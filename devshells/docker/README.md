@@ -38,7 +38,7 @@ sudo systemctl restart docker
 
 1. Copy the `.envrc` file to your project root:
    ```bash
-   cp ~/nixos/templates/docker/.envrc /path/to/your/project/
+   cp ~/serenityOs/templates/docker/.envrc /path/to/your/project/
    ```
 
 2. Allow direnv:
@@ -89,7 +89,7 @@ volumes:
 
 2. Set up the project:
 ```bash
-cp ~/nixos/templates/docker/.envrc .
+cp ~/serenityOs/templates/docker/.envrc .
 direnv allow
 npm install
 docker-compose up -d
@@ -157,7 +157,7 @@ docker system prune -a --volumes  # Clean everything (careful!)
 
 ## Customization
 
-Edit `~/nixos/templates/docker/default.nix` to add tools like:
+Edit `~/serenityOs/templates/docker/default.nix` to add tools like:
 - `mongodb` - MongoDB client
 - `redis` - Redis CLI
 - `mysql80` - MySQL client
@@ -165,6 +165,6 @@ Edit `~/nixos/templates/docker/default.nix` to add tools like:
 
 Then rebuild:
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 sudo nixos-rebuild switch --flake .
 ```

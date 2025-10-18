@@ -29,7 +29,7 @@ Project-specific development environments using Nix flakes and direnv for automa
 ```bash
 # Copy the .envrc file from the template you need
 cd /path/to/your/project
-cp ~/nixos/templates/nodejs/.envrc .
+cp ~/serenityOs/templates/nodejs/.envrc .
 
 # Allow direnv to activate the shell
 direnv allow
@@ -45,7 +45,7 @@ node --version
 ```bash
 npm create vue@latest my-vue-app
 cd my-vue-app
-cp ~/nixos/templates/vue-nuxt/.envrc .
+cp ~/serenityOs/templates/vue-nuxt/.envrc .
 direnv allow
 pnpm install
 pnpm dev
@@ -56,7 +56,7 @@ pnpm dev
 ```bash
 npx create-next-app@latest my-next-app
 cd my-next-app
-cp ~/nixos/templates/nodejs/.envrc .
+cp ~/serenityOs/templates/nodejs/.envrc .
 direnv allow
 npm install
 npm run dev
@@ -67,7 +67,7 @@ npm run dev
 ```bash
 flutter create my_flutter_app
 cd my_flutter_app
-cp ~/nixos/templates/flutter/.envrc .
+cp ~/serenityOs/templates/flutter/.envrc .
 direnv allow
 flutter pub get
 flutter run
@@ -77,7 +77,7 @@ flutter run
 
 ```bash
 mkdir my-fullstack-app && cd my-fullstack-app
-cp ~/nixos/templates/docker/.envrc .
+cp ~/serenityOs/templates/docker/.envrc .
 # Create your docker-compose.yml
 direnv allow
 docker-compose up -d
@@ -87,7 +87,7 @@ docker-compose up -d
 
 1. **direnv** watches for `.envrc` files in directories
 2. When you `cd` into a project, it reads `.envrc`
-3. `.envrc` tells direnv to use a specific devShell from `~/nixos`
+3. `.envrc` tells direnv to use a specific devShell from `~/serenityOs`
 4. The devShell loads all required tools automatically
 5. When you `cd` out, the tools are unloaded
 
@@ -118,10 +118,10 @@ If you prefer manual control:
 
 ```bash
 # Enter the shell manually
-nix develop ~/nixos#nodejs
+nix develop ~/serenityOs#nodejs
 
 # Or use the shell for a single command
-nix develop ~/nixos#flutter --command flutter doctor
+nix develop ~/serenityOs#flutter --command flutter doctor
 ```
 
 ## Customizing Templates
@@ -131,7 +131,7 @@ nix develop ~/nixos#flutter --command flutter doctor
 1. Edit the template file:
 
 ```bash
-nvim ~/nixos/templates/nodejs/default.nix
+nvim ~/serenityOs/templates/nodejs/default.nix
 ```
 
 2. Add or remove packages in `buildInputs`:
@@ -148,7 +148,7 @@ buildInputs = with pkgs; [
 3. Rebuild your system:
 
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 sudo nixos-rebuild switch --flake .
 ```
 
@@ -205,7 +205,7 @@ direnv allow
 direnv reload
 
 # Or rebuild the flake
-cd ~/nixos
+cd ~/serenityOs
 nix flake update
 sudo nixos-rebuild switch --flake .
 ```
@@ -217,7 +217,7 @@ sudo nixos-rebuild switch --flake .
 echo $DIRENV_DIR
 
 # List available shells
-nix flake show ~/nixos
+nix flake show ~/serenityOs
 ```
 
 ### Clean up old environments
@@ -235,23 +235,23 @@ nix-store --optimize
 ### List all devShells
 
 ```bash
-nix flake show ~/nixos
+nix flake show ~/serenityOs
 ```
 
 ### Test a shell without direnv
 
 ```bash
-nix develop ~/nixos#nodejs
-nix develop ~/nixos#vue-nuxt
-nix develop ~/nixos#flutter
-nix develop ~/nixos#docker
+nix develop ~/serenityOs#nodejs
+nix develop ~/serenityOs#vue-nuxt
+nix develop ~/serenityOs#flutter
+nix develop ~/serenityOs#docker
 ```
 
 ### Run command in shell
 
 ```bash
-nix develop ~/nixos#nodejs --command node --version
-nix develop ~/nixos#flutter --command flutter doctor
+nix develop ~/serenityOs#nodejs --command node --version
+nix develop ~/serenityOs#flutter --command flutter doctor
 ```
 
 ## Tips & Best Practices

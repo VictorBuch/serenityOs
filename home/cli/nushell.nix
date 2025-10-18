@@ -11,7 +11,7 @@ let
     v = "sudo nvim ";
     vi = "sudo nvim ";
     lg = "lazygit";
-    n = "nvim ~/.nixos/ ";
+    n = "nvim ~/serenityOs/ ";
   };
 in
 

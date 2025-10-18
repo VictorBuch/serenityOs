@@ -15,7 +15,7 @@ Development environment for Vue 3 and Nuxt 3 projects.
 
 1. Copy the `.envrc` file to your project root:
    ```bash
-   cp ~/nixos/templates/vue-nuxt/.envrc /path/to/your/project/
+   cp ~/serenityOs/templates/vue-nuxt/.envrc /path/to/your/project/
    ```
 
 2. Allow direnv:
@@ -32,7 +32,7 @@ Development environment for Vue 3 and Nuxt 3 projects.
 ```bash
 npm create vue@latest my-vue-app
 cd my-vue-app
-cp ~/nixos/templates/vue-nuxt/.envrc .
+cp ~/serenityOs/templates/vue-nuxt/.envrc .
 direnv allow
 pnpm install
 pnpm dev
@@ -42,7 +42,7 @@ pnpm dev
 ```bash
 npx nuxi init my-nuxt-app
 cd my-nuxt-app
-cp ~/nixos/templates/vue-nuxt/.envrc .
+cp ~/serenityOs/templates/vue-nuxt/.envrc .
 direnv allow
 pnpm install
 pnpm dev
@@ -50,8 +50,8 @@ pnpm dev
 
 ## Customization
 
-Edit `~/nixos/templates/vue-nuxt/default.nix` to add/remove packages, then rebuild:
+Edit `~/serenityOs/templates/vue-nuxt/default.nix` to add/remove packages, then rebuild:
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 sudo nixos-rebuild switch --flake .
 ```

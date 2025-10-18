@@ -27,7 +27,7 @@ Complete development environment for Flutter mobile/web apps with Appwrite backe
 
 1. Copy the `.envrc` file to your Flutter project root:
    ```bash
-   cp ~/nixos/templates/flutter-appwrite/.envrc /path/to/your/flutter-project/
+   cp ~/serenityOs/templates/flutter-appwrite/.envrc /path/to/your/flutter-project/
    ```
 
 2. Allow direnv:
@@ -44,7 +44,7 @@ flutter create my_appwrite_app
 cd my_appwrite_app
 
 # Set up dev environment
-cp ~/nixos/templates/flutter-appwrite/.envrc .
+cp ~/serenityOs/templates/flutter-appwrite/.envrc .
 direnv allow
 
 # Install Appwrite CLI globally (one-time setup)
@@ -250,7 +250,7 @@ export APPWRITE_PROJECT_ID="your-project-id"
 
 ## Customization
 
-To modify tools or versions, edit `~/nixos/templates/flutter-appwrite/default.nix`:
+To modify tools or versions, edit `~/serenityOs/templates/flutter-appwrite/default.nix`:
 
 ```nix
 buildInputs = with pkgs; [
@@ -264,7 +264,7 @@ buildInputs = with pkgs; [
 
 Then rebuild:
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 git add templates/flutter-appwrite/default.nix
 sudo nixos-rebuild switch --flake .
 cd /path/to/project

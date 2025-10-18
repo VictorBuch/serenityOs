@@ -19,7 +19,7 @@ Complete Flutter development environment with Android SDK, tools, and web suppor
 
 1. Copy the `.envrc` file to your Flutter project root:
    ```bash
-   cp ~/nixos/templates/flutter/.envrc /path/to/your/flutter-project/
+   cp ~/serenityOs/templates/flutter/.envrc /path/to/your/flutter-project/
    ```
 
 2. Allow direnv:
@@ -33,7 +33,7 @@ Complete Flutter development environment with Android SDK, tools, and web suppor
 ```bash
 flutter create my_awesome_app
 cd my_awesome_app
-cp ~/nixos/templates/flutter/.envrc .
+cp ~/serenityOs/templates/flutter/.envrc .
 direnv allow
 flutter pub get
 flutter run
@@ -93,7 +93,7 @@ flutter doctor -v
 
 ## Customization
 
-To change Android SDK versions or add/remove tools, edit `~/nixos/templates/flutter/default.nix`:
+To change Android SDK versions or add/remove tools, edit `~/serenityOs/templates/flutter/default.nix`:
 
 ```nix
 platformVersions = [ "34" "33" ];  # Add multiple versions
@@ -103,6 +103,6 @@ includeEmulator = true;  # Enable Android emulator
 
 Then rebuild:
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 sudo nixos-rebuild switch --flake .
 ```

@@ -106,7 +106,7 @@ Project-specific development environments are available in `devshells/`. Each te
 **Quick usage:**
 ```bash
 # In your project directory, copy .envrc from devshell
-cp ~/nixos/devshells/nodejs/.envrc .
+cp ~/serenityOs/devshells/nodejs/.envrc .
 direnv allow
 
 # Tools auto-activate when you cd into the directory
@@ -116,14 +116,14 @@ cd my-project  # Node.js, npm, pnpm, etc. now available
 **Testing shells:**
 ```bash
 # List available devShells
-nix flake show ~/nixos
+nix flake show ~/serenityOs
 
 # Test a shell manually (Linux only - devShells defined for x86_64-linux)
-nix develop ~/nixos#nodejs
-nix develop ~/nixos#flutter
+nix develop ~/serenityOs#nodejs
+nix develop ~/serenityOs#flutter
 
 # Run single command in shell
-nix develop ~/nixos#nodejs --command node --version
+nix develop ~/serenityOs#nodejs --command node --version
 ```
 
 See `devshells/README.md` for detailed documentation.

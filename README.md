@@ -29,8 +29,8 @@ bash <(curl -sSL https://raw.githubusercontent.com/VictorBuch/serenityOs/main/in
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/VictorBuch/serenityOs.git ~/nixos
-   cd ~/nixos
+   git clone https://github.com/VictorBuch/serenityOs.git ~/serenityOs
+   cd ~/serenityOs
    ```
 
 2. **Make scripts executable:**
@@ -77,7 +77,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/VictorBuch/serenityOs/main/in
 1. **Detects your platform** (NixOS or macOS)
 2. **Generates SSH key** (or reuses existing) for GitHub access
 3. **Prompts you to add key to GitHub** for repo cloning
-4. **Clones configuration** to `~/nixos`
+4. **Clones configuration** to `~/serenityOs`
 5. **Copies hardware config** (NixOS only) from `/etc/nixos/hardware-configuration.nix`
 6. **Builds and activates** your system configuration
 7. **Sets user password** (NixOS only) - prompts you to set password for the configured user
@@ -89,7 +89,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/VictorBuch/serenityOs/main/in
 **NixOS:**
 
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 git pull
 sudo nixos-rebuild switch --flake .#<hostname>
 ```
@@ -97,7 +97,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 **macOS:**
 
 ```bash
-cd ~/nixos
+cd ~/serenityOs
 git pull
 darwin-rebuild switch --flake .#inara
 ```
@@ -134,7 +134,7 @@ If GitHub authentication fails:
 If hardware-configuration.nix is missing:
 
 ```bash
-sudo nixos-generate-config --show-hardware-config > ~/nixos/hosts/<hostname>/hardware-configuration.nix
+sudo nixos-generate-config --show-hardware-config > ~/serenityOs/hosts/<hostname>/hardware-configuration.nix
 ```
 
 ### User Password (NixOS)

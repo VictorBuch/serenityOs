@@ -11,7 +11,7 @@ let
     vi = "sudo nvim ";
     zshrc = "sudo nvim ~/.zshrc";
     lg = "lazygit";
-    en = "nvim ~/.nixos/ ";
+    en = "nvim ~/serenityOs/ ";
     r = "source ~/.zshrc";
     ".." = "(cd ..) && (ls)";
   };

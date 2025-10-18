@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 REPO_URL="git@github.com:VictorBuch/serenityOs.git"
-INSTALL_DIR="$HOME/nixos"
+INSTALL_DIR="$HOME/serenityOs"
 SSH_KEY="$HOME/.ssh/id_ed25519"
 EMAIL="victorbuch@protonmail.com"
 DEFAULT_HOST="inara"

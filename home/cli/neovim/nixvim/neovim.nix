@@ -1,0 +1,102 @@
+{
+  config,
+  options,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
+
+{
+
+  imports = [
+    inputs.nixvim.homeModules.nixvim
+    ./options.nix
+    ./keymaps.nix
+    # Plugin configurations
+    ./plugins/alpha.nix
+    ./plugins/bufferline.nix
+    ./plugins/cmp.nix
+    ./plugins/conform.nix
+    ./plugins/emmet.nix
+    ./plugins/flash.nix
+    ./plugins/gitsigns.nix
+    ./plugins/indent-blankline.nix
+    ./plugins/lint.nix
+    ./plugins/lsp.nix
+    ./plugins/lualine.nix
+    ./plugins/mini.nix
+    ./plugins/neotree.nix
+    ./plugins/noice.nix
+    ./plugins/nonels.nix
+    ./plugins/notify.nix
+    ./plugins/persistence.nix
+    ./plugins/telescope.nix
+    ./plugins/todo-comments.nix
+    ./plugins/toggleterm.nix
+    ./plugins/treesitter.nix
+    ./plugins/trouble.nix
+    ./plugins/twilight.nix
+    ./plugins/web-devicons.nix
+    ./plugins/zen-mode.nix
+  ];
+
+  options = {
+    home.cli.neovim.nixvim.enable = lib.mkEnableOption "Enables neovim home manager";
+  };
+
+  config = lib.mkIf config.home.cli.neovim.nixvim.enable {
+    home.packages = with pkgs; [
+      ripgrep
+      fd
+    ];
+    programs.nixvim = {
+      enable = true;
+      defaultEditor = true;
+      globals.mapleader = " ";
+      clipboard.providers.wl-copy.enable = pkgs.stdenv.isLinux;
+
+      colorschemes.catppuccin = {
+        enable = true;
+        settings = {
+          flavour = "mocha";
+          term_colors = true;
+          transparent_background = true;
+          dim_inactive = {
+            enabled = false;
+          };
+          styles = {
+            comments = [ "italic" ];
+            conditionals = [ "italic" ];
+          };
+          integrations = {
+            cmp = true;
+            gitsigns = true;
+            nvimtree = true;
+            treesitter = true;
+            notify = true;
+            mini.enabled = true;
+            telescope.enabled = true;
+            which_key = true;
+          };
+        };
+      };
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
+
+      plugins = {
+        tmux-navigator.enable = true;
+        which-key.enable = true;
+        lazygit.enable = true;
+      };
+
+      extraPlugins = with pkgs.vimPlugins; [
+        flutter-tools-nvim
+        plenary-nvim
+        dressing-nvim
+        vim-tmux-navigator
+      ];
+    };
+  };
+}

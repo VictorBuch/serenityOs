@@ -1,20 +1,6 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, isLinux, mkCategory, ... }:
 
-  imports = [
-    ./qemu.nix
-  ];
-
-  options = {
-    apps.emulation.enable = lib.mkEnableOption "Enables all cross-platform emulation tools";
-  };
-
-  config = lib.mkIf config.apps.emulation.enable {
-    apps.emulation.qemu.enable = lib.mkDefault true;
-  };
-}
+mkCategory {
+  _file = toString ./.;
+  name = "emulation";
+} args

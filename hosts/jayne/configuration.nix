@@ -67,8 +67,7 @@ in
 
   apps = {
     audio = {
-      linux.enable = true;
-      # reaper.enable = true;
+      enable = true;
     };
 
     browsers = {
@@ -93,7 +92,6 @@ in
     };
 
     gaming = {
-      linux.enable = true;
       enable = true;
     };
 

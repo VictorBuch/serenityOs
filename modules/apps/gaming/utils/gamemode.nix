@@ -1,19 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.gamemode.enable = lib.mkEnableOption "Enables GameMode";
-  };
-
-  config = lib.mkIf config.apps.gaming.gamemode.enable {
-
-    environment.systemPackages = with pkgs; [
-      gamemode
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "gamemode";
+  packages = pkgs: [ pkgs.gamemode ];
+  description = "GameMode performance optimization";
+} args

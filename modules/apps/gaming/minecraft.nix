@@ -1,21 +1,11 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.minecraft.enable = lib.mkEnableOption "Enables Minecraft";
-  };
-
-  config = lib.mkIf config.apps.gaming.minecraft.enable {
-
-    environment.systemPackages = with pkgs; [
-      # minecraft
-      zulu17
-      prismlauncher
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "minecraft";
+  packages = pkgs: [
+    pkgs.zulu17
+    pkgs.prismlauncher
+  ];
+  description = "Minecraft with PrismLauncher";
+} args

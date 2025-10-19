@@ -1,24 +1,12 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-{
-  options = {
-    apps.productivity.language-learning.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable language learning apps (Whisper, Anki, yt-dlp)";
-    };
-  };
-
-  config = lib.mkIf config.apps.productivity.language-learning.enable {
-    environment.systemPackages = with pkgs; [
-      (whisper-cpp.override { vulkanSupport = true; })
-      yt-dlp
-      anki
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "language-learning";
+  packages = pkgs: [
+    (pkgs.whisper-cpp.override { vulkanSupport = true; })
+    pkgs.yt-dlp
+    pkgs.anki
+  ];
+  description = "Language learning apps (Whisper, Anki, yt-dlp)";
+} args

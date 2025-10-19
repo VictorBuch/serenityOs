@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.browsers.floorp.enable = lib.mkEnableOption "Enables Floorp browser";
-  };
-
-  config = lib.mkIf config.apps.browsers.floorp.enable {
-    environment.systemPackages = with pkgs; [
-      floorp
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "floorp";
+  packages = pkgs: [ pkgs.floorp ];
+  description = "Floorp web browser";
+} args

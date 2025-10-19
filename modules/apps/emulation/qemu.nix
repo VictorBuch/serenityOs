@@ -1,21 +1,12 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.emulation.qemu.enable = lib.mkEnableOption "Enables QEMU";
-  };
-
-  config = lib.mkIf config.apps.emulation.qemu.enable {
-
-    environment.systemPackages = with pkgs; [
-      qemu
-      quickemu
-      quickgui
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "qemu";
+  packages = pkgs: [
+    pkgs.qemu
+    pkgs.quickemu
+    pkgs.quickgui
+  ];
+  description = "QEMU virtualization with quickemu and quickgui";
+} args

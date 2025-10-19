@@ -1,20 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.ps3.enable = lib.mkEnableOption "Enables RPCS3 PS3 emulator";
-  };
-
-  config = lib.mkIf config.apps.gaming.ps3.enable {
-
-    environment.systemPackages = with pkgs; [
-      rpcs3
-    ];
-
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "ps3";
+  packages = pkgs: [ pkgs.rpcs3 ];
+  description = "RPCS3 PS3 emulator";
+} args

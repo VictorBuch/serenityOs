@@ -1,24 +1,9 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, isLinux, mkCategory, ... }:
 
-  imports = [
-    ./obsidian.nix
-    ./nextcloud.nix
-    ./language-learning.nix
-  ];
-
-  options = {
-    apps.productivity.enable = lib.mkEnableOption "Enables all productivity apps";
+mkCategory {
+  _file = toString ./.;
+  name = "productivity";
+  enableByDefault = {
+    language-learning = false;
   };
-
-  config = lib.mkIf config.apps.productivity.enable {
-    apps.productivity.obsidian.enable = lib.mkDefault true;
-    apps.productivity.nextcloud.enable = lib.mkDefault true;
-    apps.productivity.language-learning.enable = lib.mkDefault false;
-  };
-}
+} args

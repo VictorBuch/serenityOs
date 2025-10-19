@@ -1,23 +1,13 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.wine.enable = lib.mkEnableOption "Enables Wine";
-  };
-
-  config = lib.mkIf config.apps.gaming.wine.enable {
-
-    environment.systemPackages = with pkgs; [
-      # Steam configurations
-      wineWowPackages.stable
-      wineWowPackages.waylandFull
-      winetricks
-      protontricks
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "wine";
+  packages = pkgs: [
+    pkgs.wineWowPackages.stable
+    pkgs.wineWowPackages.waylandFull
+    pkgs.winetricks
+    pkgs.protontricks
+  ];
+  description = "Wine Windows compatibility layer";
+} args

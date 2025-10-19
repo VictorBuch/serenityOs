@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.audio.easyeffects.enable = lib.mkEnableOption "Enables EasyEffects";
-  };
-
-  config = lib.mkIf config.apps.audio.easyeffects.enable {
-    environment.systemPackages = with pkgs; [
-      easyeffects
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "easyeffects";
+  packages = pkgs: [ pkgs.easyeffects ];
+  description = "EasyEffects audio effects";
+} args

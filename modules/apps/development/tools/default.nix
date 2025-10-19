@@ -8,6 +8,7 @@
 
   imports = [
     ./common.nix
+    ./docker.nix
   ];
 
   options = {

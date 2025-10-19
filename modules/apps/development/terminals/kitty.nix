@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.terminals.kitty.enable = lib.mkEnableOption "Enables Kitty terminal";
-  };
-
-  config = lib.mkIf config.apps.development.terminals.kitty.enable {
-    environment.systemPackages = with pkgs; [
-      kitty
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "kitty";
+  packages = pkgs: [ pkgs.kitty ];
+  description = "Kitty terminal emulator";
+} args

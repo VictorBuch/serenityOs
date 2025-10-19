@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.audio.vlc.enable = lib.mkEnableOption "Enables VLC media player";
-  };
-
-  config = lib.mkIf config.apps.audio.vlc.enable {
-    environment.systemPackages = with pkgs; [
-      vlc
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "vlc";
+  packages = pkgs: [ pkgs.vlc ];
+  description = "VLC media player";
+} args

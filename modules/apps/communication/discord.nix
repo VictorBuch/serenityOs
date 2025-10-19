@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.communication.discord.enable = lib.mkEnableOption "Enables Discord";
-  };
-
-  config = lib.mkIf config.apps.communication.discord.enable {
-    environment.systemPackages = with pkgs; [
-      discord
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "discord";
+  packages = pkgs: [ pkgs.discord ];
+  description = "Discord chat and voice communication";
+} args

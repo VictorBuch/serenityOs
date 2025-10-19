@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.editors.neovim.enable = lib.mkEnableOption "Enables Neovim";
-  };
-
-  config = lib.mkIf config.apps.development.editors.neovim.enable {
-    environment.systemPackages = with pkgs; [
-      neovim
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "neovim";
+  packages = pkgs: [ pkgs.neovim ];
+  description = "Neovim text editor";
+} args

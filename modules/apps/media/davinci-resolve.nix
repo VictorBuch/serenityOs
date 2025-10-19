@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.media.davinci-resolve.enable = lib.mkEnableOption "Enables DaVinci Resolve";
-  };
-
-  config = lib.mkIf config.apps.media.davinci-resolve.enable {
-    environment.systemPackages = with pkgs; [
-      davinci-resolve
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "davinci-resolve";
+  packages = pkgs: [ pkgs.davinci-resolve ];
+  description = "DaVinci Resolve video editor";
+} args

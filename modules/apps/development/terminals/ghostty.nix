@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.terminals.ghostty.enable = lib.mkEnableOption "Enables Ghostty terminal";
-  };
-
-  config = lib.mkIf config.apps.development.terminals.ghostty.enable {
-    environment.systemPackages = with pkgs; [
-      ghostty
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "ghostty";
+  packages = pkgs: [ pkgs.ghostty ];
+  description = "Ghostty terminal emulator";
+} args

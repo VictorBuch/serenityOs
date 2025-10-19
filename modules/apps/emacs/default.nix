@@ -1,18 +1,6 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, isLinux, mkCategory, ... }:
 
-  options = {
-    apps.emacs.enable = lib.mkEnableOption "Enables Emacs";
-  };
-
-  config = lib.mkIf config.apps.emacs.enable {
-    environment.systemPackages = with pkgs; [
-      emacs
-    ];
-  };
-}
+mkCategory {
+  _file = toString ./.;
+  name = "emacs";
+} args

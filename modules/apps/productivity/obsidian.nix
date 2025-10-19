@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.productivity.obsidian.enable = lib.mkEnableOption "Enables Obsidian";
-  };
-
-  config = lib.mkIf config.apps.productivity.obsidian.enable {
-    environment.systemPackages = with pkgs; [
-      obsidian
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "obsidian";
+  packages = pkgs: [ pkgs.obsidian ];
+  description = "Obsidian note-taking app";
+} args

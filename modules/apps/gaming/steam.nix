@@ -5,7 +5,7 @@ mkApp {
   name = "steam";
   linuxPackages = pkgs: [ ]; # Steam is enabled via programs.steam
   description = "Steam gaming platform (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true; # Open ports for Steam Remote Play

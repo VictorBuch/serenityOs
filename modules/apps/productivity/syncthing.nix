@@ -8,7 +8,7 @@ mkApp {
     pkgs.gnomeExtensions.syncthing-toggle
   ];
   description = "Syncthing file synchronization (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     services.syncthing = {
       enable = true;
       dataDir = "/home/${config.user.userName}"; # default location for new folders

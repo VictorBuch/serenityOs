@@ -8,7 +8,7 @@ mkApp {
     pkgs.docker-compose
   ];
   description = "Docker containerization platform (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     virtualisation.docker.enable = true;
   };
 } args

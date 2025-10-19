@@ -5,7 +5,7 @@ mkApp {
   name = "sunshine";
   linuxPackages = pkgs: [ ]; # Sunshine is enabled via services.sunshine
   description = "Sunshine game streaming (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     services.sunshine = {
       enable = true;
       autoStart = true;

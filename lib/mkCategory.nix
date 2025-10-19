@@ -93,9 +93,7 @@ in
 {
   imports = allImports;
 
-  options = {
-    ${categoryPath}.enable = lib.mkEnableOption "Enables all ${name} apps";
-  };
+  options = lib.setAttrByPath (categoryParts ++ ["enable"]) (lib.mkEnableOption "Enables all ${name} apps");
 
   config = lib.mkIf (lib.attrByPath (categoryParts ++ ["enable"]) false config) (
     lib.setAttrByPath

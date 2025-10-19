@@ -3,9 +3,9 @@ args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 mkApp {
   _file = toString ./.;
   name = "web-apps";
-  packages = pkgs: [ ];
-  description = "Web desktop apps (PWAs)";
-  extraConfig = {
+  linuxPackages = pkgs: [ pkgs.chromium ];
+  description = "Web desktop apps (PWAs, Linux only)";
+  linuxExtraConfig = {
     home-manager.users.${config.user.userName} =
       let
         browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";

@@ -10,7 +10,7 @@ mkApp {
     pkgs.yabridgectl
   ];
   description = "Reaper DAW with Windows plugin support (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     # Configure PAM limits for realtime audio
     security.pam.loginLimits = [
       {

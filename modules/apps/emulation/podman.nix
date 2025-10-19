@@ -5,7 +5,7 @@ mkApp {
   name = "podman";
   linuxPackages = pkgs: [ ]; # Podman enabled via virtualisation.podman
   description = "Podman container engine (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     virtualisation.containers.enable = true;
     virtualisation.podman = {
       enable = true;

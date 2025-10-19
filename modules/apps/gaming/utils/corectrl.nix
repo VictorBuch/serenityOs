@@ -5,7 +5,7 @@ mkApp {
   name = "corectrl";
   linuxPackages = pkgs: [ ]; # CoreCtrl is enabled via programs.corectrl
   description = "CoreCtrl AMD GPU control (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     programs.corectrl.enable = true;
 
     hardware.amdgpu.overdrive = {

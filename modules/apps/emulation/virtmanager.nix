@@ -5,7 +5,7 @@ mkApp {
   name = "virtmanager";
   linuxPackages = pkgs: [ ]; # virt-manager enabled via programs.virt-manager
   description = "Virtual Machine Manager (Linux only)";
-  extraConfig = {
+  linuxExtraConfig = {
     programs.virt-manager.enable = true;
     users.groups.libvirtd.members = [ "${config.user.userName}" ];
     virtualisation.libvirtd.enable = true;

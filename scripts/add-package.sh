@@ -136,29 +136,102 @@ if [ "$MODULE_CHOICE" = "1" ]; then
         exit 1
     fi
 
-    # Generate module template
-    cat > "$MODULE_FILE" << EOF
-{ config, pkgs, lib, ... }: {
+    # Ask about platform support
+    echo -e "\n${GREEN}Platform support:${NC}"
+    echo "1) Cross-platform (works on both Linux and macOS)"
+    echo "2) Linux only"
+    echo "3) macOS only"
+    echo "4) Platform-specific packages (different on each)"
+    read -p "$(echo -e ${GREEN}Choice [1-4]:${NC} )" PLATFORM_CHOICE
 
-  options = {
-    ${CATEGORY}.${SUBCATEGORY:+${SUBCATEGORY}.}${PACKAGE_NAME}.enable = lib.mkEnableOption "Enables ${PACKAGE_NAME}";
-  };
+    # Generate module template using mkApp helper
+    case $PLATFORM_CHOICE in
+        1)
+            # Cross-platform
+            cat > "$MODULE_FILE" << 'EOF'
+{ config, pkgs, lib, mkApp, ... }:
 
-  config = lib.mkIf config.${CATEGORY}.${SUBCATEGORY:+${SUBCATEGORY}.}${PACKAGE_NAME}.enable {
-    environment.systemPackages = with pkgs; [
-      ${PACKAGE_NAME}
-    ];
-  };
+mkApp {
+  name = "PACKAGE_NAME";
+  optionPath = "OPTION_PATH";
+  packages = pkgs: [ pkgs.PACKAGE_NAME ];
+  description = "DESCRIPTION";
 }
 EOF
+            ;;
+        2)
+            # Linux only
+            cat > "$MODULE_FILE" << 'EOF'
+{ config, pkgs, lib, mkApp, ... }:
 
-    echo -e "\n${GREEN}Created module: $MODULE_FILE${NC}"
+mkApp {
+  name = "PACKAGE_NAME";
+  optionPath = "OPTION_PATH";
+  linuxPackages = pkgs: [ pkgs.PACKAGE_NAME ];
+  description = "DESCRIPTION (Linux only)";
+}
+EOF
+            ;;
+        3)
+            # macOS only
+            cat > "$MODULE_FILE" << 'EOF'
+{ config, pkgs, lib, mkApp, ... }:
 
-    # Check if module needs to be added to default.nix
+mkApp {
+  name = "PACKAGE_NAME";
+  optionPath = "OPTION_PATH";
+  darwinPackages = pkgs: [ pkgs.PACKAGE_NAME ];
+  description = "DESCRIPTION (macOS only)";
+}
+EOF
+            ;;
+        4)
+            # Platform-specific
+            cat > "$MODULE_FILE" << 'EOF'
+{ config, pkgs, lib, mkApp, ... }:
+
+mkApp {
+  name = "PACKAGE_NAME";
+  optionPath = "OPTION_PATH";
+  linuxPackages = pkgs: [ pkgs.PACKAGE_NAME ];  # Adjust package name if different
+  darwinPackages = pkgs: [ pkgs.PACKAGE_NAME ]; # Adjust package name if different
+  description = "DESCRIPTION";
+}
+EOF
+            ;;
+    esac
+
+    # Replace placeholders
+    OPTION_PATH="${CATEGORY}.${SUBCATEGORY:+${SUBCATEGORY}.}${PACKAGE_NAME}"
+    DESCRIPTION="${PACKAGE_NAME}"
+
+    sed -i.bak "s/PACKAGE_NAME/${PACKAGE_NAME}/g" "$MODULE_FILE"
+    sed -i.bak "s|OPTION_PATH|${OPTION_PATH}|g" "$MODULE_FILE"
+    sed -i.bak "s/DESCRIPTION/${DESCRIPTION}/g" "$MODULE_FILE"
+    rm "${MODULE_FILE}.bak"
+
+    echo -e "\n${GREEN}✓ Created module: $MODULE_FILE${NC}"
+
+    # Auto-add to default.nix imports
     DEFAULT_FILE="$BASE_DIR/default.nix"
     if [ -f "$DEFAULT_FILE" ]; then
         if ! grep -q "${PACKAGE_NAME}.nix" "$DEFAULT_FILE"; then
-            echo -e "${YELLOW}Don't forget to add './${PACKAGE_NAME}.nix' to imports in $DEFAULT_FILE${NC}"
+            echo -e "${YELLOW}Adding to imports in $DEFAULT_FILE...${NC}"
+
+            # Add import after the last import line
+            if grep -q "imports = \[" "$DEFAULT_FILE"; then
+                # Find the imports section and add before the closing bracket
+                sed -i.bak "/imports = \[/,/\];/ { /\];/i\\
+    ./${PACKAGE_NAME}.nix
+}" "$DEFAULT_FILE"
+                rm "${DEFAULT_FILE}.bak"
+                echo -e "${GREEN}✓ Added to imports${NC}"
+            else
+                echo -e "${YELLOW}Could not auto-add import. Please add manually:${NC}"
+                echo -e "  imports = [ ./${PACKAGE_NAME}.nix ];"
+            fi
+        else
+            echo -e "${GREEN}✓ Already in imports${NC}"
         fi
     fi
 
@@ -178,8 +251,14 @@ fi
 
 echo -e "\n${GREEN}=== Guidelines ===${NC}"
 echo -e "${BLUE}Module placement:${NC}"
-echo "  • modules/ - System-wide services, hardware, desktop environments"
+echo "  • modules/apps/ - Cross-platform applications (uses mkApp helper)"
 echo "  • home/ - User-specific configs, dotfiles, per-user applications"
+echo ""
+echo -e "${BLUE}mkApp helper benefits:${NC}"
+echo "  • Automatic platform detection (Linux/macOS)"
+echo "  • Built-in assertions for platform-specific apps"
+echo "  • Support for stable/unstable package mixing"
+echo "  • Reduced boilerplate code"
 echo ""
 echo -e "${BLUE}When to use which:${NC}"
 echo "  • Module: Requires system privileges, affects all users, system service"

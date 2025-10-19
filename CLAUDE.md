@@ -245,9 +245,70 @@ New installations use the provided install scripts:
   - `oci-containers/` - Docker containers as systemd services
   - `services/` - Native NixOS services (caddy, nextcloud, etc.)
 
+**Library Helpers (`lib/`):**
+- `lib/mkApp.nix` - Universal app module helper with cross-platform and stable/unstable support
+
 **Helper Scripts:**
-- `scripts/add-package.sh` - CLI tool to add packages with proper categorization
+- `scripts/add-package.sh` - CLI tool to add packages with proper categorization (uses mkApp)
 - `scripts/rofi-add-package.sh` - GUI version (Super+Shift+N on Hyprland systems) for interactive package addition
+
+### Using the mkApp Helper
+
+The `mkApp` helper simplifies app module creation with automatic cross-platform support and stable/unstable package mixing.
+
+**Basic usage (cross-platform):**
+```nix
+{ config, pkgs, lib, mkApp, ... }:
+
+mkApp {
+  name = "firefox";
+  optionPath = "apps.browsers.firefox";
+  packages = pkgs: [ pkgs.firefox ];
+  description = "Mozilla Firefox web browser";
+}
+```
+
+**Platform-specific packages:**
+```nix
+mkApp {
+  name = "ghostty";
+  optionPath = "apps.terminals.ghostty";
+  linuxPackages = pkgs: [ pkgs.ghostty ];
+  darwinPackages = pkgs: [ ];  # Installed via homebrew instead
+  darwinExtraConfig = {
+    homebrew.casks = [ "ghostty" ];
+  };
+}
+```
+
+**Linux-only (auto-asserts on Darwin):**
+```nix
+mkApp {
+  name = "steam";
+  optionPath = "apps.gaming.steam";
+  linuxPackages = pkgs: [ pkgs.steam ];
+  description = "Steam gaming platform";
+}
+```
+
+**Mixing stable and unstable packages:**
+```nix
+mkApp {
+  name = "myapp";
+  optionPath = "apps.myapp";
+  packages = { pkgs, stable-pkgs }: [
+    pkgs.firefox           # from unstable
+    stable-pkgs.libreoffice  # from stable (25.05)
+  ];
+}
+```
+
+**Benefits:**
+- Automatic platform detection and assertions
+- Single API for all use cases (cross-platform, platform-specific, Linux-only, Darwin-only)
+- Built-in stable/unstable package support via `inputs.stable-nixpkgs`
+- Reduced boilerplate compared to manual module creation
+- Auto-imported in all modules via `specialArgs` in flake.nix
 
 ## Platform-Specific Notes
 
@@ -286,12 +347,28 @@ New installations use the provided install scripts:
 ./scripts/rofi-add-package.sh
 ```
 
-**Manual addition:**
+**Manual addition using mkApp helper:**
 1. Determine placement: system (`modules/apps/<category>/`) vs user (`home/`)
-2. Create or edit the appropriate module file
-3. Enable the module in your host configuration (`hosts/<hostname>/configuration.nix`)
-4. For cross-platform apps, use `isLinux` parameter to handle platform differences
+2. Create a new module file using `mkApp` helper (see "Using the mkApp Helper" section)
+3. Add the new file to the category's `default.nix` imports (or let add-package.sh do it)
+4. Enable the module in your host configuration (`hosts/<hostname>/configuration.nix`)
 5. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
+
+**Example module file:**
+```nix
+{ config, pkgs, lib, mkApp, ... }:
+
+mkApp {
+  name = "discord";
+  optionPath = "apps.communication.discord";
+  packages = pkgs: [ pkgs.discord ];
+}
+```
+
+**Then enable in host config:**
+```nix
+apps.communication.discord.enable = true;
+```
 
 ### Enabling Homelab Services
 

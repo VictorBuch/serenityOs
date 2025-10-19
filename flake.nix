@@ -51,6 +51,9 @@
       ...
     }@inputs:
     let
+      # Custom library functions
+      customLib = import ./lib { lib = nixpkgs.lib; };
+
       # Import nixpkgs with config for Darwin
       darwinPkgs =
         system:
@@ -68,6 +71,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs;
+            inherit (customLib) mkApp;
             isLinux = true;
           };
           modules = [
@@ -82,6 +86,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs;
+            inherit (customLib) mkApp;
             isLinux = true;
           };
           modules = [
@@ -96,6 +101,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs;
+            inherit (customLib) mkApp;
             isLinux = true;
           };
           modules = [
@@ -108,6 +114,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs;
+            inherit (customLib) mkApp;
             isLinux = true;
           };
           modules = [
@@ -126,6 +133,7 @@
           pkgs = darwinPkgs "aarch64-darwin"; # Use configured pkgs with allowBroken
           specialArgs = {
             inherit inputs;
+            inherit (customLib) mkApp;
             isLinux = false;
           };
           modules = [

@@ -101,6 +101,14 @@
 
         filetree.neo-tree = {
           enable = true;
+          setupOpts = {
+            window = {
+              mappings = {
+                "h" = "close_node";
+                "l" = "open";
+              };
+            };
+          };
         };
         telescope.enable = true;
 
@@ -178,7 +186,7 @@
                 "  ⠈⠛⠿⣿⣿⣿⣿⣿⡿⠟⠁⠄⠄⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠋   "
                 "      ⠉⠉⠉⠁         ⠉⠉⠉⠉⠉      "
                 "                                   "
-                "       🦆 N E O V I M 🦆       "
+                "        D U C K  I T  U P       "
                 "                                   "
               ];
               opts = {

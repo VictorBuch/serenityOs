@@ -1,3 +1,5 @@
+hardware-configuration.nix
+
 # macOS
 .DS_Store
 

@@ -2,9 +2,9 @@
   config,
   pkgs,
   username,
-  system,
   inputs,
   lib,
+  isLinux,
   ...
 }:
 
@@ -15,7 +15,7 @@
 {
 
   home.username = username;
-  # home.homeDirectory = if system == "x86_64-linux" then "/home/${username}" else "Users/${username}";
+  home.homeDirectory = if isLinux then "/home/${username}" else "/Users/${username}";
 
   home.stateVersion = "24.05"; # Please read the comment before changing.
 

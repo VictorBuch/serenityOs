@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.media.handbrake.enable = lib.mkEnableOption "Enables HandBrake";
-  };
-
-  config = lib.mkIf config.apps.media.handbrake.enable {
-    environment.systemPackages = with pkgs; [
-      handbrake
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "handbrake";
+  packages = pkgs: [ pkgs.handbrake ];
+  description = "HandBrake video transcoder";
+} args

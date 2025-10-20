@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.utilities.ffmpeg.enable = lib.mkEnableOption "Enables FFmpeg";
-  };
-
-  config = lib.mkIf config.apps.utilities.ffmpeg.enable {
-    environment.systemPackages = with pkgs; [
-      ffmpeg
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "ffmpeg";
+  packages = pkgs: [ pkgs.ffmpeg ];
+  description = "FFmpeg multimedia framework";
+} args

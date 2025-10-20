@@ -1,27 +1,19 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.tools.common.enable = lib.mkEnableOption "Enables common development tools";
-  };
-
-  config = lib.mkIf config.apps.development.tools.common.enable {
-    environment.systemPackages = with pkgs; [
-      fastfetch
-      starship
-      zoxide
-      fzf
-      lazygit
-      ripgrep
-      fd
-      nodePackages.nodejs
-      claude-code
-      mcp-nixos
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "common";
+  packages = pkgs: [
+    pkgs.fastfetch
+    pkgs.starship
+    pkgs.zoxide
+    pkgs.fzf
+    pkgs.lazygit
+    pkgs.ripgrep
+    pkgs.fd
+    pkgs.nodePackages.nodejs
+    pkgs.claude-code
+    pkgs.mcp-nixos
+  ];
+  description = "Common development tools";
+} args

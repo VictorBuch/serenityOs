@@ -1,19 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.browsers.firefox.enable = lib.mkEnableOption "Enables Firefox browser";
-  };
-
-  config = lib.mkIf config.apps.browsers.firefox.enable {
-    environment.systemPackages = with pkgs; [
-      firefox
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "firefox";
+  packages = pkgs: [ pkgs.firefox ];
+  description = "Mozilla Firefox web browser";
+} args

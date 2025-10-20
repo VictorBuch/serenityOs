@@ -1,22 +1,14 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.utilities.system-tools.enable = lib.mkEnableOption "Enables system utility tools";
-  };
-
-  config = lib.mkIf config.apps.utilities.system-tools.enable {
-    environment.systemPackages = with pkgs; [
-      gcc
-      btop
-      filezilla
-      chromium
-      bottles
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "system-tools";
+  packages = pkgs: [
+    pkgs.gcc
+    pkgs.btop
+    pkgs.filezilla
+    pkgs.chromium
+    pkgs.bottles
+  ];
+  description = "System utility tools";
+} args

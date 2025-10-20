@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.editors.vscode.enable = lib.mkEnableOption "Enables VS Code";
-  };
-
-  config = lib.mkIf config.apps.development.editors.vscode.enable {
-    environment.systemPackages = with pkgs; [
-      vscode
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "vscode";
+  packages = pkgs: [ pkgs.vscode ];
+  description = "Visual Studio Code editor";
+} args

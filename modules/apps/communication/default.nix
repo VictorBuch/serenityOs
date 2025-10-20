@@ -1,24 +1,6 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, isLinux, mkCategory, ... }:
 
-  imports = [
-    ./discord.nix
-    ./slack.nix
-    ./zoom.nix
-  ];
-
-  options = {
-    apps.communication.enable = lib.mkEnableOption "Enables all communication apps";
-  };
-
-  config = lib.mkIf config.apps.communication.enable {
-    apps.communication.discord.enable = lib.mkDefault true;
-    apps.communication.slack.enable = lib.mkDefault true;
-    apps.communication.zoom.enable = lib.mkDefault true;
-  };
-}
+mkCategory {
+  _file = toString ./.;
+  name = "communication";
+} args

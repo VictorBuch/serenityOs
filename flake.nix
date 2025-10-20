@@ -51,6 +51,9 @@
       ...
     }@inputs:
     let
+      # Custom library functions
+      customLib = import ./lib { lib = nixpkgs.lib; };
+
       # Import nixpkgs with config for Darwin
       darwinPkgs =
         system:
@@ -64,10 +67,11 @@
     in
     {
       nixosConfigurations = {
-        jayne = nixpkgs.lib.nixosSystem {
+        jayne = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = {
-            inherit inputs;
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
             isLinux = true;
           };
           modules = [
@@ -78,10 +82,11 @@
             inputs.sops-nix.nixosModules.sops
           ];
         };
-        kaylee = nixpkgs.lib.nixosSystem {
+        kaylee = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = {
-            inherit inputs;
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
             isLinux = true;
           };
           modules = [
@@ -92,10 +97,11 @@
             inputs.sops-nix.nixosModules.sops
           ];
         };
-        serenity = nixpkgs.lib.nixosSystem {
+        serenity = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = {
-            inherit inputs;
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
             isLinux = true;
           };
           modules = [
@@ -104,10 +110,11 @@
             inputs.sops-nix.nixosModules.sops
           ];
         };
-        shepherd = nixpkgs.lib.nixosSystem {
+        shepherd = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = {
-            inherit inputs;
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
             isLinux = true;
           };
           modules = [
@@ -121,11 +128,12 @@
       };
 
       darwinConfigurations = {
-        inara = nix-darwin.lib.darwinSystem {
+        inara = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
           pkgs = darwinPkgs "aarch64-darwin"; # Use configured pkgs with allowBroken
           specialArgs = {
-            inherit inputs;
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
             isLinux = false;
           };
           modules = [
@@ -139,23 +147,23 @@
 
       # Development shells for different project types
       devShells.x86_64-linux = {
-        vue-nuxt = import ./templates/vue-nuxt {
+        vue-nuxt = import ./devshells/vue-nuxt {
           inherit nixpkgs;
           system = "x86_64-linux";
         };
-        nodejs = import ./templates/nodejs {
+        nodejs = import ./devshells/nodejs {
           inherit nixpkgs;
           system = "x86_64-linux";
         };
-        flutter = import ./templates/flutter {
+        flutter = import ./devshells/flutter {
           inherit nixpkgs;
           system = "x86_64-linux";
         };
-        flutter-appwrite = import ./templates/flutter-appwrite {
+        flutter-appwrite = import ./devshells/flutter-appwrite {
           inherit nixpkgs;
           system = "x86_64-linux";
         };
-        docker = import ./templates/docker {
+        docker = import ./devshells/docker {
           inherit nixpkgs;
           system = "x86_64-linux";
         };

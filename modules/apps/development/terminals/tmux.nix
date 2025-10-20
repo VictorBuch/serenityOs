@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.development.terminals.tmux.enable = lib.mkEnableOption "Enables tmux";
-  };
-
-  config = lib.mkIf config.apps.development.terminals.tmux.enable {
-    environment.systemPackages = with pkgs; [
-      tmux
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "tmux";
+  packages = pkgs: [ pkgs.tmux ];
+  description = "Tmux terminal multiplexer";
+} args

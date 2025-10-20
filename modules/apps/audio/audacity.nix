@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.audio.audacity.enable = lib.mkEnableOption "Enables Audacity";
-  };
-
-  config = lib.mkIf config.apps.audio.audacity.enable {
-    environment.systemPackages = with pkgs; [
-      audacity
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "audacity";
+  packages = pkgs: [ pkgs.audacity ];
+  description = "Audacity audio editor";
+} args

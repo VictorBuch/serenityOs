@@ -1,19 +1,11 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.productivity.nextcloud.enable = lib.mkEnableOption "Enables Nextcloud client";
-  };
-
-  config = lib.mkIf config.apps.productivity.nextcloud.enable {
-    environment.systemPackages = with pkgs; [
-      nextcloud31
-      nextcloud-client
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "nextcloud";
+  packages = pkgs: [
+    pkgs.nextcloud31
+    pkgs.nextcloud-client
+  ];
+  description = "Nextcloud client";
+} args

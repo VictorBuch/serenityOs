@@ -1,24 +1,17 @@
-{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  ...
-}:
-let
-  user = config.user;
-  browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";
-in
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-{
-
-  options = {
-    apps.utilities.web-apps.enable = lib.mkEnableOption "Enables web desktop apps (PWAs)";
-  };
-
-  config = lib.mkIf config.apps.utilities.web-apps.enable {
-    home-manager.users.${user.userName} = {
-      xdg.desktopEntries = {
+mkApp {
+  _file = toString ./.;
+  name = "web-apps";
+  linuxPackages = pkgs: [ pkgs.chromium ];
+  description = "Web desktop apps (PWAs, Linux only)";
+  linuxExtraConfig = {
+    home-manager.users.${config.user.userName} =
+      let
+        browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";
+      in
+      {
+        xdg.desktopEntries = {
         youtube = {
           name = "YouTube";
           genericName = "Video Platform";
@@ -142,4 +135,4 @@ in
       };
     };
   };
-}
+} args

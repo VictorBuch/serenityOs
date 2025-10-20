@@ -1,19 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.heroic.enable = lib.mkEnableOption "Enables Heroic Games Launcher";
-  };
-
-  config = lib.mkIf config.apps.gaming.heroic.enable {
-
-    environment.systemPackages = with pkgs; [
-      heroic
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "heroic";
+  packages = pkgs: [ pkgs.heroic ];
+  description = "Heroic Games Launcher";
+} args

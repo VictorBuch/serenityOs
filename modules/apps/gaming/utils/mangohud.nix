@@ -1,19 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.gaming.mangohud.enable = lib.mkEnableOption "Enables MangoHud";
-  };
-
-  config = lib.mkIf config.apps.gaming.mangohud.enable {
-
-    environment.systemPackages = with pkgs; [
-      mangohud
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "mangohud";
+  packages = pkgs: [ pkgs.mangohud ];
+  description = "MangoHud performance overlay";
+} args

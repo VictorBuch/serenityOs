@@ -1,28 +1,11 @@
-{
-  config,
-  pkgs,
-  lib,
-  isLinux,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.audio.spotify.enable = lib.mkEnableOption "Enables Spotify";
+mkApp {
+  _file = toString ./.;
+  name = "spotify";
+  packages = pkgs: [ pkgs.spotify ];
+  description = "Spotify music streaming";
+  linuxExtraConfig = {
+    networking.firewall.allowedUDPPorts = [ 5353 ];
   };
-
-  config = lib.mkIf config.apps.audio.spotify.enable (
-    lib.mkMerge [
-      {
-        environment.systemPackages = with pkgs; [
-          spotify
-        ];
-      }
-
-      # Firewall configuration only on Linux
-      (lib.optionalAttrs isLinux {
-        networking.firewall.allowedUDPPorts = [ 5353 ];
-      })
-    ]
-  );
-}
+} args

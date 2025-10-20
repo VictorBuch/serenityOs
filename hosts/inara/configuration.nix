@@ -15,9 +15,7 @@ in
     useUserPackages = true; # Install packages to user profile
     backupFileExtension = "hm-backup";
     extraSpecialArgs = {
-      inherit username;
-      inherit inputs;
-      inherit isLinux;
+      inherit username inputs isLinux;
     };
     users = {
       "${username}" = import ../../home/default.nix;

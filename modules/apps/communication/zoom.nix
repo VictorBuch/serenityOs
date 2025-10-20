@@ -1,18 +1,8 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.communication.zoom.enable = lib.mkEnableOption "Enables Zoom";
-  };
-
-  config = lib.mkIf config.apps.communication.zoom.enable {
-    environment.systemPackages = with pkgs; [
-      zoom-us
-    ];
-  };
-}
+mkApp {
+  _file = toString ./.;
+  name = "zoom";
+  packages = pkgs: [ pkgs.zoom-us ];
+  description = "Zoom video conferencing";
+} args

@@ -1,23 +1,16 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
 
-  options = {
-    apps.audio.reaper.enable = lib.mkEnableOption "Enables Reaper DAW";
-  };
-
-  config = lib.mkIf config.apps.audio.reaper.enable {
-    environment.systemPackages = with pkgs; [
-      reaper
-      wine-staging
-      yabridge
-      yabridgectl
-    ];
-
+mkApp {
+  _file = toString ./.;
+  name = "reaper";
+  linuxPackages = pkgs: [
+    pkgs.reaper
+    pkgs.wine-staging
+    pkgs.yabridge
+    pkgs.yabridgectl
+  ];
+  description = "Reaper DAW with Windows plugin support (Linux only)";
+  linuxExtraConfig = {
     # Configure PAM limits for realtime audio
     security.pam.loginLimits = [
       {
@@ -44,4 +37,4 @@
       };
     };
   };
-}
+} args

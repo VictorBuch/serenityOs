@@ -36,9 +36,7 @@ in
     # also pass inputs to home-manager modules
     backupFileExtension = "hm-backup";
     extraSpecialArgs = {
-      inherit username;
-      inherit inputs;
-      inherit isLinux;
+      inherit username inputs isLinux;
     };
     users = {
       "${username}" = import ../../home/default.nix;
@@ -67,8 +65,7 @@ in
 
   apps = {
     audio = {
-      linux.enable = true;
-      # reaper.enable = true;
+      enable = true;
     };
 
     browsers = {
@@ -93,7 +90,6 @@ in
     };
 
     gaming = {
-      linux.enable = true;
       enable = true;
     };
 

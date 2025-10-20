@@ -1,4 +1,4 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, system ? pkgs.system, ... }:
+args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, system, ... }:
 
 mkApp {
   _file = toString ./.;

@@ -9,7 +9,7 @@
 {
 
   imports = [
-    ../system-configs/user.nix
+    ../nixos/system-configs/user.nix
     ./configs.nix
     ./oci-containers/uptime-kuma.nix
     ./oci-containers/crafty.nix

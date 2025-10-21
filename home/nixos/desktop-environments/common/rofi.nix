@@ -49,77 +49,38 @@ in
         combi-hide-mode-prefix = true;
       };
 
-      # Catppuccin Mocha inspired theme with HyDE layout
+      # Custom theme
       theme = {
         "*" = {
-          font = "JetBrainsMono Nerd Font 12";
-
-          # Catppuccin Mocha color palette
-          bg0 = mkLiteral "#1e1e2e"; # base
-          bg1 = mkLiteral "#181825"; # mantle
-          bg2 = mkLiteral "#11111b"; # crust
-          fg0 = mkLiteral "#cdd6f4"; # text
-          fg1 = mkLiteral "#bac2de"; # subtext1
-          fg2 = mkLiteral "#a6adc8"; # subtext0
-          red = mkLiteral "#f38ba8"; # red
-          green = mkLiteral "#a6e3a1"; # green
-          yellow = mkLiteral "#f9e2af"; # yellow
-          blue = mkLiteral "#89b4fa"; # blue
-          magenta = mkLiteral "#cba6f7"; # mauve
-          cyan = mkLiteral "#94e2d5"; # teal
-
+          font = "JetBrainsMono 12";
           background-color = mkLiteral "transparent";
-          text-color = mkLiteral "@fg0";
-          margin = 0;
-          padding = 0;
-          spacing = 0;
+          text-color = mkLiteral "#e5e9f0";
         };
 
         "window" = {
           location = mkLiteral "center";
           anchor = mkLiteral "center";
-          fullscreen = false;
-          width = mkLiteral "75em";
-          height = mkLiteral "31em";
-          x-offset = mkLiteral "0px";
-          y-offset = mkLiteral "0px";
-
-          enabled = true;
-          margin = mkLiteral "0px";
-          padding = mkLiteral "0px";
-          border = mkLiteral "2px solid";
-          border-radius = mkLiteral "12px";
-          border-color = mkLiteral "@magenta";
-          background-color = mkLiteral "@bg0";
-          cursor = "default";
+          background-color = mkLiteral "rgba(41, 46, 66, 0.5)";
+          padding = mkLiteral "10px";
+          border-radius = mkLiteral "20px";
+          border = mkLiteral "5px solid";
+          border-color = mkLiteral "#b072d1";
         };
 
         "mainbox" = {
-          enabled = true;
-          spacing = mkLiteral "0px";
-          margin = mkLiteral "0px";
-          padding = mkLiteral "20px";
-          border = mkLiteral "0px solid";
-          border-radius = mkLiteral "0px 0px 0px 0px";
-          border-color = mkLiteral "@magenta";
           background-color = mkLiteral "transparent";
+          padding = mkLiteral "20px";
           children = map mkLiteral [
             "inputbar"
             "listview"
-            "mode-switcher"
           ];
         };
 
         "inputbar" = {
-          enabled = true;
-          spacing = mkLiteral "10px";
-          margin = mkLiteral "0px 0px 20px 0px";
-          padding = mkLiteral "15px 20px";
-          border = mkLiteral "0px solid";
-          border-radius = mkLiteral "10px";
-          border-color = mkLiteral "@magenta";
-          background-color = mkLiteral "@bg1";
-          text-color = mkLiteral "@fg0";
+          background-color = mkLiteral "transparent";
+          padding = mkLiteral "10px";
+          margin = mkLiteral "0px 0px 10px 0px";
+          border-radius = mkLiteral "15px";
           children = map mkLiteral [
             "textbox-prompt-colon"
             "entry"
@@ -146,13 +107,13 @@ in
           text-color = mkLiteral "inherit";
           cursor = mkLiteral "text";
           placeholder = "Search Applications";
-          placeholder-color = mkLiteral "@fg2";
+          placeholder-color = mkLiteral "#a0a0a0";
         };
 
         "listview" = {
           enabled = true;
-          columns = 3;
-          lines = 4;
+          columns = 1;
+          lines = 6;
           cycle = true;
           dynamic = true;
           scrollbar = false;
@@ -160,49 +121,31 @@ in
           reverse = false;
           fixed-height = true;
           fixed-columns = true;
-
-          spacing = mkLiteral "10px";
-          margin = mkLiteral "0px";
-          padding = mkLiteral "0px";
-          border = mkLiteral "0px solid";
-          border-radius = mkLiteral "0px";
-          border-color = mkLiteral "@magenta";
           background-color = mkLiteral "transparent";
-          text-color = mkLiteral "@fg0";
-          cursor = "default";
-        };
-
-        "scrollbar" = {
-          handle-width = mkLiteral "5px";
-          handle-color = mkLiteral "@magenta";
-          border-radius = mkLiteral "10px";
-          background-color = mkLiteral "@bg2";
+          text-color = mkLiteral "#e5e9f0";
+          spacing = mkLiteral "10px";
+          padding = mkLiteral "0px";
         };
 
         "element" = {
           enabled = true;
           spacing = mkLiteral "10px";
-          margin = mkLiteral "0px";
-          padding = mkLiteral "20px 10px";
-          border = mkLiteral "0px solid";
-          border-radius = mkLiteral "10px";
-          border-color = mkLiteral "@magenta";
+          padding = mkLiteral "10px";
+          border-radius = mkLiteral "15px";
           background-color = mkLiteral "transparent";
-          text-color = mkLiteral "@fg0";
+          text-color = mkLiteral "#e5e9f0";
           orientation = mkLiteral "vertical";
           cursor = mkLiteral "pointer";
         };
 
         "element normal.normal" = {
           background-color = mkLiteral "transparent";
-          text-color = mkLiteral "@fg0";
+          text-color = mkLiteral "#e5e9f0";
         };
 
         "element selected.normal" = {
-          background-color = mkLiteral "@bg2";
-          text-color = mkLiteral "@magenta";
-          border = mkLiteral "2px solid";
-          border-color = mkLiteral "@magenta";
+          background-color = mkLiteral "#2e3440";
+          text-color = mkLiteral "#e5e9f0";
         };
 
         "element-icon" = {
@@ -210,6 +153,7 @@ in
           text-color = mkLiteral "inherit";
           size = mkLiteral "48px";
           cursor = mkLiteral "inherit";
+          margin = mkLiteral "0px 6px 0px 0px";
         };
 
         "element-text" = {
@@ -218,7 +162,7 @@ in
           expand = true;
           horizontal-align = mkLiteral "0.5";
           vertical-align = mkLiteral "0.5";
-          margin = mkLiteral "5px 0px 0px 0px";
+          margin = mkLiteral "2px";
           cursor = mkLiteral "inherit";
         };
 
@@ -227,26 +171,21 @@ in
           spacing = mkLiteral "10px";
           margin = mkLiteral "20px 0px 0px 0px";
           padding = mkLiteral "0px";
-          border = mkLiteral "0px solid";
-          border-radius = mkLiteral "0px";
-          border-color = mkLiteral "@magenta";
           background-color = mkLiteral "transparent";
-          text-color = mkLiteral "@fg0";
+          text-color = mkLiteral "#e5e9f0";
         };
 
         "button" = {
           padding = mkLiteral "10px 15px";
-          border = mkLiteral "0px solid";
           border-radius = mkLiteral "8px";
-          border-color = mkLiteral "@magenta";
-          background-color = mkLiteral "@bg1";
-          text-color = mkLiteral "@fg0";
+          background-color = mkLiteral "rgba(41, 46, 66, 0.5)";
+          text-color = mkLiteral "#e5e9f0";
           cursor = mkLiteral "pointer";
         };
 
         "button selected" = {
-          background-color = mkLiteral "@magenta";
-          text-color = mkLiteral "@bg0";
+          background-color = mkLiteral "#b072d1";
+          text-color = mkLiteral "#e5e9f0";
         };
       };
     };

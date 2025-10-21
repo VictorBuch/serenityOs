@@ -14,95 +14,62 @@
       enable = true;
       style = ''
         * {
-          font-family: "JetBrainsMono Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-          font-size: 14px;
-          transition: background-color 0.3s ease;
+          font-family: JetBrainsMono;
+          font-size: 16px;
+          min-height: 0;
+          color: white;
         }
 
         window#waybar {
-          background: rgba(26, 27, 38, 0);
-          color: #c0caf5;
-          transition: background-color 0.5s;
+          background-color: transparent;
         }
 
-        .modules-left,
-        .modules-center,
-        .modules-right {
-          background: #1e1e2e;
-          margin: 5px 10px;
-          padding: 0 10px;
-          border-radius: 12px;
-        }
-
-        /* Workspaces styling */
         #workspaces {
-          padding: 0 5px;
+          margin-top: 3px;
+          margin-bottom: 2px;
+          margin-right: 10px;
+          margin-left: 25px;
         }
 
         #workspaces button {
-          padding: 0 8px;
-          margin: 4px 3px;
-          border-radius: 10px;
-          background: transparent;
-          color: #cdd6f4;
-          border: none;
-          transition: all 0.3s ease;
+          border-radius: 15px;
+          margin-right: 10px;
+          padding: 1px 10px;
+          font-weight: bolder;
+          background-color: #181818;
         }
 
-        #workspaces button.active {
-          background: #89b4fa;
-          color: #11111b;
-          font-weight: bold;
+        #workspaces button.active, #workspaces button.focused {
+          padding: 0 22px;
+          box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+          background: #7C9D96;
         }
 
-        #workspaces button:hover {
-          background: #313244;
-          color: #cdd6f4;
-          box-shadow: none;
+        #workspaces button.empty:not(.active):not(.focused) {
+          opacity: 0;
+          min-width: 0;
+          padding: 0;
+          margin: 0;
         }
 
-        /* Window title styling */
-        #window {
-          padding: 0 10px;
-          font-weight: 500;
-          color: #cdd6f4;
-        }
-
-        /* Status modules styling */
-        #clock,
+        #tray,
+        #mpd,
+        #custom-weather,
+        #cpu,
+        #temperature,
+        #memory,
+        #sway-mode,
+        #backlight,
         #pulseaudio,
-        #network,
-        #custom-power {
-          padding: 0 10px;
-          margin: 0 2px;
-          color: #cdd6f4;
-        }
-
-        #custom-power {
-          color: #f38ba8;
-          font-size: 18px;
-          margin-right: 5px;
-          font-weight: bold;
-        }
-
-        #clock {
-          color: inherit;
-        }
-
-        #pulseaudio {
-          color: inherit;
-        }
-
+        #custom-vpn,
+        #disk,
+        #custom-recorder,
+        #custom-audiorec,
+        #battery,
+        #clock,
+        #idle_inhibitor,
         #network {
-          color: inherit;
-        }
-
-        #pulseaudio.muted {
-          color: inherit;
-        }
-
-        #network.disconnected {
-          color: inherit;
+          padding: 0 10px;
         }
       '';
 
@@ -110,76 +77,162 @@
         mainBar = {
           layer = "top";
           position = "top";
-          height = 22;
-          spacing = 4;
+          height = 16;
+          margin-bottom = 0;
+          margin-top = 0;
 
-          modules-left = [ "niri/workspaces" ];
-          modules-center = [ "niri/window" ];
-          modules-right = [
-            "niri/language"
-            "pulseaudio"
-            "network"
-            "clock"
-            "custom/power"
+          modules-left = [
           ];
+          modules-center = [
+            "niri/workspaces"
+          ];
+          modules-right = [
+            "tray"
+            "pulseaudio"
+            "clock"
+          ];
+
+          "battery" = {
+            states = {
+              warning = 30;
+              critical = 15;
+            };
+            format = "{icon} {capacity}%";
+            format-charging = " {capacity}%";
+            format-plugged = " {capacity}%";
+            format-alt = "{icon} {time}";
+            format-icons = [ ];
+          };
 
           "niri/workspaces" = {
             all-outputs = true;
-            format = "{name}";
+            format = "{index}";
           };
 
           "niri/window" = {
-            format = "{}";
-            max-length = 30;
-            icon = true;
+            max-length = 200;
             separate-outputs = true;
           };
 
-          "niri/language" = {
-            format = "  {}";
-            format-en = "EN";
-            format-dk = "DK";
-          };
-
-          "pulseaudio" = {
-            format = "{icon} {volume}%";
-            format-bluetooth = "{icon} {volume}%";
-            format-muted = "";
-            format-icons = {
-              headphone = "";
-              hands-free = "";
-              headset = "";
-              phone = "";
-              portable = "";
-              car = "";
-              default = [
-                ""
-                ""
-                ""
-              ];
-            };
-            scroll-step = 1;
-            on-click = "pavucontrol";
-          };
-
-          "network" = {
-            format-wifi = "{essid}";
-            format-ethernet = "Connected";
-            format-disconnected = "Disconnected";
-            tooltip-format = "{ifname}: {ipaddr}/{cidr}";
-            tooltip-format-wifi = "{essid} ({signalStrength}%) ";
-            on-click = "nm-connection-editor";
+          "tray" = {
+            icon-size = 16;
+            spacing = 6;
           };
 
           "clock" = {
-            format = "{:%H:%M}";
-            on-click = "gnome-calendar";
+            locale = "C";
+            format = " {:%I:%M %p}";
+            format-alt = " {:%a,%b %d}";
           };
 
-          "custom/power" = {
-            format = "o";
-            on-click = "wlogout -p layer-shell";
+          "cpu" = {
+            format = " {usage}%";
             tooltip = false;
+            on-click = "kitty -e 'htop'";
+          };
+
+          "memory" = {
+            interval = 30;
+            format = " {used:0.2f}GB";
+            max-length = 10;
+            tooltip = false;
+            warning = 70;
+            critical = 90;
+          };
+
+          "network" = {
+            interval = 2;
+            format-wifi = " {signalStrength}%";
+            format-ethernet = "";
+            format-linked = " {ipaddr}";
+            format-disconnected = " Disconnected";
+            format-disabled = "";
+            tooltip = false;
+            max-length = 20;
+            min-length = 6;
+            format-alt = "{essid}";
+          };
+
+          "idle_inhibitor" = {
+            format = "{icon}";
+            format-icons = {
+              activated = "";
+              deactivated = "";
+            };
+          };
+
+          "backlight" = {
+            format = "{icon} {percent}%";
+            format-icons = [
+              ""
+              ""
+            ];
+            on-scroll-down = "brightnessctl -c backlight set 1%-";
+            on-scroll-up = "brightnessctl -c backlight set +1%";
+          };
+
+          "pulseaudio" = {
+            format = "{icon} {volume}% {format_source}";
+            format-bluetooth = "{icon} {volume}% {format_source}";
+            format-bluetooth-muted = " {format_source}";
+            format-muted = "  {format_source}";
+            format-source = " {volume}%";
+            format-source-muted = "";
+            format-icons = {
+              headphone = "🎧";
+              hands-free = "🎧";
+              headset = "🎧";
+              phone = "🎧";
+              portable = "🎧";
+              car = "🎧";
+              default = [ "🎧" ];
+            };
+            on-click = "pavucontrol";
+          };
+
+          "mpd" = {
+            format = "{stateIcon} {artist} - {title}";
+            format-disconnected = "🎶";
+            format-stopped = "♪";
+            interval = 10;
+            consume-icons = {
+              on = " ";
+            };
+            random-icons = {
+              off = "<span color=\"#f53c3c\"></span> ";
+              on = " ";
+            };
+            repeat-icons = {
+              on = " ";
+            };
+            single-icons = {
+              on = "1 ";
+            };
+            state-icons = {
+              paused = "";
+              playing = "";
+            };
+            tooltip-format = "MPD (connected)";
+            tooltip-format-disconnected = "MPD (disconnected)";
+            max-length = 35;
+          };
+
+          "custom/recorder" = {
+            format = " Rec";
+            format-disabled = " Off-air";
+            return-type = "json";
+            interval = 1;
+            exec = "echo '{\"class\": \"recording\"}'";
+            exec-if = "pgrep wf-recorder";
+          };
+
+          "custom/audiorec" = {
+            format = "♬ Rec";
+            format-disabled = "♬ Off-air";
+            return-type = "json";
+            interval = 1;
+            exec = "echo '{\"class\": \"audio recording\"}'";
+            exec-if = "pgrep ffmpeg";
           };
         };
       };

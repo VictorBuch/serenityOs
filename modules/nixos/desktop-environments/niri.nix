@@ -61,8 +61,8 @@
     services.blueman.enable = true;
 
     # Enable services for Nautilus to work with external drives
-    services.udisks2.enable = true;  # Auto-mount removable drives
-    services.gvfs.enable = true;     # GNOME Virtual File System (needed by Nautilus)
+    services.udisks2.enable = true; # Auto-mount removable drives
+    services.gvfs.enable = true; # GNOME Virtual File System (needed by Nautilus)
 
     # Enable network manager applet
     programs.nm-applet.enable = true;

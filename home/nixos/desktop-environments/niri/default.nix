@@ -4,9 +4,10 @@
   imports = [
     ./niri.nix
     ../common/rofi.nix
+    ../common/fuzzel.nix
     ./waybar
     ../common/dunst.nix
-     ../common/wlogout
+    ../common/wlogout
     ../common/hyprlock
   ];
 
@@ -17,6 +18,7 @@
     };
     common = {
       rofi.enable = lib.mkDefault true;
+      fuzzel.enable = lib.mkDefault true;
       dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;
       hyprlock.enable = lib.mkDefault true;

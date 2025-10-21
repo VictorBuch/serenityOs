@@ -155,12 +155,13 @@ in
             Mod+Shift+P { spawn "rofi-pass-wayland"; }
             Mod+Shift+A { spawn "rofi" "-show" "run"; }
 
-          // Screenshots
-          Alt+Shift+4 { screenshot; }
-          Alt+Shift+5 { screenshot-window; }
+            // Screenshots
+            Alt+Shift+4 { screenshot; }
+            Alt+Shift+5 { screenshot-window; }
 
             // System lock
             Mod+Escape { spawn "hyprlock"; }
+            Mod+Shift+Escape { spawn "wlogout";}
 
             // Media keys
             XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
@@ -173,9 +174,6 @@ in
             XF86AudioPause { spawn "playerctl" "play-pause"; }
             XF86AudioPlay { spawn "playerctl" "play-pause"; }
             XF86AudioPrev { spawn "playerctl" "previous"; }
-
-            // Compositor controls
-            Mod+Shift+Escape { quit; }
         }
 
         // Window rules

@@ -1,4 +1,12 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs ? null,
+  isLinux,
+  mkApp,
+  ...
+}:
 
 mkApp {
   _file = toString ./.;
@@ -14,6 +22,7 @@ mkApp {
     pkgs.nodePackages.nodejs
     pkgs.claude-code
     pkgs.mcp-nixos
+    pkgs.yazi
   ];
   description = "Common development tools";
 } args

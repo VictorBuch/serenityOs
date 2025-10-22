@@ -139,9 +139,11 @@
           enable = true;
           setupOpts = {
             options = {
+              numbers = "none";
               style_preset = "minimal";
               seperator_style = "slope";
               show_buffer_close_icon = false;
+              diagnostics = false;
             };
           };
         };
@@ -350,6 +352,9 @@
         notes.todo-comments.enable = true;
 
         extraPlugins = with pkgs.vimPlugins; {
+          vim-tmux-navigator = {
+            package = vim-tmux-navigator;
+          };
           flash-nvim = {
             package = flash-nvim;
             setup = ''
@@ -417,22 +422,8 @@
             desc = "Toggle file explorer";
             silent = true;
           };
-          "<C-h>" = {
-            action = "<C-w>h";
-            desc = "Move left";
-          };
-          "<C-j>" = {
-            action = "<C-w>j";
-            desc = "Move down";
-          };
-          "<C-k>" = {
-            action = "<C-w>k";
-            desc = "Move up";
-          };
-          "<C-l>" = {
-            action = "<C-w>l";
-            desc = "Move right";
-          };
+          # Window navigation provided by vim-tmux-navigator plugin
+          # Uses <C-h>, <C-j>, <C-k>, <C-l> for seamless vim/tmux navigation
           "<S-h>" = {
             action = ":BufferLineCyclePrev<CR>";
             desc = "Previous buffer";

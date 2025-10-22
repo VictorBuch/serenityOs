@@ -247,6 +247,7 @@ New installations use the provided install scripts:
 
 **Library Helpers (`lib/`):**
 - `lib/mkApp.nix` - Universal app module helper with cross-platform and stable/unstable support
+- `lib/mkCategory.nix` - Category module helper with auto-discovery of .nix files in directory (used in apps/*/default.nix)
 
 **Helper Scripts:**
 - `scripts/add-package.sh` - CLI tool to add packages with proper categorization (uses mkApp)
@@ -309,6 +310,10 @@ mkApp {
 - Built-in stable/unstable package support via `inputs.stable-nixpkgs`
 - Reduced boilerplate compared to manual module creation
 - Auto-imported in all modules via `specialArgs` in flake.nix
+- Can auto-derive optionPath from file location using `_file` parameter (eliminates manual optionPath specification)
+
+**Note on mkCategory:**
+The `mkCategory` helper (in `lib/mkCategory.nix`) auto-discovers all `.nix` files in a category directory and creates a single enable option for the entire category (e.g., `apps.browsers.enable = true;` enables all browser modules). This is used in category `default.nix` files like `modules/apps/browsers/default.nix`. When the category is enabled, all discovered modules are automatically imported and enabled by default (overridable with `mkDefault`).
 
 ## Platform-Specific Notes
 

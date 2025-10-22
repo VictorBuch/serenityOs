@@ -15,7 +15,7 @@
       style = ''
         * {
           font-family: "JetBrainsMono Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-          font-size: 14px;
+          font-size: 16px;
           transition: background-color 0.3s ease;
         }
 
@@ -110,7 +110,7 @@
         mainBar = {
           layer = "top";
           position = "top";
-          height = 22;
+          height = 24;
           spacing = 4;
 
           modules-left = [ "hyprland/workspaces" ];

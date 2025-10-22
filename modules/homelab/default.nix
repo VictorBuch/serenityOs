@@ -55,4 +55,5 @@
   nextcloud.enable = lib.mkDefault false;
   pocket-id.enable = lib.mkDefault false;
   gitea.enable = lib.mkDefault false;
+  tailscale.enable = lib.mkDefault false;
 }

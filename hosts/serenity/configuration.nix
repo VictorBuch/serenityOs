@@ -228,6 +228,11 @@ in
         owner = "root";
         group = "root";
       };
+      "tailscale/auth_key" = {
+        mode = "0400";
+        owner = "root";
+        group = "root";
+      };
     };
   };
 
@@ -290,6 +295,15 @@ in
   programs.neovim.defaultEditor = true;
 
   # Networking and Auth
+  tailscale = {
+    enable = true;
+    advertiseExitNode = true;
+    useRoutingFeatures = "both"; # Act as both client and server
+    enableSsh = true; # Allow SSH via Tailscale
+    extraUpFlags = [
+      "--advertise-routes=192.168.0.0/24" # Share your local network
+    ];
+  };
   cloudflare-tunnel.enable = true;
   caddy.enable = true;
   nginx-reverse-proxy.enable = false;

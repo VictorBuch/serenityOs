@@ -9,6 +9,7 @@
 #     _file = toString ./.;
 #     name = "firefox";
 #     packages = pkgs: [ pkgs.firefox ];
+#     extraConfig = {};
 #   }
 #
 # 2. Platform-specific packages:
@@ -86,28 +87,30 @@ let
         # Get the relative path (e.g., "browsers" or "gaming/utils")
         relativePath = if (builtins.length parts) > 1 then builtins.elemAt parts 1 else "";
         # Convert path separators to dots (e.g., "gaming/utils" -> "gaming.utils")
-        categoryPath = builtins.replaceStrings ["/"] ["."] relativePath;
+        categoryPath = builtins.replaceStrings [ "/" ] [ "." ] relativePath;
         # Build the full option path: "apps.category.name"
         fullPath = "apps.${categoryPath}.${name}";
       in
-        fullPath
+      fullPath
     else
       throw "mkApp: Either '_file' or 'optionPath' must be provided for ${name}";
 
   # Import stable nixpkgs if inputs is available
-  stable-pkgs = if inputs != null then
-    import inputs.stable-nixpkgs {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }
-  else
-    pkgs;
+  stable-pkgs =
+    if inputs != null then
+      import inputs.stable-nixpkgs {
+        inherit (pkgs) system;
+        config.allowUnfree = true;
+      }
+    else
+      pkgs;
 
   # Select platform-specific packages
   platformPackages = if isLinux then linuxPackages else darwinPackages;
 
   # Resolve packages (support functions or direct lists)
-  resolvePackages = pkgList:
+  resolvePackages =
+    pkgList:
     if pkgList == null then
       [ ]
     else if lib.isFunction pkgList then
@@ -139,7 +142,7 @@ let
 in
 
 {
-  options = lib.setAttrByPath (optionParts ++ ["enable"]) (lib.mkEnableOption description);
+  options = lib.setAttrByPath (optionParts ++ [ "enable" ]) (lib.mkEnableOption description);
 
   config =
     let
@@ -149,18 +152,21 @@ in
     lib.mkMerge [
       # Apply configuration when enabled AND platform is compatible
       # Silently skip if platform is incompatible (no error, just don't enable)
-      (lib.mkIf (
-        optionEnabled.enable &&
-        # Skip if Linux-only and we're on Darwin
-        !(isLinuxOnly && !isLinux) &&
-        # Skip if Darwin-only and we're on Linux
-        !(isDarwinOnly && isLinux)
-      ) (
-        lib.recursiveUpdate
-          {
+      (lib.mkIf
+        (
+          optionEnabled.enable
+          &&
+            # Skip if Linux-only and we're on Darwin
+            !(isLinuxOnly && !isLinux)
+          &&
+            # Skip if Darwin-only and we're on Linux
+            !(isDarwinOnly && isLinux)
+        )
+        (
+          lib.recursiveUpdate {
             environment.systemPackages = resolvedPackages;
-          }
-          finalExtraConfig
-      ))
+          } finalExtraConfig
+        )
+      )
     ];
 }

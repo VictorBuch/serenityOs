@@ -13,6 +13,7 @@ This document provides setup and maintenance instructions for the Serenity homel
 
 The Serenity server runs various services managed through NixOS modules:
 
+- **VPN/Networking**: Tailscale (secure mesh VPN, exit node)
 - **Reverse Proxy**: Caddy (HTTPS with Cloudflare certificates)
 - **Authentication**: Tinyauth, Pocket-ID
 - **Media**: Immich (photos), Jellyfin, Plex, Mealie (recipes)
@@ -21,6 +22,226 @@ The Serenity server runs various services managed through NixOS modules:
 - **File Management**: Filebrowser, Nextcloud
 - **Downloads**: Deluge with VPN, Sonarr, Radarr, Prowlarr
 - **Other**: Crafty (Minecraft), Music Assistant, HyperHDR
+
+## Tailscale Setup
+
+Tailscale provides secure, encrypted mesh VPN connectivity between all your devices. The Serenity server is configured as an exit node, allowing you to route all your internet traffic through your home network from anywhere.
+
+### Service Configuration
+
+- **Exit Node**: Enabled (routes internet traffic through Serenity)
+- **Subnet Routes**: Advertises 192.168.0.0/24 (entire home network accessible via Tailscale)
+- **Tailscale SSH**: Enabled (secure SSH access without exposing port 22)
+- **Routing Features**: "both" (client and server capabilities)
+- **Firewall**: UDP port 41641, trusted tailscale0 interface
+
+### Initial Setup
+
+#### 1. Generate Tailscale Auth Key
+
+Before first deployment, generate an auth key from your Tailscale admin console:
+
+1. Visit [Tailscale Admin Console](https://login.tailscale.com/admin/settings/keys)
+2. Click **Generate auth key**
+3. Choose settings:
+   - **Reusable**: Yes (allows re-registration)
+   - **Ephemeral**: No (persistent node)
+   - **Pre-authorized**: Yes (auto-approve)
+   - **Tags**: Optional (e.g., `tag:server`)
+4. Copy the generated key
+
+#### 2. Add SOPS Secret
+
+Add the auth key to your encrypted secrets:
+
+```bash
+sops secrets/secrets.yaml
+```
+
+Add this entry:
+```yaml
+tailscale:
+  auth_key: "tskey-auth-XXXXXXXXXX"
+```
+
+#### 3. Deploy Configuration
+
+The Tailscale service is already enabled in the configuration:
+
+```bash
+sudo nixos-rebuild switch --flake .#serenity
+```
+
+#### 4. Approve Exit Node (First Time Only)
+
+After the first deployment:
+
+1. Visit [Tailscale Admin Console](https://login.tailscale.com/admin/machines)
+2. Find the "serenity" machine
+3. Click **Edit route settings**
+4. Approve the exit node and subnet routes
+
+### Usage
+
+#### Connect to Exit Node
+
+From any device on your Tailnet:
+
+```bash
+# Use Serenity as exit node (routes all traffic through Serenity)
+tailscale up --exit-node=serenity
+
+# Stop using exit node
+tailscale up --exit-node=
+```
+
+On mobile devices:
+1. Open Tailscale app
+2. Tap on your device name
+3. Select **Use exit node** → **serenity**
+
+#### Access Home Network Devices
+
+With subnet routes enabled, you can access any device on your home network (192.168.0.0/24):
+
+```bash
+# Access router
+ping 192.168.0.1
+
+# Access other devices by IP
+ssh user@192.168.0.x
+
+# Access Serenity directly via Tailscale IP
+ssh ghost@100.x.x.x  # Tailscale assigns 100.x.x.x addresses
+```
+
+#### SSH via Tailscale
+
+Tailscale SSH is enabled, providing secure SSH access without exposing port 22:
+
+```bash
+# SSH using Tailscale (no port forwarding needed)
+ssh ghost@serenity
+
+# Or use the Tailscale IP
+ssh ghost@100.x.x.x
+```
+
+Configure SSH ACLs in the [Tailscale Admin Console](https://login.tailscale.com/admin/acls) to control who can SSH into Serenity.
+
+#### Check Tailscale Status
+
+```bash
+# View Tailscale status and IPs
+sudo tailscale status
+
+# View current exit node
+sudo tailscale status | grep exit
+
+# List available exit nodes
+sudo tailscale exit-node list
+
+# Check connection quality
+sudo tailscale ping serenity
+```
+
+### Configuration Options
+
+The Tailscale module is highly configurable. Current settings in `hosts/serenity/configuration.nix`:
+
+```nix
+tailscale = {
+  enable = true;
+  advertiseExitNode = true;           # Act as exit node
+  useRoutingFeatures = "both";        # Client + server routing
+  enableSsh = true;                   # Tailscale SSH
+  acceptRoutes = false;               # Don't accept routes from others
+  extraUpFlags = [
+    "--advertise-routes=192.168.0.0/24"  # Share home network
+  ];
+};
+```
+
+Available options:
+- `advertiseExitNode` - Advertise as exit node (default: false)
+- `useRoutingFeatures` - "none", "client", "server", or "both" (default: "server")
+- `acceptRoutes` - Accept routes from other nodes (default: false)
+- `enableSsh` - Enable Tailscale SSH (default: true)
+- `openFirewall` - Open UDP port 41641 (default: true)
+- `extraUpFlags` - Additional `tailscale up` flags
+- `extraSetFlags` - Additional `tailscale set` flags
+
+### Maintenance
+
+#### Check Service Status
+
+```bash
+# Tailscale daemon status
+systemctl status tailscaled
+
+# View Tailscale logs
+journalctl -u tailscaled -f
+
+# Check IP forwarding (should be enabled)
+sysctl net.ipv4.ip_forward
+sysctl net.ipv6.conf.all.forwarding
+```
+
+#### Update Auth Key
+
+If you need to rotate the auth key:
+
+```bash
+# Edit secrets
+sops secrets/secrets.yaml
+# Update tailscale.auth_key
+
+# Rebuild to apply
+sudo nixos-rebuild switch --flake .#serenity
+```
+
+#### Network Performance
+
+```bash
+# Test Tailscale connection speed to another node
+sudo tailscale ping another-node
+
+# View Tailscale routes
+ip route | grep tailscale
+
+# Check network interfaces
+ip addr show tailscale0
+```
+
+### Troubleshooting
+
+#### Cannot connect to Tailscale
+
+1. Check service is running: `systemctl status tailscaled`
+2. Verify auth key is valid in SOPS secrets
+3. Check logs: `journalctl -u tailscaled -n 50`
+4. Ensure firewall allows UDP 41641 (auto-configured)
+
+#### Exit node not working
+
+1. Verify exit node is approved in Tailscale admin console
+2. Check IP forwarding: `sysctl net.ipv4.ip_forward` (should be 1)
+3. Verify routing features: `systemctl cat tailscaled | grep useRoutingFeatures`
+4. Check for exit node advertisement: `sudo tailscale status`
+
+#### Cannot access subnet routes
+
+1. Verify routes are approved in Tailscale admin console
+2. Check advertised routes: `sudo tailscale status`
+3. On client, ensure accepting routes: `tailscale up --accept-routes`
+4. Verify network connectivity: `ping 192.168.0.1` from Tailscale client
+
+#### Tailscale SSH not working
+
+1. Verify SSH is enabled: `sudo tailscale status | grep ssh`
+2. Check Tailscale ACLs allow SSH access
+3. Test connection: `tailscale ssh ghost@serenity`
+4. Check logs: `journalctl -u tailscaled -f`
 
 ## Gitea Setup
 
@@ -265,6 +486,7 @@ Ports are managed per-service in NixOS configuration. Currently open:
 - 80/443 - Caddy (HTTP/HTTPS)
 - 2222 - Gitea SSH
 - 2283 - Immich
+- 41641/UDP - Tailscale
 - Various internal service ports
 
 ### Monitoring
@@ -306,6 +528,9 @@ ss -tulpn
 ## References
 
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
+- [Tailscale Documentation](https://tailscale.com/kb/)
+- [Tailscale Exit Nodes](https://tailscale.com/kb/1103/exit-nodes/)
+- [Tailscale Subnet Routers](https://tailscale.com/kb/1019/subnets/)
 - [Gitea Documentation](https://docs.gitea.io/)
 - [Gitea Actions](https://docs.gitea.io/en-us/actions/)
 - Repository CLAUDE.md for general development guidelines

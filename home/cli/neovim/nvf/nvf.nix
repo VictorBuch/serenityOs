@@ -102,6 +102,11 @@
         filetree.neo-tree = {
           enable = true;
           setupOpts = {
+            filesystem = {
+              filtered_items = {
+                hide_gitignored = false;
+              };
+            };
             window = {
               mappings = {
                 "h" = "close_node";

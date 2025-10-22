@@ -12,6 +12,7 @@ let
     vi = "sudo nvim ";
     lg = "lazygit";
     n = "nvim ~/serenityOs/ ";
+    y = "yazi";
   };
 in
 

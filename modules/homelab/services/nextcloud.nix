@@ -20,15 +20,9 @@ in
 
   config = lib.mkIf config.nextcloud.enable {
 
-    # NextCloud will be served through Caddy reverse proxy
-    # No additional firewall ports needed
+    services.nginx.enable = false;
 
     networking.firewall.allowedTCPPorts = [ 5672 ];
-
-    services.onlyoffice = {
-      enable = true;
-      hostname = "localhost";
-    };
 
     # MySQL service for NextCloud
     services.mysql = {
@@ -243,8 +237,6 @@ in
         inherit
           calendar
           contacts
-          onlyoffice
-          polls
           ;
       };
 

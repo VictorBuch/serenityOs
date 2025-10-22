@@ -31,6 +31,8 @@
     ./services/hyperhdr.nix
     ./services/music-assistant.nix
     ./services/caddy.nix
+    ./services/gitea.nix
+    ./services/tailscale.nix
     ./lab.nix
   ];
 
@@ -52,4 +54,5 @@
   filebrowser.enable = lib.mkDefault false;
   nextcloud.enable = lib.mkDefault false;
   pocket-id.enable = lib.mkDefault false;
+  gitea.enable = lib.mkDefault false;
 }

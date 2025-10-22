@@ -235,18 +235,11 @@ in
   zramSwap.enable = true;
 
   # Open ports in the firewall.
-  # portainer:[9443 8000] monica:[8090]
   networking.firewall.allowedTCPPorts = [
-    9443
-    8000
     2283
-    8090
   ];
   networking.firewall.allowedUDPPorts = [
-    9443
-    8000
     2283
-    8090
   ];
 
   # Server Settings
@@ -289,19 +282,12 @@ in
     zoxide
     sops
 
-    gemini-cli
     claude-code
+    mcp-nixos
     nodePackages_latest.nodejs
   ];
 
   programs.neovim.defaultEditor = true;
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "aspnetcore-runtime-6.0.36"
-    "aspnetcore-runtime-wrapped-6.0.36"
-    "dotnet-sdk-6.0.428"
-    "dotnet-sdk-wrapped-6.0.428"
-  ];
 
   # Networking and Auth
   cloudflare-tunnel.enable = true;
@@ -341,6 +327,9 @@ in
   crafty.enable = true;
   mealie.enable = true;
   lab.enable = false;
+
+  # Development
+  gitea.enable = true;
 
   system.stateVersion = "24.05"; # Did you read the comment?
 

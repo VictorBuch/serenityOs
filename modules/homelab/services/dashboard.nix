@@ -1108,7 +1108,7 @@ in
                         }
                         {
                           title = "HyperHDR";
-                          url = "https://${nixosIp}:8090";
+                          url = "http://${nixosIp}:8090";
                           icon = "sh:hyperhdr";
                           check-url = "${local}:8090";
                         }

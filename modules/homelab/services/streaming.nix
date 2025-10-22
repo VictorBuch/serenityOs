@@ -55,15 +55,15 @@ in
       after = [ "nfs-mounts-ready.target" ];
       requires = [ "nfs-mounts-ready.target" ];
     };
-    systemd.services.plex = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
-    };
+    # systemd.services.plex = {
+    #   after = [ "nfs-mounts-ready.target" ];
+    #   requires = [ "nfs-mounts-ready.target" ];
+    # };
 
     # Streaming services
     services = {
       plex = {
-        enable = true;
+        enable = false;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";

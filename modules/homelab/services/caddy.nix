@@ -143,6 +143,14 @@ let
       https = false;
       protected = false;
     };
+    tools = {
+      # IT Tools - static site
+      url = "";
+      https = false;
+      protected = true;
+      isStaticFiles = true;
+      staticPath = "${pkgs.it-tools}/lib/node_modules/it-tools/dist";
+    };
   };
 
   # --- HELPER FUNCTIONS ---
@@ -205,6 +213,12 @@ let
             }
 
             # Serve static files
+            file_server
+          ''
+        else if service.isStaticFiles or false then
+          ''
+            # Serve static files
+            root * ${service.staticPath}
             file_server
           ''
         else if service.https then

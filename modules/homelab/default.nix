@@ -33,6 +33,7 @@
     ./services/caddy.nix
     ./services/gitea.nix
     ./services/tailscale.nix
+    ./services/it-tools.nix
     ./lab.nix
   ];
 
@@ -56,4 +57,5 @@
   pocket-id.enable = lib.mkDefault false;
   gitea.enable = lib.mkDefault false;
   tailscale.enable = lib.mkDefault false;
+  it-tools.enable = lib.mkDefault false;
 }

@@ -60,6 +60,12 @@ detect_platform() {
     fi
 }
 
+# Map hostname to host directory (strips -arm suffix for architecture variants)
+get_host_dir() {
+    local hostname=$1
+    echo "${hostname%-arm}"  # Remove -arm suffix if present
+}
+
 # Check if hostname is valid
 is_valid_host() {
     local host=$1
@@ -224,11 +230,12 @@ clone_repo() {
 # Setup hardware configuration (NixOS only)
 setup_hardware_config() {
     local hostname=$1
+    local host_dir=$(get_host_dir "$hostname")
 
     print_header "Hardware Configuration"
 
     local hw_config_src="/etc/nixos/hardware-configuration.nix"
-    local hw_config_dst="$INSTALL_DIR/hosts/$hostname/hardware-configuration.nix"
+    local hw_config_dst="$INSTALL_DIR/hosts/$host_dir/hardware-configuration.nix"
 
     if [ ! -f "$hw_config_src" ]; then
         print_warning "Hardware configuration not found at $hw_config_src"
@@ -256,7 +263,8 @@ setup_hardware_config() {
 # Extract username from host configuration
 get_username() {
     local hostname=$1
-    local config_file="$INSTALL_DIR/hosts/$hostname/configuration.nix"
+    local host_dir=$(get_host_dir "$hostname")
+    local config_file="$INSTALL_DIR/hosts/$host_dir/configuration.nix"
 
     if [ ! -f "$config_file" ]; then
         echo ""

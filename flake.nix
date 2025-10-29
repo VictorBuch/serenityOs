@@ -125,6 +125,21 @@
             inputs.sops-nix.nixosModules.sops
           ];
         };
+        shepherd-arm = nixpkgs.lib.nixosSystem rec {
+          system = "aarch64-linux";
+          specialArgs = {
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory;
+            isLinux = true;
+          };
+          modules = [
+            ./hosts/shepherd/configuration.nix
+            ./modules/nixos
+            inputs.home-manager.nixosModules.default
+            inputs.catppuccin.nixosModules.catppuccin
+            inputs.sops-nix.nixosModules.sops
+          ];
+        };
       };
 
       darwinConfigurations = {

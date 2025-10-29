@@ -19,6 +19,10 @@ in
         source = ./scripts/volume.sh;
         executable = true;
       };
+      "waybar/scripts/backlight.sh" = {
+        source = ./scripts/backlight.sh;
+        executable = true;
+      };
       "waybar/scripts/bluetooth.sh" = {
         source = ./scripts/bluetooth.sh;
         executable = true;
@@ -42,41 +46,42 @@ in
           # Layout
           modules-left = [
             "group/user"
-            "custom/left_div"
+            "custom/left_div#1"
             "niri/workspaces"
-            "custom/right_div"
+            "custom/right_div#1"
             "niri/window"
           ];
           modules-center = [
-            "custom/left_div"
+            "custom/left_div#2"
             "temperature"
-            "custom/left_div"
+            "custom/left_div#3"
             "memory"
-            "custom/left_div"
+            "custom/left_div#4"
             "cpu"
-            "custom/left_inv"
-            "custom/left_div"
+            "custom/left_inv#1"
+            "custom/left_div#5"
             "custom/distro"
-            "custom/right_div"
-            "custom/right_inv"
+            "custom/right_div#2"
+            "custom/right_inv#1"
             "idle_inhibitor"
             "clock#time"
-            "custom/right_div"
+            "custom/right_div#3"
             "clock#date"
-            "custom/right_div"
+            "custom/right_div#4"
             "network"
             "bluetooth"
             "custom/system_update"
-            "custom/right_div"
+            "custom/right_div#5"
           ];
           modules-right = [
             "mpris"
-            "custom/left_div"
+            "custom/left_div#6"
             "group/pulseaudio"
-            "custom/left_div"
-            "custom/left_div"
+            "custom/left_div#7"
+            "backlight"
+            "custom/left_div#8"
             "battery"
-            "custom/left_inv"
+            "custom/left_inv#2"
             "custom/power_menu"
           ];
 
@@ -93,8 +98,8 @@ in
           "niri/workspaces" = {
             format = "{icon}";
             format-icons = {
-              active = "";
-              default = "";
+              active = "";
+              default = "";
             };
           };
 
@@ -124,21 +129,70 @@ in
           };
 
           # Dividers (Powerline triangles)
-          "custom/left_div" = {
+          "custom/left_div#1" = {
             format = "";
             tooltip = false;
           };
-          "custom/right_div" = {
+          "custom/left_div#2" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#3" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#4" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#5" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#6" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#7" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_div#8" = {
+            format = "";
+            tooltip = false;
+          };
+
+          "custom/right_div#1" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/right_div#2" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/right_div#3" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/right_div#4" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/right_div#5" = {
             format = "";
             tooltip = false;
           };
 
-          "custom/left_inv" = {
+          "custom/left_inv#1" = {
+            format = "";
+            tooltip = false;
+          };
+          "custom/left_inv#2" = {
             format = "";
             tooltip = false;
           };
 
-          "custom/right_inv" = {
+          "custom/right_inv#1" = {
             format = "";
             tooltip = false;
           };
@@ -192,7 +246,7 @@ in
 
           # Distro Icon
           "custom/distro" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 
@@ -355,6 +409,27 @@ in
             on-scroll-up = "${scriptsDir}/volume.sh input raise";
             on-scroll-down = "${scriptsDir}/volume.sh input lower";
             tooltip-format = "Input Device: {desc}";
+          };
+
+          # Backlight
+          backlight = {
+            format = "{icon} {percent}%";
+            format-icons = [
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+              ""
+            ];
+            min-length = 7;
+            max-length = 7;
+            on-scroll-up = "${scriptsDir}/backlight.sh up";
+            on-scroll-down = "${scriptsDir}/backlight.sh down";
+            tooltip = false;
           };
 
           # Battery

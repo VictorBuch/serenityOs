@@ -132,8 +132,9 @@ tooltip > box {
   padding-right: 12px;
 }
 
-/* Workspaces & adjacent dividers */
-#custom-user + #custom-left_div {
+/* Workspaces */
+#custom-left_div.\31,
+#custom-right_div.\31 {
   color: @workspaces;
 }
 
@@ -157,10 +158,6 @@ tooltip > box {
   color: @accent;
 }
 
-#workspaces + #custom-right_div {
-  color: @workspaces;
-}
-
 /* Window Title */
 #window {
   margin-left: 12px;
@@ -170,8 +167,8 @@ tooltip > box {
    Modules Center
    ================================================ */
 
-/* Temperature & dividers */
-#window + #custom-left_div {
+/* Temperature */
+#custom-left_div.\32 {
   color: @temperature;
 }
 
@@ -179,47 +176,44 @@ tooltip > box {
   background-color: @temperature;
 }
 
-#temperature + #custom-left_div {
+/* Memory */
+#custom-left_div.\33 {
   background-color: @temperature;
   color: @memory;
 }
 
-/* Memory & dividers */
 #memory {
   background-color: @memory;
 }
 
-#memory + #custom-left_div {
+/* CPU */
+#custom-left_div.\34 {
   background-color: @memory;
   color: @cpu;
 }
 
-/* CPU & dividers */
 #cpu {
   background-color: @cpu;
 }
 
-#cpu + #custom-left_inv {
+#custom-left_inv.\31 {
   color: @cpu;
 }
 
-#custom-left_inv + #custom-left_div {
+/* Distro Icon */
+#custom-left_div.\35,
+#custom-right_div.\32 {
   color: @accent;
 }
 
-/* Distro Icon & dividers */
 #custom-distro {
   padding: 0 10px 0 5px;
   background-color: @accent;
   color: @main-bg;
 }
 
-#custom-distro + #custom-right_div {
-  color: @accent;
-}
-
-/* Idle Inhibitor & Time */
-#custom-right_div + #custom-right_inv {
+/* Idle Inhibitor */
+#custom-right_inv.\31 {
   color: @time;
 }
 
@@ -227,23 +221,24 @@ tooltip > box {
   background-color: @time;
 }
 
+/* Time */
 #clock.time {
   padding-right: 6px;
   background-color: @time;
 }
 
-#clock.time + #custom-right_div {
+#custom-right_div.\33 {
   background-color: @date;
   color: @time;
 }
 
-/* Date & dividers */
+/* Date */
 #clock.date {
   padding-left: 6px;
   background-color: @date;
 }
 
-#clock.date + #custom-right_div {
+#custom-right_div.\34 {
   background-color: @tray;
   color: @date;
 }
@@ -255,7 +250,7 @@ tooltip > box {
   background-color: @tray;
 }
 
-#custom-system_update + #custom-right_div {
+#custom-right_div.\35 {
   color: @tray;
 }
 
@@ -268,18 +263,18 @@ tooltip > box {
   padding: 0 12px;
 }
 
-#mpris + #custom-left_div {
+/* Volume (PulseAudio) */
+#custom-left_div.\36 {
   color: @volume;
 }
 
-/* Volume (PulseAudio) */
 #pulseaudio,
 #wireplumber {
   background-color: @volume;
 }
 
-/* Backlight & Battery dividers */
-box > #custom-left_div {
+/* Backlight */
+#custom-left_div.\37 {
   background-color: @volume;
   color: @backlight;
 }
@@ -288,17 +283,17 @@ box > #custom-left_div {
   background-color: @backlight;
 }
 
-#backlight + #custom-left_div {
+/* Battery */
+#custom-left_div.\38 {
   background-color: @backlight;
   color: @battery;
 }
 
-/* Battery */
 #battery {
   background-color: @battery;
 }
 
-#battery + #custom-left_inv {
+#custom-left_inv.\32 {
   color: @battery;
 }
 

@@ -51,9 +51,10 @@ in
 
         // Output configuration (monitor setup)
         // Adjust as needed for your specific setup
-        output "DP-1" {
-            mode "2560x1440@144"
-        }
+        // Commented out to allow auto-detection (especially important for VMs)
+        // output "DP-1" {
+        //     mode "2560x1440@144"
+        // }
 
         // Layout configuration
         layout {

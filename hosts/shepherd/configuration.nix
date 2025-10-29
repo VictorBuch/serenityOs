@@ -145,6 +145,18 @@ in
     shell = pkgs.nushell;
   };
 
+  # Enable graphics/OpenGL (required for Wayland compositors like niri)
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
+
+  # Enable X server and video drivers (required even for Wayland)
+  services.xserver = {
+    enable = true;
+    videoDrivers = [ "modesetting" ]; # Generic driver for VMs
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 

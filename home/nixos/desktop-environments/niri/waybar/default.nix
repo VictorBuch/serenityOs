@@ -242,7 +242,7 @@ in
 
           # Distro Icon
           "custom/distro" = {
-            format = " ";
+            format = "";
             tooltip = false;
           };
 

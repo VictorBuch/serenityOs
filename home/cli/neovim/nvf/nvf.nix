@@ -77,6 +77,8 @@
           trouble.enable = true;
         };
 
+        treesitter.autotagHtml = true;
+
         languages = {
           enableFormat = true;
           enableTreesitter = true;

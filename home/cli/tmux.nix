@@ -28,6 +28,9 @@
       escapeTime = 0;
       plugins = [ pkgs.tmuxPlugins.vim-tmux-navigator ];
       extraConfig = ''
+        			## Unbind default session list (s) to allow sesh to use it
+        			unbind s
+
         			## use prefix v or h to make a vertical split or horizontal
         			bind v split-window -hc "#{pane_current_path}"
         			bind h split-window -vc "#{pane_current_path}"

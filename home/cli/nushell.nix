@@ -13,6 +13,7 @@ let
     lg = "lazygit";
     n = "nvim ~/serenityOs/ ";
     y = "yazi";
+    s = "sesh connect (sesh list --icons | fzf --ansi)";
   };
 in
 

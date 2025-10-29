@@ -98,8 +98,8 @@ in
           "niri/workspaces" = {
             format = "{icon}";
             format-icons = {
-              active = "";
-              default = "";
+              active = "";
+              default = "";
             };
           };
 
@@ -130,70 +130,70 @@ in
 
           # Dividers (Powerline triangles)
           "custom/left_div#1" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#2" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#3" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#4" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#5" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#6" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#7" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_div#8" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 
           "custom/right_div#1" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/right_div#2" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/right_div#3" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/right_div#4" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/right_div#5" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 
           "custom/left_inv#1" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
           "custom/left_inv#2" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 
           "custom/right_inv#1" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 
@@ -246,7 +246,7 @@ in
 
           # Distro Icon
           "custom/distro" = {
-            format = "";
+            format = "";
             tooltip = false;
           };
 

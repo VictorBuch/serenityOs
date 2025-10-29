@@ -20,6 +20,9 @@ in
 
   networking.hostName = "shepherd"; # Define your hostname.
 
+  # Define a user account.
+  user.userName = username;
+
   # Enable flakes
   nix.settings.experimental-features = [
     "nix-command"

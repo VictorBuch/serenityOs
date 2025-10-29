@@ -23,7 +23,7 @@
       settings = {
         "$schema" = "https://starship.rs/config-schema.json";
 
-        format = ''[](red)$os$username[ ](bg:peach fg:red)$directory[ ](bg:yellow fg:peach)$git_branch$git_status[ ](fg:yellow bg:green)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[ ](fg:green bg:sapphire)$conda[ ](fg:sapphire bg:lavender)$time[ ](fg:lavender)$cmd_duration$line_break$character'';
+        format = ''[](red)$os[](bg:peach fg:red)$directory[](bg:yellow fg:peach)$git_branch$git_status[](fg:yellow bg:green)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:green)$cmd_duration$line_break$character'';
 
         palette = "catppuccin_mocha";
 
@@ -31,9 +31,9 @@
           disabled = false;
           style = "bg:red fg:crust";
           symbols = {
-            Macos = "󰀵";
-            Linux = "";
-            NixOS = "";
+            Macos = "󰀵 ";
+            Linux = " ";
+            NixOS = " ";
           };
         };
 
@@ -48,13 +48,16 @@
           style = "bg:peach fg:crust";
           format = "[ $path ]($style)";
           truncation_length = 3;
-          truncation_symbol = "…/";
+          truncation_symbol = "";
           substitutions = {
-            Documents = "󰈙 ";
-            Downloads = " ";
-            Music = "󰝚 ";
-            Pictures = " ";
-            Developer = "󰲋 ";
+            Documents = "󰈙";
+            Downloads = "󰉍";
+            Music = "󰝚";
+            Pictures = "󰉏";
+            Developer = "󰲋";
+            github = "";
+            work = "󰦑";
+            serenityOs = "󰚀";
           };
         };
 
@@ -144,17 +147,17 @@
         };
 
         line_break = {
-          disabled = true;
+          disabled = false;
         };
 
         character = {
           disabled = false;
-          success_symbol = "[❯](bold fg:green)";
-          error_symbol = "[❯](bold fg:red)";
-          vimcmd_symbol = "[❮](bold fg:green)";
-          vimcmd_replace_one_symbol = "[❮](bold fg:lavender)";
-          vimcmd_replace_symbol = "[❮](bold fg:lavender)";
-          vimcmd_visual_symbol = "[❮](bold fg:yellow)";
+          success_symbol = "[└─>](bold fg:green)";
+          error_symbol = "[└─>](bold fg:red)";
+          vimcmd_symbol = "[└─<](bold fg:green)";
+          vimcmd_replace_one_symbol = "[└─>](bold fg:lavender)";
+          vimcmd_replace_symbol = "[└─>](bold fg:lavender)";
+          vimcmd_visual_symbol = "[└─>](bold fg:yellow)";
         };
 
         cmd_duration = {

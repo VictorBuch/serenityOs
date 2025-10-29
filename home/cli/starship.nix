@@ -23,7 +23,7 @@
       settings = {
         "$schema" = "https://starship.rs/config-schema.json";
 
-        format = ''[](red)$os[](bg:peach fg:red)$directory[](bg:yellow fg:peach)$git_branch$git_status[](fg:yellow bg:green)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:green)$cmd_duration$line_break$character'';
+        format = ''[](red)$os[](bg:peach fg:red)$directory[](bg:yellow fg:peach)$git_branch$git_status[](fg:yellow bg:green)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:green)$cmd_duration$line_break$character'';
 
         palette = "catppuccin_mocha";
 

@@ -52,9 +52,12 @@ in
         // Output configuration (monitor setup)
         // Adjust as needed for your specific setup
         // Commented out to allow auto-detection (especially important for VMs)
-        // output "DP-1" {
-        //     mode "2560x1440@144"
-        // }
+        output "DP-1" {
+            mode "2560x1440@144"
+        }
+        output "Virtual-1" {
+            mode "1920x1080@60"
+        } 
 
         // Layout configuration
         layout {
@@ -78,21 +81,19 @@ in
             }
 
             preset-column-widths {
-                proportion 0.33333
                 proportion 0.5
-                proportion 0.93333
+                proportion 0.9
             }
 
-            default-column-width { proportion 0.5; }
+            default-column-width { proportion 0.9; }
 
-          center-focused-column "on-overflow"
-          always-center-single-column
+            center-focused-column "on-overflow"
+            always-center-single-column
 
             background-color "transparent"
         }
 
         workspace "scratchpad"
-        workspace "main"
         workspace "gaming"
         workspace "chat"
 

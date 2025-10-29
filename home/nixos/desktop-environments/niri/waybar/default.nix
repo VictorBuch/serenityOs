@@ -77,10 +77,6 @@ in
             "mpris"
             "custom/left_div#6"
             "group/pulseaudio"
-            "custom/left_div#7"
-            "backlight"
-            "custom/left_div#8"
-            "battery"
             "custom/left_inv#2"
             "custom/power_menu"
           ];
@@ -89,7 +85,7 @@ in
           layer = "top";
           height = 0;
           width = 0;
-          margin = 0;
+          margin = "0";
           spacing = 0;
           mode = "dock";
           reload_style_on_change = true;
@@ -128,7 +124,7 @@ in
             tooltip = false;
           };
 
-          # Dividers (Powerline triangles)
+          # Dividers
           "custom/left_div#1" = {
             format = "";
             tooltip = false;
@@ -246,7 +242,7 @@ in
 
           # Distro Icon
           "custom/distro" = {
-            format = "";
+            format = " ";
             tooltip = false;
           };
 

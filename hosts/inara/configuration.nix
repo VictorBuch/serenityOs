@@ -55,6 +55,8 @@ in
     lazygit
     claude-code
     mcp-nixos
+    lolcat
+    figlet
 
     # TO BE MOVED LATER
     tailscale

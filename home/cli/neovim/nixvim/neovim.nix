@@ -1,3 +1,4 @@
+# DEPRECADED use NVF instead
 {
   config,
   options,

@@ -2,9 +2,12 @@
   config,
   pkgs,
   inputs,
+  isLinux,
   ...
 }:
-
+let
+  username = "shepherd";
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -47,8 +50,79 @@
   # Configure console keymap
   console.keyMap = "dk-latin1";
 
+  # Enable Home Manager
+  home-manager = {
+    # also pass inputs to home-manager modules
+    backupFileExtension = "hm-backup";
+    extraSpecialArgs = {
+      inherit username inputs isLinux;
+    };
+    users = {
+      "${username}" = import ../../home/default.nix;
+    };
+  };
+
   # Enable zsh shell
   programs.zsh.enable = true;
+
+  ############### Apps ########################
+
+  apps = {
+    audio = {
+      enable = false;
+    };
+
+    browsers = {
+      enable = true;
+      floorp.enable = false; # Disable specific browser
+    };
+
+    communication = {
+      enable = false;
+    };
+
+    development = {
+      enable = false;
+      editors.neovim.enable = true;
+      terminals.ghostty.enable = true;
+      tools.enable = true;
+    };
+
+    emacs = {
+      enable = false;
+    };
+
+    emulation = {
+      enable = false;
+    };
+
+    gaming = {
+      enable = false;
+    };
+
+    media = {
+      enable = false;
+    };
+
+    productivity = {
+      enable = false;
+    };
+
+    utilities = {
+      enable = false;
+    };
+
+  };
+  #############################################
+
+  ############### Desktop/ WM ########################
+  desktop-environments = {
+    gnome.enable = false;
+    hyprland.enable = false;
+    kde.enable = false;
+    niri.enable = true;
+  };
+  ###################################################
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.nixos = {

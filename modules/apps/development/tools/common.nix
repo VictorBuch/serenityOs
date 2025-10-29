@@ -23,6 +23,8 @@ mkApp {
     pkgs.claude-code
     pkgs.mcp-nixos
     pkgs.yazi
+    pkgs.figlet
+    pkgs.lolcat
   ];
   description = "Common development tools";
 } args

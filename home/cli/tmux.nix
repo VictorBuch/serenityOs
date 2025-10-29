@@ -49,7 +49,7 @@
 
         			# Theme
         			set -g status-style "bg=default,fg=white" # transparent status bar
-        			set -g status-position top 
+        			set -g status-position top
         			set -g pane-active-border-style "fg=white,bg=default"
         			set -g pane-border-style "fg=brightblack,bg=default"
 
@@ -59,7 +59,23 @@
         			# set -ga status-left "#[fg=white,nobold]#(gitmux -timeout 300ms -cfg $HOME/.config/tmux/gitmux.conf) "
 
         			set -g status-right-length 70
-        			set -g status-right "#(fortune -n 50 -s)"
+        			set -g status-right "#(${pkgs.writeShellScript "cached-fortune" ''
+        			  CACHE_FILE="$HOME/.cache/tmux-fortune"
+        			  CACHE_DURATION=1800  # 30 minutes in seconds
+
+        			  mkdir -p "$HOME/.cache"
+
+        			  if [ -f "$CACHE_FILE" ]; then
+        			    CACHE_AGE=$(($(date +%s) - $(date -r "$CACHE_FILE" +%s)))
+        			    if [ $CACHE_AGE -lt $CACHE_DURATION ]; then
+        			      cat "$CACHE_FILE"
+        			      exit 0
+        			    fi
+        			  fi
+
+        			  ${pkgs.fortune}/bin/fortune -n 50 -s > "$CACHE_FILE"
+        			  cat "$CACHE_FILE"
+        			''})"
 
 
         			# [0 - command]

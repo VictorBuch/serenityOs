@@ -54,6 +54,9 @@ in
           max_results = 200;
         };
       };
+      extraConfig = ''
+        figlet -f slant -tk ${config.home.username} | lolcat -p 3
+      '';
     };
 
     programs.zoxide = {

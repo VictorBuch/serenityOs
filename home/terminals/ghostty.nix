@@ -13,6 +13,8 @@ let
     window-decoration = false;
     theme = "Catppuccin Mocha";
     confirm-close-surface = false;
+    font-family = "JetBrainsMono Nerd Font";
+    font-size = 14;
   };
 in
 {

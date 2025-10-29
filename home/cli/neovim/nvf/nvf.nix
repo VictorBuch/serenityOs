@@ -444,6 +444,46 @@
             desc = "Switch buffer";
             silent = true;
           };
+          "<leader>bo" = {
+            action = ":BufferLineCloseOthers<CR>";
+            desc = "Delete other buffers";
+            silent = true;
+          };
+          "<leader>bD" = {
+            action = ":bdelete | close<CR>";
+            desc = "Delete buffer and window";
+            silent = true;
+          };
+          "<leader>bl" = {
+            action = ":BufferLineCloseLeft<CR>";
+            desc = "Delete buffers to the left";
+            silent = true;
+          };
+          "<leader>br" = {
+            action = ":BufferLineCloseRight<CR>";
+            desc = "Delete buffers to the right";
+            silent = true;
+          };
+          "<leader>bp" = lib.mkForce {
+            action = ":BufferLineTogglePin<CR>";
+            desc = "Toggle pin";
+            silent = true;
+          };
+          "<leader>bP" = {
+            action = ":BufferLineGroupClose ungrouped<CR>";
+            desc = "Delete non-pinned buffers";
+            silent = true;
+          };
+          "[b" = {
+            action = ":BufferLineCyclePrev<CR>";
+            desc = "Previous buffer";
+            silent = true;
+          };
+          "]b" = {
+            action = ":BufferLineCycleNext<CR>";
+            desc = "Next buffer";
+            silent = true;
+          };
           "<leader><space>" = {
             action = ":Telescope find_files<CR>";
             desc = "Find files";
@@ -530,39 +570,132 @@
             desc = "Clear highlight";
             silent = true;
           };
-          "<leader>Fc" = {
+          # LSP keybindings
+          "gd" = {
+            action = ":lua vim.lsp.buf.definition()<CR>";
+            desc = "Goto definition";
+            silent = true;
+          };
+          "gr" = {
+            action = ":lua vim.lsp.buf.references()<CR>";
+            desc = "Goto references";
+            silent = true;
+          };
+          "gI" = {
+            action = ":lua vim.lsp.buf.implementation()<CR>";
+            desc = "Goto implementation";
+            silent = true;
+          };
+          "gy" = {
+            action = ":lua vim.lsp.buf.type_definition()<CR>";
+            desc = "Goto type definition";
+            silent = true;
+          };
+          "gD" = {
+            action = ":lua vim.lsp.buf.declaration()<CR>";
+            desc = "Goto declaration";
+            silent = true;
+          };
+          "K" = {
+            action = ":lua vim.lsp.buf.hover()<CR>";
+            desc = "Hover";
+            silent = true;
+          };
+          "gK" = {
+            action = ":lua vim.lsp.buf.signature_help()<CR>";
+            desc = "Signature help";
+            silent = true;
+          };
+          "<leader>ca" = {
+            action = ":lua vim.lsp.buf.code_action()<CR>";
+            desc = "Code action";
+            silent = true;
+          };
+          "<leader>cr" = {
+            action = ":lua vim.lsp.buf.rename()<CR>";
+            desc = "Rename";
+            silent = true;
+          };
+          "<leader>cl" = {
+            action = ":LspInfo<CR>";
+            desc = "LSP info";
+            silent = true;
+          };
+          "<leader>cd" = {
+            action = ":lua vim.diagnostic.open_float()<CR>";
+            desc = "Line diagnostics";
+            silent = true;
+          };
+          "<leader>cD" = {
+            action = ":lua vim.diagnostic.setloclist()<CR>";
+            desc = "Document diagnostics";
+            silent = true;
+          };
+          # Flutter basic commands
+          "<leader>Ft" = {
             action = ":Telescope flutter commands<CR>";
-            desc = "Flutter commands";
+            desc = "Flutter: Telescope commands";
             silent = true;
           };
           "<leader>Fr" = {
             action = ":FlutterRun<CR>";
-            desc = "Flutter run";
+            desc = "Flutter: Run";
             silent = true;
           };
           "<leader>Fd" = {
             action = ":FlutterDevices<CR>";
-            desc = "Flutter devices";
+            desc = "Flutter: Devices";
             silent = true;
           };
           "<leader>Fe" = {
             action = ":FlutterEmulators<CR>";
-            desc = "Flutter emulators";
+            desc = "Flutter: Emulators";
             silent = true;
           };
           "<leader>FR" = {
             action = ":FlutterReload<CR>";
-            desc = "Flutter reload";
+            desc = "Flutter: Hot reload";
             silent = true;
           };
           "<leader>Fs" = {
             action = ":FlutterRestart<CR>";
-            desc = "Flutter restart";
+            desc = "Flutter: Hot restart";
             silent = true;
           };
           "<leader>Fq" = {
             action = ":FlutterQuit<CR>";
-            desc = "Flutter quit";
+            desc = "Flutter: Quit";
+            silent = true;
+          };
+          "<leader>Fo" = {
+            action = ":FlutterOutlineToggle<CR>";
+            desc = "Flutter: Toggle outline";
+            silent = true;
+          };
+          # Flutter widget refactoring keybindings (inspired by VS Code Flutter extension)
+          "<leader>Fww" = {
+            action = ":lua vim.lsp.buf.code_action({ filter = function(a) return a.title:match('Wrap with') end, apply = true })<CR>";
+            desc = "Flutter: Wrap with widget";
+            silent = true;
+          };
+          "<leader>Fwc" = {
+            action = ":lua vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Column' end, apply = true })<CR>";
+            desc = "Flutter: Wrap with Column";
+            silent = true;
+          };
+          "<leader>Fwr" = {
+            action = ":lua vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Row' end, apply = true })<CR>";
+            desc = "Flutter: Wrap with Row";
+            silent = true;
+          };
+          "<leader>Fwe" = {
+            action = ":lua vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Center' end, apply = true })<CR>";
+            desc = "Flutter: Wrap with Center";
+            silent = true;
+          };
+          "<leader>Fwx" = {
+            action = ":lua vim.lsp.buf.code_action({ filter = function(a) return a.title:match('Remove') end, apply = true })<CR>";
+            desc = "Flutter: Remove widget";
             silent = true;
           };
         };
@@ -588,7 +721,48 @@
             desc = "Flash jump";
             silent = true;
           };
+          # Code action keybindings in visual mode
+          "<leader>ca" = {
+            action = ":lua vim.lsp.buf.code_action()<CR>";
+            desc = "Code action";
+            silent = true;
+          };
+          "<leader>cf" = {
+            action = ":lua require('conform').format({ async = true, lsp_fallback = true })<CR>";
+            desc = "Format range";
+            silent = true;
+          };
           # Git keymaps in visual mode are provided by gitsigns module
+        };
+
+        maps.terminal = {
+          # Terminal navigation - exit terminal mode and navigate windows
+          "<C-h>" = {
+            action = "<C-\\><C-n><C-w>h";
+            desc = "Navigate left from terminal";
+            silent = true;
+          };
+          "<C-j>" = {
+            action = "<C-\\><C-n><C-w>j";
+            desc = "Navigate down from terminal";
+            silent = true;
+          };
+          "<C-k>" = {
+            action = "<C-\\><C-n><C-w>k";
+            desc = "Navigate up from terminal";
+            silent = true;
+          };
+          "<C-l>" = {
+            action = "<C-\\><C-n><C-w>l";
+            desc = "Navigate right from terminal";
+            silent = true;
+          };
+          # Quick escape from terminal mode
+          "<Esc><Esc>" = {
+            action = "<C-\\><C-n>";
+            desc = "Exit terminal mode";
+            silent = true;
+          };
         };
 
         luaConfigRC = {
@@ -617,6 +791,205 @@
                 vim.bo[event.buf].buflisted = false
                 vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
               end,
+            })
+          '';
+          flutter-hot-reload = ''
+            -- Auto hot reload Flutter on save
+            vim.api.nvim_create_autocmd("BufWritePost", {
+              pattern = "*.dart",
+              callback = function()
+                -- Check if Flutter is running
+                local flutter_running = vim.fn.system("pgrep -f 'flutter run'"):len() > 0
+                if flutter_running then
+                  vim.cmd("FlutterReload")
+                end
+              end,
+            })
+          '';
+          flutter-snippets = ''
+            -- Flutter snippets for luasnip
+            local ls = require("luasnip")
+            local s = ls.snippet
+            local t = ls.text_node
+            local i = ls.insert_node
+            local fmt = require("luasnip.extras.fmt").fmt
+
+            ls.add_snippets("dart", {
+              -- StatelessWidget
+              s("stless", fmt([[
+                class {} extends StatelessWidget {{
+                  const {}({{super.key}});
+
+                  @override
+                  Widget build(BuildContext context) {{
+                    return {};
+                  }}
+                }}
+              ]], { i(1, "WidgetName"), i(1), i(2, "Container()") })),
+
+              -- StatefulWidget
+              s("stful", fmt([[
+                class {} extends StatefulWidget {{
+                  const {}({{super.key}});
+
+                  @override
+                  State<{}> createState() => _{}State();
+                }}
+
+                class _{}State extends State<{}> {{
+                  @override
+                  Widget build(BuildContext context) {{
+                    return {};
+                  }}
+                }}
+              ]], {
+                i(1, "WidgetName"),
+                i(1),
+                i(1),
+                i(1),
+                i(1),
+                i(1),
+                i(2, "Container()")
+              })),
+
+              -- Container
+              s("container", fmt([[
+                Container(
+                  {}
+                )
+              ]], { i(1) })),
+
+              -- Column
+              s("column", fmt([[
+                Column(
+                  children: [
+                    {}
+                  ],
+                )
+              ]], { i(1) })),
+
+              -- Row
+              s("row", fmt([[
+                Row(
+                  children: [
+                    {}
+                  ],
+                )
+              ]], { i(1) })),
+
+              -- Center
+              s("center", fmt([[
+                Center(
+                  child: {},
+                )
+              ]], { i(1) })),
+
+              -- Padding
+              s("padding", fmt([[
+                Padding(
+                  padding: const EdgeInsets.all({}),
+                  child: {},
+                )
+              ]], { i(1, "8.0"), i(2) })),
+
+              -- Text
+              s("text", fmt([[
+                Text('{}')
+              ]], { i(1, "text") })),
+
+              -- Scaffold
+              s("scaffold", fmt([[
+                Scaffold(
+                  appBar: AppBar(
+                    title: const Text('{}'),
+                  ),
+                  body: {},
+                )
+              ]], { i(1, "Title"), i(2, "Container()") })),
+
+              -- ListView
+              s("listview", fmt([[
+                ListView(
+                  children: [
+                    {}
+                  ],
+                )
+              ]], { i(1) })),
+
+              -- ListView.builder
+              s("listviewbuilder", fmt([[
+                ListView.builder(
+                  itemCount: {},
+                  itemBuilder: (context, index) {{
+                    return {};
+                  }},
+                )
+              ]], { i(1, "10"), i(2, "ListTile()") })),
+
+              -- SizedBox
+              s("sizedbox", fmt([[
+                SizedBox(
+                  width: {},
+                  height: {},
+                  child: {},
+                )
+              ]], { i(1, "100"), i(2, "100"), i(3) })),
+
+              -- Expanded
+              s("expanded", fmt([[
+                Expanded(
+                  child: {},
+                )
+              ]], { i(1) })),
+
+              -- Stack
+              s("stack", fmt([[
+                Stack(
+                  children: [
+                    {}
+                  ],
+                )
+              ]], { i(1) })),
+
+              -- GestureDetector
+              s("gesture", fmt([[
+                GestureDetector(
+                  onTap: () {{
+                    {}
+                  }},
+                  child: {},
+                )
+              ]], { i(1), i(2) })),
+
+              -- ElevatedButton
+              s("elevatedbutton", fmt([[
+                ElevatedButton(
+                  onPressed: () {{
+                    {}
+                  }},
+                  child: const Text('{}'),
+                )
+              ]], { i(1), i(2, "Button") })),
+
+              -- TextButton
+              s("textbutton", fmt([[
+                TextButton(
+                  onPressed: () {{
+                    {}
+                  }},
+                  child: const Text('{}'),
+                )
+              ]], { i(1), i(2, "Button") })),
+
+              -- IconButton
+              s("iconbutton", fmt([[
+                IconButton(
+                  icon: const Icon(Icons.{}),
+                  onPressed: () {{
+                    {}
+                  }},
+                )
+              ]], { i(1, "add"), i(2) })),
             })
           '';
         };

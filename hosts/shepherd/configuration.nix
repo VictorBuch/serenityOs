@@ -146,10 +146,7 @@ in
   };
 
   # Enable graphics/OpenGL (required for Wayland compositors like niri)
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
-  };
+  hardware.graphics.enable = true;
 
   # Enable X server and video drivers (required even for Wayland)
   services.xserver = {

@@ -19,10 +19,6 @@ in
         source = ./scripts/volume.sh;
         executable = true;
       };
-      "waybar/scripts/backlight.sh" = {
-        source = ./scripts/backlight.sh;
-        executable = true;
-      };
       "waybar/scripts/bluetooth.sh" = {
         source = ./scripts/bluetooth.sh;
         executable = true;
@@ -46,42 +42,41 @@ in
           # Layout
           modules-left = [
             "group/user"
-            "custom/left_div#1"
+            "custom/left_div"
             "niri/workspaces"
-            "custom/right_div#1"
+            "custom/right_div"
             "niri/window"
           ];
           modules-center = [
-            "custom/left_div#2"
+            "custom/left_div"
             "temperature"
-            "custom/left_div#3"
+            "custom/left_div"
             "memory"
-            "custom/left_div#4"
+            "custom/left_div"
             "cpu"
-            "custom/left_inv#1"
-            "custom/left_div#5"
+            "custom/left_inv"
+            "custom/left_div"
             "custom/distro"
-            "custom/right_div#2"
-            "custom/right_inv#1"
+            "custom/right_div"
+            "custom/right_inv"
             "idle_inhibitor"
             "clock#time"
-            "custom/right_div#3"
+            "custom/right_div"
             "clock#date"
-            "custom/right_div#4"
+            "custom/right_div"
             "network"
             "bluetooth"
             "custom/system_update"
-            "custom/right_div#5"
+            "custom/right_div"
           ];
           modules-right = [
             "mpris"
-            "custom/left_div#6"
+            "custom/left_div"
             "group/pulseaudio"
-            "custom/left_div#7"
-            "backlight"
-            "custom/left_div#8"
+            "custom/left_div"
+            "custom/left_div"
             "battery"
-            "custom/left_inv#2"
+            "custom/left_inv"
             "custom/power_menu"
           ];
 
@@ -98,8 +93,8 @@ in
           "niri/workspaces" = {
             format = "{icon}";
             format-icons = {
-              active = "";
-              default = "";
+              active = "";
+              default = "";
             };
           };
 
@@ -128,72 +123,23 @@ in
             tooltip = false;
           };
 
-          # Dividers
-          "custom/left_div#1" = {
-            format = "";
+          # Dividers (Powerline triangles)
+          "custom/left_div" = {
+            format = "";
             tooltip = false;
           };
-          "custom/left_div#2" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#3" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#4" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#5" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#6" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#7" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_div#8" = {
-            format = "";
+          "custom/right_div" = {
+            format = "";
             tooltip = false;
           };
 
-          "custom/right_div#1" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/right_div#2" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/right_div#3" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/right_div#4" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/right_div#5" = {
-            format = "";
+          "custom/left_inv" = {
+            format = "";
             tooltip = false;
           };
 
-          "custom/left_inv#1" = {
-            format = "";
-            tooltip = false;
-          };
-          "custom/left_inv#2" = {
-            format = "";
-            tooltip = false;
-          };
-
-          "custom/right_inv#1" = {
-            format = "";
+          "custom/right_inv" = {
+            format = "";
             tooltip = false;
           };
 
@@ -204,7 +150,11 @@ in
             interval = 10;
             format-critical = "󰀦 {temperatureC}°C";
             format = "{icon} {temperatureC}°C";
-            format-icons = [ "󱃃" "󰔏" "󱃂" ];
+            format-icons = [
+              "󱃃"
+              "󰔏"
+              "󱃂"
+            ];
             min-length = 8;
             max-length = 8;
             tooltip-format = "Temp in Fahrenheit: {temperatureF}°F";
@@ -242,7 +192,7 @@ in
 
           # Distro Icon
           "custom/distro" = {
-            format = "󰣇";
+            format = "";
             tooltip = false;
           };
 
@@ -296,7 +246,12 @@ in
             format-wifi = "{icon}";
             format-disconnected = "󰤯";
             format-disabled = "󰤮";
-            format-icons = [ "󰤟" "󰤢" "󰤥" "󰤨" ];
+            format-icons = [
+              "󰤟"
+              "󰤢"
+              "󰤥"
+              "󰤨"
+            ];
             min-length = 2;
             max-length = 2;
             on-click = "ghostty -e ${scriptsDir}/network.sh";
@@ -358,7 +313,10 @@ in
           # PulseAudio Group
           "group/pulseaudio" = {
             orientation = "horizontal";
-            modules = [ "pulseaudio#output" "pulseaudio#input" ];
+            modules = [
+              "pulseaudio#output"
+              "pulseaudio#input"
+            ];
             drawer = {
               transition-left-to-right = false;
             };
@@ -368,7 +326,11 @@ in
             format = "{icon} {volume}%";
             format-muted = "{icon} {volume}%";
             format-icons = {
-              default = [ "󰕿" "󰖀" "󰕾" ];
+              default = [
+                "󰕿"
+                "󰖀"
+                "󰕾"
+              ];
               default-muted = "󰝟";
               headphone = "󰋋";
               headphone-muted = "󰟎";
@@ -395,17 +357,6 @@ in
             tooltip-format = "Input Device: {desc}";
           };
 
-          # Backlight
-          backlight = {
-            format = "{icon} {percent}%";
-            format-icons = [ "" "" "" "" "" "" "" "" "" ];
-            min-length = 7;
-            max-length = 7;
-            on-scroll-up = "${scriptsDir}/backlight.sh up";
-            on-scroll-down = "${scriptsDir}/backlight.sh down";
-            tooltip = false;
-          };
-
           # Battery
           battery = {
             states = {
@@ -414,7 +365,18 @@ in
             };
             format = "{icon} {capacity}%";
             format-time = "{H} hr {M} min";
-            format-icons = [ "󰂎" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+            format-icons = [
+              "󰂎"
+              "󰁻"
+              "󰁼"
+              "󰁽"
+              "󰁾"
+              "󰁿"
+              "󰂀"
+              "󰂁"
+              "󰂂"
+              "󰁹"
+            ];
             format-charging = "󰉁 {capacity}%";
             min-length = 7;
             max-length = 7;

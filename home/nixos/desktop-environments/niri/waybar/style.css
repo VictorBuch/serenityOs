@@ -41,8 +41,8 @@
 @define-color main-bg @crust;
 @define-color main-fg @text;
 @define-color hover-bg @base;
-@define-color hover-fg alpha(@main-fg, 0.75);
-@define-color outline shade(@main-bg, 0.5);
+@define-color hover-fg rgba(205, 214, 244, 0.75);
+@define-color outline #0a0a0f;
 
 /* Module Colors */
 @define-color workspaces @mantle;
@@ -66,26 +66,26 @@
    ================================================ */
 
 * {
-    font-family: "0xProto Nerd Font", "JetBrainsMono Nerd Font", monospace;
-    font-weight: bold;
-    font-size: 16px;
-    color: @main-fg;
+  font-family: "0xProto Nerd Font", "JetBrainsMono Nerd Font", monospace;
+  font-weight: bold;
+  font-size: 16px;
+  color: @main-fg;
 }
 
 #custom-user,
 #window label,
 #mpris,
 tooltip label {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 #workspaces button.active label,
 #custom-distro {
-    font-size: 23px;
+  font-size: 23px;
 }
 
 #custom-power_menu {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 /* Dividers */
@@ -93,7 +93,7 @@ tooltip label {
 #custom-left_inv,
 #custom-right_div,
 #custom-right_inv {
-    font-size: 23.1px;
+  font-size: 23.1px;
 }
 
 /* ================================================
@@ -101,12 +101,12 @@ tooltip label {
    ================================================ */
 
 #waybar {
-    background-color: @outline;
+  background-color: @outline;
 }
 
 #waybar > box {
-    margin: 4px;
-    background-color: @main-bg;
+  margin: 4px;
+  background-color: @main-bg;
 }
 
 /* ================================================
@@ -114,13 +114,13 @@ tooltip label {
    ================================================ */
 
 tooltip {
-    border: 2px solid @main-br;
-    border-radius: 10px;
-    background-color: @main-bg;
+  border: 2px solid @main-br;
+  border-radius: 10px;
+  background-color: @main-bg;
 }
 
 tooltip > box {
-    padding: 0 6px;
+  padding: 0 6px;
 }
 
 /* ================================================
@@ -129,38 +129,38 @@ tooltip > box {
 
 /* Username */
 #custom-user {
-    padding-right: 12px;
+  padding-right: 12px;
 }
 
 /* Workspaces */
-#custom-left_div.1,
-#custom-right_div.1 {
-    color: @workspaces;
+#custom-left_div,
+#custom-right_div {
+  color: @workspaces;
 }
 
 #workspaces {
-    padding: 0 1px;
-    background-color: @workspaces;
+  padding: 0 1px;
+  background-color: @workspaces;
 }
 
 #workspaces button {
-    border-radius: 16px;
-    min-width: 16px;
-    padding: 0 10px;
+  border-radius: 16px;
+  min-width: 16px;
+  padding: 0 10px;
 }
 
 #workspaces button:hover {
-    background-color: @hover-bg;
-    color: @hover-fg;
+  background-color: @hover-bg;
+  color: @hover-fg;
 }
 
 #workspaces button.active label {
-    color: @accent;
+  color: @accent;
 }
 
 /* Window Title */
 #window {
-    margin-left: 12px;
+  margin-left: 12px;
 }
 
 /* ================================================
@@ -168,90 +168,90 @@ tooltip > box {
    ================================================ */
 
 /* Temperature */
-#custom-left_div.2 {
-    color: @temperature;
+#custom-left_div {
+  color: @temperature;
 }
 
 #temperature {
-    background-color: @temperature;
+  background-color: @temperature;
 }
 
 /* Memory */
-#custom-left_div.3 {
-    background-color: @temperature;
-    color: @memory;
+#custom-left_div {
+  background-color: @temperature;
+  color: @memory;
 }
 
 #memory {
-    background-color: @memory;
+  background-color: @memory;
 }
 
 /* CPU */
-#custom-left_div.4 {
-    background-color: @memory;
-    color: @cpu;
+#custom-left_div {
+  background-color: @memory;
+  color: @cpu;
 }
 
 #cpu {
-    background-color: @cpu;
+  background-color: @cpu;
 }
 
-#custom-left_inv.1 {
-    color: @cpu;
+#custom-left_inv {
+  color: @cpu;
 }
 
 /* Distro Icon */
-#custom-left_div.5,
-#custom-right_div.2 {
-    color: @accent;
+#custom-left_div,
+#custom-right_div {
+  color: @accent;
 }
 
 #custom-distro {
-    padding: 0 10px 0 5px;
-    background-color: @accent;
-    color: @main-bg;
+  padding: 0 10px 0 5px;
+  background-color: @accent;
+  color: @main-bg;
 }
 
 /* Idle Inhibitor */
-#custom-right_inv.1 {
-    color: @time;
+#custom-right_inv {
+  color: @time;
 }
 
 #idle_inhibitor {
-    background-color: @time;
+  background-color: @time;
 }
 
 /* Time */
 #clock.time {
-    padding-right: 6px;
-    background-color: @time;
+  padding-right: 6px;
+  background-color: @time;
 }
 
-#custom-right_div.3 {
-    background-color: @date;
-    color: @time;
+#custom-right_div {
+  background-color: @date;
+  color: @time;
 }
 
 /* Date */
 #clock.date {
-    padding-left: 6px;
-    background-color: @date;
+  padding-left: 6px;
+  background-color: @date;
 }
 
-#custom-right_div.4 {
-    background-color: @tray;
-    color: @date;
+#custom-right_div {
+  background-color: @tray;
+  color: @date;
 }
 
 /* Network, Bluetooth, System Update */
 #network,
 #bluetooth,
 #custom-system_update {
-    background-color: @tray;
+  background-color: @tray;
 }
 
-#custom-right_div.5 {
-    color: @tray;
+#custom-right_div {
+  color: @tray;
 }
 
 /* ================================================
@@ -260,52 +260,52 @@ tooltip > box {
 
 /* Media Info (MPRIS) */
 #mpris {
-    padding: 0 12px;
+  padding: 0 12px;
 }
 
 /* Volume (PulseAudio) */
-#custom-left_div.6 {
-    color: @volume;
+#custom-left_div {
+  color: @volume;
 }
 
 #pulseaudio,
 #wireplumber {
-    background-color: @volume;
+  background-color: @volume;
 }
 
 /* Brightness */
-#custom-left_div.7 {
-    background-color: @volume;
-    color: @backlight;
+#custom-left_div {
+  background-color: @volume;
+  color: @backlight;
 }
 
 #backlight {
-    background-color: @backlight;
+  background-color: @backlight;
 }
 
 /* Battery */
-#custom-left_div.8 {
-    background-color: @backlight;
-    color: @battery;
+#custom-left_div {
+  background-color: @backlight;
+  color: @battery;
 }
 
 #battery {
-    background-color: @battery;
+  background-color: @battery;
 }
 
-#custom-left_inv.2 {
-    color: @battery;
+#custom-left_inv {
+  color: @battery;
 }
 
 /* Power Menu */
 #custom-power_menu {
-    border-radius: 16px;
-    padding: 0 19px 0 16px;
-    color: @accent;
+  border-radius: 16px;
+  padding: 0 19px 0 16px;
+  color: @accent;
 }
 
 #custom-power_menu:hover {
-    background-color: @hover-bg;
+  background-color: @hover-bg;
 }
 
 /* ================================================
@@ -322,7 +322,7 @@ tooltip > box {
 #mpris:hover,
 #pulseaudio:hover,
 #wireplumber:hover {
-    color: @hover-fg;
+  color: @hover-fg;
 }
 
 /* Disabled States */
@@ -331,14 +331,14 @@ tooltip > box {
 #pulseaudio.output.muted,
 #pulseaudio.input.source-muted,
 #wireplumber.muted {
-    color: @hover-fg;
+  color: @hover-fg;
 }
 
 /* Warning States */
 #memory.warning,
 #cpu.warning,
 #battery.warning {
-    color: @warning;
+  color: @warning;
 }
 
 /* Critical States */
@@ -346,10 +346,10 @@ tooltip > box {
 #memory.critical,
 #cpu.critical,
 #battery.critical {
-    color: @critical;
+  color: @critical;
 }
 
 /* Charging State */
 #battery.charging {
-    color: @charging;
+  color: @charging;
 }

@@ -1,18 +1,10 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
-{
-
-  options = {
-    home.cli.git.enable = lib.mkEnableOption "Enables git home manager";
-  };
-
-  config = lib.mkIf config.home.cli.git.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "git";
+  description = "Git version control";
+  homeConfig = { config, pkgs, lib, ... }: {
     # Delta package for enhanced diffs
     home.packages = with pkgs; [
       delta
@@ -134,4 +126,4 @@
       };
     };
   };
-}
+} args

@@ -1,10 +1,4 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
 let
   ghosttySettings = {
@@ -17,12 +11,12 @@ let
     font-size = 14;
   };
 in
-{
-  options = {
-    home.terminals.ghostty.enable = lib.mkEnableOption "Enables ghostty home manager";
-  };
 
-  config = lib.mkIf config.home.terminals.ghostty.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "ghostty";
+  description = "Ghostty terminal emulator";
+  homeConfig = { config, pkgs, lib, ... }: {
     programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
       enable = true;
       settings = ghosttySettings;
@@ -31,4 +25,4 @@ in
       text = lib.generators.toKeyValue { } ghosttySettings;
     };
   };
-}
+} args

@@ -1,18 +1,10 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
-{
-
-  options = {
-    home.cli.tmux.enable = lib.mkEnableOption "Enables tmux home manager";
-  };
-
-  config = lib.mkIf config.home.cli.tmux.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "tmux";
+  description = "Terminal multiplexer";
+  homeConfig = { config, pkgs, lib, ... }: {
 
     home.packages = with pkgs; [
       tmux
@@ -98,4 +90,4 @@
         		'';
     };
   };
-}
+} args

@@ -1,5 +1,6 @@
 {
   programs.nixvim.plugins.lint = {
+    enable = true;
     lintersByFt = {
       # JavaScript/TypeScript
       javascript = [ "eslint" ];
@@ -11,6 +12,14 @@
 
       # Go
       go = [ "golangcilint" ];
+    };
+    autoCmd = {
+      event = [ "BufWritePost" "TextChanged" ];
+      callback.__raw = ''
+        function()
+          require("lint").try_lint()
+        end
+      '';
     };
   };
 }

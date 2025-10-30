@@ -71,7 +71,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = true;
           };
           modules = [
@@ -86,7 +86,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = true;
           };
           modules = [
@@ -101,7 +101,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = true;
           };
           modules = [
@@ -114,7 +114,7 @@
           system = "x86_64-linux";
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = true;
           };
           modules = [
@@ -129,7 +129,7 @@
           system = "aarch64-linux";
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = true;
           };
           modules = [
@@ -148,7 +148,7 @@
           pkgs = darwinPkgs "aarch64-darwin"; # Use configured pkgs with allowBroken
           specialArgs = {
             inherit inputs system;
-            inherit (customLib) mkApp mkCategory;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
             isLinux = false;
           };
           modules = [

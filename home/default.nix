@@ -9,8 +9,7 @@
   imports = [
     ./home.nix
     ./cli
-    ./terminals/kitty.nix
-    ./terminals/ghostty.nix
+    ./terminals
   ]
   ++ lib.optionals isLinux [
     ./nixos
@@ -25,10 +24,7 @@
   };
 
   config = {
-    # Cross-platform applications
-    home.terminals = {
-      kitty.enable = lib.mkDefault true;
-      ghostty.enable = lib.mkDefault true;
-    };
+    home.cli.enable = lib.mkDefault true;
+    home.terminals.enable = lib.mkDefault true;
   };
 }

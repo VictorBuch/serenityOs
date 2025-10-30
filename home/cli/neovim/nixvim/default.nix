@@ -1,4 +1,3 @@
-# DEPRECADED use NVF instead
 {
   config,
   options,
@@ -14,6 +13,7 @@
     inputs.nixvim.homeModules.nixvim
     ./options.nix
     ./keymaps.nix
+    ./autocommands.nix
     # Plugin configurations
     ./plugins/alpha.nix
     ./plugins/bufferline.nix
@@ -21,35 +21,44 @@
     ./plugins/conform.nix
     ./plugins/emmet.nix
     ./plugins/flash.nix
+    ./plugins/flutter-tools.nix
     ./plugins/gitsigns.nix
     ./plugins/indent-blankline.nix
     ./plugins/lint.nix
     ./plugins/lsp.nix
     ./plugins/lualine.nix
     ./plugins/mini.nix
+    ./plugins/mini-bufremove.nix
     ./plugins/neotree.nix
     ./plugins/noice.nix
     ./plugins/nonels.nix
     ./plugins/notify.nix
     ./plugins/persistence.nix
+    ./plugins/snacks.nix
     ./plugins/telescope.nix
     ./plugins/todo-comments.nix
     ./plugins/toggleterm.nix
     ./plugins/treesitter.nix
     ./plugins/trouble.nix
     ./plugins/twilight.nix
+    ./plugins/vim-tmux-navigator.nix
     ./plugins/web-devicons.nix
+    ./plugins/yazi.nix
     ./plugins/zen-mode.nix
   ];
 
   options = {
-    home.cli.neovim.nixvim.enable = lib.mkEnableOption "Enables neovim home manager";
+    home.cli.neovim.nixvim.enable = lib.mkEnableOption "Enables nixvim-based neovim";
   };
 
   config = lib.mkIf config.home.cli.neovim.nixvim.enable {
     home.packages = with pkgs; [
       ripgrep
       fd
+      fzf
+      lazygit
+      nodePackages.prettier
+      nixfmt-rfc-style
     ];
     programs.nixvim = {
       enable = true;
@@ -87,17 +96,9 @@
       vimdiffAlias = true;
 
       plugins = {
-        tmux-navigator.enable = true;
         which-key.enable = true;
         lazygit.enable = true;
       };
-
-      extraPlugins = with pkgs.vimPlugins; [
-        flutter-tools-nvim
-        plenary-nvim
-        dressing-nvim
-        vim-tmux-navigator
-      ];
     };
   };
 }

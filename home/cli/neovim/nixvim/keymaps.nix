@@ -272,9 +272,460 @@
     {
       mode = "n";
       key = "<leader>bd";
-      action = "<cmd>bdelete<CR>";
+      action.__raw = "function() require('mini.bufremove').delete(0, false) end";
       options = {
         desc = "Delete Buffer";
+        silent = true;
+      };
+    }
+    # Additional buffer management from nvf
+    {
+      mode = "n";
+      key = "<leader>bo";
+      action = "<cmd>BufferLineCloseOthers<CR>";
+      options = {
+        desc = "Delete other buffers";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>bD";
+      action = "<cmd>bdelete | close<CR>";
+      options = {
+        desc = "Delete buffer and window";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>bl";
+      action = "<cmd>BufferLineCloseLeft<CR>";
+      options = {
+        desc = "Delete buffers to the left";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>br";
+      action = "<cmd>BufferLineCloseRight<CR>";
+      options = {
+        desc = "Delete buffers to the right";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>bp";
+      action = "<cmd>BufferLineTogglePin<CR>";
+      options = {
+        desc = "Toggle pin";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>bP";
+      action = "<cmd>BufferLineGroupClose ungrouped<CR>";
+      options = {
+        desc = "Delete non-pinned buffers";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "[b";
+      action = "<cmd>BufferLineCyclePrev<CR>";
+      options = {
+        desc = "Previous buffer";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "]b";
+      action = "<cmd>BufferLineCycleNext<CR>";
+      options = {
+        desc = "Next buffer";
+        silent = true;
+      };
+    }
+    # LSP keybindings from nvf
+    {
+      mode = "n";
+      key = "gr";
+      action.__raw = "function() vim.lsp.buf.references() end";
+      options = {
+        desc = "Goto references";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "gI";
+      action.__raw = "function() vim.lsp.buf.implementation() end";
+      options = {
+        desc = "Goto implementation";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "gy";
+      action.__raw = "function() vim.lsp.buf.type_definition() end";
+      options = {
+        desc = "Goto type definition";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "gD";
+      action.__raw = "function() vim.lsp.buf.declaration() end";
+      options = {
+        desc = "Goto declaration";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "gK";
+      action.__raw = "function() vim.lsp.buf.signature_help() end";
+      options = {
+        desc = "Signature help";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>ca";
+      action.__raw = "function() vim.lsp.buf.code_action() end";
+      options = {
+        desc = "Code action";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>cr";
+      action.__raw = "function() vim.lsp.buf.rename() end";
+      options = {
+        desc = "Rename";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>cl";
+      action = "<cmd>LspInfo<CR>";
+      options = {
+        desc = "LSP info";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>cd";
+      action.__raw = "function() vim.diagnostic.open_float() end";
+      options = {
+        desc = "Line diagnostics";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>cD";
+      action.__raw = "function() vim.diagnostic.setloclist() end";
+      options = {
+        desc = "Document diagnostics";
+        silent = true;
+      };
+    }
+    # Formatting from nvf
+    {
+      mode = "n";
+      key = "<leader>cf";
+      action.__raw = "function() require('conform').format({ timeout_ms = 500, lsp_fallback = true }) end";
+      options = {
+        desc = "Format";
+        silent = true;
+      };
+    }
+    {
+      mode = "v";
+      key = "<leader>cf";
+      action.__raw = "function() require('conform').format({ async = true, lsp_fallback = true }) end";
+      options = {
+        desc = "Format range";
+        silent = true;
+      };
+    }
+    # Flash keybindings from nvf
+    {
+      mode = "n";
+      key = "s";
+      action.__raw = "function() require('flash').jump() end";
+      options = {
+        desc = "Flash jump";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "S";
+      action.__raw = "function() require('flash').treesitter() end";
+      options = {
+        desc = "Flash treesitter";
+        silent = true;
+      };
+    }
+    {
+      mode = "v";
+      key = "s";
+      action.__raw = "function() require('flash').jump() end";
+      options = {
+        desc = "Flash jump";
+        silent = true;
+      };
+    }
+    # Trouble keybindings from nvf
+    {
+      mode = "n";
+      key = "<leader>xx";
+      action = "<cmd>Trouble diagnostics toggle<CR>";
+      options = {
+        desc = "Diagnostics";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>xX";
+      action = "<cmd>Trouble diagnostics toggle filter.buf=0<CR>";
+      options = {
+        desc = "Buffer diagnostics";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>xs";
+      action = "<cmd>Trouble symbols toggle focus=false<CR>";
+      options = {
+        desc = "Symbols";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>xl";
+      action = "<cmd>Trouble lsp toggle focus=false win.position=right<CR>";
+      options = {
+        desc = "LSP";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>xt";
+      action = "<cmd>TodoTrouble<CR>";
+      options = {
+        desc = "Todo Trouble";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>xT";
+      action = "<cmd>TodoTelescope<CR>";
+      options = {
+        desc = "Todo Telescope";
+        silent = true;
+      };
+    }
+    # Clear search highlight
+    {
+      mode = "n";
+      key = "<Esc>";
+      action = "<cmd>nohlsearch<CR>";
+      options = {
+        desc = "Clear highlight";
+        silent = true;
+      };
+    }
+    # Terminal mode mappings from nvf
+    {
+      mode = "t";
+      key = "<C-h>";
+      action = "<C-\\><C-n><C-w>h";
+      options = {
+        desc = "Navigate left from terminal";
+        silent = true;
+      };
+    }
+    {
+      mode = "t";
+      key = "<C-j>";
+      action = "<C-\\><C-n><C-w>j";
+      options = {
+        desc = "Navigate down from terminal";
+        silent = true;
+      };
+    }
+    {
+      mode = "t";
+      key = "<C-k>";
+      action = "<C-\\><C-n><C-w>k";
+      options = {
+        desc = "Navigate up from terminal";
+        silent = true;
+      };
+    }
+    {
+      mode = "t";
+      key = "<C-l>";
+      action = "<C-\\><C-n><C-w>l";
+      options = {
+        desc = "Navigate right from terminal";
+        silent = true;
+      };
+    }
+    {
+      mode = "t";
+      key = "<Esc><Esc>";
+      action = "<C-\\><C-n>";
+      options = {
+        desc = "Exit terminal mode";
+        silent = true;
+      };
+    }
+    # Flutter widget refactoring keybindings from nvf
+    {
+      mode = "n";
+      key = "<leader>Fww";
+      action.__raw = "function() vim.lsp.buf.code_action({ filter = function(a) return a.title:match('Wrap with') end, apply = true }) end";
+      options = {
+        desc = "Flutter: Wrap with widget";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>Fwc";
+      action.__raw = "function() vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Column' end, apply = true }) end";
+      options = {
+        desc = "Flutter: Wrap with Column";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>Fwr";
+      action.__raw = "function() vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Row' end, apply = true }) end";
+      options = {
+        desc = "Flutter: Wrap with Row";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>Fwe";
+      action.__raw = "function() vim.lsp.buf.code_action({ filter = function(a) return a.title == 'Wrap with Center' end, apply = true }) end";
+      options = {
+        desc = "Flutter: Wrap with Center";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>Fwx";
+      action.__raw = "function() vim.lsp.buf.code_action({ filter = function(a) return a.title:match('Remove') end, apply = true }) end";
+      options = {
+        desc = "Flutter: Remove widget";
+        silent = true;
+      };
+    }
+    # LazyVim-style diagnostic navigation
+    {
+      mode = "n";
+      key = "]d";
+      action.__raw = "function() vim.diagnostic.goto_next() end";
+      options = {
+        desc = "Next diagnostic";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "[d";
+      action.__raw = "function() vim.diagnostic.goto_prev() end";
+      options = {
+        desc = "Previous diagnostic";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "]e";
+      action.__raw = "function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end";
+      options = {
+        desc = "Next error";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "[e";
+      action.__raw = "function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end";
+      options = {
+        desc = "Previous error";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "]w";
+      action.__raw = "function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.WARN }) end";
+      options = {
+        desc = "Next warning";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "[w";
+      action.__raw = "function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN }) end";
+      options = {
+        desc = "Previous warning";
+        silent = true;
+      };
+    }
+    # Additional LSP keybindings
+    {
+      mode = "i";
+      key = "<C-k>";
+      action.__raw = "function() vim.lsp.buf.signature_help() end";
+      options = {
+        desc = "Signature help";
+        silent = true;
+      };
+    }
+    {
+      mode = "v";
+      key = "<leader>ca";
+      action.__raw = "function() vim.lsp.buf.code_action() end";
+      options = {
+        desc = "Code action";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>cR";
+      action.__raw = "function() vim.lsp.buf.rename() end";
+      options = {
+        desc = "Rename file";
         silent = true;
       };
     }

@@ -1,19 +1,10 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
-{
-
-  options = {
-    home.cli.sesh.enable = lib.mkEnableOption "Enables sesh session manager";
-  };
-
-  config = lib.mkIf config.home.cli.sesh.enable {
-
+mkHomeModule {
+  _file = toString ./.;
+  name = "sesh";
+  description = "Session manager for tmux";
+  homeConfig = { config, pkgs, lib, ... }: {
     programs.sesh = {
       enable = true;
       enableTmuxIntegration = true;
@@ -21,4 +12,4 @@
       tmuxKey = "s";
     };
   };
-}
+} args

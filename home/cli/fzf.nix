@@ -1,18 +1,10 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
-{
-
-  options = {
-    home.cli.fzf.enable = lib.mkEnableOption "Enables fzf home manager";
-  };
-
-  config = lib.mkIf config.home.cli.fzf.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "fzf";
+  description = "Fuzzy finder";
+  homeConfig = { config, pkgs, lib, ... }: {
     home.packages = with pkgs; [
       fzf
     ];
@@ -22,4 +14,4 @@
       tmux.enableShellIntegration = true;
     };
   };
-}
+} args

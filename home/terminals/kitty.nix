@@ -1,17 +1,10 @@
-{
-  config,
-  options,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
-{
-  options = {
-    home.terminals.kitty.enable = lib.mkEnableOption "Enables kitty home manager";
-  };
-
-  config = lib.mkIf config.home.terminals.kitty.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "kitty";
+  description = "Kitty terminal emulator";
+  homeConfig = { config, pkgs, lib, ... }: {
     programs.kitty = {
       enable = true;
       settings = {
@@ -28,4 +21,4 @@
       };
     };
   };
-}
+} args

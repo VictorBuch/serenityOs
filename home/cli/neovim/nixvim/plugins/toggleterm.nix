@@ -4,7 +4,6 @@
       enable = true;
       settings = {
         size = 15;
-        open_mapping = "[[<c-\\>]]";
         hide_numbers = true;
         shade_terminals = true;
         start_in_insert = true;
@@ -14,7 +13,7 @@
         persist_mode = true;
         direction = "horizontal";
         close_on_exit = true;
-        shell = "vim.o.shell";
+        shell.__raw = "vim.o.shell";
         auto_scroll = true;
         float_opts = {
           border = "curved";
@@ -46,9 +45,6 @@
           vim.cmd("startinsert!")
           vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
         end,
-        on_close = function(term)
-          vim.cmd("startinsert!")
-        end,
       })
 
       -- Bottom terminal (using count 1)
@@ -56,6 +52,7 @@
         direction = "horizontal",
         count = 1,
         hidden = true,
+        size = 15,
         on_open = function(term)
           vim.cmd("startinsert!")
         end,
@@ -75,7 +72,7 @@
       {
         mode = "n";
         key = "<leader>gg";
-        action = "<cmd>lua _lazygit_toggle()<CR>";
+        action.__raw = "function() _lazygit_toggle() end";
         options = {
           desc = "Lazygit";
           silent = true;
@@ -85,11 +82,29 @@
       {
         mode = "n";
         key = "<leader>ft";
-        action = "<cmd>lua _bottom_terminal_toggle()<CR>";
+        action.__raw = "function() _bottom_terminal_toggle() end";
         options = {
           desc = "Terminal (bottom)";
           silent = true;
           noremap = true;
+        };
+      }
+      {
+        mode = "n";
+        key = "<C-\\>";
+        action = "<cmd>ToggleTerm<CR>";
+        options = {
+          desc = "Toggle terminal";
+          silent = true;
+        };
+      }
+      {
+        mode = "t";
+        key = "<C-\\>";
+        action = "<cmd>ToggleTerm<CR>";
+        options = {
+          desc = "Toggle terminal";
+          silent = true;
         };
       }
     ];

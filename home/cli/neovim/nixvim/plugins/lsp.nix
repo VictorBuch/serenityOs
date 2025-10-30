@@ -3,9 +3,6 @@
     enable = true;
     keymaps.lspBuf = {
       "gd" = "definition";
-      "gD" = "references";
-      "gt" = "type_definition";
-      "gi" = "implementation";
       "K" = "hover";
     };
     servers = {
@@ -19,9 +16,17 @@
       nixd.enable = true;
       gopls.enable = true;
 
+      # Dart/Flutter
+      dartls = {
+        enable = true;
+      };
+
       # Frontend language servers
       ts_ls.enable = true;
       svelte.enable = true;
+      vue_ls = {
+        enable = true;
+      };
       eslint = {
         enable = true;
         extraOptions = {

@@ -4,6 +4,17 @@
     settings = {
       close_if_last_window = true;
       enable_refresh_on_write = true;
+      window = {
+        mappings = {
+          h = "close_node";
+          l = "open";
+        };
+      };
+      filesystem = {
+        filtered_items = {
+          hide_gitignored = false;
+        };
+      };
     };
   };
 }

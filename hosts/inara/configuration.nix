@@ -3,6 +3,8 @@
   pkgs,
   inputs,
   isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
@@ -15,11 +17,36 @@ in
     useUserPackages = true; # Install packages to user profile
     backupFileExtension = "hm-backup";
     extraSpecialArgs = {
-      inherit username inputs isLinux;
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
     };
     users = {
       "${username}" = import ../../home/default.nix;
     };
+
+    sharedModules = [
+      {
+        home = {
+          cli = {
+            enable = true;
+            zsh.enable = false;
+            neovim = {
+              nixvim.enable = true;
+              nvf.enable = false;
+            };
+          };
+          terminals = {
+            enable = true;
+            kitty.enable = false;
+          };
+        };
+      }
+    ];
   };
 
   # User configuration

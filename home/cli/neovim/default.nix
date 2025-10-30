@@ -8,5 +8,9 @@ args@{
 
 mkHomeCategory {
   _file = toString ./.;
-  name = "cli";
+  name = "neovim";
+  enableByDefault = {
+    nixvim = false;
+    nvf = false;
+  };
 } args

@@ -3,6 +3,8 @@
   pkgs,
   inputs,
   isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
@@ -33,14 +35,40 @@ in
 
   # Enable Home Manager
   home-manager = {
-    # also pass inputs to home-manager modules
     backupFileExtension = "hm-backup";
     extraSpecialArgs = {
-      inherit username inputs isLinux;
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
     };
     users = {
       "${username}" = import ../../home/default.nix;
     };
+
+    # Per-host Home Manager configuration
+    sharedModules = [
+      {
+        home = {
+          cli = {
+            enable = true;
+            zsh.enable = false;
+            neovim = {
+              enable = true;
+              nixvim.enable = true;
+              nvf.enable = false;
+            };
+          };
+          terminals = {
+            enable = true;
+            kitty.enable = false;
+          };
+        };
+      }
+    ];
   };
 
   # better memory management

@@ -1,9 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, ... }:
 
 let
   aliases = {
@@ -17,12 +12,11 @@ let
   };
 in
 
-{
-  options = {
-    home.cli.zsh.enable = lib.mkEnableOption "Enables zsh home manager";
-  };
-
-  config = lib.mkIf config.home.cli.zsh.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "zsh";
+  description = "Z shell";
+  homeConfig = { config, pkgs, lib, ... }: {
     home.packages = with pkgs; [
       zsh
     ];
@@ -43,4 +37,4 @@ in
       nix-direnv.enable = true;
     };
   };
-}
+} args

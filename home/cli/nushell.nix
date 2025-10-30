@@ -1,10 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  isLinux,
-  ...
-}:
+args@{ config, pkgs, lib, mkHomeModule, isLinux, ... }:
 
 let
   aliases = {
@@ -17,12 +11,11 @@ let
   };
 in
 
-{
-  options = {
-    home.cli.nushell.enable = lib.mkEnableOption "Enables nushell home manager";
-  };
-
-  config = lib.mkIf config.home.cli.nushell.enable {
+mkHomeModule {
+  _file = toString ./.;
+  name = "nushell";
+  description = "Nushell modern shell";
+  homeConfig = { config, pkgs, lib, isLinux, ... }: {
     home.packages = with pkgs; [
       nushell
     ];
@@ -71,4 +64,4 @@ in
       nix-direnv.enable = true;
     };
   };
-}
+} args

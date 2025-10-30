@@ -1,16 +1,11 @@
-{
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
-{
-  options.adguard.enable = lib.mkEnableOption "Enables AdGuard Home DNS filtering service with Unbound";
-
-  config = lib.mkIf config.adguard.enable {
-
+mkApp {
+  _file = toString ./.;
+  name = "adguard";
+  description = "AdGuard Home DNS filtering service with Unbound";
+  packages = pkgs: [];  # No packages to install
+  extraConfig = {
     # Configure Unbound as the recursive DNS resolver
     services.unbound = {
       enable = true;
@@ -114,4 +109,4 @@
       wants = [ "unbound.service" ];
     };
   };
-}
+} args

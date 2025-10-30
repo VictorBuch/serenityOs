@@ -1,27 +1,10 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
-with lib;
+mkApp {
+  _file = toString ./.;
+  name = "it-tools";
+  description = "IT Tools - collection of handy online tools for developers";
+  packages = pkgs: [ pkgs.it-tools ];  # Make package available for Caddy
 
-let
-  cfg = config.it-tools;
-in
-{
-
-  options.it-tools = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Whether to enable the it-tools service.";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
-    # Add it-tools package to environment for Caddy to access
-    environment.systemPackages = [ pkgs.it-tools ];
-  };
-}
+  extraConfig = {};
+} args

@@ -1,27 +1,12 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
-with lib;
+mkApp {
+  _file = toString ./.;
+  name = "music-assistant";
+  description = "Music Assistant - open source music server";
+  packages = pkgs: [];  # No packages for services
 
-let
-  cfg = config.music-assistant;
-in
-{
-
-  options.music-assistant = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Whether to enable the music assistant service.";
-    };
-  };
-
-  config = mkIf cfg.enable {
-
+  extraConfig = {
     services.music-assistant = {
       enable = true;
       providers = [
@@ -43,6 +28,5 @@ in
       8097
       8095
     ];
-
   };
-}
+} args

@@ -1,9 +1,5 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
+
 let
   cfg = config.caddy;
   hl = config.homelab;
@@ -246,13 +242,14 @@ let
     '';
   };
 in
-{
-  options.caddy = {
-    enable = lib.mkEnableOption "Enables Caddy reverse proxy";
-  };
 
-  config = lib.mkIf cfg.enable {
+mkApp {
+  _file = toString ./.;
+  name = "caddy";
+  description = "Caddy reverse proxy";
+  packages = pkgs: [];  # No packages for services
 
+  extraConfig = {
     sops.templates."cf-cert.pem" = {
       content = config.sops.placeholder."cloudflare/ssl/origin_certificate";
       owner = config.services.caddy.user;
@@ -286,4 +283,4 @@ in
       virtualHosts = (lib.mapAttrs' mkHost services);
     };
   };
-}
+} args

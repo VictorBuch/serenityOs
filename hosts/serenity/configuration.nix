@@ -294,57 +294,89 @@ in
 
   programs.neovim.defaultEditor = true;
 
-  # Networking and Auth
-  tailscale = {
-    enable = true;
-    advertiseExitNode = true;
-    useRoutingFeatures = "both"; # Act as both client and server
-    enableSsh = true; # Allow SSH via Tailscale
-    extraUpFlags = [
-      "--advertise-routes=192.168.0.0/24" # Share your local network
-    ];
+  # Homelab services configuration using new namespaced options
+  apps.homelab = {
+    # Services
+    services = {
+      # Networking and Auth
+      tailscale = {
+        enable = true;
+        advertiseExitNode = true;
+        useRoutingFeatures = "both"; # Act as both client and server
+        enableSsh = true; # Allow SSH via Tailscale
+        extraUpFlags = [
+          "--advertise-routes=192.168.0.0/24" # Share your local network
+        ];
+      };
+      cloudflare-tunnels.enable = true;
+      caddy.enable = true;
+      nginx-proxy.enable = false;  # Not yet refactored
+      authelia.enable = false;
+      adguard.enable = true;
+
+      # Smart home
+      hyperhdr.enable = true;
+      music-assistant.enable = true;
+
+      # Monitor and Dashboards
+      # TODO: dashboard needs to be split into homarr.nix and glance.nix
+      # dashboard = {
+      #   homarr.enable = false;
+      #   glance.enable = true;
+      # };
+
+      # Media (services not yet refactored)
+      # streaming.enable = true;
+      # immich.enable = true;
+      filebrowser.enable = true;
+      # nextcloud.enable = true;
+
+      # Utils
+      it-tools.enable = true;
+
+      # Other (services not yet refactored)
+      # mealie.enable = true;
+
+      # Development (not yet refactored)
+      # gitea.enable = true;
+    };
+
+    # OCI Containers
+    oci-containers = {
+      # Auth
+      tinyauth = {
+        enable = true;
+        port = 3002;
+      };
+      pocket-id.enable = true;
+
+      # Monitor
+      uptime-kuma.enable = true;
+      wallos.enable = true;
+
+      # Media
+      deluge-vpn = {
+        enable = true;
+        mam-dynamic-seedbox.enable = true;  # Nested option
+      };
+
+      # Other
+      crafty.enable = true;
+    };
   };
-  cloudflare-tunnel.enable = true;
-  caddy.enable = true;
+
+  # Services not yet refactored (keep old option structure temporarily)
   nginx-reverse-proxy.enable = false;
-  tinyauth = {
-    enable = true;
-    port = 3002;
-  };
-  authelia.enable = false;
-  adguard.enable = true;
-  pocket-id.enable = true;
-
-  # Smart home
-  hyperhdr.enable = true;
-  music-assistant.enable = true;
-
-  # Monitor and Dashboards
   dashboard = {
     homarr.enable = false;
     glance.enable = true;
   };
-  uptime-kuma.enable = true;
-  wallos.enable = true;
-
-  # Media
   streaming.enable = true;
   immich.enable = true;
-  deluge-vpn.enable = true;
-  filebrowser.enable = true;
   nextcloud.enable = true;
-
-  # Utils
-  mam-dynamic-seedbox.enable = true;
-  it-tools.enable = true;
-
-  # Other
-  crafty.enable = true;
   mealie.enable = true;
-  lab.enable = false;
-
-  # Development
   gitea.enable = true;
+  lab.enable = false;
 
   system.stateVersion = "24.05"; # Did you read the comment?
 

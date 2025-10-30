@@ -1,20 +1,17 @@
-{
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
 let
   user = config.user;
   uid = toString config.user.uid;
 in
 
-{
-  options.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
+mkApp {
+  _file = toString ./.;
+  name = "wallos";
+  description = "Wallos subscription tracker";
+  packages = pkgs: [];  # No packages for services
 
-  config = lib.mkIf config.wallos.enable {
+  extraConfig = {
     networking.firewall.allowedTCPPorts = [ 8282 ];
 
     systemd.tmpfiles.rules = [
@@ -36,4 +33,4 @@ in
       autoStart = true;
     };
   };
-}
+} args

@@ -1,10 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  options,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
 let
   storage = config.homelab.mediaDir;
@@ -12,13 +6,13 @@ let
   uid = toString config.user.uid;
 in
 
-{
+mkApp {
+  _file = toString ./.;
+  name = "crafty";
+  description = "Crafty minecraft server controller";
+  packages = pkgs: [];  # No packages for services
 
-  options = {
-    crafty.enable = lib.mkEnableOption "Enables the crafty minecraft server controller";
-  };
-
-  config = lib.mkIf config.crafty.enable {
+  extraConfig = {
     networking.firewall.allowedTCPPorts = [
       8443
       8123
@@ -60,4 +54,4 @@ in
       ];
     };
   };
-}
+} args

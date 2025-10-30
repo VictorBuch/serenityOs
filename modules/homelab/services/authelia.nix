@@ -1,22 +1,17 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
 let
   hl = config.homelab;
   domain = hl.domain;
 in
 
-{
-  options = {
-    authelia.enable = lib.mkEnableOption "Enables Authelia SSO authentication";
-  };
+mkApp {
+  _file = toString ./.;
+  name = "authelia";
+  description = "Authelia SSO authentication";
+  packages = pkgs: [];  # No packages for services
 
-  config = lib.mkIf config.authelia.enable {
-
+  extraConfig = {
     # SOPS template for users database with admin password
     sops.templates."authelia-users.yml" = {
       content = ''
@@ -134,6 +129,5 @@ in
         };
       };
     };
-
   };
-}
+} args

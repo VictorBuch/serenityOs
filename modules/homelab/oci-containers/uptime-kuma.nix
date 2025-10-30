@@ -1,10 +1,4 @@
-{
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
 let
   storage = config.homelab.storage;
@@ -12,10 +6,13 @@ let
   uid = toString config.user.uid;
 in
 
-{
-  options.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
+mkApp {
+  _file = toString ./.;
+  name = "uptime-kuma";
+  description = "Uptime Kuma monitoring service";
+  packages = pkgs: [];  # No packages for services
 
-  config = lib.mkIf config.uptime-kuma.enable {
+  extraConfig = {
     networking.firewall.allowedTCPPorts = [ 3001 ];
 
     systemd.tmpfiles.rules = [
@@ -31,4 +28,4 @@ in
       autoStart = true;
     };
   };
-}
+} args

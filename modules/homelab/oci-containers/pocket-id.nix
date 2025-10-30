@@ -1,21 +1,11 @@
-# modules/homelab/oci-containers/pocket-id.nix
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+args@{ config, pkgs, lib, mkApp, ... }:
 
 let
-  cfg = config.pocket-id;
   hl = config.homelab;
   domain = hl.domain;
-in
 
-{
-  options.pocket-id = {
-    enable = lib.mkEnableOption "Enables Pocket ID authentication service";
-
+  # Define custom options that mkApp doesn't handle
+  pocketIdOptions = {
     appUrl = lib.mkOption {
       type = lib.types.str;
       default = "https://id.${domain}";
@@ -46,68 +36,86 @@ in
       description = "Process group ID";
     };
   };
+in
 
-  config = lib.mkIf cfg.enable {
+mkApp {
+  _file = toString ./.;
+  name = "pocket-id";
+  description = "Pocket ID authentication service";
+  packages = pkgs: [];  # No packages for services
 
-    # Firewall rules - allow access to Pocket ID service
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+  extraConfig = { config, lib, ... }:
+    let
+      # Get the pocket-id config from the auto-generated option path
+      cfg = lib.attrByPath (lib.splitString "." "apps.homelab.oci-containers.pocket-id") {} config;
+    in
+    {
+      # Add custom options to the pocket-id namespace
+      options = lib.setAttrByPath
+        (lib.splitString "." "apps.homelab.oci-containers.pocket-id")
+        pocketIdOptions;
 
-    # Create data directory for Pocket ID
-    systemd.tmpfiles.rules = [
-      "d /var/lib/pocket-id 755 root root"
-    ];
+      config = lib.mkIf cfg.enable {
+        # Firewall rules - allow access to Pocket ID service
+        networking.firewall.allowedTCPPorts = [ cfg.port ];
 
-    # Pocket ID container
-    virtualisation.oci-containers.containers.pocket-id = {
-      image = "ghcr.io/pocket-id/pocket-id:v1";
-      autoStart = true;
+        # Create data directory for Pocket ID
+        systemd.tmpfiles.rules = [
+          "d /var/lib/pocket-id 755 root root"
+        ];
 
-      ports = [
-        "${toString cfg.port}:1411"
-      ];
+        # Pocket ID container
+        virtualisation.oci-containers.containers.pocket-id = {
+          image = "ghcr.io/pocket-id/pocket-id:v1";
+          autoStart = true;
 
-      volumes = [
-        "/var/lib/pocket-id:/app/data"
-      ];
+          ports = [
+            "${toString cfg.port}:1411"
+          ];
 
-      environmentFiles = [
-        config.sops.templates."pocket-id-env".path
-      ];
+          volumes = [
+            "/var/lib/pocket-id:/app/data"
+          ];
 
-      environment = {
-        "APP_URL" = cfg.appUrl;
-        "TRUST_PROXY" = lib.boolToString cfg.trustProxy;
-        "PUID" = toString cfg.puid;
-        "PGID" = toString cfg.pgid;
-        "TZ" = "Europe/Copenhagen";
+          environmentFiles = [
+            config.sops.templates."pocket-id-env".path
+          ];
+
+          environment = {
+            "APP_URL" = cfg.appUrl;
+            "TRUST_PROXY" = lib.boolToString cfg.trustProxy;
+            "PUID" = toString cfg.puid;
+            "PGID" = toString cfg.pgid;
+            "TZ" = "Europe/Copenhagen";
+          };
+
+          # Optional healthcheck
+          extraOptions = [
+            "--health-cmd=/app/pocket-id healthcheck"
+            "--health-interval=1m30s"
+            "--health-timeout=5s"
+            "--health-retries=2"
+            "--health-start-period=10s"
+          ];
+        };
+
+        # Create environment file template for Pocket ID with encryption key
+        sops.templates."pocket-id-env" = {
+          content = ''
+            ENCRYPTION_KEY=${config.sops.placeholder."pocket-id/encryption_key"}
+          '';
+          owner = "root";
+          group = "root";
+          mode = "0400";
+        };
+
+        # SOPS secrets configuration
+        sops.secrets = {
+          "pocket-id/encryption_key" = {
+            owner = "root";
+            group = "root";
+          };
+        };
       };
-
-      # Optional healthcheck
-      extraOptions = [
-        "--health-cmd=/app/pocket-id healthcheck"
-        "--health-interval=1m30s"
-        "--health-timeout=5s"
-        "--health-retries=2"
-        "--health-start-period=10s"
-      ];
     };
-
-    # Create environment file template for Pocket ID with encryption key
-    sops.templates."pocket-id-env" = {
-      content = ''
-        ENCRYPTION_KEY=${config.sops.placeholder."pocket-id/encryption_key"}
-      '';
-      owner = "root";
-      group = "root";
-      mode = "0400";
-    };
-
-    # SOPS secrets configuration
-    sops.secrets = {
-      "pocket-id/encryption_key" = {
-        owner = "root";
-        group = "root";
-      };
-    };
-  };
-}
+} args

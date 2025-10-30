@@ -140,6 +140,37 @@
             inputs.sops-nix.nixosModules.sops
           ];
         };
+        # ISO images
+        shepherd-iso = nixpkgs.lib.nixosSystem rec {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
+            isLinux = true;
+          };
+          modules = [
+            ./hosts/shepherd/iso.nix
+            ./modules/nixos
+            inputs.home-manager.nixosModules.default
+            inputs.catppuccin.nixosModules.catppuccin
+            inputs.sops-nix.nixosModules.sops
+          ];
+        };
+        shepherd-iso-arm = nixpkgs.lib.nixosSystem rec {
+          system = "aarch64-linux";
+          specialArgs = {
+            inherit inputs system;
+            inherit (customLib) mkApp mkCategory mkHomeModule mkHomeCategory;
+            isLinux = true;
+          };
+          modules = [
+            ./hosts/shepherd/iso-arm.nix
+            ./modules/nixos
+            inputs.home-manager.nixosModules.default
+            inputs.catppuccin.nixosModules.catppuccin
+            inputs.sops-nix.nixosModules.sops
+          ];
+        };
       };
 
       darwinConfigurations = {

@@ -3,6 +3,8 @@
   pkgs,
   inputs,
   isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
@@ -58,11 +60,36 @@ in
     # also pass inputs to home-manager modules
     backupFileExtension = "hm-backup";
     extraSpecialArgs = {
-      inherit username inputs isLinux;
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
     };
     users = {
       "${username}" = import ../../home/default.nix;
     };
+
+    # Per-host Home Manager configuration
+    sharedModules = [
+      {
+        home = {
+          cli = {
+            enable = true;
+            neovim = {
+              enable = true;
+              nixvim.enable = true;
+              nvf.enable = false;
+            };
+          };
+          terminals = {
+            enable = true;
+          };
+        };
+      }
+    ];
   };
 
   # Enable zsh shell
@@ -121,7 +148,7 @@ in
   ############### Desktop/ WM ########################
   desktop-environments = {
     gnome.enable = false;
-    hyprland.enable = false;
+    hyprland.enable = true;
     kde.enable = false;
     niri.enable = true;
   };
@@ -157,6 +184,6 @@ in
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 
 }

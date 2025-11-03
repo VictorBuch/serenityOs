@@ -36,8 +36,8 @@ in
             enable = true;
             zsh.enable = false;
             neovim = {
-              nixvim.enable = true;
-              nvf.enable = false;
+              nixvim.enable = false;
+              nvf.enable = true;
             };
           };
           terminals = {
@@ -144,7 +144,7 @@ in
 
       persistent-apps = [
         "/Applications/Ghostty.app"
-        "/Applications/Obsidian.app"
+        "/Applications/Nix Apps/Obsidian.app"
         "/Applications/TIDAL.app"
         "/Applications/Zen.app"
         "/Applications/Linear.app"

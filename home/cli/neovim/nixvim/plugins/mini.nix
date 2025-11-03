@@ -15,11 +15,20 @@
 
       # Add/delete/replace surroundings (brackets, quotes, etc.)
       #
-      # Examples:
-      #  - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      #  - sd'   - [S]urround [D]elete [']quotes
-      #  - sr)'  - [S]urround [R]eplace [)] [']
+      # LazyVim-style keybindings with gs prefix:
+      #  - gsaiw) - [G]o [S]urround [A]dd [I]nner [W]ord [)]Paren
+      #  - gsd'   - [G]o [S]urround [D]elete [']quotes
+      #  - gsr)'  - [G]o [S]urround [R]eplace [)] [']
       surround = {
+        mappings = {
+          add = "gsa";            # Add surrounding in Normal and Visual modes
+          delete = "gsd";         # Delete surrounding
+          find = "gsf";           # Find surrounding (to the right)
+          find_left = "gsF";      # Find surrounding (to the left)
+          highlight = "gsh";      # Highlight surrounding
+          replace = "gsr";        # Replace surrounding
+          update_n_lines = "gsn"; # Update `n_lines`
+        };
       };
       pairs = {
 

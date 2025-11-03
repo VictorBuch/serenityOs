@@ -25,6 +25,9 @@ mkApp {
     pkgs.yazi
     pkgs.figlet
     pkgs.lolcat
+    pkgs.devenv
+    pkgs.jujutsu
+    pkgs.opencode
   ];
   description = "Common development tools";
 } args

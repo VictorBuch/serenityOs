@@ -1,15 +1,6 @@
 {
   programs.nixvim.keymaps = [
     {
-      mode = "v";
-      key = "p";
-      action = "_dP";
-      options = {
-        desc = "Better paste";
-        silent = true;
-      };
-    }
-    {
       action = "<cmd>Telescope find_files<CR>";
       key = "<leader><leader>";
     }

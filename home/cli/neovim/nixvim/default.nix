@@ -16,8 +16,8 @@
     ./autocommands.nix
     # Plugin configurations
     ./plugins/alpha.nix
+    ./plugins/blink-cmp.nix
     ./plugins/bufferline.nix
-    ./plugins/cmp.nix
     ./plugins/conform.nix
     ./plugins/emmet.nix
     ./plugins/flash.nix
@@ -43,6 +43,7 @@
     ./plugins/twilight.nix
     ./plugins/vim-tmux-navigator.nix
     ./plugins/web-devicons.nix
+    ./plugins/yanky.nix
     ./plugins/yazi.nix
     ./plugins/zen-mode.nix
   ];
@@ -80,7 +81,7 @@
             conditionals = [ "italic" ];
           };
           integrations = {
-            cmp = true;
+            blink_cmp = true;
             gitsigns = true;
             nvimtree = true;
             treesitter = true;

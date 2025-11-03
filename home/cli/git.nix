@@ -1,68 +1,121 @@
-args@{ config, pkgs, lib, mkHomeModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkHomeModule,
+  ...
+}:
 
 mkHomeModule {
   _file = toString ./.;
   name = "git";
   description = "Git version control";
-  homeConfig = { config, pkgs, lib, ... }: {
-    # Delta package for enhanced diffs
-    home.packages = with pkgs; [
-      delta
-    ];
+  homeConfig =
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
+    {
+      programs.git = {
+        enable = true;
 
-    programs.git = {
-      enable = true;
+        settings = {
+          user = {
+            name = "VictorBuch";
+            email = "victorbuch@protonmail.com";
+          };
+          # Useful aliases
+          aliases = {
+            st = "status";
+            co = "checkout";
+            br = "branch";
+            ci = "commit";
+            unstage = "reset HEAD --";
+            last = "log -1 HEAD";
+            amend = "commit --amend";
+            contributors = "shortlog -sn";
+          };
 
-      userName = "VictorBuch";
-      userEmail = "victorbuch@protonmail.com";
+          # Additional git configuration
+          extraConfig = {
+            # Modern defaults
+            init = {
+              defaultBranch = "main";
+            };
 
-      # Useful aliases
-      aliases = {
-        st = "status";
-        co = "checkout";
-        br = "branch";
-        ci = "commit";
-        unstage = "reset HEAD --";
-        last = "log -1 HEAD";
-        amend = "commit --amend";
-        contributors = "shortlog -sn";
+            # Pull and push behavior
+            pull = {
+              rebase = true;
+            };
+            push = {
+              autoSetupRemote = true;
+              default = "current";
+            };
+
+            # Better diff and merge
+            diff = {
+              colorMoved = "default";
+            };
+            merge = {
+              conflictStyle = "zdiff3";
+            };
+
+            # Rebase settings
+            rebase = {
+              autoStash = true;
+            };
+
+            # Remember conflict resolutions
+            rerere = {
+              enabled = true;
+            };
+
+            # Sort branches by recent activity
+            branch = {
+              sort = "-committerdate";
+            };
+          };
+        };
+
+        # Global gitignore patterns
+        ignores = [
+          # macOS
+          ".DS_Store"
+          "._*"
+
+          # Editor files
+          "*.swp"
+          "*.swo"
+          "*~"
+          ".vscode/"
+          ".idea/"
+
+          # Environment and secrets
+          ".env"
+          ".env.local"
+          ".env.*.local"
+
+          # Node.js
+          "node_modules/"
+
+          # Build artifacts
+          "*.log"
+          "dist/"
+          "build/"
+
+          # Nix
+          ".direnv/"
+          "result"
+          "result-*"
+        ];
       };
 
-      # Global gitignore patterns
-      ignores = [
-        # macOS
-        ".DS_Store"
-        "._*"
-
-        # Editor files
-        "*.swp"
-        "*.swo"
-        "*~"
-        ".vscode/"
-        ".idea/"
-
-        # Environment and secrets
-        ".env"
-        ".env.local"
-        ".env.*.local"
-
-        # Node.js
-        "node_modules/"
-
-        # Build artifacts
-        "*.log"
-        "dist/"
-        "build/"
-
-        # Nix
-        ".direnv/"
-        "result"
-        "result-*"
-      ];
-
-      # Delta configuration for beautiful diffs
-      delta = {
+      # Delta configuration for beautiful diffs (now as separate program)
+      programs.delta = {
         enable = true;
+        enableGitIntegration = true;
         options = {
           navigate = true;
           side-by-side = false;
@@ -85,45 +138,5 @@ mkHomeModule {
         };
       };
 
-      # Additional git configuration
-      extraConfig = {
-        # Modern defaults
-        init = {
-          defaultBranch = "main";
-        };
-
-        # Pull and push behavior
-        pull = {
-          rebase = true;
-        };
-        push = {
-          autoSetupRemote = true;
-          default = "current";
-        };
-
-        # Better diff and merge
-        diff = {
-          colorMoved = "default";
-        };
-        merge = {
-          conflictStyle = "zdiff3";
-        };
-
-        # Rebase settings
-        rebase = {
-          autoStash = true;
-        };
-
-        # Remember conflict resolutions
-        rerere = {
-          enabled = true;
-        };
-
-        # Sort branches by recent activity
-        branch = {
-          sort = "-committerdate";
-        };
-      };
     };
-  };
 } args

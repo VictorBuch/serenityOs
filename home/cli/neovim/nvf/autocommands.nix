@@ -39,6 +39,16 @@
           end,
         })
       '';
+
+      # Close toggleterm with 'q' in normal mode
+      toggleterm-close-with-q = ''
+        vim.api.nvim_create_autocmd('TermOpen', {
+          pattern = 'term://*toggleterm#*',
+          callback = function()
+            vim.keymap.set('n', 'q', '<cmd>close<CR>', { buffer = 0, silent = true })
+          end,
+        })
+      '';
     };
   };
 }

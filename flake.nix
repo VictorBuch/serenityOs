@@ -189,29 +189,5 @@
           ];
         };
       };
-
-      # Development shells for different project types
-      devShells.x86_64-linux = {
-        vue-nuxt = import ./devshells/vue-nuxt {
-          inherit nixpkgs;
-          system = "x86_64-linux";
-        };
-        nodejs = import ./devshells/nodejs {
-          inherit nixpkgs;
-          system = "x86_64-linux";
-        };
-        flutter = import ./devshells/flutter {
-          inherit nixpkgs;
-          system = "x86_64-linux";
-        };
-        flutter-appwrite = import ./devshells/flutter-appwrite {
-          inherit nixpkgs;
-          system = "x86_64-linux";
-        };
-        docker = import ./devshells/docker {
-          inherit nixpkgs;
-          system = "x86_64-linux";
-        };
-      };
     };
 }

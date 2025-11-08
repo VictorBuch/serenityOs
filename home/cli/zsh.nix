@@ -35,6 +35,10 @@ mkHomeModule {
       enable = true;
       enableZshIntegration = true;
       nix-direnv.enable = true;
+      stdlib = ''
+        # Source devenv's direnvrc for use_devenv function
+        source <(${pkgs.devenv}/bin/devenv direnvrc)
+      '';
     };
   };
 } args

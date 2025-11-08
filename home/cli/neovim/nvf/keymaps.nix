@@ -242,11 +242,7 @@
         };
 
         # -------------------- Git --------------------
-        "<leader>gg" = {
-          action = ":LazyGit<CR>";
-          desc = "LazyGit (Root Dir)";
-          silent = true;
-        };
+        # Note: <leader>gg is auto-configured by nvf's toggleterm.lazygit module
         "<leader>gb" = {
           action = ":Gitsigns blame_line<CR>";
           desc = "Git Blame Line";
@@ -525,27 +521,8 @@
       # TERMINAL MODE KEYMAPS
       # ========================================
       terminal = {
-        # -------------------- Terminal Navigation --------------------
-        "<C-h>" = {
-          action = "<C-\\><C-n><C-w>h";
-          desc = "Navigate left from terminal";
-          silent = true;
-        };
-        "<C-j>" = {
-          action = "<C-\\><C-n><C-w>j";
-          desc = "Navigate down from terminal";
-          silent = true;
-        };
-        "<C-k>" = {
-          action = "<C-\\><C-n><C-w>k";
-          desc = "Navigate up from terminal";
-          silent = true;
-        };
-        "<C-l>" = {
-          action = "<C-\\><C-n><C-w>l";
-          desc = "Navigate right from terminal";
-          silent = true;
-        };
+        # Note: Terminal navigation keybindings removed since terminal is now floating
+        # 'q' to close is configured in terminal.nix via on_open function
 
         # -------------------- Quick Escape --------------------
         "<Esc><Esc>" = {

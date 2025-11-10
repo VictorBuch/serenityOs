@@ -27,3 +27,4 @@ result-*
 # Age keys (SOPS)
 keys.txt
 .claude/**
+.claude/settings.local.json

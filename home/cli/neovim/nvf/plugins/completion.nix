@@ -60,6 +60,53 @@
       # Enable snippets with luasnip
       snippets.luasnip.enable = true;
 
+      # Additional luasnip configuration for Go snippets
+      luaConfigRC.go-snippets = ''
+        -- Go snippets for luasnip
+        local ls = require("luasnip")
+        local s = ls.snippet
+        local t = ls.text_node
+        local i = ls.insert_node
+        local fmt = require("luasnip.extras.fmt").fmt
+
+        ls.add_snippets("go", {
+          -- Error handling: if err != nil
+          s("enn", fmt([[
+            if err != nil {{
+              {}
+            }}
+          ]], { i(1, "return err") })),
+
+          -- Error handling with return
+          s("erreturn", fmt([[
+            if err != nil {{
+              return {}err
+            }}
+          ]], { i(1) })),
+
+          -- Error handling with log.Fatal
+          s("erfatal", fmt([[
+            if err != nil {{
+              log.Fatal(err)
+            }}
+          ]], {})),
+
+          -- Error handling with log.Printf
+          s("erlog", fmt([[
+            if err != nil {{
+              log.Printf("{}: %v", err)
+            }}
+          ]], { i(1, "error") })),
+
+          -- Error handling with fmt.Errorf wrap
+          s("erwrap", fmt([[
+            if err != nil {{
+              return fmt.Errorf("{}: %w", err)
+            }}
+          ]], { i(1, "failed to") })),
+        })
+      '';
+
       # Additional luasnip configuration for Flutter snippets
       luaConfigRC.flutter-snippets = ''
         -- Flutter snippets for luasnip

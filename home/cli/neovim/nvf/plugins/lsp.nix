@@ -89,9 +89,37 @@
         bash.enable = true;
       };
 
-      extraPlugins = with pkgs.vimPlugins; {
-        emmet-vim.package = emmet-vim;
-      };
+      # Configure emmet-ls for HTML/CSS/JSX completion
+      luaConfigRC.emmet-ls = ''
+        -- Setup emmet-ls for web development
+        local lspconfig = require('lspconfig')
+        local capabilities = require('blink.cmp').get_lsp_capabilities()
+
+        lspconfig.emmet_ls.setup({
+          capabilities = capabilities,
+          filetypes = {
+            'html',
+            'css',
+            'scss',
+            'sass',
+            'less',
+            'javascript',
+            'javascriptreact',
+            'typescript',
+            'typescriptreact',
+            'vue',
+            'svelte',
+          },
+          init_options = {
+            html = {
+              options = {
+                -- For possible options, see: https://github.com/emmet-io/emmet/blob/master/src/config.ts#L79-L267
+                ["bem.enabled"] = true,
+              },
+            },
+          },
+        })
+      '';
     };
   };
 }

@@ -12,6 +12,26 @@
         enable = true;
         setupOpts = {
           defaults = {
+            mappings = {
+              i = {
+                # Ctrl+j/k for navigating in insert mode
+                "<C-j>" = {
+                  __raw = "require('telescope.actions').move_selection_next";
+                };
+                "<C-k>" = {
+                  __raw = "require('telescope.actions').move_selection_previous";
+                };
+              };
+              n = {
+                # Ctrl+j/k for navigating in normal mode
+                "<C-j>" = {
+                  __raw = "require('telescope.actions').move_selection_next";
+                };
+                "<C-k>" = {
+                  __raw = "require('telescope.actions').move_selection_previous";
+                };
+              };
+            };
             file_ignore_patterns = [
               ".next/"
               "node_modules/"

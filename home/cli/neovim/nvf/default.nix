@@ -46,7 +46,10 @@
         nixfmt-rfc-style
 
         # Linters
-        nodePackages.eslint
+        nodePackages.eslint_d
+
+        # LSP servers
+        emmet-ls # Emmet language server for HTML/CSS/JSX
 
         # Go development tools
         go

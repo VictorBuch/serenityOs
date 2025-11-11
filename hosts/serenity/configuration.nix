@@ -51,25 +51,9 @@ in
     "flakes"
   ];
 
-  # Automatic Garbage collection cleanup
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 10d";
-  };
-
-  # Automatic updates
-  system.autoUpgrade = {
-    enable = true;
-    flake = inputs.self.outPath;
-    flags = [
-      "--update-input"
-      "nixpkgs"
-      "-L" # print build logs
-    ];
-    dates = "02:00";
-    randomizedDelaySec = "45min";
-  };
+  # Enable all maintenance features
+  # (GC with 10-day retention, auto-upgrade with lockfile commits, store optimization, boot cleanup)
+  maintenance.enable = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Copenhagen";

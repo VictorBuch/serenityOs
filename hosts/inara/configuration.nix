@@ -90,6 +90,7 @@ in
     flutter
   ];
 
+  maintenance.enable = true;
   apps = {
 
     browsers = {

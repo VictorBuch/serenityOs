@@ -11,6 +11,7 @@
   imports = [
     ../nixos/system-configs/user.nix
     ./configs.nix
+    ./maintenance.nix
     ./oci-containers/uptime-kuma.nix
     ./oci-containers/crafty.nix
     ./oci-containers/immich.nix
@@ -37,6 +38,7 @@
     ./lab.nix
   ];
 
+  maintenance.enable = lib.mkDefault false;
   dashboard.homarr.enable = lib.mkDefault false;
   dashboard.glance.enable = lib.mkDefault false;
   uptime-kuma.enable = lib.mkDefault false;

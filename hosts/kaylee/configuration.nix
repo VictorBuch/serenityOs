@@ -30,7 +30,10 @@ in
   ############### System configs ########################
   nvidia.enable = true;
   # amd-gpu.enable = true;
-  maintenance.enable = true;
+  maintenance = {
+    enable = true;
+    linux.enable = true;
+  };
   #######################################################
 
   ############### Apps ########################

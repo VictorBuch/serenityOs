@@ -21,6 +21,7 @@
       flags = [
         "--update-input"
         "nixpkgs"
+        "--commit-lock-file"
         "-L" # print build logs
       ];
     };

@@ -101,6 +101,10 @@ in
   # Enable zsh shell
   programs.zsh.enable = true;
 
+  maintenance = {
+    enable = true;
+    linux.enable = true;
+  };
   ############### Apps ########################
 
   apps = {

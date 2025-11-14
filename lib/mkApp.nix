@@ -4,13 +4,16 @@
 #
 # Usage Examples:
 #
+# Need to add to top of module:
+# args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+#
 # 1. Cross-platform (same package):
 #   mkApp {
 #     _file = toString ./.;
 #     name = "firefox";
 #     packages = pkgs: [ pkgs.firefox ];
 #     extraConfig = {};
-#   }
+#   } args
 #
 # 2. Platform-specific packages:
 #   mkApp {
@@ -19,14 +22,14 @@
 #     linuxPackages = pkgs: [ pkgs.ghostty ];
 #     darwinPackages = pkgs: [ ];  # Installed via homebrew
 #     darwinExtraConfig = { homebrew.casks = [ "ghostty" ]; };
-#   }
+#   } args
 #
 # 3. Linux-only (auto-asserts):
 #   mkApp {
 #     _file = toString ./.;
 #     name = "steam";
 #     linuxPackages = pkgs: [ pkgs.steam ];
-#   }
+#   } args
 #
 # 4. Stable/unstable mix:
 #   mkApp {
@@ -36,14 +39,14 @@
 #       pkgs.firefox           # unstable
 #       stable-pkgs.libreoffice  # stable
 #     ];
-#   }
+#   } args
 #
 # 5. Manual optionPath (if auto-derivation doesn't work):
 #   mkApp {
 #     name = "myapp";
 #     optionPath = "apps.custom.path";
 #     packages = pkgs: [ pkgs.myapp ];
-#   }
+#   } args
 
 {
   name,

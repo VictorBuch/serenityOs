@@ -52,7 +52,7 @@ mkHomeModule {
 
           directory = {
             style = "fg:peach";
-            format = "[󰉋 $path ]($style)";
+            format = "[󰉋/$path ]($style)";
             truncation_length = 3;
             truncation_symbol = ".../";
             substitutions = {
@@ -68,7 +68,7 @@ mkHomeModule {
           };
 
           git_branch = {
-            symbol = "󰘬";
+            symbol = "󰘬/";
             style = "fg:yellow";
             format = "[[$symbol$branch ](fg:yellow)]($style)";
           };
@@ -127,19 +127,19 @@ mkHomeModule {
 
           status = {
             disabled = false;
-            success_symbol = "[┌─](bold fg:green)";
+            success_symbol = "[╭─](bold fg:green)";
             format = "[$symbol]($style)";
             map_symbol = true;
           };
 
           character = {
             disabled = false;
-            success_symbol = "[└>](bold fg:green)";
-            error_symbol = "[└>](bold fg:red)";
-            vimcmd_symbol = "[└<](bold fg:green)";
-            vimcmd_replace_one_symbol = "[└>](bold fg:lavender)";
-            vimcmd_replace_symbol = "[└>](bold fg:lavender)";
-            vimcmd_visual_symbol = "[└>](bold fg:yellow)";
+            success_symbol = "[╰](bold fg:green)";
+            error_symbol = "[╰](bold fg:red)";
+            vimcmd_symbol = "[╰](bold fg:green)";
+            vimcmd_replace_one_symbol = "[╰](bold fg:lavender)";
+            vimcmd_replace_symbol = "[╰](bold fg:lavender)";
+            vimcmd_visual_symbol = "[╰](bold fg:yellow)";
           };
 
           cmd_duration = {

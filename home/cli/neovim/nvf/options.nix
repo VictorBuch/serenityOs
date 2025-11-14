@@ -36,6 +36,7 @@
       # UI
       termguicolors = true;
       updatetime = 100;
+      cul = true;
 
       # Clipboard (wl-clipboard on Linux, system clipboard on macOS)
       clipboard = "unnamedplus";

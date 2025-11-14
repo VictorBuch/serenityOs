@@ -1,9 +1,15 @@
-args@{ config, pkgs, lib, mkHomeModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkHomeModule,
+  ...
+}:
 
 let
   ghosttySettings = {
-    background-opacity = 0.8;
-    background-blur-radius = 20;
+    background-opacity = 0.9;
+    background-blur-radius = 25;
     window-decoration = false;
     theme = "Catppuccin Mocha";
     confirm-close-surface = false;
@@ -16,13 +22,20 @@ mkHomeModule {
   _file = toString ./.;
   name = "ghostty";
   description = "Ghostty terminal emulator";
-  homeConfig = { config, pkgs, lib, ... }: {
-    programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
-      enable = true;
-      settings = ghosttySettings;
+  homeConfig =
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
+    {
+      programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
+        enable = true;
+        settings = ghosttySettings;
+      };
+      xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
+        text = lib.generators.toKeyValue { } ghosttySettings;
+      };
     };
-    xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
-      text = lib.generators.toKeyValue { } ghosttySettings;
-    };
-  };
 } args

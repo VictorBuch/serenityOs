@@ -21,6 +21,183 @@ mkHomeModule {
     {
       programs.noctalia-shell = {
         enable = true;
+
+        # Custom settings - translated from .config/noctalia/settings.json
+        settings = {
+          # App Launcher
+          appLauncher = {
+            backgroundOpacity = 0.8;
+            enableClipboardHistory = true;
+            terminalCommand = "ghostty -e";
+          };
+
+          # Audio
+          audio = {
+            cavaFrameRate = 60;
+            visualizerType = "mirrored";
+          };
+
+          # Bar - heavily customized
+          bar = {
+            backgroundOpacity = 0.1;
+            density = "compact";
+
+            widgets = {
+              left = [
+                {
+                  id = "Workspace";
+                  hideUnoccupied = true;
+                  labelMode = "name";
+                  characterCount = 8;
+                }
+                {
+                  id = "SystemMonitor";
+                  showCpuTemp = true;
+                  showCpuUsage = true;
+                  showDiskUsage = true;
+                  showMemoryAsPercent = true;
+                  showMemoryUsage = true;
+                  showNetworkStats = false;
+                }
+              ];
+
+              center = [
+                {
+                  id = "MediaMini";
+                  hideMode = "transparent";
+                  hideWhenIdle = false;
+                  maxWidth = 145;
+                  scrollingMode = "hover";
+                  showAlbumArt = true;
+                  showVisualizer = true;
+                  useFixedWidth = false;
+                  visualizerType = "wave";
+                }
+              ];
+
+              right = [
+                {
+                  id = "Tray";
+                  blacklist = [ ];
+                  colorizeIcons = false;
+                  favorites = [ ];
+                }
+                {
+                  id = "Spacer";
+                  width = 20;
+                }
+                {
+                  id = "NotificationHistory";
+                  hideWhenZero = true;
+                  showUnreadBadge = true;
+                }
+                {
+                  id = "Volume";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "WiFi";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "Bluetooth";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "KeyboardLayout";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "Spacer";
+                  width = 20;
+                }
+                {
+                  id = "Clock";
+                  customFont = "";
+                  formatHorizontal = "HH:mm";
+                  formatVertical = "HH mm - dd MM";
+                  useCustomFont = false;
+                  usePrimaryColor = true;
+                }
+                {
+                  id = "ControlCenter";
+                  customIconPath = "";
+                  icon = "noctalia";
+                  useDistroLogo = false;
+                }
+              ];
+            };
+          };
+
+          # Color scheme
+          colorSchemes = {
+            darkMode = true;
+            predefinedScheme = "Monochrome";
+            generateTemplatesForPredefined = true;
+          };
+
+          # Disable dock
+          dock.enabled = false;
+
+          # General UI tweaks
+          general = {
+            radiusRatio = 0.5;
+            screenRadiusRatio = 0.12;
+            shadowOffsetX = 3;
+          };
+
+          # Location
+          location.name = "Brno";
+
+          # Notifications
+          notifications.backgroundOpacity = 0.1;
+
+          # Templates
+          templates.fuzzel = true;
+
+          # Fonts
+          ui = {
+            fontDefault = "JetBrainsMono Nerd Font Propo";
+            fontFixed = "JetBrainsMono Nerd Font Propo";
+            panelsOverlayLayer = false;
+          };
+
+          # Wallpaper management
+          wallpaper = {
+            directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+            overviewEnabled = true;
+            randomEnabled = true;
+            randomIntervalSec = 3600;
+            recursiveSearch = true;
+            transitionDuration = 2500;
+
+            monitors = [
+              {
+                name = "Virtual-1";
+                directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+                wallpaper = "${config.home.homeDirectory}/serenityOs/home/wallpapers/house-in-mountains.png";
+              }
+            ];
+          };
+        };
+
+        # Custom color scheme (Monochrome) - translated from .config/noctalia/colors.json
+        colors = {
+          mError = "#dddddd";
+          mOnError = "#111111";
+          mOnPrimary = "#111111";
+          mOnSecondary = "#111111";
+          mOnSurface = "#828282";
+          mOnSurfaceVariant = "#5d5d5d";
+          mOnTertiary = "#111111";
+          mOutline = "#3c3c3c";
+          mPrimary = "#aaaaaa";
+          mSecondary = "#a7a7a7";
+          mShadow = "#000000";
+          mSurface = "#111111";
+          mSurfaceVariant = "#191919";
+          mTertiary = "#cccccc";
+        };
       };
 
       # Fix missing app icons in Qt applications

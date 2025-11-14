@@ -10,6 +10,7 @@ let
   fileManager = "nautilus";
   browser = "zen";
   wallpaperDaemon = "swww";
+  shell = "noctalia-shell";
 in
 
 {
@@ -35,8 +36,8 @@ in
               xkb {
                   layout "us"
               }
-              repeat-delay 600
-              repeat-rate 25
+              repeat-delay 200
+              repeat-rate 35
           }
 
             touchpad {
@@ -56,7 +57,8 @@ in
             mode "2560x1440@144"
         }
         output "Virtual-1" {
-            mode "1920x1080@60"
+            mode "2560x1600@59.972"
+            scale 1.25
         } 
 
         // Layout configuration
@@ -71,7 +73,7 @@ in
             }
 
             focus-ring {
-                width 2
+                width 1.5
                 active-color "#cba6f7"   // Catppuccin Mocha mauve
                 inactive-color "#6c7086"  // Catppuccin Mocha surface2
             }
@@ -87,9 +89,10 @@ in
 
             default-column-width { proportion 0.9; }
 
-            center-focused-column "on-overflow"
+            center-focused-column "always"
             always-center-single-column
 
+            // Transparent background for noctalia wallpapers (Option 2)
             background-color "transparent"
         }
 
@@ -103,7 +106,15 @@ in
             Mod+Return { spawn "${terminal}"; }
             Mod+B { spawn "${browser}"; }
             Mod+F { spawn "${fileManager}"; }
-            Mod+Space { spawn "fuzzel"; }
+
+            // Noctalia shell controls
+            Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+            Mod+S { spawn "noctalia-shell" "ipc" "call" "controlcenter" "toggle"; }
+            Mod+Comma { spawn "noctalia-shell" "ipc" "call" "settings" "toggle"; }
+            Mod+Y { spawn "noctalia-shell" "ipc" "call" "clipboard" "toggle"; }
+            Mod+C { spawn "noctalia-shell" "ipc" "call" "calculator" "toggle"; }
+            Mod+Escape { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
+            Mod+Shift+Escape { spawn "noctalia-shell" "ipc" "call" "sessionMenu" "lockAndSuspend";}
 
             // Window management
             Mod+Tab { toggle-overview; }
@@ -148,30 +159,18 @@ in
             Mod+Shift+8 { move-column-to-workspace 8; }
             Mod+Shift+9 { move-column-to-workspace 9; }
 
-            // Rofi extended functionality
-            Mod+N { spawn "rofi-network-manager"; }
-            Mod+Shift+B { spawn "rofi-bluetooth"; }
-            Mod+C { spawn-sh "cliphist list | rofi -dmenu | cliphist decode | wl-copy"; }
-            Mod+O { spawn "rofi" "-show" "obsidian"; }
-            Mod+Shift+C { spawn "rofi" "-show" "calc"; }
-            Mod+Shift+P { spawn "rofi-pass-wayland"; }
-            Mod+Shift+A { spawn "rofi" "-show" "run"; }
-
             // Screenshots
             Alt+Shift+4 { screenshot; }
             Alt+Shift+5 { screenshot-window; }
 
-            // System lock
-            Mod+Escape { spawn "hyprlock"; }
-            Mod+Shift+Escape { spawn "wlogout";}
 
-            // Media keys
-            XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-            XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-            XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+            // Media keys (noctalia IPC)
+            XF86AudioRaiseVolume { spawn "noctalia-shell" "ipc" "call" "audio" "volumeUp"; }
+            XF86AudioLowerVolume { spawn "noctalia-shell" "ipc" "call" "audio" "volumeDown"; }
+            XF86AudioMute { spawn "noctalia-shell" "ipc" "call" "audio" "toggleMute"; }
             XF86AudioMicMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-            XF86MonBrightnessUp { spawn "brightnessctl" "s" "10%+"; }
-            XF86MonBrightnessDown { spawn "brightnessctl" "s" "10%-"; }
+            XF86MonBrightnessUp { spawn "noctalia-shell" "ipc" "call" "brightness" "up"; }
+            XF86MonBrightnessDown { spawn "noctalia-shell" "ipc" "call" "brightness" "down"; }
             XF86AudioNext { spawn "playerctl" "next"; }
             XF86AudioPause { spawn "playerctl" "play-pause"; }
             XF86AudioPlay { spawn "playerctl" "play-pause"; }
@@ -205,8 +204,9 @@ in
             open-on-workspace "chat"
         }
 
+        // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
         layer-rule {
-            match namespace="^swww-daemon$"
+            match namespace="^noctalia-wallpaper.*"
             place-within-backdrop true
         }
 
@@ -224,12 +224,10 @@ in
           }
       }
 
-        // Spawn at Rstartup
-        spawn-at-startup "${wallpaperDaemon}-daemon"
-        spawn-at-startup "waybar"
+        // Spawn at startup
+        spawn-at-startup "${shell}"
         spawn-at-startup "${terminal}"
         spawn-at-startup "easyeffects" "--gapplication-service"
-        spawn-at-startup "${wallpaperDaemon}" "img" "${config.wallpaper}"
         spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
         // Animations

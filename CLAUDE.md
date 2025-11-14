@@ -248,6 +248,8 @@ New installations use the provided install scripts:
 **Library Helpers (`lib/`):**
 - `lib/mkApp.nix` - Universal app module helper with cross-platform and stable/unstable support
 - `lib/mkCategory.nix` - Category module helper with auto-discovery of .nix files in directory (used in apps/*/default.nix)
+- `lib/mkHomeModule.nix` - Home Manager individual module helper (similar to mkApp but for home/ directory)
+- `lib/mkHomeCategory.nix` - Home Manager category helper (similar to mkCategory but for home/ directory)
 
 **Helper Scripts:**
 - `scripts/add-package.sh` - CLI tool to add packages with proper categorization (uses mkApp)
@@ -314,6 +316,195 @@ mkApp {
 
 **Note on mkCategory:**
 The `mkCategory` helper (in `lib/mkCategory.nix`) auto-discovers all `.nix` files in a category directory and creates a single enable option for the entire category (e.g., `apps.browsers.enable = true;` enables all browser modules). This is used in category `default.nix` files like `modules/apps/browsers/default.nix`. When the category is enabled, all discovered modules are automatically imported and enabled by default (overridable with `mkDefault`).
+
+### Using the mkHomeModule Helper
+
+The `mkHomeModule` helper simplifies Home Manager module creation with automatic enable options and minimal boilerplate.
+
+**CRITICAL: The `args` Pattern**
+
+All modules using `mkHomeModule` or `mkHomeCategory` **MUST** use the `args@{...}: ... } args` pattern:
+
+```nix
+args@{                    # Capture all arguments at the start
+  config,
+  pkgs,
+  lib,
+  mkHomeModule,          # The helper function
+  ...
+}:
+
+mkHomeModule {
+  # ... configuration ...
+} args                    # Pass args at the end
+```
+
+**Without this pattern, you will get the error: "module does not look like a module"**
+
+**Basic usage (auto-derive optionPath from file location):**
+```nix
+args@{ config, pkgs, lib, mkHomeModule, ... }:
+
+mkHomeModule {
+  _file = toString ./.;  # Auto-derives path like "home.cli.git"
+  name = "git";
+  description = "Git version control";
+  homeConfig = { config, pkgs, lib, ... }: {
+    programs.git = {
+      enable = true;
+      userName = "...";
+    };
+  };
+} args
+```
+
+**Manual optionPath (when auto-derive doesn't work):**
+```nix
+args@{ config, pkgs, lib, mkHomeModule, ... }:
+
+mkHomeModule {
+  name = "noctalia";
+  optionPath = "home.desktop-environments.noctalia";
+  description = "Noctalia shell - A modern Wayland shell for niri";
+  homeConfig = { config, pkgs, lib, ... }: {
+    programs.noctalia-shell = {
+      enable = true;
+      # ... configuration ...
+    };
+  };
+} args
+```
+
+**Key differences from mkApp:**
+- Located in `home/` directory (not `modules/apps/`)
+- Creates options like `home.cli.git.enable` (not `apps.*.enable`)
+- No platform-specific package splitting (home manager handles that)
+- Always uses `homeConfig` parameter (not `packages` or `linuxPackages`)
+
+**Benefits:**
+- Automatic enable option creation
+- Auto-derives option path from file location
+- Consistent with mkApp pattern but for Home Manager
+- Reduces boilerplate in home configuration modules
+
+### Using the mkHomeCategory Helper
+
+The `mkHomeCategory` helper auto-discovers and enables all Home Manager modules in a category.
+
+**Usage in category default.nix:**
+```nix
+args@{ mkHomeCategory, ... }:
+
+mkHomeCategory {
+  _file = toString ./.;
+  name = "cli";
+} args
+```
+
+**With custom enable defaults:**
+```nix
+args@{ mkHomeCategory, ... }:
+
+mkHomeCategory {
+  _file = toString ./.;
+  name = "cli";
+  enableByDefault = {
+    zsh = false;      # Don't enable zsh by default
+    nushell = true;   # Enable nushell by default
+  };
+} args
+```
+
+**Features:**
+- Auto-discovers all `.nix` files in the directory (except `default.nix`)
+- Auto-imports discovered files and subdirectory `default.nix` files
+- Creates single enable option: `home.cli.enable = true;` enables all CLI modules
+- Supports nested categories (subdirectories with their own `default.nix`)
+- Optional manual control via `enableByDefault` parameter
+
+**Example directory structure:**
+```
+home/cli/
+├── default.nix       # Uses mkHomeCategory
+├── git.nix           # Auto-discovered
+├── tmux.nix          # Auto-discovered
+└── neovim/           # Subdirectory
+    └── default.nix   # Auto-imported
+```
+
+Enabling `home.cli.enable = true;` will automatically enable `home.cli.git`, `home.cli.tmux`, and `home.cli.neovim` (unless overridden).
+
+## Common Errors and Troubleshooting
+
+### "module does not look like a module"
+
+**Cause:** Missing the `args@{...}: ... } args` pattern when using `mkHomeModule` or `mkHomeCategory`.
+
+**Solution:** Always use this pattern:
+```nix
+args@{ config, pkgs, lib, mkHomeModule, ... }:
+
+mkHomeModule {
+  # configuration
+} args
+```
+
+### "path does not exist" (in flake evaluation)
+
+**Cause:** File not tracked by Git. Flakes only include Git-tracked files.
+
+**Solution:**
+```bash
+git add path/to/file.nix
+```
+
+### mkApp vs mkHomeModule confusion
+
+**mkApp (for `modules/apps/`):**
+- Creates options like `apps.browsers.firefox.enable`
+- Uses `packages`, `linuxPackages`, `darwinPackages` parameters
+- For system-level applications
+
+**mkHomeModule (for `home/`):**
+- Creates options like `home.cli.git.enable`
+- Uses `homeConfig` parameter (function returning Home Manager config)
+- For user-level configurations
+
+### Missing app icons in Qt/QML applications (noctalia, etc.)
+
+**Cause:** Qt applications don't automatically detect GTK icon themes without proper environment variables.
+
+**Solution:** Add to your Home Manager module:
+```nix
+home.sessionVariables = {
+  QT_QPA_PLATFORMTHEME = "gtk3";      # Use GTK theme
+  QS_ICON_THEME = "Papirus-Dark";     # Fallback icon theme
+};
+```
+
+Or system-wide via:
+```nix
+environment.variables = {
+  QT_QPA_PLATFORMTHEME = "gtk3";
+  QS_ICON_THEME = "Papirus-Dark";
+};
+```
+
+**Note:** Requires reboot or re-login to take effect.
+
+### Flake module naming inconsistencies
+
+Different flakes use different naming conventions for their Home Manager modules:
+
+- Most flakes: `inputs.flake.homeManagerModules.default`
+- Some flakes: `inputs.flake.homeModules.default` (e.g., noctalia)
+
+**Solution:** Check the flake's outputs first:
+```bash
+nix flake show github:owner/repo
+```
+
+Look for either `homeManagerModules` or `homeModules` in the output.
 
 ## Platform-Specific Notes
 

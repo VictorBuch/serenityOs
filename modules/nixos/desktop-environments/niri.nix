@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 {
@@ -94,22 +95,11 @@
       qt5.qtwayland
       qt6.qtwayland
 
+      inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
+
       # Xwayland support
       xwayland-satellite # X11 compatibility layer for niri
 
-      # Rofi and extensions
-      rofi
-      rofi-calc
-      rofi-emoji
-      rofi-bluetooth
-      rofi-power-menu
-      rofi-vpn
-      rofi-obsidian
-      rofi-network-manager
-      rofi-screenshot
-      rofi-systemd
-      rofi-pulse-select
-      rofi-pass-wayland
       cliphist
       wl-clipboard
       papirus-icon-theme
@@ -117,9 +107,6 @@
       # Screenshot tools
       grim # Screenshot tool
       slurp # Screen area selector
-
-      # For testing
-      alacritty
     ];
   };
 }

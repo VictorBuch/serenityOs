@@ -74,14 +74,20 @@ in
 
     # Per-host Home Manager configuration
     sharedModules = [
+      inputs.noctalia.homeModules.default
       {
         home = {
+          catppuccin.enable = true;
+          desktop-environments = {
+            niri.enable = true;
+            noctalia.enable = true;
+          };
           cli = {
             enable = true;
             neovim = {
               enable = true;
-              nixvim.enable = true;
-              nvf.enable = false;
+              nixvim.enable = false;
+              nvf.enable = true;
             };
           };
           terminals = {
@@ -148,7 +154,7 @@ in
   ############### Desktop/ WM ########################
   desktop-environments = {
     gnome.enable = false;
-    hyprland.enable = true;
+    hyprland.enable = false;
     kde.enable = false;
     niri.enable = true;
   };
@@ -168,6 +174,8 @@ in
       git
       lazygit
       zoxide
+      ripgrep
+      fd
     ];
     shell = pkgs.nushell;
   };

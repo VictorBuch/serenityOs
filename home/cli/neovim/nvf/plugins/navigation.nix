@@ -32,6 +32,14 @@
                 };
               };
             };
+            layout_strategy = "horizontal";
+            layout_config = {
+              width = 0.95;
+              height = 0.90;
+              horizontal = {
+                preview_width = 0.55;
+              };
+            };
             file_ignore_patterns = [
               ".next/"
               "node_modules/"

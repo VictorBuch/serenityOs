@@ -13,19 +13,35 @@
         enable = true;
         setupOpts = {
           # Custom keymaps
-          # <Tab> = accept completion
-          # <C-j>/<C-k> = navigate down/up
-          # <C-Space> = show completion menu
+          # <C-j>/<C-k> = navigate down/up through completions
+          # <Enter> = accept completion (from enter preset)
           keymap = {
-            preset = "default";
-            "<Tab>" = [ "select_and_accept" "fallback" ];
-            "<C-j>" = [ "select_next" "fallback" ];
-            "<C-k>" = [ "select_prev" "fallback" ];
+            preset = "enter";
+            "<C-y>" = [ "select_and_accept" ];
+            "<C-j>" = [
+              "select_next"
+              "fallback"
+            ];
+            "<C-k>" = [
+              "select_prev"
+              "fallback"
+            ];
+            "<Tab>" = [
+              (lib.generators.mkLuaInline ''
+                function(cmp)
+                  if cmp.snippet_active() then
+                    return cmp.snippet_forward()
+                  end
+                  return false
+                end
+              '')
+              "fallback"
+            ];
           };
 
           appearance = {
             nerd_font_variant = "mono";
-            use_nvim_cmp_as_default = true;
+            use_nvim_cmp_as_default = false;
           };
 
           completion = {
@@ -47,12 +63,43 @@
 
             documentation = {
               auto_show = true;
-              auto_show_delay_ms = 500;
+              auto_show_delay_ms = 200;
             };
           };
 
           sources = {
-            default = [ "lsp" "path" "snippets" "buffer" ];
+            default = [
+              "lsp"
+              "path"
+              "snippets"
+              "buffer"
+            ];
+          };
+
+          cmdline = {
+            enabled = true;
+            keymap = {
+              preset = "cmdline";
+              "<Right>" = [ ];
+              "<Left>" = [ ];
+            };
+            completion = {
+              list = {
+                selection = {
+                  preselect = false;
+                };
+              };
+              menu = {
+                auto_show = lib.generators.mkLuaInline ''
+                  function(ctx)
+                    return vim.fn.getcmdtype() == ":"
+                  end
+                '';
+              };
+              ghost_text = {
+                enabled = true;
+              };
+            };
           };
         };
       };
@@ -87,14 +134,14 @@
           -- Error handling with log.Fatal
           s("erfatal", fmt([[
             if err != nil {{
-              log.Fatal(err)
+              fmt.Fatal(err)
             }}
           ]], {})),
 
           -- Error handling with log.Printf
           s("erlog", fmt([[
             if err != nil {{
-              log.Printf("{}: %v", err)
+              fmt.Printf("{}: %v", err)
             }}
           ]], { i(1, "error") })),
 

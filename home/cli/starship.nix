@@ -28,7 +28,7 @@ mkHomeModule {
         settings = {
           "$schema" = "https://starship.rs/config-schema.json";
 
-          format = ''$status$os $directory $git_branch$git_status $golang$nodejs$php$python $cmd_duration$line_break$character'';
+          format = ''$status$os $directory  $git_branch$git_status $golang$nodejs$php$python $cmd_duration$line_break$character'';
 
           palette = "catppuccin_mocha";
 
@@ -52,7 +52,7 @@ mkHomeModule {
 
           directory = {
             style = "fg:peach";
-            format = "[󰉋/$path ]($style)";
+            format = "[󰉋/$path]($style)";
             truncation_length = 3;
             truncation_symbol = ".../";
             substitutions = {

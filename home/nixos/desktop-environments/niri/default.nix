@@ -3,18 +3,22 @@
 {
   imports = [
     ./niri.nix
-    ../common/rofi.nix
-    ../common/fuzzel.nix
     ./waybar
     ../common/dunst.nix
     ../common/wlogout
     ../common/hyprlock
+    ../common/rofi.nix
+    ../common/fuzzel.nix
+    ../common/noctalia.nix
   ];
 
   home.desktop-environments = {
     niri = {
       enable = lib.mkDefault true;
       waybar.enable = lib.mkDefault true;
+    };
+    noctalia = {
+      enable = lib.mkDefault true;
     };
     common = {
       rofi.enable = lib.mkDefault true;

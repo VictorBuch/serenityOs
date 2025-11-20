@@ -16,8 +16,8 @@
       settings = {
         main = {
           font = "JetBrainsMono Nerd Font:weight=bold:size=12";
-          line-height = 32;
-          width = 60;
+          line-height = 30;
+          width = 40;
           fields = "name,generic,comment,categories,filename,keywords";
           terminal = "ghostty -e";
           prompt = ''"❯   "'';
@@ -37,8 +37,8 @@
         };
 
         border = {
-          radius = 20;
-          width = 3;
+          radius = 10;
+          width = 2;
         };
       };
     };

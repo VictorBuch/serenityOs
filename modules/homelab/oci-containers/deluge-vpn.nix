@@ -74,7 +74,7 @@
 
         volumes = [
           "/var/lib/deluge/config:/config"
-          "/mnt/data/media/downloads:/downloads"
+          "${config.homelab.mediaDir}/downloads:/downloads"
         ];
 
         environment = {

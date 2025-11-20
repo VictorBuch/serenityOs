@@ -11,6 +11,8 @@
   imports = [
     ../nixos/system-configs/user.nix
     ./configs.nix
+    ./storage.nix
+    ./database-backups.nix
     ./maintenance.nix
     ./oci-containers/uptime-kuma.nix
     ./oci-containers/crafty.nix

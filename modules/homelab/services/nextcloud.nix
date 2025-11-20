@@ -75,29 +75,29 @@ in
       users."${user.userName}".extraGroups = [ "nextcloud" ];
     };
 
-    # Ensure all Nextcloud services wait for NFS mounts
+    # Ensure all Nextcloud services wait for mergerFS pool mount
     systemd.services.nextcloud-setup = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.nextcloud-update-db = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.phpfpm-nextcloud = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
 
-    # Create nextcloud directories and set proper ownership for NFSv4
+    # Create nextcloud directories and set proper ownership
     systemd.services.nextcloud-directories = {
       description = "Create Nextcloud directories and set ownership";
       before = [
         "nextcloud-setup.service"
         "phpfpm-nextcloud.service"
       ];
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";

@@ -43,7 +43,8 @@
       "Bash(tree:*)",
       "mcp__nixos__home_manager_info",
       "WebFetch(domain:mynixos.com)",
-      "WebFetch(domain:starship.rs)"
+      "WebFetch(domain:starship.rs)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

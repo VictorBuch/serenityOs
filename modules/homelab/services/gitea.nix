@@ -45,8 +45,7 @@ in
         host = "/run/postgresql";
         name = "gitea";
         user = giteaUser;
-        # Use Unix socket authentication for PostgreSQL
-        passwordFile = null;
+        # Uses Unix socket authentication - no password needed
       };
 
       # Git LFS support for large files

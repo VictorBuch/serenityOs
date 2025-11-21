@@ -19,9 +19,9 @@ in
     # inputs.home-manager.nixosModules.default
   ];
 
-  # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; # Adjust according to your disk
+  # Bootloader (UEFI with systemd-boot)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernel.sysctl = {
     "fs.inotify.max_user_watches" = "1048576"; # 128 times the default 8192

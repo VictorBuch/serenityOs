@@ -10,20 +10,20 @@
   # Mount individual data drives with labels for stability
   fileSystems."/mnt/disk1" = {
     device = "/dev/disk/by-label/data01";
-    fsType = "xfs";
+    fsType = "ext4";
     options = ["defaults" "noatime"];  # noatime reduces write overhead
   };
 
   fileSystems."/mnt/disk2" = {
     device = "/dev/disk/by-label/data02";
-    fsType = "xfs";
+    fsType = "ext4";
     options = ["defaults" "noatime"];
   };
 
   # Parity disk 1
   fileSystems."/mnt/parity1" = {
     device = "/dev/disk/by-label/parity01";
-    fsType = "xfs";
+    fsType = "ext4";
     options = ["defaults" "noatime"];
   };
 

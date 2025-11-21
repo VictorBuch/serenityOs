@@ -96,7 +96,7 @@ validate_storage() {
                     expected_fs="btrfs"
                     ;;
                 "data01"|"data02"|"parity01")
-                    expected_fs="xfs"
+                    expected_fs="ext4"
                     ;;
             esac
 

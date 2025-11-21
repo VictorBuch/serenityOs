@@ -110,7 +110,7 @@ in
 
     # Gitea Actions Runners for CI/CD
     services.gitea-actions-runner = {
-      package = pkgs.forgejo-actions-runner; # Compatible with Gitea Actions
+      package = pkgs.forgejo-runner; # Compatible with Gitea Actions
 
       instances = {
         # Docker runner for containerized builds

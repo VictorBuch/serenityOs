@@ -167,8 +167,8 @@
       "/lost+found/"
       ".DS_Store"
       ".Thumbs.db"
-      "downloads/incomplete/"  # Exclude incomplete downloads
-      ".cache/"
+      "/downloads/incomplete/"  # Exclude incomplete downloads
+      "/.cache/"
     ];
 
     # Touch files before sync to update timestamps
@@ -176,8 +176,8 @@
 
     # Additional configuration
     extraConfig = ''
-      nohidden          # Exclude hidden files
-      autosave 500      # Autosave state every 500 MB processed
+      nohidden
+      autosave 500
     '';
   };
 

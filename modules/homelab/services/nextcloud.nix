@@ -70,7 +70,7 @@ in
         isSystemUser = true;
         uid = 912;
         group = "nextcloud";
-        home = "${nextcloudDir}/nextcloud";
+        home = nextcloudDir;
       };
       users."${user.userName}".extraGroups = [ "nextcloud" ];
     };
@@ -145,19 +145,22 @@ in
         }
 
         # Check and fix directories only if needed
-        fix_dir "${nextcloudDir}/nextcloud" "770"
-        fix_dir "${nextcloudDir}/nextcloud/config" "770"
-        fix_dir "${nextcloudDir}/nextcloud/data" "770"
-        fix_dir "${nextcloudDir}/nextcloud/store-apps" "770"
-        fix_dir "${nextcloudDir}/nextcloud/apps" "770"
+        # NixOS nextcloud module uses ${home}/nextcloud internally
+        # With home=/mnt/pool, final path is /mnt/pool/nextcloud
+        NCDIR="${nextcloudDir}/nextcloud"
+        fix_dir "$NCDIR" "770"
+        fix_dir "$NCDIR/config" "770"
+        fix_dir "$NCDIR/data" "770"
+        fix_dir "$NCDIR/store-apps" "770"
+        fix_dir "$NCDIR/apps" "770"
 
         # Only run recursive chown if we detect ownership issues in subdirectories
-        if [ -d "${nextcloudDir}/nextcloud" ]; then
+        if [ -d "$NCDIR" ]; then
           # Check if any files/subdirs have wrong ownership (but don't fix yet)
-          wrong_files=$(find "${nextcloudDir}/nextcloud" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
+          wrong_files=$(find "$NCDIR" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
           if [ "$wrong_files" -gt 0 ]; then
             echo "Found $wrong_files files with wrong ownership, fixing recursively..."
-            chown -R nextcloud:nextcloud "${nextcloudDir}/nextcloud"
+            chown -R nextcloud:nextcloud "$NCDIR"
           else
             echo "All files have correct ownership, skipping recursive chown"
           fi
@@ -172,7 +175,7 @@ in
       hostName = "nextcloud.${domain}";
       https = true;
       maxUploadSize = "16G";
-      home = "${nextcloudDir}/nextcloud";
+      home = nextcloudDir;
       appstoreEnable = false;
 
       # Configure PHP-FPM for NextCloud

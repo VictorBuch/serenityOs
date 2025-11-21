@@ -129,6 +129,10 @@ Add minimal essentials:
 nixos-install
 # Set root password when prompted
 
+# IMPORTANT: Set password for serenity user before rebooting
+# Without this, you won't have sudo access after reboot
+nixos-enter --root /mnt -c "passwd serenity"
+
 # Reboot
 reboot
 ```
@@ -143,8 +147,8 @@ Boot into the new system and login as serenity.
 # Install git if not already available
 nix-shell -p git
 
-# Clone your configuration
-git clone https://github.com/VictorBuch/serenityOs.git ~/serenityOs
+# Clone your configuration (mergerfs-snapraid branch)
+git clone -b mergerfs-snapraid https://github.com/VictorBuch/serenityOs.git ~/serenityOs
 cd ~/serenityOs
 ```
 
@@ -165,7 +169,25 @@ sudo cp /etc/nixos/hardware-configuration.nix ~/serenityOs/hosts/serenity/
 cat ~/serenityOs/hosts/serenity/hardware-configuration.nix
 ```
 
-### 5. Build Configuration
+### 5. Build and Switch Configuration
+
+**Option A: Automated (Recommended)**
+```bash
+cd ~/serenityOs
+
+# Run the install script - handles build, switch, and Phase 3 setup
+./install-serenity.sh
+```
+
+This script will:
+- Validate storage labels and filesystems
+- Create the `/cache` directory
+- Run `nixos-rebuild switch --flake .#serenity`
+- Create service directories on mergerFS pool
+- Optionally run initial SnapRAID sync
+- Verify all mounts and services
+
+**Option B: Manual**
 ```bash
 cd ~/serenityOs
 
@@ -174,32 +196,30 @@ nix flake check
 
 # Build (don't switch yet)
 sudo nixos-rebuild build --flake .#serenity
-```
 
-If build succeeds, review what will change:
-```bash
+# Review what will change
 nix store diff-closures /run/current-system ./result
-```
 
-### 6. Switch to New Configuration
-```bash
+# Switch to new configuration
 sudo nixos-rebuild switch --flake .#serenity
+
+# Create cache directory
+sudo mkdir -p /cache
+sudo chmod 755 /cache
 ```
 
-This will:
+Both options will:
 - Mount HDDs at `/mnt/disk1`, `/mnt/disk2`, `/mnt/parity1`
 - Create mergerFS pools at `/mnt/cold` and `/mnt/pool`
 - Install mergerFS and snapraid
 - Set up systemd services and timers
 - Enable all configured homelab services
 
-### 7. Create Cache Directory
-```bash
-sudo mkdir -p /cache
-sudo chmod 755 /cache
-```
+If you used Option A, skip to Phase 4 (the script handles Phase 3).
 
 ## Phase 3: Initialize Storage
+
+_(Skip this phase if you used `install-serenity.sh`)_
 
 ### 1. Verify Mounts
 ```bash

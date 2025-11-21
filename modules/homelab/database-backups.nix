@@ -1,6 +1,16 @@
 { config, lib, pkgs, ... }:
 
 {
+  # Create backup directories with correct ownership
+  systemd.tmpfiles.rules = [
+    "d /mnt/pool/backups/postgres 0750 postgres postgres -"
+    "d /mnt/pool/backups/postgres/daily 0750 postgres postgres -"
+    "d /mnt/pool/backups/postgres/weekly 0750 postgres postgres -"
+    "d /mnt/pool/backups/mysql 0750 mysql mysql -"
+    "d /mnt/pool/backups/mysql/daily 0750 mysql mysql -"
+    "d /mnt/pool/backups/mysql/weekly 0750 mysql mysql -"
+  ];
+
   # PostgreSQL backup service (for Immich)
   systemd.services.postgres-backup = {
     description = "Backup PostgreSQL databases to mergerFS pool";

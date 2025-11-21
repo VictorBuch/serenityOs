@@ -232,11 +232,11 @@ in
         owner = "root";
         group = "root";
       };
-      "tailscale/auth_key" = {
-        mode = "0400";
-        owner = "root";
-        group = "root";
-      };
+      # "tailscale/auth_key" = {
+      #   mode = "0400";
+      #   owner = "root";
+      #   group = "root";
+      # };
     };
   };
 
@@ -340,6 +340,6 @@ in
   # Development
   gitea.enable = false;
 
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
 
 }

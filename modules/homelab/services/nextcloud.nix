@@ -145,22 +145,19 @@ in
         }
 
         # Check and fix directories only if needed
-        # NixOS nextcloud module uses home/nextcloud internally
-        # With home=/mnt/pool, final path is /mnt/pool/nextcloud
-        NCDIR="${nextcloudDir}/nextcloud"
-        fix_dir "''${NCDIR}" "770"
-        fix_dir "''${NCDIR}/config" "770"
-        fix_dir "''${NCDIR}/data" "770"
-        fix_dir "''${NCDIR}/store-apps" "770"
-        fix_dir "''${NCDIR}/apps" "770"
+        fix_dir "${nextcloudDir}" "770"
+        fix_dir "${nextcloudDir}/config" "770"
+        fix_dir "${nextcloudDir}/data" "770"
+        fix_dir "${nextcloudDir}/store-apps" "770"
+        fix_dir "${nextcloudDir}/apps" "770"
 
         # Only run recursive chown if we detect ownership issues in subdirectories
-        if [ -d "''${NCDIR}" ]; then
+        if [ -d "${nextcloudDir}" ]; then
           # Check if any files/subdirs have wrong ownership (but don't fix yet)
-          wrong_files=$(find "''${NCDIR}" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
+          wrong_files=$(find "${nextcloudDir}" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
           if [ "''${wrong_files}" -gt 0 ]; then
             echo "Found ''${wrong_files} files with wrong ownership, fixing recursively..."
-            chown -R nextcloud:nextcloud "''${NCDIR}"
+            chown -R nextcloud:nextcloud "${nextcloudDir}"
           else
             echo "All files have correct ownership, skipping recursive chown"
           fi

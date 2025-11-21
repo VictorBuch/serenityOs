@@ -22,8 +22,8 @@ in
     };
     nextcloudDir = lib.mkOption {
       type = lib.types.str;
-      default = "/mnt/pool";
-      description = "Parent directory for Nextcloud (module adds /nextcloud)";
+      default = "/mnt/pool/nextcloud";
+      description = "Directory for Nextcloud data";
     };
     domain = lib.mkOption {
       type = lib.types.str;

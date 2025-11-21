@@ -290,7 +290,7 @@ in
 
   # Networking and Auth
   tailscale = {
-    enable = true;
+    enable = false;
     advertiseExitNode = true;
     useRoutingFeatures = "both"; # Act as both client and server
     enableSsh = true; # Allow SSH via Tailscale

@@ -59,7 +59,7 @@ in
 
     # Pocket ID container
     virtualisation.oci-containers.containers.pocket-id = {
-      image = "ghcr.io/pocket-id/pocket-id:v1";
+      image = "ghcr.io/pocket-id/pocket-id:v1.15.0";
       autoStart = true;
 
       ports = [

@@ -79,7 +79,7 @@
 
         environment = {
           "PUID" = "1000"; # serenity user UID
-          "PGID" = "993"; # multimedia group GID
+          "PGID" = "994"; # multimedia group GID
           "TZ" = "Europe/Copenhagen";
           "DELUGE_LOGLEVEL" = "error";
         };
@@ -87,6 +87,17 @@
         extraOptions = [
           "--network=container:gluetun"
         ];
+      };
+
+      # Ensure containers wait for storage mounts
+      systemd.services.docker-gluetun = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
+      };
+
+      systemd.services.docker-deluge = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
       };
 
       # Create environment file template for Gluetun with PIA credentials

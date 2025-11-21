@@ -18,9 +18,9 @@ in
     networking.firewall.allowedTCPPorts = [ 8282 ];
 
     systemd.tmpfiles.rules = [
-      "d /home/${user.userName}/wallos 775 ${user.userName} ${user.group}"
-      "d /home/${user.userName}/wallos/db 775 ${user.userName} ${user.group}"
-      "d /home/${user.userName}/wallos/logos 775 ${user.userName} ${user.group}"
+      "d /home/${user.userName}/wallos 775 ${uid} ${user.group}"
+      "d /home/${user.userName}/wallos/db 775 ${uid} ${user.group}"
+      "d /home/${user.userName}/wallos/logos 775 ${uid} ${user.group}"
     ];
 
     virtualisation.oci-containers.containers.wallos = {
@@ -33,6 +33,7 @@ in
       environment = {
         TZ = "Europe/Prague";
       };
+      user = "${uid}:${user.group}";
       autoStart = true;
     };
   };

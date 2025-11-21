@@ -145,7 +145,7 @@ in
         }
 
         # Check and fix directories only if needed
-        # NixOS nextcloud module uses ${home}/nextcloud internally
+        # NixOS nextcloud module uses home/nextcloud internally
         # With home=/mnt/pool, final path is /mnt/pool/nextcloud
         NCDIR="${nextcloudDir}/nextcloud"
         fix_dir "$NCDIR" "770"

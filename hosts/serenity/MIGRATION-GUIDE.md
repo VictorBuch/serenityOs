@@ -6,7 +6,7 @@ Migration from Proxmox VM with TrueNAS NFS to baremetal NixOS with mergerFS + Sn
 
 **Hardware:**
 - 4TB SSD (btrfs): NixOS root + `/cache` directory for mergerFS cache tier
-- 3x12TB HDD (XFS): mergerFS data pool with SnapRAID parity
+- 3x12TB HDD (ext4): mergerFS data pool with SnapRAID parity
 - 250GB SSD: Unused (reserved for future download staging)
 
 **Storage Layout:**
@@ -56,22 +56,22 @@ mkfs.btrfs -L nixos /dev/sda1
 mount /dev/disk/by-label/nixos /mnt
 ```
 
-**12TB HDDs (data disks with XFS):**
+**12TB HDDs (data disks with ext4):**
 ```bash
 # First data disk
 parted /dev/sdb -- mklabel gpt
 parted /dev/sdb -- mkpart primary 1MiB 100%
-mkfs.xfs -L data01 /dev/sdb1
+mkfs.ext4 -L data01 /dev/sdb1
 
 # Second data disk
 parted /dev/sdc -- mklabel gpt
 parted /dev/sdc -- mkpart primary 1MiB 100%
-mkfs.xfs -L data02 /dev/sdc1
+mkfs.ext4 -L data02 /dev/sdc1
 
 # Parity disk
 parted /dev/sdd -- mklabel gpt
 parted /dev/sdd -- mkpart primary 1MiB 100%
-mkfs.xfs -L parity01 /dev/sdd1
+mkfs.ext4 -L parity01 /dev/sdd1
 ```
 
 **Verify labels:**
@@ -206,8 +206,8 @@ sudo chmod 755 /cache
 df -h
 # Should show:
 # - / (btrfs, 4TB)
-# - /mnt/disk1, /mnt/disk2 (xfs, 12TB each)
-# - /mnt/parity1 (xfs, 12TB)
+# - /mnt/disk1, /mnt/disk2 (ext4, 12TB each)
+# - /mnt/parity1 (ext4, 12TB)
 # - /mnt/cold (mergerfs, ~24TB)
 # - /mnt/pool (mergerfs, ~28TB with cache)
 
@@ -440,12 +440,12 @@ sudo systemctl start postgres-backup.service
 # 2. Partition and format
 parted /dev/sdX -- mklabel gpt
 parted /dev/sdX -- mkpart primary 1MiB 100%
-mkfs.xfs -L data03 /dev/sdX1
+mkfs.ext4 -L data03 /dev/sdX1
 
 # 3. Edit storage.nix, add:
 fileSystems."/mnt/disk3" = {
   device = "/dev/disk/by-label/data03";
-  fsType = "xfs";
+  fsType = "ext4";
   options = ["defaults" "noatime"];
 };
 

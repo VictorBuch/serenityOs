@@ -20,9 +20,9 @@ in
   ];
 
   boot = {
-    # Bootloader (Legacy BIOS with GRUB)
-    loader.grub.enable = true;
-    loader.grub.device = "/dev/sda"; # Adjust to your boot disk
+    # Bootloader (UEFI with systemd-boot)
+    loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = true;
 
     kernel.sysctl = {
       "fs.inotify.max_user_watches" = "1048576"; # 128 times the default 8192

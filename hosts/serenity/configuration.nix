@@ -19,9 +19,9 @@ in
     # inputs.home-manager.nixosModules.default
   ];
 
-  # Bootloader.
+  # Bootloader (Legacy BIOS with GRUB)
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; # Adjust according to your disk
+  boot.loader.grub.device = "/dev/sda"; # Adjust to your boot disk
 
   boot.kernel.sysctl = {
     "fs.inotify.max_user_watches" = "1048576"; # 128 times the default 8192

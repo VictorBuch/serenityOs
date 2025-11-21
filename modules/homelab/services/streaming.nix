@@ -50,14 +50,14 @@ in
       recyclarr
     ];
 
-    # Ensure all streaming services wait for NFS mounts
+    # Ensure all streaming services wait for storage mounts
     systemd.services.jellyfin = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     # systemd.services.plex = {
-    #   after = [ "nfs-mounts-ready.target" ];
-    #   requires = [ "nfs-mounts-ready.target" ];
+    #   after = [ "mnt-pool.mount" ];
+    #   requires = [ "mnt-pool.mount" ];
     # };
 
     # Streaming services

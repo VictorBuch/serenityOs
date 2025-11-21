@@ -40,29 +40,29 @@ in
       "vm.overcommit_memory" = lib.mkForce 1;
     };
 
-    # Ensure all Immich services wait for NFS mounts
+    # Ensure all Immich services wait for storage mounts
     systemd.services.immich-server = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.immich-machine-learning = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.redis-immich = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
 
-    # Create immich directories and set proper ownership for NFSv4
+    # Create immich directories and set proper ownership
     systemd.services.immich-directories = {
       description = "Create Immich directories and set ownership";
       before = [
         "immich-server.service"
         "immich-machine-learning.service"
       ];
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";

@@ -69,7 +69,7 @@ in
             --address ${cfg.address} \
             --port ${toString cfg.port} \
             --database /var/lib/filebrowser/filebrowser.db \
-            --root /mnt/data
+            --root /mnt/pool
         '';
       };
     };

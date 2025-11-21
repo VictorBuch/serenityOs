@@ -338,7 +338,7 @@ in
   lab.enable = false;
 
   # Development
-  gitea.enable = true;
+  gitea.enable = false;
 
   system.stateVersion = "24.05"; # Did you read the comment?
 

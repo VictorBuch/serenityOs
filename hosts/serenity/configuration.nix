@@ -6,7 +6,7 @@
   ...
 }:
 let
-  username = "ghost";
+  username = "serenity";
   hl = config.homelab;
   nixosIp = hl.nixosIp;
   uid = toString config.user.uid;

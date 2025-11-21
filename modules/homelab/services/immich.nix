@@ -9,7 +9,7 @@ let
   immichDir = config.homelab.immichDir;
   domain = config.homelab.domain;
   user = config.user;
-  uid = toString config.user.uid; # ghost user UID
+  uid = toString config.user.uid; # serenity user UID
   gid = "immich"; # immich group
 in
 {
@@ -33,7 +33,7 @@ in
       shell = pkgs.bash;
     };
 
-    # Add ghost user to immich group for management access
+    # Add serenity user to immich group for management access
     users.users.${user.userName}.extraGroups = [ "immich" ];
 
     boot.kernel.sysctl = {

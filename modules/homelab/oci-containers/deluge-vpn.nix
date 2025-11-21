@@ -78,7 +78,7 @@
         ];
 
         environment = {
-          "PUID" = "1000"; # ghost user UID
+          "PUID" = "1000"; # serenity user UID
           "PGID" = "993"; # multimedia group GID
           "TZ" = "Europe/Copenhagen";
           "DELUGE_LOGLEVEL" = "error";

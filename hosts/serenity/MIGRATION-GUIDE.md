@@ -30,7 +30,7 @@ Migration from Proxmox VM with TrueNAS NFS to baremetal NixOS with mergerFS + Sn
 
 ## Pre-Installation Checklist
 
-- [ ] Backup SOPS age key from current system: `/home/ghost/.config/sops/age/keys.txt`
+- [ ] Backup SOPS age key from current system: `/home/serenity/.config/sops/age/keys.txt`
 - [ ] Verify all secrets are in git: `secrets/secrets.yaml`
 - [ ] Download NixOS 24.05 ISO (or latest stable)
 - [ ] Have physical access to server hardware
@@ -115,7 +115,7 @@ Add minimal essentials:
   services.openssh.enable = true;
 
   # User
-  users.users.ghost = {
+  users.users.serenity = {
     isNormalUser = true;
     extraGroups = ["wheel" "networkmanager"];
   };
@@ -136,7 +136,7 @@ reboot
 ## Phase 2: Deploy Serenity Configuration
 
 ### 1. Initial System Access
-Boot into the new system and login as ghost.
+Boot into the new system and login as serenity.
 
 ### 2. Clone Repository
 ```bash
@@ -243,7 +243,7 @@ sudo mkdir -p /mnt/pool/nextcloud
 sudo mkdir -p /mnt/pool/backups/{postgres,mysql}
 
 # Set permissions for your user
-sudo chown -R ghost:users /mnt/pool
+sudo chown -R serenity:users /mnt/pool
 ```
 
 ### 4. Initial SnapRAID Sync
@@ -415,7 +415,7 @@ sudo snapraid smart
 ls -la /mnt/pool/
 
 # Fix ownership if needed
-sudo chown -R ghost:users /mnt/pool/media
+sudo chown -R serenity:users /mnt/pool/media
 sudo chown -R nextcloud:nextcloud /mnt/pool/nextcloud
 ```
 

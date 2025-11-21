@@ -16,7 +16,6 @@
     ./maintenance.nix
     ./oci-containers/uptime-kuma.nix
     ./oci-containers/crafty.nix
-    ./oci-containers/immich.nix
     ./oci-containers/deluge-vpn.nix
     ./oci-containers/wallos.nix
     ./oci-containers/tinyauth.nix

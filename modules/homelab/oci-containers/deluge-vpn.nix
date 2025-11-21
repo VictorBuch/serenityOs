@@ -185,103 +185,103 @@
 
           # Configuration
           STATE_DIR="/data"
-          CACHE_FILE="$STATE_DIR/last_ip"
-          RATE_LIMIT_FILE="$STATE_DIR/last_update"
-          COOKIE_FILE="$STATE_DIR/mam_cookie"
+          CACHE_FILE="''${STATE_DIR}/last_ip"
+          RATE_LIMIT_FILE="''${STATE_DIR}/last_update"
+          COOKIE_FILE="''${STATE_DIR}/mam_cookie"
           MAM_API_URL="https://t.myanonamouse.net/json/dynamicSeedbox.php"
           MAM_IP_URL="https://t.myanonamouse.net/json/jsonIp.php"
 
           # Check if cookie file exists
-          if [[ ! -f "$COOKIE_FILE" ]]; then
-            echo "ERROR: MAM cookie file not found at $COOKIE_FILE"
+          if [[ ! -f "''${COOKIE_FILE}" ]]; then
+            echo "ERROR: MAM cookie file not found at ''${COOKIE_FILE}"
             echo "Please ensure MAM session cookie is configured"
             exit 1
           fi
 
           # Read cookie
-          MAM_COOKIE=$(cat "$COOKIE_FILE" | grep '^mam_id=' | cut -d'=' -f2- || echo "")
-          if [[ -z "$MAM_COOKIE" ]]; then
+          MAM_COOKIE=$(cat "''${COOKIE_FILE}" | grep '^mam_id=' | cut -d'=' -f2- || echo "")
+          if [[ -z "''${MAM_COOKIE}" ]]; then
             echo "ERROR: MAM cookie is empty or malformed"
             exit 1
           fi
 
           # Get current IP from MAM (this ensures we're using the VPN IP)
           echo "Checking current IP..."
-          CURRENT_IP_RESPONSE=$(curl -s --fail "$MAM_IP_URL" || echo "")
-          if [[ -z "$CURRENT_IP_RESPONSE" ]]; then
+          CURRENT_IP_RESPONSE=$(curl -s --fail "''${MAM_IP_URL}" || echo "")
+          if [[ -z "''${CURRENT_IP_RESPONSE}" ]]; then
             echo "ERROR: Failed to get current IP from MAM"
             exit 1
           fi
 
-          CURRENT_IP=$(echo "$CURRENT_IP_RESPONSE" | jq -r '.ip' 2>/dev/null || echo "")
-          if [[ -z "$CURRENT_IP" || "$CURRENT_IP" == "null" ]]; then
-            echo "ERROR: Failed to parse IP from response: $CURRENT_IP_RESPONSE"
+          CURRENT_IP=$(echo "''${CURRENT_IP_RESPONSE}" | jq -r '.ip' 2>/dev/null || echo "")
+          if [[ -z "''${CURRENT_IP}" || "''${CURRENT_IP}" == "null" ]]; then
+            echo "ERROR: Failed to parse IP from response: ''${CURRENT_IP_RESPONSE}"
             exit 1
           fi
 
-          echo "Current IP: $CURRENT_IP"
+          echo "Current IP: ''${CURRENT_IP}"
 
           # Check cached IP
           CACHED_IP=""
-          if [[ -f "$CACHE_FILE" ]]; then
-            CACHED_IP=$(cat "$CACHE_FILE" 2>/dev/null || echo "")
+          if [[ -f "''${CACHE_FILE}" ]]; then
+            CACHED_IP=$(cat "''${CACHE_FILE}" 2>/dev/null || echo "")
           fi
 
-          echo "Cached IP: $CACHED_IP"
+          echo "Cached IP: ''${CACHED_IP}"
 
           # Check if IP has changed
-          if [[ "$CURRENT_IP" == "$CACHED_IP" ]]; then
+          if [[ "''${CURRENT_IP}" == "''${CACHED_IP}" ]]; then
             echo "IP unchanged, no update needed"
             exit 0
           fi
 
           # Check rate limit (1 hour = 3600 seconds)
-          if [[ -f "$RATE_LIMIT_FILE" ]]; then
-            LAST_UPDATE=$(cat "$RATE_LIMIT_FILE" 2>/dev/null || echo "0")
+          if [[ -f "''${RATE_LIMIT_FILE}" ]]; then
+            LAST_UPDATE=$(cat "''${RATE_LIMIT_FILE}" 2>/dev/null || echo "0")
             CURRENT_TIME=$(date +%s)
             TIME_DIFF=$((CURRENT_TIME - LAST_UPDATE))
-            
-            if [[ $TIME_DIFF -lt 3600 ]]; then
+
+            if [[ ''${TIME_DIFF} -lt 3600 ]]; then
               WAIT_TIME=$((3600 - TIME_DIFF))
-              echo "Rate limit: Must wait $WAIT_TIME seconds before next update"
+              echo "Rate limit: Must wait ''${WAIT_TIME} seconds before next update"
               exit 0
             fi
           fi
 
           # Update MAM with new IP
-          echo "Updating MAM with new IP: $CURRENT_IP"
-          API_RESPONSE=$(curl -s -b "mam_id=$MAM_COOKIE" "$MAM_API_URL" || echo "")
+          echo "Updating MAM with new IP: ''${CURRENT_IP}"
+          API_RESPONSE=$(curl -s -b "mam_id=''${MAM_COOKIE}" "''${MAM_API_URL}" || echo "")
 
-          if [[ -z "$API_RESPONSE" ]]; then
+          if [[ -z "''${API_RESPONSE}" ]]; then
             echo "ERROR: Failed to call MAM API"
             exit 1
           fi
 
-          echo "MAM API Response: $API_RESPONSE"
+          echo "MAM API Response: ''${API_RESPONSE}"
 
           # Parse response
-          SUCCESS=$(echo "$API_RESPONSE" | jq -r '.Success' 2>/dev/null || echo "false")
-          MESSAGE=$(echo "$API_RESPONSE" | jq -r '.msg' 2>/dev/null || echo "unknown")
+          SUCCESS=$(echo "''${API_RESPONSE}" | jq -r '.Success' 2>/dev/null || echo "false")
+          MESSAGE=$(echo "''${API_RESPONSE}" | jq -r '.msg' 2>/dev/null || echo "unknown")
 
-          if [[ "$SUCCESS" == "true" ]]; then
-            case "$MESSAGE" in
+          if [[ "''${SUCCESS}" == "true" ]]; then
+            case "''${MESSAGE}" in
               "Completed")
-                echo "SUCCESS: IP updated to $CURRENT_IP"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
-                date +%s > "$RATE_LIMIT_FILE"
+                echo "SUCCESS: IP updated to ''${CURRENT_IP}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
+                date +%s > "''${RATE_LIMIT_FILE}"
                 ;;
               "No Change")
-                echo "SUCCESS: IP already set to $CURRENT_IP"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
+                echo "SUCCESS: IP already set to ''${CURRENT_IP}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
                 ;;
               *)
-                echo "SUCCESS: $MESSAGE"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
+                echo "SUCCESS: ''${MESSAGE}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
                 ;;
             esac
           else
-            echo "ERROR: MAM API call failed - $MESSAGE"
-            case "$MESSAGE" in
+            echo "ERROR: MAM API call failed - ''${MESSAGE}"
+            case "''${MESSAGE}" in
               "Last Change too recent")
                 echo "Rate limited by MAM, will retry later"
                 ;;

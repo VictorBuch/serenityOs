@@ -80,35 +80,35 @@
       TARGET=60     # Target after cleanup
 
       # Get cache usage percentage
-      USAGE=$(df "$CACHE" | awk 'NR==2 {print int($5)}')
+      USAGE=$(df "''${CACHE}" | awk 'NR==2 {print int($5)}')
 
-      if [ "$USAGE" -gt "$THRESHOLD" ]; then
-        echo "Cache at $USAGE%, moving files to backing storage..."
+      if [ "''${USAGE}" -gt "''${THRESHOLD}" ]; then
+        echo "Cache at ''${USAGE}%, moving files to backing storage..."
 
         # Find files older than 7 days, move oldest first
-        find "$CACHE" -type f -atime +7 -printf '%A@ %p\0' 2>/dev/null | \
+        find "''${CACHE}" -type f -atime +7 -printf '%A@ %p\0' 2>/dev/null | \
           sort -z -n | \
           while IFS= read -r -d "" line; do
-            FILE=$(echo "$line" | cut -d' ' -f2-)
-            RELPATH="''${FILE#$CACHE/}"
+            FILE=$(echo "''${line}" | cut -d' ' -f2-)
+            RELPATH="''${FILE#''${CACHE}/}"
 
             # Create directory structure in backing storage
-            mkdir -p "$BACKING/$(dirname "$RELPATH")"
+            mkdir -p "''${BACKING}/$(dirname "''${RELPATH}")"
 
             # Move file
-            rsync -a --remove-source-files "$FILE" "$BACKING/$RELPATH"
+            rsync -a --remove-source-files "''${FILE}" "''${BACKING}/''${RELPATH}"
 
             # Check if we've reached target usage
-            CURRENT=$(df "$CACHE" | awk 'NR==2 {print int($5)}')
-            [ "$CURRENT" -le "$TARGET" ] && break
+            CURRENT=$(df "''${CACHE}" | awk 'NR==2 {print int($5)}')
+            [ "''${CURRENT}" -le "''${TARGET}" ] && break
           done
 
         # Clean up empty directories
-        find "$CACHE" -type d -empty -delete 2>/dev/null || true
+        find "''${CACHE}" -type d -empty -delete 2>/dev/null || true
 
-        echo "Cache cleanup complete. Usage now: $(df "$CACHE" | awk 'NR==2 {print $5}')"
+        echo "Cache cleanup complete. Usage now: $(df "''${CACHE}" | awk 'NR==2 {print $5}')"
       else
-        echo "Cache at $USAGE%, no cleanup needed."
+        echo "Cache at ''${USAGE}%, no cleanup needed."
       fi
     '';
     serviceConfig = {

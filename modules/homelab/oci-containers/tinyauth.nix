@@ -41,8 +41,8 @@ in
     };
 
     logLevel = lib.mkOption {
-      type = lib.types.int;
-      default = 1;
+      type = lib.types.str;
+      default = "info";
       description = "Log level verbosity";
     };
 

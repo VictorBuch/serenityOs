@@ -307,7 +307,9 @@ in
   };
   authelia.enable = false;
   adguard.enable = true;
-  pocket-id.enable = true;
+  pocket-id = {
+    enable = true;
+  };
 
   # Smart home
   hyperhdr.enable = true;

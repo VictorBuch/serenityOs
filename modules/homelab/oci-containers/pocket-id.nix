@@ -7,13 +7,13 @@
 }:
 
 let
-  cfg = config.pocket-id;
+  cfg = config.pocket-id-oci;
   hl = config.homelab;
   domain = hl.domain;
 in
 
 {
-  options.pocket-id = {
+  options.pocket-id-oci = {
     enable = lib.mkEnableOption "Enables Pocket ID authentication service";
 
     appUrl = lib.mkOption {

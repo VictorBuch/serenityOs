@@ -65,7 +65,7 @@ in
 
     # TinyAuth container
     virtualisation.oci-containers.containers.tinyauth = {
-      image = "ghcr.io/steveiliop56/tinyauth:v4";
+      image = "ghcr.io/steveiliop56/tinyauth:v4.1.0";
       autoStart = true;
 
       ports = [

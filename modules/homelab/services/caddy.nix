@@ -149,7 +149,7 @@ let
       https = false;
       protected = true;
       isStaticFiles = true;
-      staticPath = "${pkgs.it-tools}/lib/node_modules/it-tools/dist";
+      staticPath = "${pkgs.it-tools}/lib";
     };
   };
 

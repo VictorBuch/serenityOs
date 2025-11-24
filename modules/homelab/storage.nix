@@ -70,7 +70,7 @@
   # Systemd service for cache mover
   systemd.services.mergerfs-cache-mover = {
     description = "Move old files from SSD cache to backing storage";
-    path = with pkgs; [bash coreutils rsync findutils];
+    path = with pkgs; [bash coreutils rsync findutils gawk];  # Added gawk for awk command
     script = ''
       #!/usr/bin/env bash
 

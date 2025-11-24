@@ -232,11 +232,16 @@ in
         owner = "root";
         group = "root";
       };
-      # "tailscale/auth_key" = {
-      #   mode = "0400";
-      #   owner = "root";
-      #   group = "root";
-      # };
+      "gitea/runner_token" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
+      "tailscale/auth_key" = {
+        mode = "0400";
+        owner = "root";
+        group = "root";
+      };
     };
   };
 
@@ -290,7 +295,7 @@ in
 
   # Networking and Auth
   tailscale = {
-    enable = false;
+    enable = true;
     advertiseExitNode = true;
     useRoutingFeatures = "both"; # Act as both client and server
     enableSsh = true; # Allow SSH via Tailscale
@@ -340,7 +345,7 @@ in
   lab.enable = false;
 
   # Development
-  gitea.enable = false;
+  gitea.enable = true;
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

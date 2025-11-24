@@ -33,7 +33,8 @@ in
       environment = {
         TZ = "Europe/Prague";
       };
-      user = "${uid}:${user.group}";
+      # Let the container run as root (default) - it needs this for initial setup
+      # The container will drop privileges internally after setup if needed
       autoStart = true;
     };
   };

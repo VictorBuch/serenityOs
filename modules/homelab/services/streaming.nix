@@ -25,20 +25,20 @@ in
       groups.multimedia = {
         name = "multimedia";
         members = [ "${user.userName}" ];
-        gid = 993;
+        gid = 994;
       };
       users."${user.userName}".extraGroups = [ "multimedia" ];
     };
 
     systemd.tmpfiles.rules = [
-      "d ${mediaDir}/media 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/downloads 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/tv 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/movies 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/books 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/books/audio 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/books/analog 0770 ${uid} multimedia"
-      "d ${mediaDir}/media/music 0770 ${uid} multimedia"
+      "d ${mediaDir} 0770 ${uid} multimedia"
+      "d ${mediaDir}/downloads 0770 ${uid} multimedia"
+      "d ${mediaDir}/tv 0770 ${uid} multimedia"
+      "d ${mediaDir}/movies 0770 ${uid} multimedia"
+      "d ${mediaDir}/books 0770 ${uid} multimedia"
+      "d ${mediaDir}/books/audio 0770 ${uid} multimedia"
+      "d ${mediaDir}/books/analog 0770 ${uid} multimedia"
+      "d ${mediaDir}/music 0770 ${uid} multimedia"
       "d /home/${user.userName}/gluetun 0770 ${uid} multimedia"
       "d /home/${user.userName}/deluge 0770 ${uid} multimedia"
     ];

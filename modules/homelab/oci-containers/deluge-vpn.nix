@@ -79,7 +79,7 @@
 
         environment = {
           "PUID" = "1000"; # serenity user UID
-          "PGID" = "993"; # multimedia group GID
+          "PGID" = "994"; # multimedia group GID
           "TZ" = "Europe/Copenhagen";
           "DELUGE_LOGLEVEL" = "error";
         };
@@ -87,6 +87,17 @@
         extraOptions = [
           "--network=container:gluetun"
         ];
+      };
+
+      # Ensure containers wait for storage mounts
+      systemd.services.docker-gluetun = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
+      };
+
+      systemd.services.docker-deluge = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
       };
 
       # Create environment file template for Gluetun with PIA credentials
@@ -100,11 +111,11 @@
         mode = "0400";
       };
 
-      # Service to fix deluge configuration after container starts
+      # Service to fix deluge configuration and sync with PIA forwarded port
       systemd.services.deluge-config-fix = {
-        description = "Fix Deluge daemon configuration for remote access";
-        after = [ "docker-deluge.service" ];
-        wants = [ "docker-deluge.service" ];
+        description = "Fix Deluge daemon configuration and sync with VPN forwarded port";
+        after = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wants = [ "docker-deluge.service" "docker-gluetun.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
@@ -113,18 +124,62 @@
             # Wait for deluge to create its config
             sleep 15
 
+            # Wait for Gluetun to establish port forwarding
+            echo "Waiting for VPN port forwarding to be established..."
+            MAX_WAIT=60
+            WAITED=0
+            while [ ! -f /var/lib/gluetun/forwarded_port ] && [ $WAITED -lt $MAX_WAIT ]; do
+              sleep 5
+              WAITED=$((WAITED + 5))
+              echo "Waiting for forwarded port file... ($WAITED/$MAX_WAIT seconds)"
+            done
+
+            if [ ! -f /var/lib/gluetun/forwarded_port ]; then
+              echo "WARNING: Forwarded port file not found after $MAX_WAIT seconds"
+              echo "Continuing with configuration without port sync..."
+            else
+              FORWARDED_PORT=$(cat /var/lib/gluetun/forwarded_port)
+              echo "VPN forwarded port detected: $FORWARDED_PORT"
+            fi
+
             if [ -f /var/lib/deluge/config/core.conf ]; then
               # Stop deluge to modify config safely
               systemctl stop docker-deluge.service
-              
+
               # Fix the configuration
               sed -i 's/"allow_remote": false/"allow_remote": true/g' /var/lib/deluge/config/core.conf
               sed -i 's/"listen_interface": ""/"listen_interface": "0.0.0.0"/g' /var/lib/deluge/config/core.conf
-              
+
+              # Update listen ports to match forwarded port if available
+              if [ -n "$FORWARDED_PORT" ] && [ "$FORWARDED_PORT" -gt 0 ] 2>/dev/null; then
+                echo "Updating Deluge listen ports to: [$FORWARDED_PORT, $FORWARDED_PORT]"
+
+                # Use Python to properly update the JSON config (handles Deluge's special format)
+                ${pkgs.python3}/bin/python3 -c "
+import json
+# Deluge config has two JSON objects: header and config
+with open('/var/lib/deluge/config/core.conf', 'r') as f:
+    content = f.read()
+    # Find the second JSON object (actual config)
+    first_end = content.index('}') + 1
+    header = content[:first_end]
+    config_str = content[first_end:]
+    config = json.loads(config_str)
+
+config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['random_port'] = False
+
+with open('/var/lib/deluge/config/core.conf', 'w') as f:
+    f.write(header)
+    json.dump(config, f, indent=4)
+"
+                echo "Successfully updated listen_ports using Python"
+              fi
+
               # Restart deluge
               systemctl start docker-deluge.service
-              
-              echo "Deluge daemon configuration fixed for remote access"
+
+              echo "Deluge daemon configuration fixed and synced with VPN port"
             else
               echo "Deluge config not found"
               exit 1
@@ -132,6 +187,100 @@
           '';
           Restart = "on-failure";
           RestartSec = "30s";
+        };
+      };
+
+      # Service to watch for VPN port changes and update Deluge
+      systemd.services.deluge-port-sync = {
+        description = "Monitor VPN port forwarding and sync with Deluge";
+        after = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wants = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = pkgs.writeShellScript "sync-deluge-port" ''
+            # Check if forwarded port file exists
+            if [ ! -f /var/lib/gluetun/forwarded_port ]; then
+              echo "Forwarded port file not found, skipping sync"
+              exit 0
+            fi
+
+            # Check if Deluge config exists
+            if [ ! -f /var/lib/deluge/config/core.conf ]; then
+              echo "Deluge config not found, skipping sync"
+              exit 0
+            fi
+
+            # Read current forwarded port
+            FORWARDED_PORT=$(cat /var/lib/gluetun/forwarded_port)
+
+            if [ -z "$FORWARDED_PORT" ] || [ "$FORWARDED_PORT" -le 0 ] 2>/dev/null; then
+              echo "Invalid forwarded port: $FORWARDED_PORT"
+              exit 0
+            fi
+
+            # Check current Deluge port configuration using Python
+            CURRENT_PORT=$(${pkgs.python3}/bin/python3 -c "
+import json
+try:
+    with open('/var/lib/deluge/config/core.conf', 'r') as f:
+        content = f.read()
+        # Find the second JSON object (actual config)
+        first_end = content.index('}') + 1
+        config_str = content[first_end:]
+        config = json.loads(config_str)
+    print(config.get('listen_ports', [0])[0])
+except:
+    print(0)
+" 2>/dev/null)
+
+            if [ "$CURRENT_PORT" = "$FORWARDED_PORT" ]; then
+              echo "Deluge already configured with correct port: $FORWARDED_PORT"
+              exit 0
+            fi
+
+            echo "Port mismatch detected! VPN: $FORWARDED_PORT, Deluge: $CURRENT_PORT"
+            echo "Updating Deluge configuration..."
+
+            # Stop deluge to modify config safely
+            systemctl stop docker-deluge.service
+
+            # Update the port configuration using Python (handles Deluge's special format)
+            ${pkgs.python3}/bin/python3 -c "
+import json
+# Deluge config has two JSON objects: header and config
+with open('/var/lib/deluge/config/core.conf', 'r') as f:
+    content = f.read()
+    # Find the second JSON object (actual config)
+    first_end = content.index('}') + 1
+    header = content[:first_end]
+    config_str = content[first_end:]
+    config = json.loads(config_str)
+
+config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['random_port'] = False
+
+with open('/var/lib/deluge/config/core.conf', 'w') as f:
+    f.write(header)
+    json.dump(config, f, indent=4)
+"
+
+            # Restart deluge with new configuration
+            systemctl start docker-deluge.service
+
+            echo "Deluge port updated to: $FORWARDED_PORT"
+          '';
+        };
+      };
+
+      # Timer to periodically check port synchronization
+      systemd.timers.deluge-port-sync = {
+        description = "Timer for Deluge port synchronization with VPN";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "2min";
+          OnUnitActiveSec = "5min";
+          Persistent = true;
         };
       };
 

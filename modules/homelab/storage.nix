@@ -70,7 +70,7 @@
   # Systemd service for cache mover
   systemd.services.mergerfs-cache-mover = {
     description = "Move old files from SSD cache to backing storage";
-    path = with pkgs; [bash coreutils rsync findutils];
+    path = with pkgs; [bash coreutils rsync findutils gawk];  # Added gawk for awk command
     script = ''
       #!/usr/bin/env bash
 
@@ -121,7 +121,7 @@
   systemd.timers.mergerfs-cache-mover = {
     wantedBy = ["timers.target"];
     timerConfig = {
-      OnCalendar = "02:00";  # 2 AM, before SnapRAID sync at 3 AM
+      OnCalendar = "12:00";  # Noon, before SnapRAID sync at 1 PM
       Persistent = true;
     };
   };
@@ -149,8 +149,8 @@
       d2 = "/mnt/disk2/";
     };
 
-    # Daily sync at 3 AM (after cache mover at 2 AM)
-    sync.interval = "03:00";
+    # Daily sync at 1 PM (after cache mover at noon)
+    sync.interval = "13:00";
 
     # Weekly scrub checks 12% of array
     scrub = {

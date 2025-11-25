@@ -3,6 +3,9 @@
   pkgs,
   inputs,
   lib,
+  isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
@@ -16,7 +19,7 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    # inputs.home-manager.nixosModules.default
+    inputs.home-manager.nixosModules.default
   ];
 
   boot = {
@@ -117,7 +120,7 @@ in
     # SSH protection
     fail2ban = {
       enable = true;
-      bantime = "1h";
+      bantime = "8h";
     };
 
     # Load nvidia driver for Xorg and Wayland
@@ -232,11 +235,16 @@ in
         owner = "root";
         group = "root";
       };
-      # "tailscale/auth_key" = {
-      #   mode = "0400";
-      #   owner = "root";
-      #   group = "root";
-      # };
+      "gitea/runner_token" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
+      "tailscale/auth_key" = {
+        mode = "0400";
+        owner = "root";
+        group = "root";
+      };
     };
   };
 
@@ -288,9 +296,26 @@ in
     nodePackages_latest.nodejs
   ];
 
+  # Enable Home Manager for CLI tools
+  home-manager = {
+    backupFileExtension = "hm-backup";
+    extraSpecialArgs = {
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
+    };
+    users = {
+      "${username}" = import ../../home/server.nix;
+    };
+  };
+
   # Networking and Auth
   tailscale = {
-    enable = false;
+    enable = true;
     advertiseExitNode = true;
     useRoutingFeatures = "both"; # Act as both client and server
     enableSsh = true; # Allow SSH via Tailscale
@@ -307,7 +332,9 @@ in
   };
   authelia.enable = false;
   adguard.enable = true;
-  pocket-id.enable = true;
+  pocket-id = {
+    enable = true;
+  };
 
   # Smart home
   hyperhdr.enable = true;
@@ -338,7 +365,7 @@ in
   lab.enable = false;
 
   # Development
-  gitea.enable = false;
+  gitea.enable = true;
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

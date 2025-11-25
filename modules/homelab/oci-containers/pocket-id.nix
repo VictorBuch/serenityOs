@@ -7,13 +7,13 @@
 }:
 
 let
-  cfg = config.pocket-id;
+  cfg = config.pocket-id-oci;
   hl = config.homelab;
   domain = hl.domain;
 in
 
 {
-  options.pocket-id = {
+  options.pocket-id-oci = {
     enable = lib.mkEnableOption "Enables Pocket ID authentication service";
 
     appUrl = lib.mkOption {
@@ -59,7 +59,7 @@ in
 
     # Pocket ID container
     virtualisation.oci-containers.containers.pocket-id = {
-      image = "ghcr.io/pocket-id/pocket-id:v1";
+      image = "ghcr.io/pocket-id/pocket-id:v1.15.0";
       autoStart = true;
 
       ports = [

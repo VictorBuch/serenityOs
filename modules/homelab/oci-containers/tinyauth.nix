@@ -41,8 +41,8 @@ in
     };
 
     logLevel = lib.mkOption {
-      type = lib.types.int;
-      default = 1;
+      type = lib.types.str;
+      default = "info";
       description = "Log level verbosity";
     };
 
@@ -65,7 +65,7 @@ in
 
     # TinyAuth container
     virtualisation.oci-containers.containers.tinyauth = {
-      image = "ghcr.io/steveiliop56/tinyauth:v3";
+      image = "ghcr.io/steveiliop56/tinyauth:v4.1.0";
       autoStart = true;
 
       ports = [
@@ -84,16 +84,16 @@ in
         "PORT" = "3000";
         "ADDRESS" = "0.0.0.0";
         "APP_URL" = cfg.appUrl;
-        "COOKIE_SECURE" = lib.boolToString cfg.cookieSecure;
+        "SECURE_COOKIE" = lib.boolToString cfg.cookieSecure;
         "SESSION_EXPIRY" = toString cfg.sessionExpiry;
         "LOG_LEVEL" = toString cfg.logLevel;
         "LOGIN_MAX_RETRIES" = toString cfg.loginMaxRetries;
-        "GENERIC_AUTH_URL" = "https://id.${domain}/authorize";
-        "GENERIC_TOKEN_URL" = "https://id.${domain}/api/oidc/token";
-        "GENERIC_USER_URL" = "https://id.${domain}/api/oidc/userinfo";
-        "GENERIC_SCOPES" = "openid email profile groups";
-        "GENERIC_NAME" = "Pocket ID";
-        "OAUTH_AUTO_REDIRECT" = "generic";
+        "PROVIDERS_POCKETID_AUTH_URL" = "https://id.${domain}/authorize";
+        "PROVIDERS_POCKETID_TOKEN_URL" = "https://id.${domain}/api/oidc/token";
+        "PROVIDERS_POCKETID_USER_INFO_URL" = "https://id.${domain}/api/oidc/userinfo";
+        "PROVIDERS_POCKETID_SCOPES" = "openid email profile groups";
+        "PROVIDERS_POCKETID_NAME" = "Pocket ID";
+        "PROVIDERS_POCKETID_REDIRECT_URL" = "https://auth.${domain}/api/oauth/callback/pocketid";
         "TZ" = "Europe/Copenhagen";
       };
     };
@@ -101,10 +101,9 @@ in
     # Create environment file template for TinyAuth with credentials
     sops.templates."tinyauth-env" = {
       content = ''
-        SECRET=${config.sops.placeholder."tinyauth/secret"}
         USERS=${config.sops.placeholder."tinyauth/users"}
-        GENERIC_CLIENT_ID=${config.sops.placeholder."pocket-id/oidc_client_id"}
-        GENERIC_CLIENT_SECRET=${config.sops.placeholder."pocket-id/oidc_client_secret"}
+        PROVIDERS_POCKETID_CLIENT_ID=${config.sops.placeholder."pocket-id/oidc_client_id"}
+        PROVIDERS_POCKETID_CLIENT_SECRET=${config.sops.placeholder."pocket-id/oidc_client_secret"}
       '';
       owner = "root";
       group = "root";

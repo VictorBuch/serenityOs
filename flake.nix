@@ -133,6 +133,7 @@
           modules = [
             ./hosts/serenity/configuration.nix
             ./modules/homelab
+            inputs.home-manager.nixosModules.default
             inputs.sops-nix.nixosModules.sops
           ];
         };

@@ -84,6 +84,7 @@ in
     mcp-nixos
     lolcat
     figlet
+    bat
 
     # TO BE MOVED LATER
     tailscale

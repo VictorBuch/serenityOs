@@ -11,14 +11,14 @@
   imports = [
     ../nixos/system-configs/user.nix
     ./configs.nix
+    ./storage.nix
+    ./database-backups.nix
     ./maintenance.nix
     ./oci-containers/uptime-kuma.nix
     ./oci-containers/crafty.nix
-    ./oci-containers/immich.nix
     ./oci-containers/deluge-vpn.nix
     ./oci-containers/wallos.nix
     ./oci-containers/tinyauth.nix
-    ./oci-containers/pocket-id.nix
     ./services/dashboard.nix
     ./services/streaming.nix
     ./services/nginx-proxy.nix
@@ -32,6 +32,7 @@
     ./services/hyperhdr.nix
     ./services/music-assistant.nix
     ./services/caddy.nix
+    ./services/pocket-id.nix
     ./services/gitea.nix
     ./services/tailscale.nix
     ./services/it-tools.nix

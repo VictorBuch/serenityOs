@@ -74,12 +74,12 @@
 
         volumes = [
           "/var/lib/deluge/config:/config"
-          "/mnt/data/media/downloads:/downloads"
+          "${config.homelab.mediaDir}/downloads:/downloads"
         ];
 
         environment = {
-          "PUID" = "1000"; # ghost user UID
-          "PGID" = "993"; # multimedia group GID
+          "PUID" = "1000"; # serenity user UID
+          "PGID" = "994"; # multimedia group GID
           "TZ" = "Europe/Copenhagen";
           "DELUGE_LOGLEVEL" = "error";
         };
@@ -87,6 +87,17 @@
         extraOptions = [
           "--network=container:gluetun"
         ];
+      };
+
+      # Ensure containers wait for storage mounts
+      systemd.services.docker-gluetun = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
+      };
+
+      systemd.services.docker-deluge = {
+        after = [ "mnt-pool.mount" ];
+        requires = [ "mnt-pool.mount" ];
       };
 
       # Create environment file template for Gluetun with PIA credentials
@@ -100,11 +111,11 @@
         mode = "0400";
       };
 
-      # Service to fix deluge configuration after container starts
+      # Service to fix deluge configuration and sync with PIA forwarded port
       systemd.services.deluge-config-fix = {
-        description = "Fix Deluge daemon configuration for remote access";
-        after = [ "docker-deluge.service" ];
-        wants = [ "docker-deluge.service" ];
+        description = "Fix Deluge daemon configuration and sync with VPN forwarded port";
+        after = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wants = [ "docker-deluge.service" "docker-gluetun.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
@@ -113,18 +124,62 @@
             # Wait for deluge to create its config
             sleep 15
 
+            # Wait for Gluetun to establish port forwarding
+            echo "Waiting for VPN port forwarding to be established..."
+            MAX_WAIT=60
+            WAITED=0
+            while [ ! -f /var/lib/gluetun/forwarded_port ] && [ $WAITED -lt $MAX_WAIT ]; do
+              sleep 5
+              WAITED=$((WAITED + 5))
+              echo "Waiting for forwarded port file... ($WAITED/$MAX_WAIT seconds)"
+            done
+
+            if [ ! -f /var/lib/gluetun/forwarded_port ]; then
+              echo "WARNING: Forwarded port file not found after $MAX_WAIT seconds"
+              echo "Continuing with configuration without port sync..."
+            else
+              FORWARDED_PORT=$(cat /var/lib/gluetun/forwarded_port)
+              echo "VPN forwarded port detected: $FORWARDED_PORT"
+            fi
+
             if [ -f /var/lib/deluge/config/core.conf ]; then
               # Stop deluge to modify config safely
               systemctl stop docker-deluge.service
-              
+
               # Fix the configuration
               sed -i 's/"allow_remote": false/"allow_remote": true/g' /var/lib/deluge/config/core.conf
               sed -i 's/"listen_interface": ""/"listen_interface": "0.0.0.0"/g' /var/lib/deluge/config/core.conf
-              
+
+              # Update listen ports to match forwarded port if available
+              if [ -n "$FORWARDED_PORT" ] && [ "$FORWARDED_PORT" -gt 0 ] 2>/dev/null; then
+                echo "Updating Deluge listen ports to: [$FORWARDED_PORT, $FORWARDED_PORT]"
+
+                # Use Python to properly update the JSON config (handles Deluge's special format)
+                ${pkgs.python3}/bin/python3 -c "
+import json
+# Deluge config has two JSON objects: header and config
+with open('/var/lib/deluge/config/core.conf', 'r') as f:
+    content = f.read()
+    # Find the second JSON object (actual config)
+    first_end = content.index('}') + 1
+    header = content[:first_end]
+    config_str = content[first_end:]
+    config = json.loads(config_str)
+
+config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['random_port'] = False
+
+with open('/var/lib/deluge/config/core.conf', 'w') as f:
+    f.write(header)
+    json.dump(config, f, indent=4)
+"
+                echo "Successfully updated listen_ports using Python"
+              fi
+
               # Restart deluge
               systemctl start docker-deluge.service
-              
-              echo "Deluge daemon configuration fixed for remote access"
+
+              echo "Deluge daemon configuration fixed and synced with VPN port"
             else
               echo "Deluge config not found"
               exit 1
@@ -132,6 +187,100 @@
           '';
           Restart = "on-failure";
           RestartSec = "30s";
+        };
+      };
+
+      # Service to watch for VPN port changes and update Deluge
+      systemd.services.deluge-port-sync = {
+        description = "Monitor VPN port forwarding and sync with Deluge";
+        after = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wants = [ "docker-deluge.service" "docker-gluetun.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = pkgs.writeShellScript "sync-deluge-port" ''
+            # Check if forwarded port file exists
+            if [ ! -f /var/lib/gluetun/forwarded_port ]; then
+              echo "Forwarded port file not found, skipping sync"
+              exit 0
+            fi
+
+            # Check if Deluge config exists
+            if [ ! -f /var/lib/deluge/config/core.conf ]; then
+              echo "Deluge config not found, skipping sync"
+              exit 0
+            fi
+
+            # Read current forwarded port
+            FORWARDED_PORT=$(cat /var/lib/gluetun/forwarded_port)
+
+            if [ -z "$FORWARDED_PORT" ] || [ "$FORWARDED_PORT" -le 0 ] 2>/dev/null; then
+              echo "Invalid forwarded port: $FORWARDED_PORT"
+              exit 0
+            fi
+
+            # Check current Deluge port configuration using Python
+            CURRENT_PORT=$(${pkgs.python3}/bin/python3 -c "
+import json
+try:
+    with open('/var/lib/deluge/config/core.conf', 'r') as f:
+        content = f.read()
+        # Find the second JSON object (actual config)
+        first_end = content.index('}') + 1
+        config_str = content[first_end:]
+        config = json.loads(config_str)
+    print(config.get('listen_ports', [0])[0])
+except:
+    print(0)
+" 2>/dev/null)
+
+            if [ "$CURRENT_PORT" = "$FORWARDED_PORT" ]; then
+              echo "Deluge already configured with correct port: $FORWARDED_PORT"
+              exit 0
+            fi
+
+            echo "Port mismatch detected! VPN: $FORWARDED_PORT, Deluge: $CURRENT_PORT"
+            echo "Updating Deluge configuration..."
+
+            # Stop deluge to modify config safely
+            systemctl stop docker-deluge.service
+
+            # Update the port configuration using Python (handles Deluge's special format)
+            ${pkgs.python3}/bin/python3 -c "
+import json
+# Deluge config has two JSON objects: header and config
+with open('/var/lib/deluge/config/core.conf', 'r') as f:
+    content = f.read()
+    # Find the second JSON object (actual config)
+    first_end = content.index('}') + 1
+    header = content[:first_end]
+    config_str = content[first_end:]
+    config = json.loads(config_str)
+
+config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['random_port'] = False
+
+with open('/var/lib/deluge/config/core.conf', 'w') as f:
+    f.write(header)
+    json.dump(config, f, indent=4)
+"
+
+            # Restart deluge with new configuration
+            systemctl start docker-deluge.service
+
+            echo "Deluge port updated to: $FORWARDED_PORT"
+          '';
+        };
+      };
+
+      # Timer to periodically check port synchronization
+      systemd.timers.deluge-port-sync = {
+        description = "Timer for Deluge port synchronization with VPN";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "2min";
+          OnUnitActiveSec = "5min";
+          Persistent = true;
         };
       };
 
@@ -185,103 +334,103 @@
 
           # Configuration
           STATE_DIR="/data"
-          CACHE_FILE="$STATE_DIR/last_ip"
-          RATE_LIMIT_FILE="$STATE_DIR/last_update"
-          COOKIE_FILE="$STATE_DIR/mam_cookie"
+          CACHE_FILE="''${STATE_DIR}/last_ip"
+          RATE_LIMIT_FILE="''${STATE_DIR}/last_update"
+          COOKIE_FILE="''${STATE_DIR}/mam_cookie"
           MAM_API_URL="https://t.myanonamouse.net/json/dynamicSeedbox.php"
           MAM_IP_URL="https://t.myanonamouse.net/json/jsonIp.php"
 
           # Check if cookie file exists
-          if [[ ! -f "$COOKIE_FILE" ]]; then
-            echo "ERROR: MAM cookie file not found at $COOKIE_FILE"
+          if [[ ! -f "''${COOKIE_FILE}" ]]; then
+            echo "ERROR: MAM cookie file not found at ''${COOKIE_FILE}"
             echo "Please ensure MAM session cookie is configured"
             exit 1
           fi
 
           # Read cookie
-          MAM_COOKIE=$(cat "$COOKIE_FILE" | grep '^mam_id=' | cut -d'=' -f2- || echo "")
-          if [[ -z "$MAM_COOKIE" ]]; then
+          MAM_COOKIE=$(cat "''${COOKIE_FILE}" | grep '^mam_id=' | cut -d'=' -f2- || echo "")
+          if [[ -z "''${MAM_COOKIE}" ]]; then
             echo "ERROR: MAM cookie is empty or malformed"
             exit 1
           fi
 
           # Get current IP from MAM (this ensures we're using the VPN IP)
           echo "Checking current IP..."
-          CURRENT_IP_RESPONSE=$(curl -s --fail "$MAM_IP_URL" || echo "")
-          if [[ -z "$CURRENT_IP_RESPONSE" ]]; then
+          CURRENT_IP_RESPONSE=$(curl -s --fail "''${MAM_IP_URL}" || echo "")
+          if [[ -z "''${CURRENT_IP_RESPONSE}" ]]; then
             echo "ERROR: Failed to get current IP from MAM"
             exit 1
           fi
 
-          CURRENT_IP=$(echo "$CURRENT_IP_RESPONSE" | jq -r '.ip' 2>/dev/null || echo "")
-          if [[ -z "$CURRENT_IP" || "$CURRENT_IP" == "null" ]]; then
-            echo "ERROR: Failed to parse IP from response: $CURRENT_IP_RESPONSE"
+          CURRENT_IP=$(echo "''${CURRENT_IP_RESPONSE}" | jq -r '.ip' 2>/dev/null || echo "")
+          if [[ -z "''${CURRENT_IP}" || "''${CURRENT_IP}" == "null" ]]; then
+            echo "ERROR: Failed to parse IP from response: ''${CURRENT_IP_RESPONSE}"
             exit 1
           fi
 
-          echo "Current IP: $CURRENT_IP"
+          echo "Current IP: ''${CURRENT_IP}"
 
           # Check cached IP
           CACHED_IP=""
-          if [[ -f "$CACHE_FILE" ]]; then
-            CACHED_IP=$(cat "$CACHE_FILE" 2>/dev/null || echo "")
+          if [[ -f "''${CACHE_FILE}" ]]; then
+            CACHED_IP=$(cat "''${CACHE_FILE}" 2>/dev/null || echo "")
           fi
 
-          echo "Cached IP: $CACHED_IP"
+          echo "Cached IP: ''${CACHED_IP}"
 
           # Check if IP has changed
-          if [[ "$CURRENT_IP" == "$CACHED_IP" ]]; then
+          if [[ "''${CURRENT_IP}" == "''${CACHED_IP}" ]]; then
             echo "IP unchanged, no update needed"
             exit 0
           fi
 
           # Check rate limit (1 hour = 3600 seconds)
-          if [[ -f "$RATE_LIMIT_FILE" ]]; then
-            LAST_UPDATE=$(cat "$RATE_LIMIT_FILE" 2>/dev/null || echo "0")
+          if [[ -f "''${RATE_LIMIT_FILE}" ]]; then
+            LAST_UPDATE=$(cat "''${RATE_LIMIT_FILE}" 2>/dev/null || echo "0")
             CURRENT_TIME=$(date +%s)
             TIME_DIFF=$((CURRENT_TIME - LAST_UPDATE))
-            
-            if [[ $TIME_DIFF -lt 3600 ]]; then
+
+            if [[ ''${TIME_DIFF} -lt 3600 ]]; then
               WAIT_TIME=$((3600 - TIME_DIFF))
-              echo "Rate limit: Must wait $WAIT_TIME seconds before next update"
+              echo "Rate limit: Must wait ''${WAIT_TIME} seconds before next update"
               exit 0
             fi
           fi
 
           # Update MAM with new IP
-          echo "Updating MAM with new IP: $CURRENT_IP"
-          API_RESPONSE=$(curl -s -b "mam_id=$MAM_COOKIE" "$MAM_API_URL" || echo "")
+          echo "Updating MAM with new IP: ''${CURRENT_IP}"
+          API_RESPONSE=$(curl -s -b "mam_id=''${MAM_COOKIE}" "''${MAM_API_URL}" || echo "")
 
-          if [[ -z "$API_RESPONSE" ]]; then
+          if [[ -z "''${API_RESPONSE}" ]]; then
             echo "ERROR: Failed to call MAM API"
             exit 1
           fi
 
-          echo "MAM API Response: $API_RESPONSE"
+          echo "MAM API Response: ''${API_RESPONSE}"
 
           # Parse response
-          SUCCESS=$(echo "$API_RESPONSE" | jq -r '.Success' 2>/dev/null || echo "false")
-          MESSAGE=$(echo "$API_RESPONSE" | jq -r '.msg' 2>/dev/null || echo "unknown")
+          SUCCESS=$(echo "''${API_RESPONSE}" | jq -r '.Success' 2>/dev/null || echo "false")
+          MESSAGE=$(echo "''${API_RESPONSE}" | jq -r '.msg' 2>/dev/null || echo "unknown")
 
-          if [[ "$SUCCESS" == "true" ]]; then
-            case "$MESSAGE" in
+          if [[ "''${SUCCESS}" == "true" ]]; then
+            case "''${MESSAGE}" in
               "Completed")
-                echo "SUCCESS: IP updated to $CURRENT_IP"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
-                date +%s > "$RATE_LIMIT_FILE"
+                echo "SUCCESS: IP updated to ''${CURRENT_IP}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
+                date +%s > "''${RATE_LIMIT_FILE}"
                 ;;
               "No Change")
-                echo "SUCCESS: IP already set to $CURRENT_IP"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
+                echo "SUCCESS: IP already set to ''${CURRENT_IP}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
                 ;;
               *)
-                echo "SUCCESS: $MESSAGE"
-                echo "$CURRENT_IP" > "$CACHE_FILE"
+                echo "SUCCESS: ''${MESSAGE}"
+                echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
                 ;;
             esac
           else
-            echo "ERROR: MAM API call failed - $MESSAGE"
-            case "$MESSAGE" in
+            echo "ERROR: MAM API call failed - ''${MESSAGE}"
+            case "''${MESSAGE}" in
               "Last Change too recent")
                 echo "Rate limited by MAM, will retry later"
                 ;;

@@ -112,7 +112,7 @@ ping 192.168.0.1
 ssh user@192.168.0.x
 
 # Access Serenity directly via Tailscale IP
-ssh ghost@100.x.x.x  # Tailscale assigns 100.x.x.x addresses
+ssh serenity@100.x.x.x  # Tailscale assigns 100.x.x.x addresses
 ```
 
 #### SSH via Tailscale
@@ -121,10 +121,10 @@ Tailscale SSH is enabled, providing secure SSH access without exposing port 22:
 
 ```bash
 # SSH using Tailscale (no port forwarding needed)
-ssh ghost@serenity
+ssh serenity@serenity
 
 # Or use the Tailscale IP
-ssh ghost@100.x.x.x
+ssh serenity@100.x.x.x
 ```
 
 Configure SSH ACLs in the [Tailscale Admin Console](https://login.tailscale.com/admin/acls) to control who can SSH into Serenity.
@@ -240,7 +240,7 @@ ip addr show tailscale0
 
 1. Verify SSH is enabled: `sudo tailscale status | grep ssh`
 2. Check Tailscale ACLs allow SSH access
-3. Test connection: `tailscale ssh ghost@serenity`
+3. Test connection: `tailscale ssh serenity@serenity`
 4. Check logs: `journalctl -u tailscaled -f`
 
 ## Gitea Setup
@@ -462,7 +462,7 @@ All critical services wait for NFS mounts via `nfs-mounts-ready.target`.
 
 Secrets are managed with SOPS and age encryption:
 - **Secrets file**: `secrets/secrets.yaml`
-- **Age key**: `/home/ghost/.config/sops/age/keys.txt`
+- **Age key**: `/home/serenity/.config/sops/age/keys.txt`
 
 Edit secrets:
 ```bash

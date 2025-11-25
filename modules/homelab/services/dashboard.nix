@@ -9,7 +9,6 @@ let
   hl = config.homelab;
   user = config.user;
   nixosIp = hl.nixosIp;
-  trueNasIp = hl.trueNasIp;
   local = "http://127.0.0.1";
 in
 {
@@ -1058,12 +1057,6 @@ in
                           url = "https://plex.${hl.domain}/web/index.html";
                           icon = "sh:plex";
                           check-url = "${local}:32400";
-                        }
-                        {
-                          title = "TrueNAS";
-                          url = "http://${trueNasIp}/ui";
-                          icon = "sh:truenas-core";
-                          "allow-insecure" = true;
                         }
                         {
                           title = "Uptime";

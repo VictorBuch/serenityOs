@@ -45,8 +45,7 @@ in
         host = "/run/postgresql";
         name = "gitea";
         user = giteaUser;
-        # Use Unix socket authentication for PostgreSQL
-        passwordFile = null;
+        # Uses Unix socket authentication - no password needed
       };
 
       # Git LFS support for large files
@@ -57,7 +56,7 @@ in
           DOMAIN = "git.${domain}";
           ROOT_URL = "https://git.${domain}/";
           HTTP_ADDR = "127.0.0.1";
-          HTTP_PORT = 3000;
+          HTTP_PORT = 3004;
 
           # SSH configuration
           DISABLE_SSH = false;
@@ -69,7 +68,7 @@ in
         };
 
         service = {
-          DISABLE_REGISTRATION = false; # Allow user registration (change to true after initial setup if desired)
+          DISABLE_REGISTRATION = true; # Allow user registration (change to true after initial setup if desired)
           REQUIRE_SIGNIN_VIEW = false; # Public repositories are viewable without login
         };
 
@@ -111,7 +110,7 @@ in
 
     # Gitea Actions Runners for CI/CD
     services.gitea-actions-runner = {
-      package = pkgs.forgejo-actions-runner; # Compatible with Gitea Actions
+      package = pkgs.forgejo-runner; # Compatible with Gitea Actions
 
       instances = {
         # Docker runner for containerized builds
@@ -121,7 +120,7 @@ in
           url = "https://git.${domain}";
           # Token needs to be generated in Gitea UI after first setup
           # Go to Site Administration -> Actions -> Runners -> Create new runner
-          tokenFile = config.sops.secrets."gitea/runner_token".path;
+          tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
             "docker:docker://node:20-bookworm"
             "ubuntu-latest:docker://node:20-bookworm"
@@ -138,7 +137,7 @@ in
           enable = true;
           name = "nix-runner";
           url = "https://git.${domain}";
-          tokenFile = config.sops.secrets."gitea/runner_token".path;
+          tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
             "nix:host"
           ];
@@ -155,9 +154,20 @@ in
 
     # SOPS secrets configuration
     sops.secrets."gitea/runner_token" = {
-      mode = "0400";
-      owner = "gitea-runner-docker";
-      group = "gitea-runner-docker";
+      mode = "0444";  # Make readable by both runner users
+      owner = "root";
+      group = "root";
+      restartUnits = [ "gitea-runner-docker.service" "gitea-runner-nix.service" ];
+    };
+
+    # Create environment file with TOKEN variable for runners
+    sops.templates."gitea-runner-env" = {
+      content = ''
+        TOKEN=${config.sops.placeholder."gitea/runner_token"}
+      '';
+      owner = "root";
+      group = "root";
+      mode = "0444";
     };
 
     # Open firewall port for Gitea SSH

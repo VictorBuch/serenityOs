@@ -7,7 +7,7 @@
 }:
 let
   user = config.user;
-  uid = toString config.user.uid; # ghost user UID
+  uid = toString config.user.uid; # serenity user UID
   gid = "mealie";
 in
 {
@@ -31,7 +31,7 @@ in
       shell = pkgs.bash;
     };
 
-    # Add ghost user to mealie group for management access
+    # Add serenity user to mealie group for management access
     users.users.${user.userName}.extraGroups = [ "mealie" ];
 
     systemd.tmpfiles.rules = [

@@ -70,34 +70,34 @@ in
         isSystemUser = true;
         uid = 912;
         group = "nextcloud";
-        home = "${nextcloudDir}/nextcloud";
+        home = nextcloudDir;
       };
       users."${user.userName}".extraGroups = [ "nextcloud" ];
     };
 
-    # Ensure all Nextcloud services wait for NFS mounts
+    # Ensure all Nextcloud services wait for mergerFS pool mount
     systemd.services.nextcloud-setup = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.nextcloud-update-db = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
     systemd.services.phpfpm-nextcloud = {
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
     };
 
-    # Create nextcloud directories and set proper ownership for NFSv4
+    # Create nextcloud directories and set proper ownership
     systemd.services.nextcloud-directories = {
       description = "Create Nextcloud directories and set ownership";
       before = [
         "nextcloud-setup.service"
         "phpfpm-nextcloud.service"
       ];
-      after = [ "nfs-mounts-ready.target" ];
-      requires = [ "nfs-mounts-ready.target" ];
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
@@ -145,19 +145,19 @@ in
         }
 
         # Check and fix directories only if needed
-        fix_dir "${nextcloudDir}/nextcloud" "770"
-        fix_dir "${nextcloudDir}/nextcloud/config" "770"
-        fix_dir "${nextcloudDir}/nextcloud/data" "770"
-        fix_dir "${nextcloudDir}/nextcloud/store-apps" "770"
-        fix_dir "${nextcloudDir}/nextcloud/apps" "770"
+        fix_dir "${nextcloudDir}" "770"
+        fix_dir "${nextcloudDir}/config" "770"
+        fix_dir "${nextcloudDir}/data" "770"
+        fix_dir "${nextcloudDir}/store-apps" "770"
+        fix_dir "${nextcloudDir}/apps" "770"
 
         # Only run recursive chown if we detect ownership issues in subdirectories
-        if [ -d "${nextcloudDir}/nextcloud" ]; then
+        if [ -d "${nextcloudDir}" ]; then
           # Check if any files/subdirs have wrong ownership (but don't fix yet)
-          wrong_files=$(find "${nextcloudDir}/nextcloud" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
-          if [ "$wrong_files" -gt 0 ]; then
-            echo "Found $wrong_files files with wrong ownership, fixing recursively..."
-            chown -R nextcloud:nextcloud "${nextcloudDir}/nextcloud"
+          wrong_files=$(find "${nextcloudDir}" ! -user nextcloud -o ! -group nextcloud 2>/dev/null | wc -l)
+          if [ "''${wrong_files}" -gt 0 ]; then
+            echo "Found ''${wrong_files} files with wrong ownership, fixing recursively..."
+            chown -R nextcloud:nextcloud "${nextcloudDir}"
           else
             echo "All files have correct ownership, skipping recursive chown"
           fi
@@ -168,11 +168,11 @@ in
     # NextCloud service configuration
     services.nextcloud = {
       enable = true;
-      package = pkgs.nextcloud31;
+      package = pkgs.nextcloud32;
       hostName = "nextcloud.${domain}";
       https = true;
       maxUploadSize = "16G";
-      home = "${nextcloudDir}/nextcloud";
+      home = nextcloudDir;
       appstoreEnable = false;
 
       # Configure PHP-FPM for NextCloud

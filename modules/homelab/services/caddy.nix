@@ -151,6 +151,12 @@ let
       isStaticFiles = true;
       staticPath = "${pkgs.it-tools}/lib";
     };
+    paperless = {
+      # Paperless-ngx document management
+      url = "http://127.0.0.1:28981";
+      https = false;
+      protected = true;
+    };
   };
 
   # --- HELPER FUNCTIONS ---

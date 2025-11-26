@@ -25,6 +25,11 @@ in
       default = "/mnt/pool/nextcloud";
       description = "Directory for Nextcloud data";
     };
+    paperlessDir = lib.mkOption {
+      type = lib.types.str;
+      default = "/mnt/pool/paperless";
+      description = "Directory for Paperless-ngx document storage";
+    };
     domain = lib.mkOption {
       type = lib.types.str;
       default = "victorbuch.com";

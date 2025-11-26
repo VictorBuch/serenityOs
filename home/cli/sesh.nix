@@ -29,6 +29,7 @@ mkHomeModule {
               name = "web-builder";
               path = "~/Documents/work/web-builder";
               startup_command = "nvim";
+              preview_command = "bat --color=always 'web-builder'";
               windows = [
                 "git"
                 "node"
@@ -43,12 +44,12 @@ mkHomeModule {
                 "git"
               ];
             }
-            # {
-            #   name = "tmux config";
-            #   path = "~/c/dotfiles/.config/tmux";
-            #   startup_command = "nvim tmux.conf";
-            #   preview_command = "bat --color=always ~/c/dotfiles/.config/tmux/tmux.conf";
-            # }
+            {
+              name = "server serenity";
+              path = "~";
+              startup_command = "ssh serenity@serenity";
+              preview_command = "bat --color=always 'ssh serenity'";
+            }
           ];
           window = [
             {

@@ -220,6 +220,11 @@ in
         owner = "root";
         group = "root";
       };
+      "immich_api_key" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
       "mealie/db_password" = {
         mode = "0400";
         owner = "mealie";
@@ -244,6 +249,15 @@ in
         mode = "0400";
         owner = "root";
         group = "root";
+      };
+      "paperless/db_password" = {
+        mode = "0400";
+      };
+      "paperless/admin_password" = {
+        mode = "0400";
+      };
+      "paperless/secret_key" = {
+        mode = "0400";
       };
     };
   };
@@ -366,6 +380,9 @@ in
 
   # Development
   gitea.enable = true;
+
+  # Document Management
+  paperless.enable = true;
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

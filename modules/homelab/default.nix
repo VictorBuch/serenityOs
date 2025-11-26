@@ -36,6 +36,7 @@
     ./services/gitea.nix
     ./services/tailscale.nix
     ./services/it-tools.nix
+    ./services/paperless.nix
     ./lab.nix
   ];
 
@@ -61,4 +62,5 @@
   gitea.enable = lib.mkDefault false;
   tailscale.enable = lib.mkDefault false;
   it-tools.enable = lib.mkDefault false;
+  paperless.enable = lib.mkDefault false;
 }

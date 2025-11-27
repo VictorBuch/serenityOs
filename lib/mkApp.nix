@@ -101,13 +101,21 @@ let
   # Import stable nixpkgs if inputs is available
   stable-pkgs =
     if inputs != null then
-      import inputs.stable-nixpkgs {
+      import inputs.nixpkgs {
         inherit (pkgs) system;
         config.allowUnfree = true;
       }
     else
       pkgs;
 
+  unstable-pkgs =
+    if inputs != null then
+      import inputs.unstable-nixpkgs {
+        inherit (pkgs) system;
+        config.allowUnfree = true;
+      }
+    else
+      pkgs;
   # Select platform-specific packages
   platformPackages = if isLinux then linuxPackages else darwinPackages;
 
@@ -122,7 +130,7 @@ let
       in
       if funcArgs != { } then
         # Named arguments: { pkgs, stable-pkgs }
-        pkgList { inherit pkgs stable-pkgs; }
+        pkgList { inherit unstable-pkgs stable-pkgs; }
       else
         # Single argument: pkgs
         pkgList pkgs

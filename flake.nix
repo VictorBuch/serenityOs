@@ -2,8 +2,8 @@
   description = "Nixos config flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    stable-nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    unstable-nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -57,19 +57,20 @@
     {
       self,
       nixpkgs,
-      stable-nixpkgs,
+      unstable-nixpkgs,
       nix-darwin,
       ...
     }@inputs:
     let
       # Custom library functions
-      customLib = import ./lib { lib = nixpkgs.lib; };
+      customLib = import ./lib { inherit (nixpkgs) lib; };
 
       # Import nixpkgs with overlays and config for all systems
       pkgsFor =
         system:
         import nixpkgs {
           inherit system;
+          inherit unstable-nixpkgs;
           config = {
             allowUnfree = true;
             allowBroken = true; # Allow broken packages (needed for Linux packages on macOS)

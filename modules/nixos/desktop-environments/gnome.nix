@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  unstable-nixpkgs,
   lib,
   ...
 }:
@@ -16,7 +17,7 @@
       !(config.desktop-environments.kde.enable || config.desktop-environments.hyprland.enable);
     services.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =
-      (with pkgs; [
+      (with unstable-nixpkgs; [
         gnome-tour
         gedit
         cheese # webcam tool
@@ -31,14 +32,14 @@
         hitori # sudoku game
         atomix # puzzle game
       ])
-      ++ (with pkgs.gnome; [
-        pkgs.gnome-console
-        pkgs.gnome-connections
+      ++ (with unstable-nixpkgs.gnome; [
+        unstable-nixpkgs.gnome-console
+        unstable-nixpkgs.gnome-connections
       ]);
 
     environment.systemPackages = [
-      pkgs.sushi
-      pkgs.gnome-tweaks
+      unstable-nixpkgs.sushi
+      unstable-nixpkgs.gnome-tweaks
     ];
     networking.firewall.allowedTCPPortRanges = [
       {

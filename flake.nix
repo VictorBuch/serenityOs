@@ -19,32 +19,35 @@
 
     quickshell = {
       url = "github:outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
       inputs.quickshell.follows = "quickshell"; # Use same quickshell version
     };
 
     stylix.url = "github:danth/stylix";
 
-    catppuccin.url = "github:catppuccin/nix";
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
+    };
 
     nvf = {
       url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     sops-nix = {
@@ -77,13 +80,24 @@
           };
           overlays = [ self.overlays.default ];
         };
+
+      # Import unstable nixpkgs for all systems
+      unstablePkgsFor =
+        system:
+        import unstable-nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+            allowBroken = true;
+          };
+        };
       # Export custom packages for all systems
       packages = builtins.listToAttrs (
         map
           (system: {
             name = system;
             value = import ./packages {
-              pkgs = pkgsFor system;
+              pkgs = unstablePkgsFor system;
             };
           })
           [
@@ -110,6 +124,7 @@
           pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory
@@ -131,6 +146,7 @@
           pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory
@@ -152,6 +168,7 @@
           pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory
@@ -172,6 +189,7 @@
           pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory
@@ -193,6 +211,7 @@
           pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory
@@ -217,6 +236,7 @@
           pkgs = pkgsFor system; # Use universal pkgsFor with overlay
           specialArgs = {
             inherit inputs system;
+            unstable-pkgs = unstablePkgsFor system;
             inherit (customLib)
               mkApp
               mkCategory

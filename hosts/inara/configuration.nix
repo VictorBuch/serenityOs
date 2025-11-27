@@ -5,6 +5,7 @@
   isLinux,
   mkHomeModule,
   mkHomeCategory,
+  unstable-pkgs,
   ...
 }:
 let
@@ -23,6 +24,7 @@ in
         isLinux
         mkHomeModule
         mkHomeCategory
+        unstable-pkgs
         ;
     };
     users = {

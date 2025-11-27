@@ -26,7 +26,7 @@ mkHomeModule {
         settings = {
           # App Launcher
           appLauncher = {
-            backgroundOpacity = 0.8;
+            backgroundOpacity = 0.75;
             enableClipboardHistory = true;
             terminalCommand = "ghostty -e";
           };
@@ -39,7 +39,7 @@ mkHomeModule {
 
           # Bar - heavily customized
           bar = {
-            backgroundOpacity = 0.1;
+            backgroundOpacity = 0.2;
             density = "compact";
 
             widgets = {
@@ -150,7 +150,7 @@ mkHomeModule {
           location.name = "Brno";
 
           # Notifications
-          notifications.backgroundOpacity = 0.1;
+          notifications.backgroundOpacity = 0.9;
 
           # Templates
           templates.fuzzel = true;
@@ -165,7 +165,7 @@ mkHomeModule {
           # Wallpaper management
           wallpaper = {
             directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
-            overviewEnabled = true;
+            overviewEnabled = false;
             randomEnabled = true;
             randomIntervalSec = 3600;
             recursiveSearch = true;

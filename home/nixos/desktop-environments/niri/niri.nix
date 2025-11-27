@@ -90,7 +90,7 @@ in
 
             default-column-width { proportion 0.5; }
 
-            // center-focused-column "always"
+            center-focused-column = "always"
             always-center-single-column
 
             // Transparent background for noctalia wallpapers (Option 2)
@@ -184,7 +184,7 @@ in
             draw-border-with-background false
         }
         window-rule {
-            geometry-corner-radius 8
+            geometry-corner-radius 20
             clip-to-geometry true
         }
 
@@ -207,10 +207,10 @@ in
         }
 
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
-        //layer-rule {
-        //    match namespace="^noctalia-wallpaper.*"
-        //    place-within-backdrop true
-        //}
+        layer-rule {
+          match namespace="^noctalia-wallpaper*"
+          place-within-backdrop true
+        }
 
       // Gestures configuration
       gestures {
@@ -260,6 +260,11 @@ in
 
         // Prefer dark themes
         prefer-no-csd
+
+        debug {
+          // Allows notification actions and window activation from Noctalia.
+          honor-xdg-activation-with-invalid-serial
+        }
     '';
   };
 }

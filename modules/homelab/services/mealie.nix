@@ -3,6 +3,7 @@
   lib,
   options,
   config,
+  unstable-pkgs,
   ...
 }:
 let
@@ -28,7 +29,7 @@ in
       group = "mealie";
       extraGroups = [ "users" ];
       home = "/var/lib/mealie";
-      shell = pkgs.bash;
+      shell = unstable-pkgs.bash;
     };
 
     # Add serenity user to mealie group for management access
@@ -67,7 +68,7 @@ in
     };
     nixpkgs.overlays = [
       (self: super: {
-        mealie = super.mealie.overrideAttrs (oldAttrs: {
+        mealie = unstable-pkgs.mealie.overrideAttrs (oldAttrs: {
           doCheck = false;
           doInstallCheck = false;
         });

@@ -3,6 +3,7 @@
   lib,
   pkgs,
   options,
+  unstable-pkgs,
   ...
 }:
 
@@ -20,6 +21,15 @@ in
   };
 
   config = lib.mkIf config.streaming.enable {
+    # Use unstable streaming packages
+    nixpkgs.overlays = [
+      (self: super: {
+        jellyfin = unstable-pkgs.jellyfin;
+        jellyfin-web = unstable-pkgs.jellyfin-web;
+        jellyfin-ffmpeg = unstable-pkgs.jellyfin-ffmpeg;
+        recyclarr = unstable-pkgs.recyclarr;
+      })
+    ];
 
     users = {
       groups.multimedia = {
@@ -43,7 +53,7 @@ in
       "d /home/${user.userName}/deluge 0770 ${uid} multimedia"
     ];
 
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = with unstable-pkgs; [
       jellyfin
       jellyfin-web
       jellyfin-ffmpeg

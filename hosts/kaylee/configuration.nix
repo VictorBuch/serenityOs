@@ -3,6 +3,9 @@
   pkgs,
   inputs,
   isLinux,
+  mkHomeModule,
+  mkHomeCategory,
+  unstable-pkgs,
   ...
 }:
 let
@@ -130,7 +133,14 @@ in
   home-manager = {
     # also pass inputs to home-manager modules
     extraSpecialArgs = {
-      inherit username inputs isLinux;
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        unstable-pkgs
+        ;
     };
     users = {
       "${username}" = import ../../home/default.nix;

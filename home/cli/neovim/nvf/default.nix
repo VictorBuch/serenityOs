@@ -4,6 +4,7 @@
   pkgs,
   lib,
   inputs,
+  unstable-pkgs,
   ...
 }:
 
@@ -34,7 +35,7 @@
 
   config = lib.mkIf config.home.cli.neovim.nvf.enable {
     home.packages =
-      with pkgs;
+      with unstable-pkgs;
       [
         ripgrep
         fd
@@ -60,7 +61,7 @@
         delve # Go debugger
         gotools # Additional go tools (godoc, etc.)
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals unstable-pkgs.stdenv.isLinux [
         wl-clipboard # Wayland clipboard (Linux only)
       ];
 

@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  unstable-pkgs,
   ...
 }:
 {
@@ -43,7 +44,7 @@
     # Enable portals with proper configuration
     xdg.portal = {
       enable = true;
-      extraPortals = with pkgs; [
+      extraPortals = with unstable-pkgs; [
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
       ];
@@ -88,7 +89,7 @@
       jack.enable = true;
     };
 
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = with unstable-pkgs; [
       libnotify
       # hyprpaper #Wallpaper
       swww

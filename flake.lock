@@ -87,7 +87,9 @@
     },
     "catppuccin": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "unstable-nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1764250936,
@@ -375,22 +377,6 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1763421233,
-        "narHash": "sha256-Stk9ZYRkGrnnpyJ4eqt9eQtdFWRRIvMxpNRf4sIegnw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "89c2b2330e733d6cdb5eae7b899326930c2c0648",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
         "lastModified": 1763948260,
         "narHash": "sha256-dY9qLD0H0zOUgU3vWacPY6Qc421BeQAfm8kBuBtPVE0=",
         "owner": "nixos",
@@ -405,7 +391,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_2": {
       "locked": {
         "lastModified": 1762977756,
         "narHash": "sha256-4PqRErxfe+2toFJFgcRKZ0UI9NSIOJa+7RXVtBhy4KE=",
@@ -425,7 +411,7 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": [
-          "nixpkgs"
+          "unstable-nixpkgs"
         ],
         "nuschtosSearch": "nuschtosSearch",
         "systems": "systems_2"
@@ -447,15 +433,15 @@
     "noctalia": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "unstable-nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1764256456,
-        "narHash": "sha256-+x7T4KDcRye8BGRtRWLFU9M7cWTMF6+DQBtiLtwnT50=",
+        "lastModified": 1764271737,
+        "narHash": "sha256-DRVQCBjcoIGaHR9KesbIgBrPfmzFKwriSyqcf2wxdXY=",
         "owner": "noctalia-dev",
         "repo": "noctalia-shell",
-        "rev": "f66e063d5a7f3356767194a3d0a2011503ca6572",
+        "rev": "0e46c4bb2b189e21d5c70f9bdf27a86fd5a8665e",
         "type": "github"
       },
       "original": {
@@ -518,7 +504,7 @@
         "flake-parts": "flake-parts_2",
         "mnw": "mnw",
         "nixpkgs": [
-          "nixpkgs"
+          "unstable-nixpkgs"
         ],
         "systems": "systems_3"
       },
@@ -539,7 +525,7 @@
     "quickshell": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "unstable-nixpkgs"
         ]
       },
       "locked": {
@@ -562,7 +548,7 @@
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
         "nvf": "nvf",
@@ -602,7 +588,7 @@
         "firefox-gnome-theme": "firefox-gnome-theme",
         "flake-parts": "flake-parts_3",
         "gnome-shell": "gnome-shell",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "nur": "nur",
         "systems": "systems_4",
         "tinted-foot": "tinted-foot",
@@ -786,7 +772,7 @@
       "inputs": {
         "home-manager": "home-manager_2",
         "nixpkgs": [
-          "nixpkgs"
+          "unstable-nixpkgs"
         ]
       },
       "locked": {

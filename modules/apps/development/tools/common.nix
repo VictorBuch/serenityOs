@@ -11,21 +11,21 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "common";
-  packages = pkgs: [
-    pkgs.fastfetch
-    pkgs.starship
-    pkgs.zoxide
-    pkgs.fzf
-    pkgs.lazygit
-    pkgs.ripgrep
-    pkgs.fd
-    pkgs.nodePackages.nodejs
-    pkgs.claude-code
-    pkgs.mcp-nixos
-    pkgs.yazi
-    pkgs.devenv
-    pkgs.jujutsu
-    pkgs.pocketbase
+  packages = { pkgs, unstable-pkgs }: [
+    unstable-pkgs.fastfetch
+    unstable-pkgs.starship
+    unstable-pkgs.zoxide
+    unstable-pkgs.fzf
+    unstable-pkgs.lazygit
+    unstable-pkgs.ripgrep
+    unstable-pkgs.fd
+    unstable-pkgs.nodePackages.nodejs
+    unstable-pkgs.claude-code
+    unstable-pkgs.mcp-nixos
+    unstable-pkgs.yazi
+    unstable-pkgs.devenv
+    unstable-pkgs.jujutsu
+    unstable-pkgs.pocketbase
   ];
   description = "Common development tools";
 } args

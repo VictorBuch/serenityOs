@@ -114,9 +114,20 @@
       inherit packages;
 
       # Export overlay
-      overlays.default = final: prev: {
-        pam = final.callPackage ./packages/pam { };
-      };
+      overlays.default = final: prev:
+        let
+          unstablePkgs = import unstable-nixpkgs {
+            inherit (final) system;
+            config = {
+              allowUnfree = true;
+              allowBroken = true;
+            };
+          };
+        in {
+          pam = final.callPackage ./packages/pam {
+            buildGoModule = unstablePkgs.buildGoModule;
+          };
+        };
 
       nixosConfigurations = {
         jayne = nixpkgs.lib.nixosSystem rec {

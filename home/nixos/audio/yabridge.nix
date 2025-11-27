@@ -20,14 +20,26 @@ mkHomeModule {
     {
       # Create symlinks to yabridge binaries in the expected location
       home.file = {
-        ".local/share/yabridge/yabridge-host.exe".source = "${pkgs.yabridge}/bin/yabridge-host.exe";
-        ".local/share/yabridge/yabridge-host-32.exe".source = "${pkgs.yabridge}/bin/yabridge-host-32.exe";
-        ".local/share/yabridge/libyabridge-chainloader-vst2.so".source =
-          "${pkgs.yabridge}/lib/libyabridge-chainloader-vst2.so";
-        ".local/share/yabridge/libyabridge-chainloader-vst3.so".source =
-          "${pkgs.yabridge}/lib/libyabridge-chainloader-vst3.so";
-        ".local/share/yabridge/libyabridge-chainloader-clap.so".source =
-          "${pkgs.yabridge}/lib/libyabridge-chainloader-clap.so";
+        ".local/share/yabridge/yabridge-host.exe" = {
+          source = "${pkgs.yabridge}/bin/yabridge-host.exe";
+          force = true; # Overwrite existing files from manual installation
+        };
+        ".local/share/yabridge/yabridge-host-32.exe" = {
+          source = "${pkgs.yabridge}/bin/yabridge-host-32.exe";
+          force = true;
+        };
+        ".local/share/yabridge/libyabridge-chainloader-vst2.so" = {
+          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-vst2.so";
+          force = true;
+        };
+        ".local/share/yabridge/libyabridge-chainloader-vst3.so" = {
+          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-vst3.so";
+          force = true;
+        };
+        ".local/share/yabridge/libyabridge-chainloader-clap.so" = {
+          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-clap.so";
+          force = true;
+        };
       };
 
       # Create VST wrapper directories

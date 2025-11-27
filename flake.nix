@@ -65,8 +65,8 @@
       # Custom library functions
       customLib = import ./lib { lib = nixpkgs.lib; };
 
-      # Import nixpkgs with config for Darwin
-      darwinPkgs =
+      # Import nixpkgs with overlays and config for all systems
+      pkgsFor =
         system:
         import nixpkgs {
           inherit system;
@@ -74,12 +74,39 @@
             allowUnfree = true;
             allowBroken = true; # Allow broken packages (needed for Linux packages on macOS)
           };
+          overlays = [ self.overlays.default ];
         };
+      # Export custom packages for all systems
+      packages = builtins.listToAttrs (
+        map
+          (system: {
+            name = system;
+            value = import ./packages {
+              pkgs = pkgsFor system;
+            };
+          })
+          [
+            "x86_64-linux"
+            "aarch64-linux"
+            "x86_64-darwin"
+            "aarch64-darwin"
+          ]
+      );
+
     in
     {
+      # Export packages
+      inherit packages;
+
+      # Export overlay
+      overlays.default = final: prev: {
+        pam = final.callPackage ./packages/pam { };
+      };
+
       nixosConfigurations = {
         jayne = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
+          pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
             inherit (customLib)
@@ -100,6 +127,7 @@
         };
         kaylee = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
+          pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
             inherit (customLib)
@@ -120,6 +148,7 @@
         };
         serenity = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
+          pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
             inherit (customLib)
@@ -139,6 +168,7 @@
         };
         shepherd = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
+          pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
             inherit (customLib)
@@ -159,6 +189,7 @@
         };
         shepherd-arm = nixpkgs.lib.nixosSystem rec {
           system = "aarch64-linux";
+          pkgs = pkgsFor system;
           specialArgs = {
             inherit inputs system;
             inherit (customLib)
@@ -182,7 +213,7 @@
       darwinConfigurations = {
         inara = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
-          pkgs = darwinPkgs "aarch64-darwin"; # Use configured pkgs with allowBroken
+          pkgs = pkgsFor system; # Use universal pkgsFor with overlay
           specialArgs = {
             inherit inputs system;
             inherit (customLib)

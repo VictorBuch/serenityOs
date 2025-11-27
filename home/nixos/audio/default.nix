@@ -1,6 +1,6 @@
-args@{ mkHomeCategory, ... }:
-
-mkHomeCategory {
-  _file = toString ./.;
-  name = "audio";
-} args
+{ pkgs, lib, ... }:
+{
+  imports = [
+    ./yabridge.nix
+  ];
+}

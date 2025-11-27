@@ -37,7 +37,7 @@ in
             zsh.enable = false;
             neovim = {
               nixvim.enable = false;
-              nvf.enable = true;
+              nvf.enable = false;
             };
           };
           terminals = {
@@ -84,6 +84,7 @@ in
     mcp-nixos
     lolcat
     figlet
+    bat
 
     # TO BE MOVED LATER
     tailscale
@@ -115,6 +116,10 @@ in
 
     productivity = {
       obsidian.enable = true;
+    };
+
+    utilities = {
+    	cli-tools.enable = true;
     };
   };
 

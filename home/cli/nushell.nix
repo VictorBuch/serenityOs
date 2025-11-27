@@ -91,9 +91,6 @@ mkHomeModule {
             source <(${pkgs.devenv}/bin/devenv direnvrc)
           '';
         };
-        extraConfig = ''
-          figlet -f slant -tk ${config.home.username} | lolcat -p 3
-        '';
       };
     };
 } args

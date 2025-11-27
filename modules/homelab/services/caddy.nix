@@ -139,7 +139,7 @@ let
       isPhpFpm = true;
     };
     git = {
-      url = "http://127.0.0.1:3000";
+      url = "http://127.0.0.1:3004";
       https = false;
       protected = false;
     };
@@ -149,7 +149,13 @@ let
       https = false;
       protected = true;
       isStaticFiles = true;
-      staticPath = "${pkgs.it-tools}/lib/node_modules/it-tools/dist";
+      staticPath = "${pkgs.it-tools}/lib";
+    };
+    paperless = {
+      # Paperless-ngx document management
+      url = "http://127.0.0.1:28981";
+      https = false;
+      protected = true;
     };
   };
 

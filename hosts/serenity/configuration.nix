@@ -3,47 +3,62 @@
   pkgs,
   inputs,
   lib,
+  isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
-  username = "ghost";
+  username = "serenity";
   hl = config.homelab;
   nixosIp = hl.nixosIp;
   uid = toString config.user.uid;
   # Main network interface - update this if interface name changes
-  mainInterface = "ens18";
+  mainInterface = "enp6s0";
 in
 {
   imports = [
     ./hardware-configuration.nix
-    # inputs.home-manager.nixosModules.default
+    inputs.home-manager.nixosModules.default
   ];
 
-  # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; # Adjust according to your disk
+  boot = {
+    # Bootloader (UEFI with systemd-boot)
+    loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = true;
 
-  boot.kernel.sysctl = {
-    "fs.inotify.max_user_watches" = "1048576"; # 128 times the default 8192
+    kernel.sysctl = {
+      "fs.inotify.max_user_watches" = "1048576"; # 128 times the default 8192
+    };
   };
 
-  # Enable networking
-  networking.networkmanager.enable = true;
+  networking = {
+    # Enable networking
+    networkmanager.enable = true;
 
-  # Static IP configuration for main interface
-  networking.interfaces.${mainInterface}.ipv4.addresses = [
-    {
-      address = nixosIp; # 192.168.0.243
-      prefixLength = 24;
-    }
-  ];
-  networking.defaultGateway = "192.168.0.1";
-  networking.nameservers = [
-    "127.0.0.1"
-    "1.1.1.1"
-  ];
+    # Static IP configuration for main interface
+    interfaces.${mainInterface}.ipv4.addresses = [
+      {
+        address = nixosIp; # 192.168.0.243
+        prefixLength = 24;
+      }
+    ];
+    defaultGateway = "192.168.0.1";
+    nameservers = [
+      "127.0.0.1"
+      "1.1.1.1"
+    ];
 
-  networking.hostName = "serenity"; # Define your hostname.
+    hostName = "serenity";
+
+    # Open ports in the firewall.
+    firewall.allowedTCPPorts = [
+      2283
+    ];
+    firewall.allowedUDPPorts = [
+      2283
+    ];
+  }; # Define your hostname.
 
   # Enable flakes
   nix.settings.experimental-features = [
@@ -75,33 +90,41 @@ in
 
   # Configure console keymap
   console.keyMap = "dk-latin1";
+  programs = {
+    # Enable zsh shell
+    zsh.enable = true;
 
-  # Enable zsh shell
-  programs.zsh.enable = true;
+    # Enable binaries to work
+    nix-ld.enable = true;
+    nix-ld.libraries = with pkgs; [
+      # add any missing dynamic libraries for unpackaged programs here
+      libz
+    ];
+
+    neovim.defaultEditor = true;
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # Enable binaries to work
-  programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [
-    # add any missing dynamic libraries for unpackaged programs here
-    libz
-  ];
-
   # Define a user account.
   user.userName = username;
 
-  # Enable automatic login for the user.
-  services.getty.autologinUser = username;
+  services = {
+    # Enable automatic login for the user.
+    getty.autologinUser = username;
 
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+    # Enable the OpenSSH daemon.
+    openssh.enable = true;
 
-  # SSH protection
-  services.fail2ban = {
-    enable = true;
-    bantime = "1h";
+    # SSH protection
+    fail2ban = {
+      enable = true;
+      bantime = "8h";
+    };
+
+    # Load nvidia driver for Xorg and Wayland
+    xserver.videoDrivers = [ "nvidia" ];
   };
 
   # Sops configuration
@@ -197,6 +220,11 @@ in
         owner = "root";
         group = "root";
       };
+      "immich_api_key" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
       "mealie/db_password" = {
         mode = "0400";
         owner = "mealie";
@@ -212,10 +240,24 @@ in
         owner = "root";
         group = "root";
       };
+      "gitea/runner_token" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
       "tailscale/auth_key" = {
         mode = "0400";
         owner = "root";
         group = "root";
+      };
+      "paperless/db_password" = {
+        mode = "0400";
+      };
+      "paperless/admin_password" = {
+        mode = "0400";
+      };
+      "paperless/secret_key" = {
+        mode = "0400";
       };
     };
   };
@@ -223,22 +265,11 @@ in
   # better memory management
   zramSwap.enable = true;
 
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [
-    2283
-  ];
-  networking.firewall.allowedUDPPorts = [
-    2283
-  ];
-
   # Server Settings
   # Enable OpenGL
   hardware.graphics = {
     enable = true;
   };
-
-  # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
     # Modesetting is required.
@@ -247,15 +278,18 @@ in
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
-  # enable docker
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
+  virtualisation = {
 
-  # Virtualization containers
-  virtualisation.oci-containers.backend = "docker";
+    # enable docker
+    docker.enable = true;
+    docker.rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+
+    # Virtualization containers
+    oci-containers.backend = "docker";
+  };
 
   users.users."${username}".extraGroups = [ "docker" ];
 
@@ -276,7 +310,22 @@ in
     nodePackages_latest.nodejs
   ];
 
-  programs.neovim.defaultEditor = true;
+  # Enable Home Manager for CLI tools
+  home-manager = {
+    backupFileExtension = "hm-backup";
+    extraSpecialArgs = {
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
+    };
+    users = {
+      "${username}" = import ../../home/server.nix;
+    };
+  };
 
   # Networking and Auth
   tailscale = {
@@ -297,7 +346,9 @@ in
   };
   authelia.enable = false;
   adguard.enable = true;
-  pocket-id.enable = true;
+  pocket-id = {
+    enable = true;
+  };
 
   # Smart home
   hyperhdr.enable = true;
@@ -330,6 +381,9 @@ in
   # Development
   gitea.enable = true;
 
-  system.stateVersion = "24.05"; # Did you read the comment?
+  # Document Management
+  paperless.enable = true;
+
+  system.stateVersion = "25.05"; # Did you read the comment?
 
 }

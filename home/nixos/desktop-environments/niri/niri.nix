@@ -31,7 +31,7 @@ in
           // Focus windows automatically when moving the mouse into them.
           // max-scroll-amount="95%" means focus won't switch if it requires scrolling more than 95%
           // (i.e., only focus windows that are at least 5% visible)
-          focus-follows-mouse max-scroll-amount="75%"
+          // focus-follows-mouse max-scroll-amount="75%"
 
           keyboard {
               xkb {

@@ -51,20 +51,27 @@ in
 
     # Per-host Home Manager configuration
     sharedModules = [
+      inputs.noctalia.homeModules.default
       {
         home = {
+          audio = {
+            yabridge.enable = true;
+          };
+          catppuccin.enable = true;
+          desktop-environments = {
+            niri.enable = true;
+            noctalia.enable = true;
+          };
           cli = {
             enable = true;
-            zsh.enable = false;
             neovim = {
               enable = true;
-              nixvim.enable = true;
-              nvf.enable = false;
+              nixvim.enable = false;
+              nvf.enable = true;
             };
           };
           terminals = {
             enable = true;
-            kitty.enable = false;
           };
         };
       }

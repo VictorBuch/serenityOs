@@ -3,7 +3,6 @@
   lib,
   options,
   config,
-  unstable-pkgs,
   ...
 }:
 let
@@ -20,7 +19,7 @@ in
     # Use unstable Immich packages
     nixpkgs.overlays = [
       (self: super: {
-        immich = unstable-pkgs.immich;
+        immich = pkgs.unstable.immich;
       })
     ];
 
@@ -38,7 +37,7 @@ in
         group = "immich";
         extraGroups = [ "users" ];
         home = immichDir;
-        shell = unstable-pkgs.bash;
+        shell = pkgs.unstable.bash;
       };
 
       # Add serenity user to immich group for management access

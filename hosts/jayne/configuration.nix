@@ -5,7 +5,6 @@
   isLinux,
   mkHomeModule,
   mkHomeCategory,
-  unstable-pkgs,
   ...
 }:
 let
@@ -55,7 +54,6 @@ in
         isLinux
         mkHomeModule
         mkHomeCategory
-        unstable-pkgs
         ;
     };
     users = {
@@ -70,7 +68,7 @@ in
           audio = {
             yabridge.enable = true;
           };
-          catppuccin.enable = true;
+          catppuccin.enable = false; # Bug in catppuccin 25.05 with anki module
           desktop-environments = {
             niri.enable = true;
             noctalia.enable = true;

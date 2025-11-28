@@ -7,39 +7,39 @@
 }:
 
 {
-  imports = [
-    inputs.catppuccin.homeModules.catppuccin
-  ];
+  # imports = [
+  #   inputs.catppuccin.homeModules.catppuccin # Bug with anki in 25.05
+  # ];
 
   options = {
     home.catppuccin.enable = lib.mkEnableOption "Enables catppuccin home manager theming";
   };
 
   config = lib.mkIf config.home.catppuccin.enable {
-    catppuccin = {
-      enable = true;
-      flavor = "mocha";
-      accent = "mauve";
+    # catppuccin = {
+    #   enable = true;
+    #   flavor = "mocha";
+    #   accent = "mauve";
 
-      # Enable catppuccin for specific applications
-      kitty.enable = true;
-      ghostty.enable = true;
-      rofi.enable = false; # Using custom theme
-      hyprland.enable = true;
-      waybar.enable = false; # Using custom theme with catppuccin colors
-      kvantum = {
-        enable = true;
-        flavor = "mocha";
-        accent = "mauve";
-      };
-    };
+    #   # Enable catppuccin for specific applications
+    #   kitty.enable = true;
+    #   ghostty.enable = true;
+    #   rofi.enable = false; # Using custom theme
+    #   hyprland.enable = true;
+    #   waybar.enable = false; # Using custom theme with catppuccin colors
+    #   kvantum = {
+    #     enable = true;
+    #     flavor = "mocha";
+    #     accent = "mauve";
+    #   };
+    # };
 
     home.pointerCursor = {
       gtk.enable = true;
       x11.enable = true;
       package = pkgs.catppuccin-cursors.mochaDark;
       name = "catppuccin-mocha-dark-cursors";
-      size = 16;
+      size = 14;
     };
 
     fonts.fontconfig.enable = true;
@@ -84,7 +84,7 @@
     home.sessionVariables = {
       GTK_THEME = "catppuccin-mocha-mauve-standard";
       XCURSOR_THEME = "catppuccin-mocha-dark-cursors";
-      XCURSOR_SIZE = "16";
+      XCURSOR_SIZE = "14";
     };
 
     # Force dark mode preference for GTK and GNOME applications

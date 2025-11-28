@@ -21,61 +21,59 @@ mkHomeModule {
       programs.git = {
         enable = true;
 
-        settings = {
-          user = {
-            name = "VictorBuch";
-            email = "victorbuch@protonmail.com";
+        # User configuration
+        userName = "VictorBuch";
+        userEmail = "victorbuch@protonmail.com";
+
+        # Useful aliases
+        aliases = {
+          st = "status";
+          co = "checkout";
+          br = "branch";
+          ci = "commit";
+          unstage = "reset HEAD --";
+          last = "log -1 HEAD";
+          amend = "commit --amend";
+          contributors = "shortlog -sn";
+        };
+
+        # Additional git configuration
+        extraConfig = {
+          # Modern defaults
+          init = {
+            defaultBranch = "main";
           };
-          # Useful aliases
-          aliases = {
-            st = "status";
-            co = "checkout";
-            br = "branch";
-            ci = "commit";
-            unstage = "reset HEAD --";
-            last = "log -1 HEAD";
-            amend = "commit --amend";
-            contributors = "shortlog -sn";
+
+          # Pull and push behavior
+          pull = {
+            rebase = true;
+          };
+          push = {
+            autoSetupRemote = true;
+            default = "current";
           };
 
-          # Additional git configuration
-          extraConfig = {
-            # Modern defaults
-            init = {
-              defaultBranch = "main";
-            };
+          # Better diff and merge
+          diff = {
+            colorMoved = "default";
+          };
+          merge = {
+            conflictStyle = "zdiff3";
+          };
 
-            # Pull and push behavior
-            pull = {
-              rebase = true;
-            };
-            push = {
-              autoSetupRemote = true;
-              default = "current";
-            };
+          # Rebase settings
+          rebase = {
+            autoStash = true;
+          };
 
-            # Better diff and merge
-            diff = {
-              colorMoved = "default";
-            };
-            merge = {
-              conflictStyle = "zdiff3";
-            };
+          # Remember conflict resolutions
+          rerere = {
+            enabled = true;
+          };
 
-            # Rebase settings
-            rebase = {
-              autoStash = true;
-            };
-
-            # Remember conflict resolutions
-            rerere = {
-              enabled = true;
-            };
-
-            # Sort branches by recent activity
-            branch = {
-              sort = "-committerdate";
-            };
+          # Sort branches by recent activity
+          branch = {
+            sort = "-committerdate";
           };
         };
 
@@ -112,10 +110,9 @@ mkHomeModule {
         ];
       };
 
-      # Delta configuration for beautiful diffs (now as separate program)
-      programs.delta = {
+      # Delta configuration for beautiful diffs (configured through git in HM 25.05)
+      programs.git.delta = {
         enable = true;
-        enableGitIntegration = true;
         options = {
           navigate = true;
           side-by-side = false;

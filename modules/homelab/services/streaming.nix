@@ -3,7 +3,6 @@
   lib,
   pkgs,
   options,
-  unstable-pkgs,
   ...
 }:
 
@@ -24,10 +23,10 @@ in
     # Use unstable streaming packages
     nixpkgs.overlays = [
       (self: super: {
-        jellyfin = unstable-pkgs.jellyfin;
-        jellyfin-web = unstable-pkgs.jellyfin-web;
-        jellyfin-ffmpeg = unstable-pkgs.jellyfin-ffmpeg;
-        recyclarr = unstable-pkgs.recyclarr;
+        jellyfin = pkgs.unstable.jellyfin;
+        jellyfin-web = pkgs.unstable.jellyfin-web;
+        jellyfin-ffmpeg = pkgs.unstable.jellyfin-ffmpeg;
+        recyclarr = pkgs.unstable.recyclarr;
       })
     ];
 
@@ -53,7 +52,7 @@ in
       "d /home/${user.userName}/deluge 0770 ${uid} multimedia"
     ];
 
-    environment.systemPackages = with unstable-pkgs; [
+    environment.systemPackages = with pkgs.unstable; [
       jellyfin
       jellyfin-web
       jellyfin-ffmpeg

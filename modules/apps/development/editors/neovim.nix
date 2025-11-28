@@ -11,6 +11,6 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "neovim";
-  packages = { pkgs, unstable-pkgs }: [ unstable-pkgs.neovim ];
+  packages = pkgs: [ pkgs.unstable.neovim ];
   description = "Neovim text editor";
 } args

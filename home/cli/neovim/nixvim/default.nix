@@ -4,7 +4,6 @@
   pkgs,
   lib,
   inputs,
-  unstable-pkgs,
   ...
 }:
 
@@ -54,7 +53,7 @@
   };
 
   config = lib.mkIf config.home.cli.neovim.nixvim.enable {
-    home.packages = with unstable-pkgs; [
+    home.packages = with pkgs.unstable; [
       ripgrep
       fd
       fzf

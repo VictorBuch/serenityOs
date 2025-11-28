@@ -5,7 +5,6 @@
   isLinux,
   mkHomeModule,
   mkHomeCategory,
-  unstable-pkgs,
   ...
 }:
 let
@@ -24,7 +23,6 @@ in
         isLinux
         mkHomeModule
         mkHomeCategory
-        unstable-pkgs
         ;
     };
     users = {
@@ -78,19 +76,19 @@ in
 
   # System packages (keep minimal, prefer home-manager for user apps)
   environment.systemPackages = with pkgs; [
-    neovim
-    nushell
+    unstable.neovim
+    unstable.nushell
     git
     lazygit
-    claude-code
-    mcp-nixos
+    unstable.claude-code
+    unstable.mcp-nixos
     lolcat
     figlet
     bat
 
     # TO BE MOVED LATER
-    tailscale
-    flutter
+    unstable.tailscale
+    unstable.flutter
   ];
 
   maintenance.enable = true;

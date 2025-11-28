@@ -6,12 +6,12 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:LnL7/nix-darwin/nix-darwin-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -31,8 +31,8 @@
     stylix.url = "github:danth/stylix";
 
     catppuccin = {
-      url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      url = "github:catppuccin/nix/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nvf = {
@@ -68,36 +68,80 @@
       # Custom library functions
       customLib = import ./lib { inherit (nixpkgs) lib; };
 
+      # Import the overlay with inputs
+      overlayWithInputs = import ./overlays { inherit inputs; };
+
       # Import nixpkgs with overlays and config for all systems
       pkgsFor =
         system:
         import nixpkgs {
           inherit system;
-          inherit unstable-nixpkgs;
           config = {
             allowUnfree = true;
             allowBroken = true; # Allow broken packages (needed for Linux packages on macOS)
           };
-          overlays = [ self.overlays.default ];
+          overlays = [ overlayWithInputs ];
         };
 
-      # Import unstable nixpkgs for all systems
-      unstablePkgsFor =
-        system:
-        import unstable-nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-            allowBroken = true;
-          };
-        };
+      # Host definitions with their specific configurations
+      nixosHosts = [
+        {
+          name = "jayne";
+          # system defaults to x86_64-linux
+          extraModules = [
+            ./modules/nixos
+            # inputs.catppuccin.nixosModules.catppuccin # Bug with anki module in 25.05
+          ];
+        }
+        {
+          name = "kaylee";
+          # system defaults to x86_64-linux
+          extraModules = [
+            ./modules/nixos
+            inputs.catppuccin.nixosModules.catppuccin
+          ];
+        }
+        {
+          name = "serenity";
+          # system defaults to x86_64-linux
+          # Serenity is a homelab server with different modules
+          extraModules = [
+            ./modules/homelab
+          ];
+        }
+        {
+          name = "shepherd";
+          # system defaults to x86_64-linux
+          extraModules = [
+            ./modules/nixos
+            inputs.catppuccin.nixosModules.catppuccin
+          ];
+        }
+        {
+          name = "shepherd-arm";
+          system = "aarch64-linux"; # Override default system
+          hostConfig = "./hosts/shepherd/configuration.nix"; # Uses shepherd's config
+          extraModules = [
+            ./modules/nixos
+            inputs.catppuccin.nixosModules.catppuccin
+          ];
+        }
+      ];
+
+      darwinHosts = [
+        {
+          name = "inara";
+          system = "aarch64-darwin";
+        }
+      ];
+
       # Export custom packages for all systems
       packages = builtins.listToAttrs (
         map
           (system: {
             name = system;
             value = import ./packages {
-              pkgs = unstablePkgsFor system;
+              pkgs = pkgsFor system; # Now has unstable available via pkgs.unstable
             };
           })
           [
@@ -114,155 +158,72 @@
       inherit packages;
 
       # Export overlay
-      overlays.default = final: prev:
-        let
-          unstablePkgs = import unstable-nixpkgs {
-            inherit (final) system;
-            config = {
-              allowUnfree = true;
-              allowBroken = true;
-            };
-          };
-        in {
-          pam = final.callPackage ./packages/pam {
-            buildGoModule = unstablePkgs.buildGoModule;
-          };
-        };
+      overlays.default = overlayWithInputs;
 
-      nixosConfigurations = {
-        jayne = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          pkgs = pkgsFor system;
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = true;
-          };
-          modules = [
-            ./hosts/jayne/configuration.nix
-            ./modules/nixos
-            inputs.home-manager.nixosModules.default
-            inputs.catppuccin.nixosModules.catppuccin
-            inputs.sops-nix.nixosModules.sops
-          ];
-        };
-        kaylee = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          pkgs = pkgsFor system;
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = true;
-          };
-          modules = [
-            ./hosts/kaylee/configuration.nix
-            ./modules/nixos
-            inputs.home-manager.nixosModules.default
-            inputs.catppuccin.nixosModules.catppuccin
-            inputs.sops-nix.nixosModules.sops
-          ];
-        };
-        serenity = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          pkgs = pkgsFor system;
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = true;
-          };
-          modules = [
-            ./hosts/serenity/configuration.nix
-            ./modules/homelab
-            inputs.home-manager.nixosModules.default
-            inputs.sops-nix.nixosModules.sops
-          ];
-        };
-        shepherd = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          pkgs = pkgsFor system;
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = true;
-          };
-          modules = [
-            ./hosts/shepherd/configuration.nix
-            ./modules/nixos
-            inputs.home-manager.nixosModules.default
-            inputs.catppuccin.nixosModules.catppuccin
-            inputs.sops-nix.nixosModules.sops
-          ];
-        };
-        shepherd-arm = nixpkgs.lib.nixosSystem rec {
-          system = "aarch64-linux";
-          pkgs = pkgsFor system;
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = true;
-          };
-          modules = [
-            ./hosts/shepherd/configuration.nix
-            ./modules/nixos
-            inputs.home-manager.nixosModules.default
-            inputs.catppuccin.nixosModules.catppuccin
-            inputs.sops-nix.nixosModules.sops
-          ];
-        };
-      };
+      nixosConfigurations = builtins.listToAttrs (
+        map (host: {
+          name = host.name;
+          value = nixpkgs.lib.nixosSystem (
+            let
+              system = host.system or "x86_64-linux"; # Default to x86_64-linux
+            in
+            {
+              inherit system;
+              pkgs = pkgsFor system;
+              specialArgs = {
+                inherit inputs system;
+                inherit (customLib)
+                  mkApp
+                  mkCategory
+                  mkHomeModule
+                  mkHomeCategory
+                  ;
+                isLinux = true;
+              };
+              modules = [
+                # Host-specific configuration
+                (host.hostConfig or ./hosts/${host.name}/configuration.nix)
+                # Standard modules for all NixOS hosts
+                inputs.home-manager.nixosModules.default
+                inputs.sops-nix.nixosModules.sops
+              ] ++ (host.extraModules or []);
+            }
+          );
+        })
+        nixosHosts
+      );
 
-      darwinConfigurations = {
-        inara = nix-darwin.lib.darwinSystem rec {
-          system = "aarch64-darwin";
-          pkgs = pkgsFor system; # Use universal pkgsFor with overlay
-          specialArgs = {
-            inherit inputs system;
-            unstable-pkgs = unstablePkgsFor system;
-            inherit (customLib)
-              mkApp
-              mkCategory
-              mkHomeModule
-              mkHomeCategory
-              ;
-            isLinux = false;
-          };
-          modules = [
-            ./hosts/inara/configuration.nix
-            ./modules/darwin
-            inputs.home-manager.darwinModules.default
-            # inputs.catppuccin.nixosModules.catppuccin
-          ];
-        };
-      };
+      darwinConfigurations = builtins.listToAttrs (
+        map (host: {
+          name = host.name;
+          value = nix-darwin.lib.darwinSystem (
+            let
+              system = host.system; # Darwin hosts must specify system
+            in
+            {
+              inherit system;
+              pkgs = pkgsFor system; # Use universal pkgsFor with overlay
+              specialArgs = {
+                inherit inputs system;
+                inherit (customLib)
+                  mkApp
+                  mkCategory
+                  mkHomeModule
+                  mkHomeCategory
+                  ;
+                isLinux = false;
+              };
+              modules = [
+                # Host-specific configuration
+                (host.hostConfig or ./hosts/${host.name}/configuration.nix)
+                # Standard modules for all Darwin hosts
+                ./modules/darwin
+                inputs.home-manager.darwinModules.default
+              ] ++ (host.extraModules or []);
+            }
+          );
+        })
+        darwinHosts
+      );
     };
 }

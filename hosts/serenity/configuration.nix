@@ -6,7 +6,6 @@
   isLinux,
   mkHomeModule,
   mkHomeCategory,
-  unstable-pkgs,
   ...
 }:
 let
@@ -306,9 +305,9 @@ in
     zoxide
     sops
 
-    claude-code
-    mcp-nixos
-    nodePackages_latest.nodejs
+    unstable.claude-code
+    unstable.mcp-nixos
+    unstable.nodePackages_latest.nodejs
   ];
 
   # Enable Home Manager for CLI tools
@@ -321,7 +320,6 @@ in
         isLinux
         mkHomeModule
         mkHomeCategory
-        unstable-pkgs
         ;
     };
     users = {

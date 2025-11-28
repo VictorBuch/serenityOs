@@ -3,7 +3,6 @@
   pkgs,
   lib,
   inputs,
-  unstable-pkgs,
   ...
 }:
 {
@@ -21,7 +20,7 @@
     # Enable the Niri Window Manager
     programs.niri = {
       enable = true;
-      package = unstable-pkgs.niri;
+      package = pkgs.unstable.niri;
     };
 
     sddm.enable = true;
@@ -48,7 +47,7 @@
     # Enable portals with proper configuration for niri
     xdg.portal = {
       enable = true;
-      extraPortals = with unstable-pkgs; [
+      extraPortals = with pkgs.unstable; [
         xdg-desktop-portal-gnome
         xdg-desktop-portal-gtk
       ];
@@ -87,7 +86,7 @@
     security.rtkit.enable = true;
 
     environment.systemPackages =
-      (with unstable-pkgs; [
+      (with pkgs.unstable; [
         libnotify
         swww # Wallpaper daemon
         hyprlock # Lock screen (compatible with niri)

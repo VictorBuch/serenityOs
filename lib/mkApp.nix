@@ -35,9 +35,9 @@
 #   mkApp {
 #     _file = toString ./.;
 #     name = "myapp";
-#     packages = { pkgs, unstable-pkgs }: [
+#     packages = pkgs: [
 #       pkgs.firefox             # stable (main branch)
-#       unstable-pkgs.neovim     # unstable
+#       pkgs.unstable.neovim     # unstable via overlay
 #     ];
 #   } args
 #
@@ -73,7 +73,6 @@
   lib,
   inputs ? null,
   isLinux ? pkgs.stdenv.isLinux,
-  unstable-pkgs,
   ...
 }:
 
@@ -108,16 +107,8 @@ let
     if pkgList == null then
       [ ]
     else if lib.isFunction pkgList then
-      let
-        funcArgs = lib.functionArgs pkgList;
-      in
-      if funcArgs != { } then
-        # Named arguments: { pkgs, unstable-pkgs }
-        # pkgs = stable (main), unstable-pkgs = unstable
-        pkgList { inherit pkgs unstable-pkgs; }
-      else
-        # Single argument: pkgs (stable)
-        pkgList pkgs
+      # Function: takes pkgs (which has unstable via overlay)
+      pkgList pkgs
     else
       # Direct list
       pkgList;

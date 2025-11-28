@@ -3,7 +3,6 @@
   pkgs,
   lib,
   options,
-  unstable-pkgs,
   ...
 }:
 {

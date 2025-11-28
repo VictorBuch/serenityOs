@@ -11,6 +11,6 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "zed";
-  packages = { pkgs, unstable-pkgs }: [ unstable-pkgs.zed-editor ];
+  packages = pkgs: [ pkgs.unstable.zed-editor ];
   description = "zed-editor";
 } args

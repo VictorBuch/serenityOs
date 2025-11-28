@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  unstable-pkgs,
   ...
 }:
 {
@@ -24,7 +23,7 @@
     services.xserver.displayManager.sddm.settings.General.DisplayServer = "wayland";
     services.xserver.displayManager.defaultSession = "plasma";
 
-    environment.plasma6.excludePackages = with unstable-pkgs.kdePackages; [
+    environment.plasma6.excludePackages = with pkgs.unstable.kdePackages; [
       plasma-browser-integration
       konsole
       oxygen

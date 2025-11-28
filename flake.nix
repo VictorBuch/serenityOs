@@ -90,7 +90,7 @@
           # system defaults to x86_64-linux
           extraModules = [
             ./modules/nixos
-            # inputs.catppuccin.nixosModules.catppuccin # Bug with anki module in 25.05
+            inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {

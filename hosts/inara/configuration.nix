@@ -108,6 +108,9 @@ in
       terminals = {
         ghostty.enable = false;
       };
+      editors = {
+        zed.enable = false; # Use homebrew cask instead to avoid compilation
+      };
     };
 
     media = {

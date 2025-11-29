@@ -19,6 +19,7 @@
     ./plugins/blink-cmp.nix
     ./plugins/bufferline.nix
     ./plugins/conform.nix
+    ./plugins/diffview.nix
     ./plugins/emmet.nix
     ./plugins/flash.nix
     ./plugins/flutter-tools.nix

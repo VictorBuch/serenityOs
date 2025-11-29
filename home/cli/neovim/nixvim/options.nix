@@ -23,5 +23,6 @@
     undofile = true; # Build-in persistent undo
 
     termguicolors = true;
+    cursorline = true; # Highlight current line
   };
 }

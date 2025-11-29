@@ -720,5 +720,172 @@
         silent = true;
       };
     }
+    # Yanky keymaps
+    {
+      mode = "n";
+      key = "p";
+      action = "<Plug>(YankyPutAfter)";
+      options = {
+        desc = "Put after";
+      };
+    }
+    {
+      mode = "n";
+      key = "P";
+      action = "<Plug>(YankyPutBefore)";
+      options = {
+        desc = "Put before";
+      };
+    }
+    {
+      mode = "n";
+      key = "[y";
+      action = "<Plug>(YankyCycleForward)";
+      options = {
+        desc = "Cycle yank forward";
+      };
+    }
+    {
+      mode = "n";
+      key = "]y";
+      action = "<Plug>(YankyCycleBackward)";
+      options = {
+        desc = "Cycle yank backward";
+      };
+    }
+    {
+      mode = "n";
+      key = ">p";
+      action = "<Plug>(YankyPutIndentAfterLinewise)";
+      options = {
+        desc = "Put indent after linewise";
+      };
+    }
+    {
+      mode = "n";
+      key = "<p";
+      action = "<Plug>(YankyPutIndentBeforeLinewise)";
+      options = {
+        desc = "Put indent before linewise";
+      };
+    }
+    {
+      mode = "n";
+      key = "=p";
+      action = "<Plug>(YankyPutAfterFilter)";
+      options = {
+        desc = "Put after filter";
+      };
+    }
+    {
+      mode = "n";
+      key = "]p";
+      action = "<Plug>(YankyPutIndentAfterLinewise)";
+      options = {
+        desc = "Put indent after";
+      };
+    }
+    {
+      mode = "n";
+      key = "[p";
+      action = "<Plug>(YankyPutIndentBeforeLinewise)";
+      options = {
+        desc = "Put indent before";
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>p";
+      action = "<cmd>Telescope yank_history<CR>";
+      options = {
+        desc = "Yank history";
+        silent = true;
+      };
+    }
+    # Yanky visual mode keymaps
+    {
+      mode = "v";
+      key = "p";
+      action = "<Plug>(YankyPutAfter)";
+      options = {
+        desc = "Paste (yanky)";
+      };
+    }
+    {
+      mode = "v";
+      key = "P";
+      action = "<Plug>(YankyPutBefore)";
+      options = {
+        desc = "Paste before (yanky)";
+      };
+    }
+    # Session Management (Persistence)
+    {
+      mode = "n";
+      key = "<leader>qs";
+      action.__raw = "function() require('persistence').load() end";
+      options = {
+        desc = "Restore session";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>ql";
+      action.__raw = "function() require('persistence').load({ last = true }) end";
+      options = {
+        desc = "Restore last session";
+        silent = true;
+      };
+    }
+    {
+      mode = "n";
+      key = "<leader>qd";
+      action.__raw = "function() require('persistence').stop() end";
+      options = {
+        desc = "Don't save current session";
+        silent = true;
+      };
+    }
+    # Zen Mode / Twilight
+    {
+      mode = "n";
+      key = "<leader>z";
+      action = "<cmd>ZenMode<CR>";
+      options = {
+        desc = "Zen mode";
+        silent = true;
+      };
+    }
+    # Yazi File Manager
+    {
+      mode = "n";
+      key = "<leader>y";
+      action = "<cmd>Yazi<CR>";
+      options = {
+        desc = "Yazi file manager";
+        silent = true;
+      };
+    }
+    # Missing gd keymap (go to definition)
+    {
+      mode = "n";
+      key = "gd";
+      action.__raw = "function() vim.lsp.buf.definition() end";
+      options = {
+        desc = "Goto definition";
+        silent = true;
+      };
+    }
+    # Missing K keymap (hover)
+    {
+      mode = "n";
+      key = "K";
+      action.__raw = "function() vim.lsp.buf.hover() end";
+      options = {
+        desc = "Hover";
+        silent = true;
+      };
+    }
   ];
 }

@@ -39,7 +39,9 @@ mkHomeModule {
 
           # Bar - heavily customized
           bar = {
-            backgroundOpacity = 0.2;
+            floating = true;
+            position = "top";
+            backgroundOpacity = 0.0;
             density = "compact";
 
             widgets = {

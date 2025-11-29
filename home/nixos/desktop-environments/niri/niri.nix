@@ -75,8 +75,8 @@ in
 
             focus-ring {
                 width 1.5
-                active-color "#aaaaaa"   // Catppuccin Mocha mauve
-                inactive-color "#6c7086"  // Catppuccin Mocha surface2
+                active-color "#aaaaaa"
+                inactive-color "#6c7086"
             }
 
             border {

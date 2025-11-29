@@ -12,7 +12,7 @@ mkApp {
   _file = toString ./.;
   name = "cli-tools";
   packages = pkgs: [
-    # pkgs.pam-cli  # Temporarily disabled - requires network to build Go modules
+    # pkgs.pam-cli
   ];
   description = "Command-line development and management tools";
 } args

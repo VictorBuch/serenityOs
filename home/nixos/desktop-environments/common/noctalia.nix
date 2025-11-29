@@ -208,7 +208,7 @@ mkHomeModule {
       # Fix missing app icons in Qt applications
       # Override Kvantum theme with GTK3 for better icon detection
       # This properly overrides catppuccin's Kvantum via systemd environment.d
-      qt.platformTheme.name = lib.mkForce "gtk3";
+      # qt.platformTheme.name = lib.mkForce "gtk3";
 
       # Configure GTK icon theme for better icon resolution
       # Helps Qt's gtk3 platform theme find fallback icons

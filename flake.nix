@@ -6,8 +6,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     nix-darwin = {
@@ -31,8 +31,8 @@
     stylix.url = "github:danth/stylix";
 
     catppuccin = {
-      url = "github:catppuccin/nix/release-25.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
     nvf = {
@@ -162,7 +162,7 @@
 
       nixosConfigurations = builtins.listToAttrs (
         map (host: {
-          name = host.name;
+          inherit (host) name;
           value = nixpkgs.lib.nixosSystem (
             let
               system = host.system or "x86_64-linux"; # Default to x86_64-linux
@@ -186,16 +186,17 @@
                 # Standard modules for all NixOS hosts
                 inputs.home-manager.nixosModules.default
                 inputs.sops-nix.nixosModules.sops
-              ] ++ (host.extraModules or []);
+                { home-manager.useGlobalPkgs = true; }
+              ]
+              ++ (host.extraModules or [ ]);
             }
           );
-        })
-        nixosHosts
+        }) nixosHosts
       );
 
       darwinConfigurations = builtins.listToAttrs (
         map (host: {
-          name = host.name;
+          inherit (host) name;
           value = nix-darwin.lib.darwinSystem (
             let
               system = host.system; # Darwin hosts must specify system
@@ -219,11 +220,12 @@
                 # Standard modules for all Darwin hosts
                 ./modules/darwin
                 inputs.home-manager.darwinModules.default
-              ] ++ (host.extraModules or []);
+                { home-manager.useGlobalPkgs = true; }
+              ]
+              ++ (host.extraModules or [ ]);
             }
           );
-        })
-        darwinHosts
+        }) darwinHosts
       );
     };
 }

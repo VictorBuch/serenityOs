@@ -63,20 +63,12 @@ in
     # Per-host Home Manager configuration
     sharedModules = [
       inputs.noctalia.homeModules.default
-      inputs.catppuccin.homeModules.catppuccin
       {
-        # Catppuccin home-manager configuration
-        catppuccin = {
-          enable = true;
-          flavor = "mocha";
-          accent = "mauve";
-        };
-
         home = {
           audio = {
             yabridge.enable = true;
           };
-          catppuccin.enable = true; # Re-enable now that we handle anki issue
+          catppuccin.enable = true;
           desktop-environments = {
             niri.enable = true;
             noctalia.enable = true;
@@ -84,9 +76,8 @@ in
           cli = {
             enable = true;
             neovim = {
-              enable = true;
-              nixvim.enable = false;
-              nvf.enable = true;
+              nixvim.enable = true;
+              nvf.enable = false;
             };
           };
           terminals = {
@@ -143,6 +134,7 @@ in
 
     media = {
       enable = true;
+      davinci-resolve.enable = false;
     };
 
     productivity = {
@@ -180,12 +172,6 @@ in
     "flakes"
   ];
 
-  # Catppuccin theming at system level
-  catppuccin = {
-    enable = true;
-    flavor = "mocha";
-    accent = "mauve";
-  };
   hardware.bluetooth.enable = true; # enables support for Bluetooth
   hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth
 

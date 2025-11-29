@@ -45,18 +45,16 @@
     };
 
     # Enable portals with proper configuration for niri
+    # Use xdg-desktop-portal-gtk only (gnome portal causes conflicts)
     xdg.portal = {
       enable = true;
-      extraPortals = with pkgs.unstable; [
-        xdg-desktop-portal-gnome
+      xdgOpenUsePortal = true;
+      extraPortals = with pkgs; [
         xdg-desktop-portal-gtk
       ];
       config = {
-        common.default = "*";
-        niri.default = [
-          "gnome"
-          "gtk"
-        ];
+        common.default = [ "gtk" ];
+        niri.default = [ "gtk" ];
       };
     };
 

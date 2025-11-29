@@ -114,9 +114,6 @@ in
   # Enable zsh shell
   programs.zsh.enable = true;
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   # Enable binaries to work
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [

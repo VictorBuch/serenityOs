@@ -193,9 +193,6 @@ in
     videoDrivers = [ "modesetting" ]; # Generic driver for VMs
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   system.stateVersion = "25.05";
 
 }

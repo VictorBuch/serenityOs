@@ -7,12 +7,12 @@ mkHomeModule {
   homeConfig = { config, pkgs, lib, ... }: {
 
     home.packages = with pkgs; [
-      tmux
       fortune
     ];
 
     programs.tmux = {
       enable = true;
+	  package = pkgs.unstable.tmux;
       prefix = "C-Space";
       terminal = "screen-256color";
       baseIndex = 1;

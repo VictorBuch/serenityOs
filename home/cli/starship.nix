@@ -19,12 +19,9 @@ mkHomeModule {
     }:
     {
 
-      home.packages = with pkgs; [
-        starship
-      ];
-
       programs.starship = {
         enable = true;
+        package = pkgs.unstable.starship;
         settings = {
           "$schema" = "https://starship.rs/config-schema.json";
 

@@ -26,6 +26,7 @@ mkApp {
     pkgs.unstable.devenv
     pkgs.unstable.jujutsu
     pkgs.unstable.pocketbase
+    pkgs.unstable.go
   ];
   description = "Common development tools";
 } args

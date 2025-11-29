@@ -36,7 +36,7 @@ in
             enable = true;
             zsh.enable = false;
             neovim = {
-              nixvim.enable = false;
+              nixvim.enable = true;
               nvf.enable = false;
             };
           };
@@ -89,6 +89,8 @@ in
     # TO BE MOVED LATER
     unstable.tailscale
     unstable.flutter
+    unstable.opencode
+    postman
   ];
 
   maintenance.enable = true;

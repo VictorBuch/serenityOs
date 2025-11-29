@@ -85,10 +85,10 @@ in
 
             preset-column-widths {
                 proportion 0.5
-                proportion 0.9
+                proportion 0.85
             }
 
-            default-column-width { proportion 0.5; }
+            default-column-width { proportion 0.70; }
 
             center-focused-column "always"
             always-center-single-column

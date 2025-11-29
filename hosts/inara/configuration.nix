@@ -124,7 +124,7 @@ in
     };
 
     utilities = {
-    	cli-tools.enable = true;
+      cli-tools.enable = true;
     };
   };
 

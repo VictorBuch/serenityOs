@@ -102,6 +102,7 @@ in
 
   ############### Apps ########################
 
+  catppuccin.enable = true;
   apps = {
     audio = {
       enable = true;

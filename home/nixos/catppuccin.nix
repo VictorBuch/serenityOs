@@ -26,7 +26,6 @@
       # ghostty.enable = true;
       # rofi.enable = false; # Using custom theme
       # hyprland.enable = true;
-      # waybar.enable = false; # Using custom theme with catppuccin colors
       # kvantum = {
       #   enable = true;
       #   flavor = "mocha";

@@ -189,12 +189,14 @@
       nixosConfigurations = builtins.listToAttrs (
         map (host: {
           inherit (host) name;
-          value = nixpkgs.lib.nixosSystem (
+          value =
             let
               system = host.system or "x86_64-linux"; # Default to x86_64-linux
               useUnstable = host.useUnstable or false;
+              # Use matching nixpkgs lib for modules to match packages
+              nixpkgsToUse = if useUnstable then unstable-nixpkgs else nixpkgs;
             in
-            {
+            nixpkgsToUse.lib.nixosSystem {
               inherit system;
               pkgs = if useUnstable then unstablePkgsFor system else pkgsFor system;
               specialArgs = {
@@ -216,8 +218,7 @@
                 { home-manager.useGlobalPkgs = true; }
               ]
               ++ (host.extraModules or [ ]);
-            }
-          );
+            };
         }) nixosHosts
       );
 

@@ -22,7 +22,7 @@ in
     # PostgreSQL database for Gitea
     services.postgresql = {
       enable = true;
-      package = pkgs.unstable.postgresql;
+      package = pkgs.postgresql_17;
       ensureDatabases = [ "gitea" ];
       ensureUsers = [
         {

@@ -150,7 +150,12 @@ in
         newVersionCheck.enabled = true; # Check for new versions. This feature relies on periodic communication with github.com.
       };
 
-      database.createDB = true;
+      database = {
+        createDB = true;
+        # Disable pgvecto.rs to allow PostgreSQL 17+
+        # Immich now uses pgvector which supports newer PostgreSQL versions
+        enableVectors = false;
+      };
 
       redis = {
         enable = true;

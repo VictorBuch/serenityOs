@@ -14,7 +14,7 @@ in
   options.paperless.enable = lib.mkEnableOption "Enables Paperless-ngx document management service";
 
   config = lib.mkIf config.paperless.enable {
-    
+
     users.users.${user.userName}.extraGroups = [ "paperless" ];
 
     services.redis.servers.paperless = {
@@ -34,22 +34,46 @@ in
     };
 
     systemd.services.paperless-scheduler = {
-      after = [ "mnt-pool.mount" "redis-paperless.service" ];
-      requires = [ "mnt-pool.mount" "redis-paperless.service" ];
-      serviceConfig.PrivateNetwork = lib.mkForce false;  # Allow Redis TCP connection on port 6382
+      after = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
+      requires = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
+      serviceConfig.PrivateNetwork = lib.mkForce false; # Allow Redis TCP connection on port 6382
     };
 
     systemd.services.paperless-consumer = {
-      after = [ "mnt-pool.mount" "redis-paperless.service" ];
-      requires = [ "mnt-pool.mount" "redis-paperless.service" ];
+      after = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
+      requires = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
     };
     systemd.services.paperless-web = {
-      after = [ "mnt-pool.mount" "redis-paperless.service" ];
-      requires = [ "mnt-pool.mount" "redis-paperless.service" ];
+      after = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
+      requires = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
     };
     systemd.services.paperless-task-queue = {
-      after = [ "mnt-pool.mount" "redis-paperless.service" ];
-      requires = [ "mnt-pool.mount" "redis-paperless.service" ];
+      after = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
+      requires = [
+        "mnt-pool.mount"
+        "redis-paperless.service"
+      ];
     };
 
     networking.firewall.allowedTCPPorts = [ 28981 ];
@@ -68,11 +92,14 @@ in
       enable = true;
       port = 28981;
       address = "0.0.0.0";
-      
-      # Override package to disable pytests
+
+      # Override package to disable all test phases
       package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
         doCheck = false;
-        checkPhase = "true";  # Skip all tests
+        # doInstallCheck = false;
+        # checkPhase = "";
+        # installCheckPhase = "";
+        pytestCheckPhase = "";
       });
 
       dataDir = "${paperlessDir}/data";
@@ -92,8 +119,8 @@ in
         PAPERLESS_REDIS = "redis://127.0.0.1:6382";
 
         # OCR settings
-        PAPERLESS_OCR_LANGUAGE = "eng+dan+ces";  # English, Danish, Czech
-        PAPERLESS_OCR_SKIP_ARCHIVE_FILE = "with_text";  # Skip OCR for files that already have text
+        PAPERLESS_OCR_LANGUAGE = "eng+dan+ces"; # English, Danish, Czech
+        PAPERLESS_OCR_SKIP_ARCHIVE_FILE = "with_text"; # Skip OCR for files that already have text
 
         # URL settings
         PAPERLESS_URL = "https://paperless.${domain}";
@@ -111,7 +138,7 @@ in
         PAPERLESS_THREADS_PER_WORKER = 2;
 
         # Security
-        PAPERLESS_AUTO_LOGIN_USERNAME = "";  # Disable auto-login
+        PAPERLESS_AUTO_LOGIN_USERNAME = ""; # Disable auto-login
         PAPERLESS_DISABLE_REGULAR_LOGIN = false;
 
         # Admin user

@@ -265,18 +265,35 @@ in
   # better memory management
   zramSwap.enable = true;
 
-  # Server Settings
-  # Enable OpenGL
+  # Server Settings - NVIDIA GPU Support for Jellyfin Transcoding
+  # Enable OpenGL and 32-bit support
   hardware.graphics = {
     enable = true;
+    enable32Bit = true; # Add 32-bit support for better compatibility
   };
 
   hardware.nvidia = {
-    # Modesetting is required.
+    # Modesetting is required
     modesetting.enable = true;
+
+    # Use proprietary drivers (better performance for transcoding)
     open = false;
+
+    # Stable driver package
     package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+    # Power management - keep GPU always on for server use
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
+
+    # CRITICAL: Enable persistence daemon for headless transcoding
+    # This keeps the GPU initialized even without a display
+    nvidiaPersistenced = true;
+
+    # Enable nvidia-settings tool (optional but useful for debugging)
+    nvidiaSettings = true;
   };
+
 
   virtualisation = {
 
@@ -308,6 +325,9 @@ in
     claude-code
     mcp-nixos
     nodePackages_latest.nodejs
+
+    # NVIDIA VAAPI driver for hardware acceleration
+    nvidia-vaapi-driver
   ];
 
   # Enable Home Manager for CLI tools

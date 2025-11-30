@@ -54,7 +54,7 @@ in
     # Native NixOS service for Pocket ID
     services.pocket-id = {
       enable = true;
-      package = pkgs.pocket-id;
+      package = pkgs.unstable.pocket-id;
 
       dataDir = cfg.dataDir;
 

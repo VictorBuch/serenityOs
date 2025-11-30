@@ -290,7 +290,6 @@ in
     nvidiaSettings = true;
   };
 
-
   virtualisation = {
 
     # enable docker

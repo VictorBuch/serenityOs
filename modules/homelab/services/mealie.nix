@@ -56,6 +56,7 @@ in
 
     services.mealie = {
       enable = true;
+      package = pkgs.unstable.mealie;
       port = 9000;
       listenAddress = "0.0.0.0";
       settings = {

@@ -20,16 +20,6 @@ in
   };
 
   config = lib.mkIf config.streaming.enable {
-    # Use unstable streaming packages
-    nixpkgs.overlays = [
-      (self: super: {
-        jellyfin = pkgs.unstable.jellyfin;
-        jellyfin-web = pkgs.unstable.jellyfin-web;
-        jellyfin-ffmpeg = pkgs.unstable.jellyfin-ffmpeg;
-        recyclarr = pkgs.unstable.recyclarr;
-      })
-    ];
-
     users = {
       groups.multimedia = {
         name = "multimedia";
@@ -80,6 +70,7 @@ in
       jellyfin = {
         # port 8096
         enable = true;
+        package = pkgs.unstable.jellyfin;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -87,11 +78,13 @@ in
       jellyseerr = {
         # port 5055
         enable = true;
+        package = pkgs.unstable.jellyseerr;
         openFirewall = true;
       };
       sonarr = {
         # port 8989
         enable = true;
+        package = pkgs.unstable.sonarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -99,6 +92,7 @@ in
       radarr = {
         # port 7878
         enable = true;
+        package = pkgs.unstable.radarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -106,6 +100,7 @@ in
       readarr = {
         # port 8787
         enable = true;
+        package = pkgs.unstable.readarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -113,6 +108,7 @@ in
       lidarr = {
         #port 8686
         enable = true;
+        package = pkgs.unstable.lidarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -120,17 +116,20 @@ in
       prowlarr = {
         # port 9696
         enable = true;
+        package = pkgs.unstable.prowlarr;
         openFirewall = true;
       };
       bazarr = {
         # port 6767
         enable = true;
+        package = pkgs.unstable.bazarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
       };
       audiobookshelf = {
         enable = true;
+        package = pkgs.unstable.audiobookshelf;
         port = 8004;
         host = "127.0.0.1";
         openFirewall = true;

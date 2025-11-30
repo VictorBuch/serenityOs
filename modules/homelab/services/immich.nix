@@ -16,13 +16,6 @@ in
   options.immich.enable = lib.mkEnableOption "Enables Immich photo backup service";
 
   config = lib.mkIf config.immich.enable {
-    # Use unstable Immich packages
-    nixpkgs.overlays = [
-      (self: super: {
-        immich = pkgs.unstable.immich;
-      })
-    ];
-
     users = {
       # Create dedicated immich group
       groups.immich = {
@@ -143,6 +136,7 @@ in
 
     services.immich = {
       enable = true;
+      package = pkgs.unstable.immich;
       user = "immich";
       group = "immich";
       host = "0.0.0.0"; # Allow external access

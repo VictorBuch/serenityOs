@@ -38,6 +38,7 @@ in
     # Gitea service configuration
     services.gitea = {
       enable = true;
+      package = pkgs.unstable.gitea;
       appName = "Git Server";
 
       database = {
@@ -154,10 +155,13 @@ in
 
     # SOPS secrets configuration
     sops.secrets."gitea/runner_token" = {
-      mode = "0444";  # Make readable by both runner users
+      mode = "0444"; # Make readable by both runner users
       owner = "root";
       group = "root";
-      restartUnits = [ "gitea-runner-docker.service" "gitea-runner-nix.service" ];
+      restartUnits = [
+        "gitea-runner-docker.service"
+        "gitea-runner-nix.service"
+      ];
     };
 
     # Create environment file with TOKEN variable for runners

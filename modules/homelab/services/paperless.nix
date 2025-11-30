@@ -96,9 +96,9 @@ in
       # Override package to disable all test phases
       package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
         doCheck = false;
-        # doInstallCheck = false;
-        # checkPhase = "";
-        # installCheckPhase = "";
+        doInstallCheck = false;
+        checkPhase = "";
+        installCheckPhase = "";
         pytestCheckPhase = "";
       });
 

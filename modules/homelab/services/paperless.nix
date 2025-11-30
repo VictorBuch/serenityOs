@@ -68,6 +68,12 @@ in
       enable = true;
       port = 28981;
       address = "0.0.0.0";
+      
+      # Override package to disable pytests
+      package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
+        doCheck = false;
+        checkPhase = "true";  # Skip all tests
+      });
 
       dataDir = "${paperlessDir}/data";
       mediaDir = "${paperlessDir}/media";

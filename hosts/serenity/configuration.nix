@@ -19,7 +19,6 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    inputs.home-manager.nixosModules.default
   ];
 
   boot = {
@@ -103,9 +102,6 @@ in
 
     neovim.defaultEditor = true;
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # Define a user account.
   user.userName = username;

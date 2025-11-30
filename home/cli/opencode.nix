@@ -59,13 +59,6 @@ mkHomeModule {
             };
           };
 
-          # Tool permissions
-          permissions = {
-            edit = "ask";
-            bash = "ask";
-            webfetch = "allow";
-          };
-
           # Instructions files
           instructions = [
             "CONTRIBUTING.md"

@@ -55,11 +55,13 @@ in
     # Redis service for NextCloud (separate from Immich container)
     services.redis.servers.nextcloud = {
       enable = true;
-      package = pkgs.unstable.redis;
       port = 6380;
       bind = lib.mkForce "127.0.0.1";
       settings.dir = "/var/lib/redis-nextcloud";
     };
+
+    # Use unstable redis globally to avoid RDB format version mismatch
+    services.redis.package = lib.mkDefault pkgs.unstable.redis;
 
     users = {
       groups.nextcloud = {

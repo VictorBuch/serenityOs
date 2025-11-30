@@ -19,7 +19,6 @@ in
 
     services.redis.servers.paperless = {
       enable = true;
-      package = pkgs.unstable.redis;
       port = 6382;
       bind = "127.0.0.1";
       settings = {
@@ -28,6 +27,9 @@ in
         maxmemory-policy = "allkeys-lru";
       };
     };
+
+    # Use unstable redis globally to avoid RDB format version mismatch
+    services.redis.package = lib.mkDefault pkgs.unstable.redis;
 
     systemd.services.redis-paperless = {
       after = [ "mnt-pool.mount" ];

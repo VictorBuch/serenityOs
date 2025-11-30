@@ -159,7 +159,7 @@ in
       };
     };
 
-    # Use unstable redis for immich to avoid RDB format version mismatch
-    services.redis.servers.immich.package = pkgs.unstable.redis;
+    # Use unstable redis globally to avoid RDB format version mismatch
+    services.redis.package = pkgs.unstable.redis;
   };
 }

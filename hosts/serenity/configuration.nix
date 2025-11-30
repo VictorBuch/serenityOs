@@ -394,6 +394,7 @@ in
 
   # Development
   gitea.enable = true;
+  wannashare.enable = true;
 
   # Document Management
   paperless.enable = true;

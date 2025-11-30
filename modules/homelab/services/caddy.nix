@@ -157,6 +157,12 @@ let
       https = false;
       protected = true;
     };
+    wannashare = {
+      # WannaShare PocketBase backend
+      url = "http://127.0.0.1:8090";
+      https = false;
+      protected = false; # PocketBase handles its own auth
+    };
   };
 
   # --- HELPER FUNCTIONS ---

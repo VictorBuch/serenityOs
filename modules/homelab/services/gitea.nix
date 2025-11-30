@@ -39,7 +39,7 @@ in
     # Gitea service configuration
     services.gitea = {
       enable = true;
-      package = pkgs.unstable.gitea;
+      package = pkgs.gitea;
       appName = "Git Server";
 
       database = {
@@ -112,7 +112,7 @@ in
 
     # Gitea Actions Runners for CI/CD
     services.gitea-actions-runner = {
-      package = pkgs.unstable.forgejo-runner; # Compatible with Gitea Actions
+      package = pkgs.forgejo-runner; # Compatible with Gitea Actions
 
       instances = {
         # Docker runner for containerized builds

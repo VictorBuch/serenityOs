@@ -21,7 +21,7 @@ in
 
     services.cloudflared = {
       enable = true;
-      package = pkgs.unstable.cloudflared;
+      package = pkgs.cloudflared;
       tunnels."7cd014d0-a9b0-4fc5-82e5-393486bba01a" = {
         credentialsFile = config.sops.templates."cloudflared-credentials".path;
         default = "http_status:404";

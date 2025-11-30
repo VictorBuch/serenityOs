@@ -94,7 +94,7 @@ in
     # Enable the Tailscale service
     services.tailscale = {
       enable = true;
-      package = pkgs.unstable.tailscale;
+      package = pkgs.tailscale;
       useRoutingFeatures = cfg.useRoutingFeatures;
       authKeyFile = config.sops.secrets."tailscale/auth_key".path;
 

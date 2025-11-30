@@ -82,6 +82,31 @@
           overlays = [ overlayWithInputs ];
         };
 
+      # Import unstable nixpkgs for serenity (homelab server)
+      # This makes unstable the default, with stable available as pkgs.stable
+      unstablePkgsFor =
+        system:
+        import unstable-nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+            allowBroken = true;
+          };
+          overlays = [
+            overlayWithInputs
+            # Add stable packages as pkgs.stable
+            (final: prev: {
+              stable = import nixpkgs {
+                inherit system;
+                config = {
+                  allowUnfree = true;
+                  allowBroken = true;
+                };
+              };
+            })
+          ];
+        };
+
       # Host definitions with their specific configurations
       nixosHosts = [
         {
@@ -104,6 +129,8 @@
           name = "serenity";
           # system defaults to x86_64-linux
           # Serenity is a homelab server with different modules
+          # Uses unstable nixpkgs by default
+          useUnstable = true;
           extraModules = [
             ./modules/homelab
           ];
@@ -165,10 +192,11 @@
           value = nixpkgs.lib.nixosSystem (
             let
               system = host.system or "x86_64-linux"; # Default to x86_64-linux
+              useUnstable = host.useUnstable or false;
             in
             {
               inherit system;
-              pkgs = pkgsFor system;
+              pkgs = if useUnstable then unstablePkgsFor system else pkgsFor system;
               specialArgs = {
                 inherit inputs system;
                 inherit (customLib)

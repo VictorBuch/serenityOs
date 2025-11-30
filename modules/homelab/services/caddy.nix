@@ -149,7 +149,7 @@ let
       https = false;
       protected = true;
       isStaticFiles = true;
-      staticPath = "${pkgs.unstable.it-tools}/lib";
+      staticPath = "${pkgs.it-tools}/lib";
     };
     paperless = {
       # Paperless-ngx document management

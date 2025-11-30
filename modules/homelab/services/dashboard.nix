@@ -479,7 +479,7 @@ in
       ];
       services.glance = {
         enable = true;
-        package = pkgs.unstable.glance;
+        package = pkgs.glance;
         openFirewall = true;
         settings = {
           server = {

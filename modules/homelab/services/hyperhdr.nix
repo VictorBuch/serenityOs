@@ -65,7 +65,7 @@ in
         RestartSec = 5;
 
         # Set the userdata directory and run in service mode
-        ExecStart = "${pkgs.unstable.hyperhdr}/bin/hyperhdr --service --userdata ${cfg.dataDir}";
+        ExecStart = "${pkgs.hyperhdr}/bin/hyperhdr --service --userdata ${cfg.dataDir}";
 
         # Security settings
         NoNewPrivileges = true;
@@ -84,7 +84,7 @@ in
     };
 
     # Install HyperHDR package
-    environment.systemPackages = with pkgs.unstable; [
+    environment.systemPackages = with pkgs; [
       hyperhdr
     ];
 

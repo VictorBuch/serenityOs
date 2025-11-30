@@ -28,7 +28,7 @@ in
       group = "mealie";
       extraGroups = [ "users" ];
       home = "/var/lib/mealie";
-      shell = pkgs.unstable.bash;
+      shell = pkgs.bash;
     };
 
     # Add serenity user to mealie group for management access
@@ -56,7 +56,7 @@ in
 
     services.mealie = {
       enable = true;
-      package = pkgs.unstable.mealie;
+      package = pkgs.mealie;
       port = 9000;
       listenAddress = "0.0.0.0";
       settings = {
@@ -68,7 +68,7 @@ in
     };
     nixpkgs.overlays = [
       (self: super: {
-        mealie = pkgs.unstable.mealie.overrideAttrs (oldAttrs: {
+        mealie = pkgs.mealie.overrideAttrs (oldAttrs: {
           doCheck = false;
           doInstallCheck = false;
         });

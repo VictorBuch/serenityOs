@@ -27,7 +27,7 @@ in
     # MySQL service for NextCloud
     services.mysql = {
       enable = true;
-      package = pkgs.unstable.mariadb;
+      package = pkgs.mariadb;
       ensureDatabases = [ "nextcloud" ];
       ensureUsers = [
         {
@@ -60,8 +60,8 @@ in
       settings.dir = "/var/lib/redis-nextcloud";
     };
 
-    # Use unstable redis globally to avoid RDB format version mismatch
-    services.redis.package = lib.mkDefault pkgs.unstable.redis;
+    # Set redis package (serenity uses unstable nixpkgs by default)
+    services.redis.package = lib.mkDefault pkgs.redis;
 
     users = {
       groups.nextcloud = {
@@ -171,7 +171,7 @@ in
     # NextCloud service configuration
     services.nextcloud = {
       enable = true;
-      package = pkgs.unstable.nextcloud32;
+      package = pkgs.nextcloud32;
       hostName = "nextcloud.${domain}";
       https = true;
       maxUploadSize = "16G";

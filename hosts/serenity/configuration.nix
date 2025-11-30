@@ -309,7 +309,7 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     docker-compose
-    unstable.neovim
+    neovim
     fzf
     lazygit
     git
@@ -317,9 +317,10 @@ in
     zoxide
     sops
 
-    unstable.claude-code
-    unstable.mcp-nixos
-    unstable.nodePackages_latest.nodejs
+    claude-code
+    opencode
+    mcp-nixos
+    nodePackages_latest.nodejs
     nvidia-vaapi-driver
   ];
 

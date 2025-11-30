@@ -30,7 +30,7 @@ in
         group = "immich";
         extraGroups = [ "users" ];
         home = immichDir;
-        shell = pkgs.unstable.bash;
+        shell = pkgs.bash;
       };
 
       # Add serenity user to immich group for management access
@@ -136,7 +136,7 @@ in
 
     services.immich = {
       enable = true;
-      package = pkgs.unstable.immich;
+      package = pkgs.immich;
       user = "immich";
       group = "immich";
       host = "0.0.0.0"; # Allow external access
@@ -164,7 +164,7 @@ in
       };
     };
 
-    # Use unstable redis globally to avoid RDB format version mismatch
-    services.redis.package = pkgs.unstable.redis;
+    # Set redis package (serenity uses unstable nixpkgs by default)
+    services.redis.package = pkgs.redis;
   };
 }

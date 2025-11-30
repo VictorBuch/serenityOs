@@ -97,7 +97,7 @@ in
       address = "0.0.0.0";
 
       # Override package to disable all test phases
-      package = pkgs.unstable.paperless-ngx.overrideAttrs (oldAttrs: {
+      package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
         doCheck = false;
         doInstallCheck = false;
         checkPhase = "";

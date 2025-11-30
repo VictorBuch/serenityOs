@@ -5,6 +5,7 @@
     ./stylix.nix
     ./catppuccin.nix
     ./desktop-environments
+    ./audio
   ];
 
   config = {

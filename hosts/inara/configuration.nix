@@ -37,7 +37,7 @@ in
             zsh.enable = false;
             neovim = {
               nixvim.enable = false;
-              nvf.enable = true;
+              nvf.enable = false;
             };
           };
           terminals = {
@@ -116,6 +116,10 @@ in
 
     productivity = {
       obsidian.enable = true;
+    };
+
+    utilities = {
+    	cli-tools.enable = true;
     };
   };
 

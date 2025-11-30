@@ -48,7 +48,7 @@ mkHomeModule {
                   id = "Workspace";
                   hideUnoccupied = true;
                   labelMode = "name";
-                  characterCount = 8;
+                  characterCount = 10;
                 }
                 {
                   id = "SystemMonitor";
@@ -122,8 +122,8 @@ mkHomeModule {
                 {
                   id = "ControlCenter";
                   customIconPath = "";
-                  icon = "noctalia";
-                  useDistroLogo = false;
+                  icon = "";
+                  useDistroLogo = true;
                 }
               ];
             };
@@ -172,6 +172,11 @@ mkHomeModule {
             transitionDuration = 2500;
 
             monitors = [
+              {
+                name = "DP-1";
+                directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+                wallpaper = "${config.home.homeDirectory}/serenityOs/home/wallpapers/house-in-mountains.png";
+              }
               {
                 name = "Virtual-1";
                 directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";

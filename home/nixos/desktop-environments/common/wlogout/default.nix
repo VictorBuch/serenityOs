@@ -82,7 +82,7 @@ in
         {
           label = "suspend";
           text = "Suspend";
-          action = "systemctl suspend";
+          action = "loginctl suspend";
           keybind = "s";
         }
         {
@@ -94,7 +94,7 @@ in
         {
           label= "logout";
           text= "Logout";
-          action= "sleep 1; hyprctl dispatch exit";
+          action= "niri msg action quit --skip-confirmation";
           keybind= "t";
         }
         {

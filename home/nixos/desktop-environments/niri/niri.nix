@@ -11,6 +11,7 @@ let
   browser = "zen";
   wallpaperDaemon = "swww";
   shell = "noctalia-shell";
+  applicationLauncher = "fuzzel";
 in
 
 {
@@ -30,7 +31,7 @@ in
           // Focus windows automatically when moving the mouse into them.
           // max-scroll-amount="95%" means focus won't switch if it requires scrolling more than 95%
           // (i.e., only focus windows that are at least 5% visible)
-          focus-follows-mouse max-scroll-amount="75%"
+          // focus-follows-mouse max-scroll-amount="75%"
 
           keyboard {
               xkb {
@@ -54,7 +55,7 @@ in
         // Adjust as needed for your specific setup
         // Commented out to allow auto-detection (especially important for VMs)
         output "DP-1" {
-            mode "2560x1440@144"
+            mode "2560x1440@119.998"
         }
         output "Virtual-1" {
             mode "2560x1600@59.972"
@@ -66,15 +67,15 @@ in
             gaps 8
 
             struts {
-            top 8
-            bottom 8
-            left 8
-            right 8
+                top 8
+                bottom 8
+                left 8
+                right 8
             }
 
             focus-ring {
                 width 1.5
-                active-color "#cba6f7"   // Catppuccin Mocha mauve
+                active-color "#aaaaaa"   // Catppuccin Mocha mauve
                 inactive-color "#6c7086"  // Catppuccin Mocha surface2
             }
 
@@ -87,9 +88,9 @@ in
                 proportion 0.9
             }
 
-            default-column-width { proportion 0.9; }
+            default-column-width { proportion 0.5; }
 
-            center-focused-column "always"
+            // center-focused-column "always"
             always-center-single-column
 
             // Transparent background for noctalia wallpapers (Option 2)
@@ -97,6 +98,7 @@ in
         }
 
         workspace "scratchpad"
+        workspace "main"
         workspace "gaming"
         workspace "chat"
 
@@ -128,14 +130,14 @@ in
             // Focus movement (vim keys)
             Mod+H { focus-column-left; }
             Mod+L { focus-column-right; }
-            Mod+J { focus-window-down; }
-            Mod+K { focus-window-up; }
+            Mod+J { focus-window-or-workspace-down; }
+            Mod+K { focus-window-or-workspace-up; }
 
             // Window movement
             Mod+Shift+H { move-column-left; }
             Mod+Shift+L { move-column-right; }
-            Mod+Shift+J { move-window-down; }
-            Mod+Shift+K { move-window-up; }
+            Mod+Shift+J { move-column-to-workspace-down; }
+            Mod+Shift+K { move-column-to-workspace-up; }
 
             // Workspace switching
             Mod+1 { focus-workspace 1; }
@@ -205,10 +207,10 @@ in
         }
 
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
-        layer-rule {
-            match namespace="^noctalia-wallpaper.*"
-            place-within-backdrop true
-        }
+        //layer-rule {
+        //    match namespace="^noctalia-wallpaper.*"
+        //    place-within-backdrop true
+        //}
 
       // Gestures configuration
       gestures {

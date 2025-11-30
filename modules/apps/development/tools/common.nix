@@ -23,11 +23,9 @@ mkApp {
     pkgs.claude-code
     pkgs.mcp-nixos
     pkgs.yazi
-    pkgs.figlet
-    pkgs.lolcat
     pkgs.devenv
     pkgs.jujutsu
-    pkgs.opencode
+    pkgs.pocketbase
   ];
   description = "Common development tools";
 } args

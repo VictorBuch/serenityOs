@@ -6,7 +6,8 @@
       "Bash(systemctl status:*)",
       "Bash(journalctl:*)",
       "Bash(systemctl list-units:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(nix-shell -p pciutils --run:*)"
     ],
     "deny": [],
     "ask": []

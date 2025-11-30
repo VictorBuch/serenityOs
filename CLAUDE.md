@@ -92,41 +92,43 @@ sudo nixos-rebuild build --flake .    # NixOS
 darwin-rebuild build --flake .        # macOS
 ```
 
-### Development Shells
+### Development Environments
 
-Project-specific development environments are available in `devshells/`. Each template provides isolated tool sets that auto-activate with direnv.
+Project-specific development environments are available in `devenvs/` using [devenv.sh](https://devenv.sh). Each template provides isolated, reproducible environments with automatic activation via direnv.
 
-**Available devShells:**
-- `vue-nuxt` - Vue 3 + Nuxt 3 with Node.js 20, pnpm, Vue CLI
-- `nodejs` - Generic Node.js 22 with npm/pnpm/yarn/bun (for Next.js, React, etc.)
-- `flutter` - Flutter + Android SDK + Chrome
-- `flutter-appwrite` - Flutter with Appwrite backend integration
+**Available Templates:**
+- `vue-nuxt` - Vue 3 + Nuxt 3 with Node.js 20, pnpm, Vue language server
+- `nodejs` - Node.js 22 with npm/pnpm/yarn/bun (for Next.js, React, Vite, etc.)
+- `flutter` - Flutter + Android SDK + Dart formatter
+- `flutter-appwrite` - Flutter with Appwrite CLI integration
 - `docker` - Docker Compose + Node.js + database CLIs
+- `go` - Go toolchain + gopls + delve + golangci-lint + sqlc
 
 **Quick usage:**
 ```bash
-# In your project directory, copy .envrc from devshell
-cp ~/serenityOs/devshells/nodejs/.envrc .
+# Copy template to your project directory
+cp -r ~/serenityOs/devenvs/nodejs/* /path/to/your-project/
+cd /path/to/your-project/
 direnv allow
 
-# Tools auto-activate when you cd into the directory
-cd my-project  # Node.js, npm, pnpm, etc. now available
+# Environment auto-activates with tools available
+# Custom scripts: dev, build, test, format
 ```
 
-**Testing shells:**
+**Prerequisites (for teammates):**
 ```bash
-# List available devShells
-nix flake show ~/serenityOs
+# Install Nix if not already installed
+sh <(curl -L https://nixos.org/nix/install)
 
-# Test a shell manually (Linux only - devShells defined for x86_64-linux)
-nix develop ~/serenityOs#nodejs
-nix develop ~/serenityOs#flutter
+# Install devenv
+nix-env -iA nixpkgs.devenv
 
-# Run single command in shell
-nix develop ~/serenityOs#nodejs --command node --version
+# Install direnv (optional but recommended)
+nix-env -iA nixpkgs.direnv
+eval "$(direnv hook bash)"  # or zsh
 ```
 
-See `devshells/README.md` for detailed documentation.
+See `devenvs/README.md` for detailed documentation.
 
 ### Homelab-Specific (serenity host)
 

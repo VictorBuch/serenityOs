@@ -15,6 +15,7 @@ let
     confirm-close-surface = false;
     font-family = "JetBrainsMono Nerd Font";
     font-size = 14;
+    mouse-scroll-multiplier = 1;
   };
 in
 

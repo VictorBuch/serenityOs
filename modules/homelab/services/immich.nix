@@ -137,7 +137,6 @@ in
     services.immich = {
       enable = true;
       package = pkgs.unstable.immich;
-      redis.package = pkgs.unstable.redis;
       user = "immich";
       group = "immich";
       host = "0.0.0.0"; # Allow external access
@@ -159,5 +158,8 @@ in
         host = "127.0.0.1";
       };
     };
+
+    # Use unstable redis for immich to avoid RDB format version mismatch
+    services.redis.servers.immich.package = pkgs.unstable.redis;
   };
 }

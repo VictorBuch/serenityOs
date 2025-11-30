@@ -25,7 +25,6 @@
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "unstable-nixpkgs";
-      inputs.quickshell.follows = "quickshell"; # Use same quickshell version
     };
 
     stylix.url = "github:danth/stylix";

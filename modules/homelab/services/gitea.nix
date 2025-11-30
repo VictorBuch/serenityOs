@@ -22,6 +22,7 @@ in
     # PostgreSQL database for Gitea
     services.postgresql = {
       enable = true;
+      package = pkgs.unstable.postgresql;
       ensureDatabases = [ "gitea" ];
       ensureUsers = [
         {
@@ -111,7 +112,7 @@ in
 
     # Gitea Actions Runners for CI/CD
     services.gitea-actions-runner = {
-      package = pkgs.forgejo-runner; # Compatible with Gitea Actions
+      package = pkgs.unstable.forgejo-runner; # Compatible with Gitea Actions
 
       instances = {
         # Docker runner for containerized builds

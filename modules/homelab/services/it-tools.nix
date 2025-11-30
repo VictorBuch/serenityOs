@@ -22,6 +22,6 @@ in
 
   config = lib.mkIf cfg.enable {
     # Add it-tools package to environment for Caddy to access
-    environment.systemPackages = [ pkgs.it-tools ];
+    environment.systemPackages = [ pkgs.unstable.it-tools ];
   };
 }

@@ -19,6 +19,7 @@ in
 
     services.redis.servers.paperless = {
       enable = true;
+      package = pkgs.unstable.redis;
       port = 6382;
       bind = "127.0.0.1";
       settings = {
@@ -94,7 +95,7 @@ in
       address = "0.0.0.0";
 
       # Override package to disable all test phases
-      package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
+      package = pkgs.unstable.paperless-ngx.overrideAttrs (oldAttrs: {
         doCheck = false;
         # doInstallCheck = false;
         # checkPhase = "";

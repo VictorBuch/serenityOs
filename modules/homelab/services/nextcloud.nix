@@ -27,7 +27,7 @@ in
     # MySQL service for NextCloud
     services.mysql = {
       enable = true;
-      package = pkgs.mariadb;
+      package = pkgs.unstable.mariadb;
       ensureDatabases = [ "nextcloud" ];
       ensureUsers = [
         {
@@ -55,6 +55,7 @@ in
     # Redis service for NextCloud (separate from Immich container)
     services.redis.servers.nextcloud = {
       enable = true;
+      package = pkgs.unstable.redis;
       port = 6380;
       bind = lib.mkForce "127.0.0.1";
       settings.dir = "/var/lib/redis-nextcloud";

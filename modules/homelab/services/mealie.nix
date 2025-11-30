@@ -67,8 +67,8 @@ in
       database.createLocally = true;
     };
     nixpkgs.overlays = [
-      (self: super: {
-        mealie = pkgs.mealie.overrideAttrs (oldAttrs: {
+      (final: prev: {
+        mealie = prev.mealie.overrideAttrs (oldAttrs: {
           doCheck = false;
           doInstallCheck = false;
         });

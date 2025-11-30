@@ -22,24 +22,26 @@ mkHomeModule {
         enable = true;
         package = pkgs.unstable.git;
 
-        # User configuration
-        userName = "VictorBuch";
-        userEmail = "victorbuch@protonmail.com";
+        # Git settings (new format for HM 26.05)
+        settings = {
+          # User configuration
+          user = {
+            name = "VictorBuch";
+            email = "victorbuch@protonmail.com";
+          };
 
-        # Useful aliases
-        aliases = {
-          st = "status";
-          co = "checkout";
-          br = "branch";
-          ci = "commit";
-          unstage = "reset HEAD --";
-          last = "log -1 HEAD";
-          amend = "commit --amend";
-          contributors = "shortlog -sn";
-        };
+          # Useful aliases
+          alias = {
+            st = "status";
+            co = "checkout";
+            br = "branch";
+            ci = "commit";
+            unstage = "reset HEAD --";
+            last = "log -1 HEAD";
+            amend = "commit --amend";
+            contributors = "shortlog -sn";
+          };
 
-        # Additional git configuration
-        extraConfig = {
           # Modern defaults
           init = {
             defaultBranch = "main";
@@ -111,9 +113,10 @@ mkHomeModule {
         ];
       };
 
-      # Delta configuration for beautiful diffs (configured through git in HM 25.05)
-      programs.git.delta = {
+      # Delta configuration for beautiful diffs (separate program in HM 26.05)
+      programs.delta = {
         enable = true;
+        enableGitIntegration = true;
         options = {
           navigate = true;
           side-by-side = false;
@@ -135,6 +138,5 @@ mkHomeModule {
           hunk-header-decoration-style = "blue box";
         };
       };
-
     };
 } args

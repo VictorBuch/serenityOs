@@ -137,6 +137,7 @@ in
     services.immich = {
       enable = true;
       package = pkgs.unstable.immich;
+      redis.package = pkgs.unstable.redis;
       user = "immich";
       group = "immich";
       host = "0.0.0.0"; # Allow external access

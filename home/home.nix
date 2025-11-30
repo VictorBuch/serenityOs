@@ -19,6 +19,10 @@
 
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
+  # Disable nixpkgs release check since we use unstable home-manager with stable nixpkgs
+  # This is intentional to get access to newer HM modules like programs.opencode
+  home.enableNixpkgsReleaseCheck = false;
+
   # # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 

@@ -290,6 +290,7 @@ in
     nvidiaSettings = true;
   };
 
+
   virtualisation = {
 
     # enable docker
@@ -321,6 +322,8 @@ in
     opencode
     mcp-nixos
     nodePackages_latest.nodejs
+
+    # NVIDIA VAAPI driver for hardware acceleration
     nvidia-vaapi-driver
   ];
 

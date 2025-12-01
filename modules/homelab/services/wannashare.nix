@@ -9,7 +9,7 @@ let
   dataDir = "/var/lib/wannashare";
   user = "wannashare";
   group = "wannashare";
-  port = 8090;
+  port = 8099;
 in
 {
   options.wannashare.enable = lib.mkEnableOption "Enables WannaShare PocketBase backend";
@@ -42,7 +42,7 @@ in
         User = user;
         Group = group;
         WorkingDirectory = dataDir;
-        ExecStart = "${dataDir}/wannashare serve --http=127.0.0.1:${toString port}";
+        ExecStart = "${dataDir}/wannashare-backend serve --http=127.0.0.1:${toString port}";
         Restart = "always";
         RestartSec = "5s";
 

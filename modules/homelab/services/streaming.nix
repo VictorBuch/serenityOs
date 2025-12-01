@@ -20,7 +20,6 @@ in
   };
 
   config = lib.mkIf config.streaming.enable {
-
     users = {
       groups.multimedia = {
         name = "multimedia";
@@ -71,6 +70,7 @@ in
       jellyfin = {
         # port 8096
         enable = true;
+        package = pkgs.jellyfin;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -78,11 +78,13 @@ in
       jellyseerr = {
         # port 5055
         enable = true;
+        package = pkgs.jellyseerr;
         openFirewall = true;
       };
       sonarr = {
         # port 8989
         enable = true;
+        package = pkgs.sonarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -90,6 +92,7 @@ in
       radarr = {
         # port 7878
         enable = true;
+        package = pkgs.radarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -97,6 +100,7 @@ in
       readarr = {
         # port 8787
         enable = true;
+        package = pkgs.readarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -104,6 +108,7 @@ in
       lidarr = {
         #port 8686
         enable = true;
+        package = pkgs.lidarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
@@ -111,17 +116,20 @@ in
       prowlarr = {
         # port 9696
         enable = true;
+        package = pkgs.prowlarr;
         openFirewall = true;
       };
       bazarr = {
         # port 6767
         enable = true;
+        package = pkgs.bazarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
       };
       audiobookshelf = {
         enable = true;
+        package = pkgs.audiobookshelf;
         port = 8004;
         host = "127.0.0.1";
         openFirewall = true;

@@ -166,7 +166,7 @@ with open('/var/lib/deluge/config/core.conf', 'r') as f:
     config_str = content[first_end:]
     config = json.loads(config_str)
 
-config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['listen_ports'] = [$FORWARDED_PORT, $FORWARDED_PORT]
 config['random_port'] = False
 
 with open('/var/lib/deluge/config/core.conf', 'w') as f:
@@ -257,7 +257,7 @@ with open('/var/lib/deluge/config/core.conf', 'r') as f:
     config_str = content[first_end:]
     config = json.loads(config_str)
 
-config['listen_ports'] = [$FORWARDED_PORT, $((FORWARDED_PORT + 1))]
+config['listen_ports'] = [$FORWARDED_PORT, $FORWARDED_PORT]
 config['random_port'] = False
 
 with open('/var/lib/deluge/config/core.conf', 'w') as f:

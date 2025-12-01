@@ -20,6 +20,7 @@ mkHomeModule {
     {
       programs.sesh = {
         enable = true;
+        package = pkgs.unstable.sesh;
         enableTmuxIntegration = true;
         enableAlias = false;
         tmuxKey = "s";

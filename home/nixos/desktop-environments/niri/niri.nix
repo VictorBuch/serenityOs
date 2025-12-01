@@ -75,8 +75,8 @@ in
 
             focus-ring {
                 width 1.5
-                active-color "#aaaaaa"   // Catppuccin Mocha mauve
-                inactive-color "#6c7086"  // Catppuccin Mocha surface2
+                active-color "#aaaaaa"
+                inactive-color "#6c7086"
             }
 
             border {
@@ -85,12 +85,12 @@ in
 
             preset-column-widths {
                 proportion 0.5
-                proportion 0.9
+                proportion 0.85
             }
 
-            default-column-width { proportion 0.5; }
+            default-column-width { proportion 0.70; }
 
-            // center-focused-column "always"
+            center-focused-column "always"
             always-center-single-column
 
             // Transparent background for noctalia wallpapers (Option 2)
@@ -184,7 +184,7 @@ in
             draw-border-with-background false
         }
         window-rule {
-            geometry-corner-radius 8
+            geometry-corner-radius 20
             clip-to-geometry true
         }
 
@@ -207,10 +207,10 @@ in
         }
 
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
-        //layer-rule {
-        //    match namespace="^noctalia-wallpaper.*"
-        //    place-within-backdrop true
-        //}
+        layer-rule {
+          match namespace="^noctalia-wallpaper*"
+          place-within-backdrop true
+        }
 
       // Gestures configuration
       gestures {
@@ -260,6 +260,11 @@ in
 
         // Prefer dark themes
         prefer-no-csd
+
+        debug {
+          // Allows notification actions and window activation from Noctalia.
+          honor-xdg-activation-with-invalid-serial
+        }
     '';
   };
 }

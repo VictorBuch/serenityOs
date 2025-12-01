@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Add paperlessng as a service
 - [ ] fix crafty controller file issues
 - [ ] try out authentik to replace tinyauth and pocketId/ is there a reason?!
 - [ ] try out invoicePlane

@@ -479,6 +479,7 @@ in
       ];
       services.glance = {
         enable = true;
+        package = pkgs.glance;
         openFirewall = true;
         settings = {
           server = {

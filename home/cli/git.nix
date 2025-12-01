@@ -20,14 +20,18 @@ mkHomeModule {
     {
       programs.git = {
         enable = true;
+        package = pkgs.unstable.git;
 
+        # Git settings (new format for HM 26.05)
         settings = {
+          # User configuration
           user = {
             name = "VictorBuch";
             email = "victorbuch@protonmail.com";
           };
+
           # Useful aliases
-          aliases = {
+          alias = {
             st = "status";
             co = "checkout";
             br = "branch";
@@ -38,44 +42,41 @@ mkHomeModule {
             contributors = "shortlog -sn";
           };
 
-          # Additional git configuration
-          extraConfig = {
-            # Modern defaults
-            init = {
-              defaultBranch = "main";
-            };
+          # Modern defaults
+          init = {
+            defaultBranch = "main";
+          };
 
-            # Pull and push behavior
-            pull = {
-              rebase = true;
-            };
-            push = {
-              autoSetupRemote = true;
-              default = "current";
-            };
+          # Pull and push behavior
+          pull = {
+            rebase = true;
+          };
+          push = {
+            autoSetupRemote = true;
+            default = "current";
+          };
 
-            # Better diff and merge
-            diff = {
-              colorMoved = "default";
-            };
-            merge = {
-              conflictStyle = "zdiff3";
-            };
+          # Better diff and merge
+          diff = {
+            colorMoved = "default";
+          };
+          merge = {
+            conflictStyle = "zdiff3";
+          };
 
-            # Rebase settings
-            rebase = {
-              autoStash = true;
-            };
+          # Rebase settings
+          rebase = {
+            autoStash = true;
+          };
 
-            # Remember conflict resolutions
-            rerere = {
-              enabled = true;
-            };
+          # Remember conflict resolutions
+          rerere = {
+            enabled = true;
+          };
 
-            # Sort branches by recent activity
-            branch = {
-              sort = "-committerdate";
-            };
+          # Sort branches by recent activity
+          branch = {
+            sort = "-committerdate";
           };
         };
 
@@ -112,7 +113,7 @@ mkHomeModule {
         ];
       };
 
-      # Delta configuration for beautiful diffs (now as separate program)
+      # Delta configuration for beautiful diffs (separate program in HM 26.05)
       programs.delta = {
         enable = true;
         enableGitIntegration = true;
@@ -137,6 +138,5 @@ mkHomeModule {
           hunk-header-decoration-style = "blue box";
         };
       };
-
     };
 } args

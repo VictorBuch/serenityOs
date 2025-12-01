@@ -19,7 +19,6 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    inputs.home-manager.nixosModules.default
   ];
 
   boot = {
@@ -103,9 +102,6 @@ in
 
     neovim.defaultEditor = true;
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # Define a user account.
   user.userName = username;
@@ -323,6 +319,7 @@ in
     sops
 
     claude-code
+    opencode
     mcp-nixos
     nodePackages_latest.nodejs
 
@@ -400,6 +397,7 @@ in
 
   # Development
   gitea.enable = true;
+  wannashare.enable = true;
 
   # Document Management
   paperless.enable = true;

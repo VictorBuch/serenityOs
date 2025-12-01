@@ -56,6 +56,7 @@ in
 
     services.mealie = {
       enable = true;
+      package = pkgs.mealie;
       port = 9000;
       listenAddress = "0.0.0.0";
       settings = {
@@ -66,8 +67,8 @@ in
       database.createLocally = true;
     };
     nixpkgs.overlays = [
-      (self: super: {
-        mealie = super.mealie.overrideAttrs (oldAttrs: {
+      (final: prev: {
+        mealie = prev.mealie.overrideAttrs (oldAttrs: {
           doCheck = false;
           doInstallCheck = false;
         });

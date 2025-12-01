@@ -38,7 +38,7 @@
       {
         mode = "n";
         key = "]c";
-        action = ''
+        action.__raw = ''
           function()
             if vim.wo.diff then
               vim.cmd.normal({']c', bang = true})
@@ -47,7 +47,6 @@
             end
           end
         '';
-        lua = true;
         options = {
           desc = "Next git hunk";
           expr = true;
@@ -56,7 +55,7 @@
       {
         mode = "n";
         key = "[c";
-        action = ''
+        action.__raw = ''
           function()
             if vim.wo.diff then
               vim.cmd.normal({'[c', bang = true})
@@ -65,7 +64,6 @@
             end
           end
         '';
-        lua = true;
         options = {
           desc = "Previous git hunk";
           expr = true;

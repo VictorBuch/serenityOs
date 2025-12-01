@@ -31,7 +31,7 @@
         ts = {
           enable = true;
           format.enable = true;
-          format.type = "prettier";
+          format.type = "prettierd";
           extraDiagnostics.enable = true;
           extraDiagnostics.types = [ "eslint_d" ];
         };
@@ -66,7 +66,7 @@
         css = {
           enable = true;
           format.enable = true;
-          format.type = "prettier";
+          format.type = "prettierd";
         };
 
         # Tailwind CSS

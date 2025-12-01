@@ -35,9 +35,9 @@
 #   mkApp {
 #     _file = toString ./.;
 #     name = "myapp";
-#     packages = { pkgs, stable-pkgs }: [
-#       pkgs.firefox           # unstable
-#       stable-pkgs.libreoffice  # stable
+#     packages = pkgs: [
+#       pkgs.firefox             # stable (main branch)
+#       pkgs.unstable.neovim     # unstable via overlay
 #     ];
 #   } args
 #
@@ -98,16 +98,6 @@ let
     else
       throw "mkApp: Either '_file' or 'optionPath' must be provided for ${name}";
 
-  # Import stable nixpkgs if inputs is available
-  stable-pkgs =
-    if inputs != null then
-      import inputs.stable-nixpkgs {
-        inherit (pkgs) system;
-        config.allowUnfree = true;
-      }
-    else
-      pkgs;
-
   # Select platform-specific packages
   platformPackages = if isLinux then linuxPackages else darwinPackages;
 
@@ -117,15 +107,8 @@ let
     if pkgList == null then
       [ ]
     else if lib.isFunction pkgList then
-      let
-        funcArgs = lib.functionArgs pkgList;
-      in
-      if funcArgs != { } then
-        # Named arguments: { pkgs, stable-pkgs }
-        pkgList { inherit pkgs stable-pkgs; }
-      else
-        # Single argument: pkgs
-        pkgList pkgs
+      # Function: takes pkgs (which has unstable via overlay)
+      pkgList pkgs
     else
       # Direct list
       pkgList;

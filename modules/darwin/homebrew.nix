@@ -49,6 +49,7 @@
         "orbstack"
         "qmk-toolbox"
         "raycast"
+        "zed"
       ];
 
       # Mac App Store apps (requires mas CLI tool)

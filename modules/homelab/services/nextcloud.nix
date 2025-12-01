@@ -60,6 +60,9 @@ in
       settings.dir = "/var/lib/redis-nextcloud";
     };
 
+    # Set redis package (serenity uses unstable nixpkgs by default)
+    services.redis.package = lib.mkDefault pkgs.redis;
+
     users = {
       groups.nextcloud = {
         name = "nextcloud";

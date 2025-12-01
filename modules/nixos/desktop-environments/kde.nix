@@ -17,13 +17,13 @@
   config = lib.mkIf config.desktop-environments.kde.enable {
     sddm.enable = true;
     services.xserver.enable = true; # optional
-    services.displayManager.sddm.enable = true;
-    services.displayManager.sddm.wayland.enable = true;
-    services.desktopManager.plasma6.enable = true;
-    services.displayManager.sddm.settings.General.DisplayServer = "wayland";
-    services.displayManager.defaultSession = "plasma";
+    services.xserver.displayManager.sddm.enable = true;
+    services.xserver.displayManager.sddm.wayland.enable = true;
+    services.xserver.desktopManager.plasma6.enable = true;
+    services.xserver.displayManager.sddm.settings.General.DisplayServer = "wayland";
+    services.xserver.displayManager.defaultSession = "plasma";
 
-    environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    environment.plasma6.excludePackages = with pkgs.unstable.kdePackages; [
       plasma-browser-integration
       konsole
       oxygen

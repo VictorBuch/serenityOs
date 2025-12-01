@@ -94,6 +94,7 @@ in
     # Enable the Tailscale service
     services.tailscale = {
       enable = true;
+      package = pkgs.tailscale;
       useRoutingFeatures = cfg.useRoutingFeatures;
       authKeyFile = config.sops.secrets."tailscale/auth_key".path;
 
@@ -123,14 +124,16 @@ in
     };
 
     # Additional kernel parameters for better routing performance when acting as exit node
-    boot.kernel.sysctl = lib.mkIf (cfg.useRoutingFeatures == "server" || cfg.useRoutingFeatures == "both") {
-      # These are already set by useRoutingFeatures, but we document them here
-      # "net.ipv4.ip_forward" = 1;  # Automatically enabled by useRoutingFeatures = "server"
-      # "net.ipv6.conf.all.forwarding" = 1;
+    boot.kernel.sysctl =
+      lib.mkIf (cfg.useRoutingFeatures == "server" || cfg.useRoutingFeatures == "both")
+        {
+          # These are already set by useRoutingFeatures, but we document them here
+          # "net.ipv4.ip_forward" = 1;  # Automatically enabled by useRoutingFeatures = "server"
+          # "net.ipv6.conf.all.forwarding" = 1;
 
-      # Additional optimizations for routing
-      "net.ipv4.conf.all.forwarding" = 1;
-      "net.ipv6.conf.all.forwarding" = 1;
-    };
+          # Additional optimizations for routing
+          "net.ipv4.conf.all.forwarding" = 1;
+          "net.ipv6.conf.all.forwarding" = 1;
+        };
   };
 }

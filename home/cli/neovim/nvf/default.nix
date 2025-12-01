@@ -34,7 +34,7 @@
 
   config = lib.mkIf config.home.cli.neovim.nvf.enable {
     home.packages =
-      with pkgs;
+      with pkgs.unstable;
       [
         ripgrep
         fd

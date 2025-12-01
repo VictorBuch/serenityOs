@@ -3,6 +3,8 @@
   pkgs,
   inputs,
   isLinux,
+  mkHomeModule,
+  mkHomeCategory,
   ...
 }:
 let
@@ -112,9 +114,6 @@ in
   # Enable zsh shell
   programs.zsh.enable = true;
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   # Enable binaries to work
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
@@ -130,7 +129,13 @@ in
   home-manager = {
     # also pass inputs to home-manager modules
     extraSpecialArgs = {
-      inherit username inputs isLinux;
+      inherit
+        username
+        inputs
+        isLinux
+        mkHomeModule
+        mkHomeCategory
+        ;
     };
     users = {
       "${username}" = import ../../home/default.nix;

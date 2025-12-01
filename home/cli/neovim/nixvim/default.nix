@@ -19,6 +19,7 @@
     ./plugins/blink-cmp.nix
     ./plugins/bufferline.nix
     ./plugins/conform.nix
+    ./plugins/diffview.nix
     ./plugins/emmet.nix
     ./plugins/flash.nix
     ./plugins/flutter-tools.nix
@@ -53,7 +54,7 @@
   };
 
   config = lib.mkIf config.home.cli.neovim.nixvim.enable {
-    home.packages = with pkgs; [
+    home.packages = with pkgs.unstable; [
       ripgrep
       fd
       fzf

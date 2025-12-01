@@ -12,36 +12,24 @@
   };
 
   config = lib.mkIf config.sddm.enable {
-    catppuccin.sddm = {
-      enable = true;
-      accent = "mauve";
-      flavor = "mocha";
-    };
-
-    services.displayManager.sddm = {
+    # catppuccin.sddm = {
+    #   enable = true;
+    #   accent = "mauve";
+    #   flavor = "mocha";
+    #   assertQt6Sddm = false;
+    # };
+    #
+    services.xserver.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
+      package = pkgs.kdePackages.sddm;
       # theme = "catppuccin-mocha";
       settings = {
         General = {
           # Ensure proper session detection
           GreeterEnvironment = "QT_WAYLAND_DISABLE_WINDOWDECORATION=1";
         };
-        # Wayland = {
-        #   # Specify compositor for SDDM
-        #   CompositorCommand = "kwin_wayland --no-lockscreen --no-global-shortcuts --locale1";
-        # };
       };
     };
-    # environment.systemPackages = with pkgs; [
-    #   (catppuccin-sddm.override {
-    #     flavor = "mocha";
-    #     font  = "JetBrainsMono Nerd Font";
-    #     fontSize = "12";
-    #     background = ../../home/wallpapers/cloudsnight.jpg;
-    #     loginBackground = true;
-    #     }
-    #   )
-    # ];
   };
 }

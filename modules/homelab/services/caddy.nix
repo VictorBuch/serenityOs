@@ -157,6 +157,13 @@ let
       https = false;
       protected = true;
     };
+    wannashare = {
+      # WannaShare PocketBase backend
+      url = "http://127.0.0.1:8099";
+      https = false;
+      protected = false; # PocketBase handles its own auth
+      isPocketBase = true;
+    };
   };
 
   # --- HELPER FUNCTIONS ---
@@ -239,6 +246,21 @@ let
               }
             }
           ''
+	else if service.isPocketBase or false then
+	  ''
+	    request_body {
+	      max_size 10M
+	    }
+	    reverse_proxy ${service.url} {
+	      header_up Host {host}
+	      header_up X-Real-IP {remote}
+	      header_up X-Forwarded-For {remote}
+	      header_up X-Forwarded-Proto {scheme}
+	      transport http {
+		read_timeout 360s
+	      }
+	    }
+	  ''
         else
           ''
             reverse_proxy ${service.url} {
@@ -248,6 +270,7 @@ let
               header_up X-Forwarded-Proto {scheme}
             }
           ''
+
       }
     '';
   };

@@ -118,12 +118,11 @@
       {
         mode = "n";
         key = "]t";
-        action = ''
+        action.__raw = ''
           function()
             require("todo-comments").jump_next()
           end
         '';
-        lua = true;
         options = {
           desc = "Next todo comment";
           silent = true;
@@ -132,12 +131,11 @@
       {
         mode = "n";
         key = "[t";
-        action = ''
+        action.__raw = ''
           function()
             require("todo-comments").jump_prev()
           end
         '';
-        lua = true;
         options = {
           desc = "Previous todo comment";
           silent = true;

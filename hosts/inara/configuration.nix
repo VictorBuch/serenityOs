@@ -36,7 +36,7 @@ in
             enable = true;
             zsh.enable = false;
             neovim = {
-              nixvim.enable = false;
+              nixvim.enable = true;
               nvf.enable = false;
             };
           };
@@ -76,19 +76,21 @@ in
 
   # System packages (keep minimal, prefer home-manager for user apps)
   environment.systemPackages = with pkgs; [
-    neovim
-    nushell
+    unstable.neovim
+    unstable.nushell
     git
     lazygit
-    claude-code
-    mcp-nixos
+    unstable.claude-code
+    unstable.mcp-nixos
     lolcat
     figlet
     bat
 
     # TO BE MOVED LATER
-    tailscale
-    flutter
+    unstable.tailscale
+    unstable.flutter
+    unstable.opencode
+    postman
   ];
 
   maintenance.enable = true;
@@ -108,6 +110,9 @@ in
       terminals = {
         ghostty.enable = false;
       };
+      editors = {
+        zed.enable = false; # Use homebrew cask instead to avoid compilation
+      };
     };
 
     media = {
@@ -119,7 +124,7 @@ in
     };
 
     utilities = {
-    	cli-tools.enable = true;
+      cli-tools.enable = true;
     };
   };
 

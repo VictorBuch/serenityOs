@@ -12,11 +12,11 @@
 
   config = lib.mkIf config.desktop-environments.gnome.enable {
     services.xserver.enable = true;
-    services.displayManager.gdm.enable =
+    services.xserver.displayManager.gdm.enable =
       !(config.desktop-environments.kde.enable || config.desktop-environments.hyprland.enable);
-    services.desktopManager.gnome.enable = true;
+    services.xserver.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =
-      (with pkgs; [
+      (with pkgs.unstable; [
         gnome-tour
         gedit
         cheese # webcam tool
@@ -31,14 +31,14 @@
         hitori # sudoku game
         atomix # puzzle game
       ])
-      ++ (with pkgs.gnome; [
-        pkgs.gnome-console
-        pkgs.gnome-connections
+      ++ (with pkgs.unstable.gnome; [
+        pkgs.unstable.gnome-console
+        pkgs.unstable.gnome-connections
       ]);
 
     environment.systemPackages = [
-      pkgs.sushi
-      pkgs.gnome-tweaks
+      pkgs.unstable.sushi
+      pkgs.unstable.gnome-tweaks
     ];
     networking.firewall.allowedTCPPortRanges = [
       {

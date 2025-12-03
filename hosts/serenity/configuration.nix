@@ -370,6 +370,7 @@ in
   # Smart home
   hyperhdr.enable = true;
   music-assistant.enable = true;
+  home-assistant.enable = true;
 
   # Monitor and Dashboards
   dashboard = {

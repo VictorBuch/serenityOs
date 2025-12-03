@@ -31,6 +31,7 @@
     ./services/mealie.nix
     ./services/hyperhdr.nix
     ./services/music-assistant.nix
+    ./services/home-assistant.nix
     ./services/caddy.nix
     ./services/pocket-id.nix
     ./services/gitea.nix

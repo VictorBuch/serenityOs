@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] Add paperlessng as a service
 - [ ] fix crafty controller file issues
 - [ ] try out authentik to replace tinyauth and pocketId/ is there a reason?!
 - [ ] try out invoicePlane
@@ -11,4 +10,6 @@
 - [x] setup devenv to replace flake dev shells for ease of use and declaration
 - [x] fix wallos issues
 - [x] fix tailscale service
+- [x] Add paperlessng as a service
 - [x] fix gitea service
+- [x] setup home assistant

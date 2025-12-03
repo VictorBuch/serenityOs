@@ -46,9 +46,9 @@ mkHomeModule {
         nushell = {
           enable = true;
           shellAliases = aliases;
-	  extraEnv = ''
-		def nrc [] { npm run prettier; npm run lint; npm run ts-check }
-	  '';
+          extraEnv = ''
+            		def nrc [] { npm run prettier; npm run lint; npm run ts-check }
+            	  '';
 
           # Set up Nix environment for Darwin (nushell doesn't auto-source /etc/bashrc)
           # On NixOS, the system handles PATH correctly including /run/wrappers/bin
@@ -75,7 +75,7 @@ mkHomeModule {
             };
           };
           extraConfig = ''
-            figlet -f slant -tk ${config.home.username} | lolcat -p 3
+            figlet -ft slant -tk ${config.home.username} | lolcat -p 3
           '';
         };
 

@@ -55,6 +55,7 @@ in
         "esphome"
         "cast" # Chromecast
         "spotify"
+	"tuya"
         "mobile_app" # For HA companion app
       ];
 

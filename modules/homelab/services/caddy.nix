@@ -246,21 +246,41 @@ let
               }
             }
           ''
-	else if service.isPocketBase or false then
-	  ''
-	    request_body {
-	      max_size 10M
-	    }
-	    reverse_proxy ${service.url} {
-	      header_up Host {host}
-	      header_up X-Real-IP {remote}
-	      header_up X-Forwarded-For {remote}
-	      header_up X-Forwarded-Proto {scheme}
-	      transport http {
-		read_timeout 360s
-	      }
-	    }
-	  ''
+        else if service.isPocketBase or false then
+          ''
+            request_body {
+              max_size 10M
+            }
+
+            # Route /api/* directly to backend
+            handle /api/* {
+              reverse_proxy ${service.url} {
+                header_up Host {host}
+                header_up X-Real-IP {remote}
+                header_up X-Forwarded-For {remote}
+                header_up X-Forwarded-Proto {scheme}
+                transport http {
+                  read_timeout 360s
+                }
+              }
+            }
+
+            # Route /_/* directly to backend (PocketBase admin UI)
+            handle /_/* {
+              reverse_proxy ${service.url} {
+                header_up Host {host}
+                header_up X-Real-IP {remote}
+                header_up X-Forwarded-For {remote}
+                header_up X-Forwarded-Proto {scheme}
+                transport http {
+                  read_timeout 360s
+                }
+              }
+            }
+
+            # Redirect root to /_/
+            redir / /_/ permanent
+          ''
         else
           ''
             reverse_proxy ${service.url} {

@@ -8,7 +8,6 @@ let
   cfg = config.caddy;
   hl = config.homelab;
   domain = hl.domain;
-  nixosIp = hl.nixosIp;
 
   services = {
     auth = {

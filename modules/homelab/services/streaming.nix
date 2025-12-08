@@ -10,7 +10,6 @@ let
   mediaDir = config.homelab.mediaDir;
   user = config.user;
   uid = toString config.user.uid;
-  nixosIp = config.homelab.nixosIp;
 in
 
 {

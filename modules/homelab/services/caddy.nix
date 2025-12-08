@@ -176,21 +176,6 @@ let
       https = false;
       protected = true;
     };
-    wannashare = {
-      # WannaShare PocketBase backend
-      url = "http://127.0.0.1:8099";
-      https = false;
-      protected = false; # PocketBase handles its own auth
-      isPocketBase = true;
-    };
-    app = {
-      # WannaShare Flutter Web App
-      url = "";
-      https = false;
-      protected = false;
-      isStaticFiles = true;
-      staticPath = "/var/lib/wannashare/web";
-    };
   };
 
   # --- HELPER FUNCTIONS ---
@@ -274,41 +259,6 @@ let
               }
             }
           ''
-        else if service.isPocketBase or false then
-          ''
-            request_body {
-              max_size 10M
-            }
-
-            # Route /api/* directly to backend
-            handle /api/* {
-              reverse_proxy ${service.url} {
-                header_up Host {host}
-                header_up X-Real-IP {remote}
-                header_up X-Forwarded-For {remote}
-                header_up X-Forwarded-Proto {scheme}
-                transport http {
-                  read_timeout 360s
-                }
-              }
-            }
-
-            # Route /_/* directly to backend (PocketBase admin UI)
-            handle /_/* {
-              reverse_proxy ${service.url} {
-                header_up Host {host}
-                header_up X-Real-IP {remote}
-                header_up X-Forwarded-For {remote}
-                header_up X-Forwarded-Proto {scheme}
-                transport http {
-                  read_timeout 360s
-                }
-              }
-            }
-
-            # Redirect root to /_/
-            redir / /_/ permanent
-          ''
         else
           ''
             reverse_proxy ${service.url} {
@@ -335,6 +285,12 @@ let
       ${
         if service.isStaticFiles or false then
           ''
+	    # CORS headers for Flutter WASM multi-threading
+	    header {
+	     Cross-Origin-Embedder-Policy "credentialless"
+	     Cross-Origin-Opener-Policy "same-origin"
+	    }
+
             # Serve static files
             root * ${service.staticPath}
             file_server

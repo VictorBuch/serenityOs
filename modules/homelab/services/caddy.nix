@@ -164,6 +164,14 @@ let
       protected = false; # PocketBase handles its own auth
       isPocketBase = true;
     };
+    app = {
+      # WannaShare Flutter Web App
+      url = "";
+      https = false;
+      protected = false;
+      isStaticFiles = true;
+      staticPath = "/var/lib/wannashare/web";
+    };
   };
 
   # --- HELPER FUNCTIONS ---
@@ -328,6 +336,8 @@ in
       80
       443
     ];
+
+
 
     services.caddy = {
       enable = true;

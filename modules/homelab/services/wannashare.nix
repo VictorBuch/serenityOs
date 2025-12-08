@@ -53,6 +53,8 @@ in
       home = dataDir;
     };
 
+    users.users.caddy.extraGroups = [ "wannashare" ];
+
     systemd.tmpfiles.rules = [
       "d ${dataDir} 0770 ${user} ${group}"
       "d ${dataDir}/pb_data 0750 ${user} ${group}"

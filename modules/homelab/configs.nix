@@ -34,6 +34,11 @@ in
       type = lib.types.str;
       default = "victorbuch.com";
     };
+    smoothlessDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "smoothless.org";
+      description = "Domain for smoothless work";
+    };
     domain-local = lib.mkOption {
       type = lib.types.str;
       default = "local.victorbuch.com";

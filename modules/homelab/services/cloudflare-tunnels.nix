@@ -9,7 +9,7 @@
 let
   hl = config.homelab;
   dom = hl.domain;
-  nixosIp = hl.nixosIp;
+  smoothlessDomain = hl.smoothlessDomain;
 in
 {
 
@@ -31,6 +31,14 @@ in
             originRequest = {
               # Send subdomain as SNI to match wildcard certificate (*.victorbuch.com)
               originServerName = "*.${dom}";
+            };
+          };
+          # WannaShare services (*.smoothless.org - covers db-wannashare, app-wannashare, etc.)
+          "*.${smoothlessDomain}" = {
+            service = "https://127.0.0.1:443";
+            originRequest = {
+              # Send subdomain as SNI to match wildcard certificate (*.smoothless.org)
+              originServerName = "*.${smoothlessDomain}";
             };
           };
         };

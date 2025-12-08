@@ -8,6 +8,26 @@ let
   cfg = config.caddy;
   hl = config.homelab;
   domain = hl.domain;
+  smoothlessDomain = hl.smoothlessDomain;
+
+  # WannaShare services (db-wannashare.smoothless.org, app-wannashare.smoothless.org)
+  wannashareServices = {
+    db-wannashare = {
+      # WannaShare PocketBase backend (database)
+      url = "http://127.0.0.1:8099";
+      https = false;
+      protected = false;
+      isPocketBase = true;
+    };
+    wannashare = {
+      # WannaShare Flutter Web App
+      url = "";
+      https = false;
+      protected = false;
+      isStaticFiles = true;
+      staticPath = "/var/lib/wannashare/web";
+    };
+  };
 
   services = {
     auth = {
@@ -174,6 +194,7 @@ let
   };
 
   # --- HELPER FUNCTIONS ---
+  # Helper for main domain (victorbuch.com)
   mkHost = subdomain: service: {
     name = "${subdomain}.${domain}";
     value.extraConfig = ''
@@ -301,6 +322,70 @@ let
       }
     '';
   };
+
+  # Helper for WannaShare services on smoothless.org
+  mkWannaShareHost = subdomain: service: {
+    name = "${subdomain}.${smoothlessDomain}"; # e.g., db-wannashare.smoothless.org
+    value.extraConfig = ''
+
+      tls ${config.sops.templates."cf-wannashare-cert.pem".path} ${
+        config.sops.templates."cf-wannashare-key.pem".path
+      }
+
+      ${
+        if service.isStaticFiles or false then
+          ''
+            # Serve static files
+            root * ${service.staticPath}
+            file_server
+          ''
+        else if service.isPocketBase or false then
+          ''
+            request_body {
+              max_size 10M
+            }
+
+            # Route /api/* directly to backend
+            handle /api/* {
+              reverse_proxy ${service.url} {
+                header_up Host {host}
+                header_up X-Real-IP {remote}
+                header_up X-Forwarded-For {remote}
+                header_up X-Forwarded-Proto {scheme}
+                transport http {
+                  read_timeout 360s
+                }
+              }
+            }
+
+            # Route /_/* directly to backend (PocketBase admin UI)
+            handle /_/* {
+              reverse_proxy ${service.url} {
+                header_up Host {host}
+                header_up X-Real-IP {remote}
+                header_up X-Forwarded-For {remote}
+                header_up X-Forwarded-Proto {scheme}
+                transport http {
+                  read_timeout 360s
+                }
+              }
+            }
+
+            # Redirect root to /_/
+            redir / /_/ permanent
+          ''
+        else
+          ''
+            reverse_proxy ${service.url} {
+              header_up Host {host}
+              header_up X-Real-IP {remote}
+              header_up X-Forwarded-For {remote}
+              header_up X-Forwarded-Proto {scheme}
+            }
+          ''
+      }
+    '';
+  };
 in
 {
   options.caddy = {
@@ -309,6 +394,7 @@ in
 
   config = lib.mkIf cfg.enable {
 
+    # SSL certificates for main domain (victorbuch.com)
     sops.templates."cf-cert.pem" = {
       content = config.sops.placeholder."cloudflare/ssl/origin_certificate";
       owner = config.services.caddy.user;
@@ -316,6 +402,18 @@ in
     };
     sops.templates."cf-key.pem" = {
       content = config.sops.placeholder."cloudflare/ssl/origin_private_key";
+      owner = config.services.caddy.user;
+      group = config.services.caddy.group;
+    };
+
+    # SSL certificates for WannaShare subdomain (*.wannashare.smoothless.org)
+    sops.templates."cf-wannashare-cert.pem" = {
+      content = config.sops.placeholder."cloudflare/wannashare/ssl/origin_certificate";
+      owner = config.services.caddy.user;
+      group = config.services.caddy.group;
+    };
+    sops.templates."cf-wannashare-key.pem" = {
+      content = config.sops.placeholder."cloudflare/wannashare/ssl/origin_private_key";
       owner = config.services.caddy.user;
       group = config.services.caddy.group;
     };
@@ -329,6 +427,14 @@ in
         owner = config.services.caddy.user;
         group = config.services.caddy.group;
       };
+      "cloudflare/wannashare/ssl/origin_certificate" = {
+        owner = config.services.caddy.user;
+        group = config.services.caddy.group;
+      };
+      "cloudflare/wannashare/ssl/origin_private_key" = {
+        owner = config.services.caddy.user;
+        group = config.services.caddy.group;
+      };
     };
 
     networking.firewall.allowedTCPPorts = [
@@ -336,12 +442,11 @@ in
       443
     ];
 
-
-
     services.caddy = {
       enable = true;
       email = "victorbuch@protonmail.com";
-      virtualHosts = (lib.mapAttrs' mkHost services);
+      virtualHosts =
+        (lib.mapAttrs' mkHost services) // (lib.mapAttrs' mkWannaShareHost wannashareServices);
     };
   };
 }

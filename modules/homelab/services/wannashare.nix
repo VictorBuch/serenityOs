@@ -27,8 +27,8 @@ in
       shell = pkgs.bashInteractive;
       extraGroups = [ "wannashare" ];
     };
-    users.groups.wanna-share-releaser = {};
-    
+    users.groups.wanna-share-releaser = { };
+
     security.sudo.extraRules = [
       {
         users = [ "wanna-share-releaser" ];
@@ -37,11 +37,11 @@ in
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare";
             options = [ "NOPASSWD" ];
-    	  }
-  	  {
-  	    command = "/run/current-system/sw/bin/systemctl start wannashare";
-  	    options = [ "NOPASSWD" ];
-  	  }
+          }
+          {
+            command = "/run/current-system/sw/bin/systemctl start wannashare";
+            options = [ "NOPASSWD" ];
+          }
         ];
       }
     ];
@@ -71,8 +71,6 @@ in
         Group = group;
         WorkingDirectory = dataDir;
         ExecStart = "${dataDir}/wannashare-backend serve --http=127.0.0.1:${toString port}";
-        Restart = "always";
-        RestartSec = "5s";
 
         # Hardening
         NoNewPrivileges = true;

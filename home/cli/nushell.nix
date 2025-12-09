@@ -46,6 +46,9 @@ mkHomeModule {
         nushell = {
           enable = true;
           shellAliases = aliases;
+          environmentVariables = {
+            EDITOR = "nvim";
+          };
           extraEnv = ''
             		def nrc [] { npm run prettier; npm run lint; npm run ts-check }
             	  '';

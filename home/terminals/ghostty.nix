@@ -11,7 +11,7 @@ let
     background-opacity = 0.9;
     background-blur-radius = 25;
     window-decoration = false;
-    theme = "catppuccin-mocha";
+    theme = "Catppuccin Mocha";
     confirm-close-surface = false;
     font-family = "JetBrainsMono Nerd Font";
     font-size = 14;

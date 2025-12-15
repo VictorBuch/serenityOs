@@ -17,6 +17,7 @@ let
     s = "sesh connect (sesh list --icons | fzf --ansi)";
     nr = "npm run ";
     ni = "npm install";
+    nrd = "npm run dev";
     dcu = "docker compose up -d";
     dcd = "docker compose down";
     nfu = "nix flake update";

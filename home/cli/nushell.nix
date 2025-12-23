@@ -21,6 +21,7 @@ let
     dcu = "docker compose up -d";
     dcd = "docker compose down";
     nfu = "nix flake update";
+    oc = "opencode";
   };
 in
 
@@ -79,7 +80,7 @@ mkHomeModule {
             };
           };
           extraConfig = ''
-            figlet -ft slant -tk ${config.home.username} | lolcat -p 3
+            figlet -tk ${config.home.username} | lolcat -p 3
           '';
         };
 

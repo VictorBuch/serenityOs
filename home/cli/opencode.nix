@@ -24,7 +24,7 @@ mkHomeModule {
 
         # Basic settings (these override/extend defaults)
         settings = {
-          theme = "opencode";
+          theme = "catppuccin";
           model = "anthropic/claude-opus-4-5";
           autoupdate = true;
 
@@ -57,11 +57,16 @@ mkHomeModule {
                 "--"
               ];
             };
+            github = {
+              type = "remote";
+              url = "https://api.githubcopilot.com/mcp/";
+
+            };
           };
 
           # Instructions files
           instructions = [
-	    "AGENTS.md"
+            "AGENTS.md"
             "CONTRIBUTING.md"
             "docs/guidelines.md"
             ".cursor/rules/*.md"

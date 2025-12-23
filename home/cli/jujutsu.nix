@@ -26,12 +26,21 @@ mkHomeModule {
             email = "victorbuch@protonmail.com";
             name = "VictorBuch";
           };
-          git = {
-            auto-local-bookmark = true;
+          remotes.origin = {
+            auto-track-bookmarks = "glob:*";
           };
           ui = {
             abandon-on-new = true;
             default-command = "log-recent";
+            pager = "delta";
+            diff-formatter = ":git";
+            conflict-marker-style = "git"; # Important for Neovim plugin compatibility
+          };
+          merge-tools.delta = {
+            diff-expected-exit-codes = [
+              0
+              1
+            ];
           };
           template-aliases = {
             "format_short_change_id(id)" = "id.shortest()";
@@ -88,6 +97,12 @@ mkHomeModule {
               "--interactive"
             ];
             d = [ "desc" ];
+            pp = [
+              "git"
+              "push"
+              "-c"
+              "@"
+            ];
           };
         };
       };

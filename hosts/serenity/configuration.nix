@@ -370,6 +370,7 @@ in
   # Smart home
   hyperhdr.enable = true;
   music-assistant.enable = true;
+  home-assistant.enable = true;
 
   # Monitor and Dashboards
   dashboard = {
@@ -397,10 +398,14 @@ in
 
   # Development
   gitea.enable = true;
-  wannashare.enable = true;
 
   # Document Management
   paperless.enable = true;
+
+  ####### Wanna share config ################
+
+  wannashare.enable = true;
+
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

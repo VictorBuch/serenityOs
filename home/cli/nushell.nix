@@ -18,6 +18,7 @@ let
     nr = "npm run ";
     nrd = "npm run dev";
     ni = "npm install";
+    nrd = "npm run dev";
     dcu = "docker compose up -d";
     dcd = "docker compose down";
     nfu = "nix flake update";
@@ -48,6 +49,9 @@ mkHomeModule {
         nushell = {
           enable = true;
           shellAliases = aliases;
+          environmentVariables = {
+            EDITOR = "nvim";
+          };
           extraEnv = ''
             		def nrc [] { npm run prettier; npm run lint; npm run ts-check }
             	  '';
@@ -77,7 +81,7 @@ mkHomeModule {
             };
           };
           extraConfig = ''
-            figlet -f slant -tk ${config.home.username} | lolcat -p 3
+            figlet -tk ${config.home.username} | lolcat -p 3
           '';
         };
 

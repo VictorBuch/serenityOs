@@ -30,7 +30,7 @@ mkHomeModule {
               name = "web-builder";
               path = "~/Documents/work/web-builder";
               startup_command = "nvim";
-              preview_command = "figlet 'web-builder'";
+              preview_command = "figlet web-builder";
               windows = [
                 "git"
                 "node"
@@ -40,7 +40,7 @@ mkHomeModule {
               name = "serenityOs";
               path = "~/serenityOs";
               startup_command = "nvim";
-              preview_command = "figlet 'serenityOs'";
+              preview_command = "figlet serenityOs";
               windows = [
                 "git"
               ];
@@ -49,7 +49,7 @@ mkHomeModule {
               name = "server serenity";
               path = "~";
               startup_command = "ssh serenity@serenity";
-              preview_command = "figlet 'ssh serenity'";
+              preview_command = "figlet ssh serenity";
             }
           ];
           window = [

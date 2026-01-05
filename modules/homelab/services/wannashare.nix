@@ -20,6 +20,32 @@ in
       go
     ];
 
+    users.users.wanna-share-releaser = {
+      isNormalUser = true;
+      group = "wanna-share-releaser";
+      description = "WannaShare Deployment User";
+      shell = pkgs.bashInteractive;
+      extraGroups = [ "wannashare" ];
+    };
+    users.groups.wanna-share-releaser = { };
+
+    security.sudo.extraRules = [
+      {
+        users = [ "wanna-share-releaser" ];
+        commands = [
+          # systemctl start stop wannashare - NOPASSWD
+          {
+            command = "/run/current-system/sw/bin/systemctl stop wannashare";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/systemctl start wannashare";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
+
     users.groups.${group} = { };
     users.users.${user} = {
       isSystemUser = true;
@@ -27,8 +53,10 @@ in
       home = dataDir;
     };
 
+    users.users.caddy.extraGroups = [ "wannashare" ];
+
     systemd.tmpfiles.rules = [
-      "d ${dataDir} 0750 ${user} ${group}"
+      "d ${dataDir} 0770 ${user} ${group}"
       "d ${dataDir}/pb_data 0750 ${user} ${group}"
     ];
 
@@ -43,8 +71,6 @@ in
         Group = group;
         WorkingDirectory = dataDir;
         ExecStart = "${dataDir}/wannashare-backend serve --http=127.0.0.1:${toString port}";
-        Restart = "always";
-        RestartSec = "5s";
 
         # Hardening
         NoNewPrivileges = true;

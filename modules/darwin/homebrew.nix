@@ -32,7 +32,6 @@
 
       # Formulae (CLI tools)
       brews = [
-        "appwrite"
         "cmatrix"
         "docker"
         "docker-compose"
@@ -50,6 +49,7 @@
         "qmk-toolbox"
         "raycast"
         "zed"
+        "gcloud-cli"
       ];
 
       # Mac App Store apps (requires mas CLI tool)

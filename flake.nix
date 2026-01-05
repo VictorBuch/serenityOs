@@ -53,6 +53,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Pinned nixpkgs for Wine 9.20 (audio/yabridge compatibility)
+    # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
+    nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
   };
 
   outputs =

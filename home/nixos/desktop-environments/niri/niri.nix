@@ -206,6 +206,38 @@ in
             open-on-workspace "chat"
         }
 
+        // === Wine/Audio Application Rules ===
+        // Wine applications should float properly for installers and dialogs
+        window-rule {
+            match app-id=r#"^wine$|^Wine$|^\.exe$"#
+            default-column-width { proportion 0.5; }
+        }
+
+        // iLok License Manager - needs floating for authorization dialogs
+        window-rule {
+            match title=r#"iLok|PACE|License"#
+            default-column-width { proportion 0.6; }
+        }
+
+        // IK Product Manager - software authorization
+        window-rule {
+            match title=r#"IK Product Manager|IK Multimedia"#
+            default-column-width { proportion 0.6; }
+        }
+
+        // REAPER DAW - give it more space
+        window-rule {
+            match app-id=r#"^REAPER$|^reaper$"#
+            default-column-width { proportion 0.85; }
+        }
+
+        // VST Plugin windows (typically spawned by REAPER)
+        // These often have specific size requirements
+        window-rule {
+            match title=r#"Amplitube|SSD5|Steven Slate"#
+            default-column-width { proportion 0.6; }
+        }
+
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
         layer-rule {
           match namespace="^noctalia-wallpaper*"

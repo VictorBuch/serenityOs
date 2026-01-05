@@ -392,6 +392,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-wine920": {
+      "locked": {
+        "lastModified": 1735160951,
+        "narHash": "sha256-9h91U6BBNnzShwzlC+r/aXB+WyN3S140lYQbHH95bc0=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "c792c60b8a97daa7efe41a6e4954497ae410e0c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "c792c60b8a97daa7efe41a6e4954497ae410e0c1",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1762977756,
@@ -550,6 +566,7 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-wine920": "nixpkgs-wine920",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
         "nvf": "nvf",

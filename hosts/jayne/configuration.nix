@@ -151,7 +151,7 @@ in
 
   ############### Desktop/ WM ########################
   desktop-environments = {
-    gnome.enable = false;
+    gnome.enable = true;
     hyprland.enable = false;
     kde.enable = false; # Disabled to prevent conflict with Hyprland
     niri.enable = true;

@@ -13,6 +13,7 @@ mkApp {
   name = "cli-tools";
   packages = pkgs: [
     # pkgs.pam-cli
+    pkgs.google-cloud-sdk
   ];
   description = "Command-line development and management tools";
 } args

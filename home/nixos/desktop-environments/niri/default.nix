@@ -4,6 +4,7 @@
   imports = [
     ./niri.nix
     ./waybar
+    ./focus-or-run.nix
     ../common/dunst.nix
     ../common/wlogout
     ../common/hyprlock
@@ -16,6 +17,7 @@
     niri = {
       enable = lib.mkDefault true;
       waybar.enable = lib.mkDefault true;
+      focus-or-run.enable = lib.mkDefault true;
     };
     noctalia = {
       enable = lib.mkDefault true;

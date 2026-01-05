@@ -109,6 +109,13 @@ in
             Mod+B { spawn "${browser}"; }
             Mod+F { spawn "${fileManager}"; }
 
+            // Raycast-style focus-or-run bindings (Alt + numbers)
+            Alt+1 { spawn "focus-or-run" "zen-beta" "zen"; }
+            Alt+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
+            Alt+3 { spawn "focus-or-run" "Slack" "slack"; }
+            Alt+4 { spawn "focus-or-run" "chrome-listen.tidal.com__-Default" "tidal"; }
+            Alt+5 { spawn "focus-or-run" "discord" "discord"; }
+
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
             Mod+S { spawn "noctalia-shell" "ipc" "call" "controlcenter" "toggle"; }

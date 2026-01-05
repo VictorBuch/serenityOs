@@ -18,7 +18,6 @@ let
     nr = "npm run ";
     nrd = "npm run dev";
     ni = "npm install";
-    nrd = "npm run dev";
     dcu = "docker compose up -d";
     dcd = "docker compose down";
     nfu = "nix flake update";

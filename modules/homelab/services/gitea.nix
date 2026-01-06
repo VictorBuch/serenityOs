@@ -18,7 +18,7 @@ in
   options.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
   config = lib.mkIf config.gitea.enable {
-  
+
     catppuccin.gitea.enable = true;
 
     # PostgreSQL database for Gitea
@@ -56,9 +56,9 @@ in
       lfs.enable = true;
 
       settings = {
-      	other = {
-	  SHOW_FOOTER_POWERED_BY = false;
-	};
+        other = {
+          SHOW_FOOTER_POWERED_BY = false;
+        };
         server = {
           DOMAIN = "git.${domain}";
           ROOT_URL = "https://git.${domain}/";
@@ -129,8 +129,9 @@ in
           # Go to Site Administration -> Actions -> Runners -> Create new runner
           tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
-            "docker:docker://catthehacker/ubuntu:act-latest"
             "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+            "flutter:docker://ghcr.io/cirruslabs/flutter:stable"
+            "node:docker://node:20-bookworm"
           ];
           settings = {
             container = {

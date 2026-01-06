@@ -137,6 +137,7 @@
           useUnstable = true;
           extraModules = [
             ./modules/homelab
+            inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {

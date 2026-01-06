@@ -18,6 +18,8 @@ in
   options.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
   config = lib.mkIf config.gitea.enable {
+  
+    catppuccin.gitea.enable = true;
 
     # PostgreSQL database for Gitea
     services.postgresql = {
@@ -54,6 +56,9 @@ in
       lfs.enable = true;
 
       settings = {
+      	other = {
+	  SHOW_FOOTER_POWERED_BY = false;
+	};
         server = {
           DOMAIN = "git.${domain}";
           ROOT_URL = "https://git.${domain}/";

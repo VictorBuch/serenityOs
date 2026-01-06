@@ -27,10 +27,8 @@ in
       providers = [
         "audiobookshelf"
         "builtin"
-        "builtin_player"
         "chromecast"
         "jellyfin"
-        "player_group"
         "podcastfeed"
         "radiobrowser"
         "snapcast"

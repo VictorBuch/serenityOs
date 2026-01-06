@@ -12,8 +12,7 @@ mkApp {
   _file = toString ./.;
   name = "cli-tools";
   packages = pkgs: [
-    # pkgs.pam-cli
-    pkgs.google-cloud-sdk
+    pkgs.pam-cli
   ];
   description = "Command-line development and management tools";
 } args

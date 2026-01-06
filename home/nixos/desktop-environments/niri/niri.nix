@@ -56,10 +56,11 @@ in
         // Commented out to allow auto-detection (especially important for VMs)
         output "DP-1" {
             mode "2560x1440@119.998"
+            scale 1.1
         }
         output "Virtual-1" {
             mode "2560x1600@59.972"
-            scale 1.25
+            scale 1.1
         } 
 
         // Layout configuration
@@ -74,7 +75,7 @@ in
             }
 
             focus-ring {
-                width 1.5
+                width 1.25
                 active-color "#aaaaaa"
                 inactive-color "#6c7086"
             }
@@ -88,7 +89,7 @@ in
                 proportion 0.85
             }
 
-            default-column-width { proportion 0.70; }
+            default-column-width { proportion 0.85; }
 
             center-focused-column "always"
             always-center-single-column
@@ -97,10 +98,10 @@ in
             background-color "transparent"
         }
 
-        workspace "scratchpad"
         workspace "main"
-        workspace "gaming"
         workspace "chat"
+        workspace "gaming"
+        workspace "scratchpad"
 
         // Key bindings
         binds {
@@ -191,7 +192,7 @@ in
             draw-border-with-background false
         }
         window-rule {
-            geometry-corner-radius 20
+            geometry-corner-radius 4
             clip-to-geometry true
         }
 
@@ -211,6 +212,14 @@ in
         window-rule {
             match app-id=r#"^discord$|^[Dd]iscord$"#
             open-on-workspace "chat"
+        }
+        window-rule {
+            match app-id=r#"^slack$|^[Ss]lack$"#
+            open-on-workspace "chat"
+        }
+        window-rule {
+            match app-id=r#"^tidal$|^[Tt]idal$"#
+            open-on-workspace "scratchpad"
         }
 
         // === Wine/Audio Application Rules ===
@@ -267,7 +276,10 @@ in
 
         // Spawn at startup
         spawn-at-startup "${shell}"
+        spawn-at-startup "${browser}"
         spawn-at-startup "${terminal}"
+        spawn-at-startup "slack"
+        spawn-at-startup "discord"
         spawn-at-startup "easyeffects" "--gapplication-service"
         spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
@@ -289,7 +301,7 @@ in
 
         // Environment variables
         environment {
-            XCURSOR_SIZE "18"
+            XCURSOR_SIZE "16"
         }
 
         // Xwayland support (integrated since niri 25.08)

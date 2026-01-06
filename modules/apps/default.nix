@@ -12,6 +12,7 @@
     ./media
     ./utilities
     ./emacs
+    ./work.nix
   ];
 
 }

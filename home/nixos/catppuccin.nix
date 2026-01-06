@@ -33,7 +33,12 @@
       # };
     };
 
-    fonts.fontconfig.enable = true;
+    fonts.fontconfig = {
+      enable = true;
+      antialiasing = true;
+      hinting = "slight";
+      subpixelRendering = "rgb";
+    };
 
     gtk = {
       enable = true;
@@ -69,7 +74,7 @@
         x11.enable = true;
         package = pkgs.catppuccin-cursors.mochaDark;
         name = "catppuccin-mocha-dark-cursors";
-        size = 14;
+        size = 16;
       };
       packages = with pkgs; [
         nerd-fonts.jetbrains-mono
@@ -84,7 +89,7 @@
       sessionVariables = {
         GTK_THEME = "catppuccin-mocha-blue-standard";
         XCURSOR_THEME = "catppuccin-mocha-dark-cursors";
-        XCURSOR_SIZE = "14";
+        XCURSOR_SIZE = "16";
       };
     };
 

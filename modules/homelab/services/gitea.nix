@@ -124,8 +124,8 @@ in
           # Go to Site Administration -> Actions -> Runners -> Create new runner
           tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
-            "docker:docker://node:20-bookworm"
-            "ubuntu-latest:docker://node:20-bookworm"
+            "docker:docker://catthehacker/ubuntu:act-latest"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
           ];
           settings = {
             container = {

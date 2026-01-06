@@ -84,7 +84,6 @@ in
           ENABLED = true;
           DEFAULT_ACTIONS_URL = "github";
         };
-
         # Security settings
         security = {
           INSTALL_LOCK = true;
@@ -117,7 +116,7 @@ in
 
     # Gitea Actions Runners for CI/CD
     services.gitea-actions-runner = {
-      package = pkgs.forgejo-runner; # Compatible with Gitea Actions
+      package = pkgs.gitea-actions-runner;
 
       instances = {
         # Docker runner for containerized builds
@@ -155,10 +154,11 @@ in
             git
             nix
 	    go
-	    openssl
+	    openssh
 	    gzip
 	    gnutar
 	    nodejs
+	    sudo
           ];
         };
       };

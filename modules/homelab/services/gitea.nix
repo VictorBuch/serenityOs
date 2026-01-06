@@ -198,5 +198,14 @@ in
       "d ${giteaDir}/data 0750 ${giteaUser} ${giteaGroup}"
       "d ${giteaDir}/data/lfs 0750 ${giteaUser} ${giteaGroup}"
     ];
+
+    # Run nix runner as wanna-share-releaser for deployment access
+    systemd.services.gitea-runner-nix.serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "wanna-share-releaser";
+      Group = lib.mkForce "wanna-share-releaser";
+      NoNewPrivileges = lib.mkForce false;  # Required for sudo
+    };
+
   };
 }

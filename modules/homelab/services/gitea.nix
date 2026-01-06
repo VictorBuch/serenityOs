@@ -129,9 +129,8 @@ in
           # Go to Site Administration -> Actions -> Runners -> Create new runner
           tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
-            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
-            "flutter:docker://ghcr.io/cirruslabs/flutter:stable"
             "node:docker://node:20-bookworm"
+	    "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:full-latest"
           ];
           settings = {
             container = {
@@ -155,6 +154,11 @@ in
             curl
             git
             nix
+	    go
+	    openssl
+	    gzip
+	    gnutar
+	    nodejs
           ];
         };
       };
@@ -194,46 +198,5 @@ in
       "d ${giteaDir}/data 0750 ${giteaUser} ${giteaGroup}"
       "d ${giteaDir}/data/lfs 0750 ${giteaUser} ${giteaGroup}"
     ];
-
-    # Create admin user on first run
-    # Uses sops secret for the admin password
-    sops.secrets."gitea/admin_password" = {
-      mode = "0400";
-      owner = giteaUser;
-      group = giteaGroup;
-    };
-
-    systemd.services.gitea-admin-setup = {
-      description = "Create Gitea admin user";
-      after = [ "gitea.service" ];
-      requires = [ "gitea.service" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = giteaUser;
-        Group = giteaGroup;
-        RemainAfterExit = true;
-      };
-      script = ''
-        # Wait for Gitea to be ready
-        sleep 5
-
-        # Check if admin user already exists
-        if ${pkgs.gitea}/bin/gitea admin user list --config ${giteaDir}/custom/conf/app.ini 2>/dev/null | grep -q "admin"; then
-          echo "Admin user already exists, skipping creation"
-          exit 0
-        fi
-
-        # Create admin user
-        ${pkgs.gitea}/bin/gitea admin user create \
-          --admin \
-          --username admin \
-          --email "admin@${domain}" \
-          --password "$(cat ${config.sops.secrets."gitea/admin_password".path})" \
-          --config ${giteaDir}/custom/conf/app.ini || true
-
-        echo "Admin user setup complete"
-      '';
-    };
   };
 }

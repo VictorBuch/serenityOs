@@ -43,6 +43,36 @@ in
             options = [ "NOPASSWD" ];
           }
         ];
+
+      }
+      {
+        users = [ "gitea-runner" ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/systemctl stop wannashare";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/systemctl start wannashare";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/mv /tmp/wannashare-new /var/lib/wannashare/wannashare-backend";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/chmod +x /var/lib/wannashare/wannashare-backend";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/rm -rf /var/lib/wannashare/web";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/mv /tmp/wannashare-web-new /var/lib/wannashare/web";
+            options = [ "NOPASSWD" ];
+          }
+        ];
       }
     ];
 

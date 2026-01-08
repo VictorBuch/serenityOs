@@ -203,6 +203,20 @@
         silent = true;
       };
     }
+    {
+      mode = "n";
+      key = "<leader>Fa";
+      action.__raw = ''
+        function()
+          vim.fn.jobstart("flutter emulators --launch Pixel_6_API_35", { detach = true })
+          vim.notify("Launching Pixel 6 emulator...", vim.log.levels.INFO)
+        end
+      '';
+      options = {
+        desc = "Flutter: Launch Android Emulator";
+        silent = true;
+      };
+    }
     # LazyVim-style terminal keymaps
     {
       mode = "n";

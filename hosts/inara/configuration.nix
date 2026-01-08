@@ -81,7 +81,7 @@ in
     git
     lazygit
     unstable.claude-code
-    unstable.mcp-nixos
+    #unstable.mcp-nixos
     lolcat
     figlet
     bat

@@ -57,10 +57,21 @@ mkHomeModule {
                 "--"
               ];
             };
-            github = {
-              type = "remote";
-              url = "https://api.githubcopilot.com/mcp/";
-
+            gitea = {
+              type = "local";
+              enabled = true;
+              command = [
+                "gitea-mcp"
+                "-t"
+                "stdio"
+                "--host"
+                "https://git.victorbuch.com"
+                "--token"
+                "16ae604bd0fca8931b0dd98f0cc7047a06bcc69d"
+              ];
+              environment = {
+                GITEA_ACCESS_TOKEN = "16ae604bd0fca8931b0dd98f0cc7047a06bcc69d";
+              };
             };
           };
 

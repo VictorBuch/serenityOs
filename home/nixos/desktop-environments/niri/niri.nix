@@ -56,7 +56,7 @@ in
         // Commented out to allow auto-detection (especially important for VMs)
         output "DP-1" {
             mode "2560x1440@119.998"
-            scale 1.1
+            scale 1
         }
         output "Virtual-1" {
             mode "2560x1600@59.972"
@@ -114,8 +114,8 @@ in
             Alt+1 { spawn "focus-or-run" "zen-beta" "zen"; }
             Alt+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
             Alt+3 { spawn "focus-or-run" "Slack" "slack"; }
-            Alt+4 { spawn "focus-or-run" "chrome-listen.tidal.com__-Default" "tidal"; }
-            Alt+5 { spawn "focus-or-run" "discord" "discord"; }
+            Alt+T { spawn "focus-or-run" "chrome-listen.tidal.com__-Default" "tidal"; }
+            Alt+D { spawn "focus-or-run" "discord" "discord"; }
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }

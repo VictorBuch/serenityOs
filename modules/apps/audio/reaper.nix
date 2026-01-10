@@ -64,8 +64,9 @@ let
       xact xact_x64 xinput ffdshow quartz wmp10 devenum dmsynth dsdmo dswave msdxmocx
 
     # Install DXVK for better Direct3D performance (uses Vulkan)
+    # This fixes UI refresh issues with JUCE-based plugins (Amplitube, TONEX, etc.)
     echo "[7/7] Installing DXVK..."
-    setup_dxvk install --symlink
+    winetricks -q dxvk
 
     echo ""
     echo "=== Setup Complete ==="
@@ -115,25 +116,46 @@ let
   # Also handles automatic installation of ReaPack and SWS extensions
   reaperWrapper = pkgs.writeShellScriptBin "reaper" ''
     #!/usr/bin/env bash
-    
+
     # Ensure REAPER UserPlugins directory exists
     REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
     mkdir -p "$REAPER_USER_PLUGINS"
-    
+
     # Install ReaPack extension if not already present or broken
     REAPACK_SO="$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
     if [ ! -e "$REAPACK_SO" ]; then
       echo "Installing ReaPack extension..."
       ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPACK_SO"
     fi
-    
+
     # Install SWS extension if not already present or broken
     SWS_SO="$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
     if [ ! -e "$SWS_SO" ]; then
       echo "Installing SWS extension..."
       ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$SWS_SO"
     fi
-    
+
+    # Create yabridge.toml for IK Multimedia plugins if it doesn't exist
+    # This fixes GUI refresh issues with TONEX, Amplitube, etc.
+    YABRIDGE_CONFIG="$HOME/.config/yabridge/yabridge.toml"
+    if [ ! -e "$YABRIDGE_CONFIG" ]; then
+      echo "Creating yabridge.toml for IK Multimedia plugins..."
+      mkdir -p "$(dirname "$YABRIDGE_CONFIG")"
+      cat > "$YABRIDGE_CONFIG" << 'YABRIDGE_EOF'
+# Yabridge configuration for audio plugins
+# See: https://github.com/robbert-vdh/yabridge#configuration
+
+# Global settings
+frame_rate = 60
+
+# IK Multimedia plugins (TONEX, Amplitube, MODO Bass, etc.)
+# These need editor_xembed for proper GUI refresh on Wayland/Hyprland
+["**/IK Multimedia/**"]
+frame_rate = 120
+editor_xembed = true
+YABRIDGE_EOF
+    fi
+
     # Set Wine environment for yabridge
     export WINELOADER="${wineStaging}/bin/wine"
     export WINEARCH="win64"
@@ -142,7 +164,9 @@ let
     export WINE_LARGE_ADDRESS_AWARE="1"
     export DXVK_HUD="0"
     export DXVK_LOG_LEVEL="none"
-    
+    # Force DXVK DLLs - fixes IK Multimedia (TONEX, Amplitube) GUI refresh issues
+    export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
+
     # Launch REAPER
     exec ${pkgs.unstable.reaper}/bin/reaper "$@"
   '';
@@ -218,9 +242,9 @@ mkApp {
     services.pipewire.extraConfig.pipewire."10-low-latency" = {
       context.properties = {
         default.clock.rate = 48000;
-        default.clock.quantum = 128;
-        default.clock.min-quantum = 128;
-        default.clock.max-quantum = 256;
+        default.clock.quantum = 64;
+        default.clock.min-quantum = 32;
+        default.clock.max-quantum = 64;
       };
     };
 
@@ -228,7 +252,7 @@ mkApp {
     services.pipewire.extraConfig.jack."20-realtime" = {
       jack.properties = {
         # Match PipeWire's sample rate
-        "node.latency" = "128/48000";
+        "node.latency" = "64/48000";
         # Enable realtime scheduling
         "jack.realtime" = true;
         "jack.realtime-priority" = 88;
@@ -253,9 +277,15 @@ mkApp {
       WINEFSYNC = "1"; # Enable fsync for better threading (kernel 5.16+)
       WINE_LARGE_ADDRESS_AWARE = "1"; # Better memory handling for plugins
 
-      # DXVK configuration
+      # DXVK configuration - fixes UI refresh issues with JUCE plugins (Amplitube, TONEX)
       DXVK_HUD = "0"; # Disable DXVK overlay (set to "fps" to show FPS)
       DXVK_LOG_LEVEL = "none"; # Disable DXVK logging for performance
+      DXVK_STATE_CACHE_PATH = "$HOME/.cache/dxvk"; # Cache shader compilations
+      DXVK_LOG_PATH = "none"; # Disable file logging
+
+      # Force Wine to use DXVK DLLs instead of built-in WineD3D
+      # This is critical for IK Multimedia plugins (TONEX, Amplitube) GUI refresh
+      WINEDLLOVERRIDES = "d3d9,d3d10core,d3d11,dxgi=n";
 
       # Yabridge settings
       YABRIDGE_DEBUG_LEVEL = "0"; # Set to 1 or 2 for debugging plugin issues

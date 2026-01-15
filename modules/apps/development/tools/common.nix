@@ -24,7 +24,7 @@ mkApp {
     # pkgs.unstable.mcp-nixos  # Temporarily disabled due to mcp version conflict (mcp 1.25.0 incompatible with fastmcp)
     pkgs.unstable.gitea-mcp-server
     pkgs.unstable.yazi
-    pkgs.unstable.devenv
+    #pkgs.unstable.devenv
     pkgs.unstable.jujutsu
     pkgs.unstable.go
     pkgs.unstable.opencode

@@ -52,7 +52,7 @@ mkHomeModule {
             EDITOR = "nvim";
           };
           extraEnv = ''
-            		def nrc [] { npm run prettier; npm run lint; npm run ts-check }
+            		def nrc [] { npm run prettier --write; npm run lint; npm run ts-check }
             	  '';
 
           # Set up Nix environment for Darwin (nushell doesn't auto-source /etc/bashrc)
@@ -89,15 +89,15 @@ mkHomeModule {
           enableNushellIntegration = true;
         };
 
-        direnv = {
-          enable = true;
-          enableNushellIntegration = true;
-          nix-direnv.enable = true;
-          stdlib = ''
-            # Source devenv's direnvrc for use_devenv function
-            source <(${pkgs.devenv}/bin/devenv direnvrc)
-          '';
-        };
+        # direnv = {
+        #   enable = true;
+        #   enableNushellIntegration = true;
+        #   nix-direnv.enable = true;
+        #   stdlib = ''
+        #     # Source devenv's direnvrc for use_devenv function
+        #     source <(${pkgs.devenv}/bin/devenv direnvrc)
+        #   '';
+        # };
       };
     };
 } args

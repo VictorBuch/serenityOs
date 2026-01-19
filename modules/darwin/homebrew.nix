@@ -35,6 +35,7 @@
         "cmatrix"
         "docker"
         "docker-compose"
+        "android-platform-tools"
       ];
 
       # Casks (GUI applications)

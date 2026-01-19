@@ -129,7 +129,7 @@ in
           tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
             "node:docker://node:20-bookworm"
-	    "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:full-latest"
+            "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:full-latest"
           ];
           settings = {
             container = {
@@ -205,7 +205,7 @@ in
       DynamicUser = lib.mkForce false;
       User = lib.mkForce "wanna-share-releaser";
       Group = lib.mkForce "wanna-share-releaser";
-      NoNewPrivileges = lib.mkForce false;  # Required for sudo
+      NoNewPrivileges = lib.mkForce false; # Required for sudo
     };
      
     systemd.services.gitea-runner-docker.serviceConfig = {

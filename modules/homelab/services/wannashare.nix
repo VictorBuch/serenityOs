@@ -25,7 +25,7 @@ in
       group = "wanna-share-releaser";
       description = "WannaShare Deployment User";
       shell = pkgs.bashInteractive;
-      extraGroups = [ "wannashare" ];
+      extraGroups = [ "wannashare" "docker" ];
     };
     users.groups.wanna-share-releaser = { };
 

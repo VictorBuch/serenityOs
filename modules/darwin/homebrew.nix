@@ -36,6 +36,7 @@
         "docker"
         "docker-compose"
         "android-platform-tools"
+        "pnpm"
       ];
 
       # Casks (GUI applications)

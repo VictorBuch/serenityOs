@@ -95,10 +95,8 @@ in
   # Enable zsh shell
   programs.zsh.enable = true;
 
-  maintenance = {
-    enable = true;
-    linux.enable = true;
-  };
+  # Enables GC, boot-cleanup, and optimization (Linux-specific options auto-enabled)
+  maintenance.enable = true;
   ############### Apps ########################
 
   apps = {

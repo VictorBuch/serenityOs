@@ -62,9 +62,9 @@
     services.blueman.enable = true;
 
     # Enable services for Nautilus to work with external drives
-    services.udisks2.enable = true;  # Auto-mount removable drives
-    services.gvfs.enable = true;     # GNOME Virtual File System (needed by Nautilus)
- 
+    services.udisks2.enable = true; # Auto-mount removable drives
+    services.gvfs.enable = true; # GNOME Virtual File System (needed by Nautilus)
+
     # Enable network manager applet
     programs.nm-applet.enable = true;
 
@@ -110,18 +110,6 @@
       qt5.qtwayland
       qt6.qtwayland
 
-      rofi # Application launcher
-      rofi-calc
-      rofi-emoji
-      rofi-bluetooth
-      rofi-power-menu
-      rofi-vpn
-      rofi-obsidian
-      rofi-network-manager
-      rofi-screenshot
-      rofi-systemd
-      rofi-pulse-select
-      rofi-pass-wayland
       cliphist
       wl-clipboard
       papirus-icon-theme

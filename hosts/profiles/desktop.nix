@@ -57,11 +57,8 @@
     libz
   ];
 
-  # Maintenance
-  maintenance = {
-    enable = true;
-    linux.enable = true;
-  };
+  # Maintenance (GC, boot-cleanup, optimization - Linux options auto-enabled)
+  maintenance.enable = true;
 
   # Theming
   catppuccin.enable = true;

@@ -1,8 +1,7 @@
 { pkgs, lib, ... }:
 {
-
+  # Darwin-specific modules
   imports = [
-    ../common.nix
     ./homebrew.nix
   ];
 

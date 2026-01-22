@@ -1,9 +1,8 @@
 { pkgs, lib, ... }:
 {
-
   imports = [
     ./hyprland
-    ./gnome/gnome.nix
+    ./gnome.nix
     ./niri
   ];
 }

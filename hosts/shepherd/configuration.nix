@@ -25,12 +25,6 @@ in
   # Define a user account.
   user.userName = username;
 
-  # Enable flakes
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-
   # Enable networking
   networking.networkmanager.enable = true;
 

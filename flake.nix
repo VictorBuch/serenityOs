@@ -215,6 +215,8 @@
                 isLinux = true;
               };
               modules = [
+                # Common modules for all hosts (nix settings, caches, etc.)
+                ./modules/common
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
                 # Standard modules for all NixOS hosts
@@ -248,6 +250,8 @@
                 isLinux = false;
               };
               modules = [
+                # Common modules for all hosts (nix settings, caches, etc.)
+                ./modules/common
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
                 # Standard modules for all Darwin hosts

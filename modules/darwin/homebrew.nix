@@ -35,7 +35,6 @@
         "cmatrix"
         "docker"
         "docker-compose"
-        "android-platform-tools"
         "pnpm"
       ];
 

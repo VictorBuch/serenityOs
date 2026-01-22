@@ -56,12 +56,6 @@ in
     # shell is managed by Home Manager
   };
 
-  # Enable flakes
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-
   # Set up nix channels
   nix.channel.enable = false; # We're using flakes
 

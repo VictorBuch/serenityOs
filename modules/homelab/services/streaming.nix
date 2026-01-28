@@ -53,6 +53,30 @@ in
       after = [ "mnt-pool.mount" ];
       requires = [ "mnt-pool.mount" ];
     };
+    systemd.services.sonarr = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
+    systemd.services.radarr = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
+    systemd.services.readarr = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
+    systemd.services.lidarr = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
+    systemd.services.bazarr = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
+    systemd.services.audiobookshelf = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
     # systemd.services.plex = {
     #   after = [ "mnt-pool.mount" ];
     #   requires = [ "mnt-pool.mount" ];

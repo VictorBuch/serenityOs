@@ -11,6 +11,9 @@
     };
   };
 
+  # AI coding agents from numtide/llm-agents.nix
+  llm-agents = inputs.llm-agents.packages.${final.system};
+
   # Add the pam package (renamed to avoid conflict with linux-pam)
   # Use unstable buildGoModule if available, otherwise use current pkgs
   pam-cli = final.callPackage ../packages/pam {

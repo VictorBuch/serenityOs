@@ -153,13 +153,13 @@ in
             curl
             git
             nix
-	    go
-	    openssh
-	    gzip
-	    gnutar
-	    nodejs
-	    sudo
-	    docker
+            go
+            openssh
+            gzip
+            gnutar
+            nodejs
+            sudo
+            docker
           ];
         };
       };
@@ -207,13 +207,13 @@ in
       Group = lib.mkForce "wanna-share-releaser";
       NoNewPrivileges = lib.mkForce false; # Required for sudo
     };
-     
+
     systemd.services.gitea-runner-docker.serviceConfig = {
-     DynamicUser = lib.mkForce false;
-     User = lib.mkForce "wanna-share-releaser";
-     Group = lib.mkForce "wanna-share-releaser";
-     NoNewPrivileges = lib.mkForce false;
-   };
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "wanna-share-releaser";
+      Group = lib.mkForce "wanna-share-releaser";
+      NoNewPrivileges = lib.mkForce false;
+    };
 
   };
 }

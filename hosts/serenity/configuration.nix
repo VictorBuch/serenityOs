@@ -59,12 +59,6 @@ in
     ];
   }; # Define your hostname.
 
-  # Enable flakes
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-
   # Enable all maintenance features
   # (GC with 10-day retention, auto-upgrade with lockfile commits, store optimization, boot cleanup)
   maintenance.enable = true;
@@ -290,7 +284,6 @@ in
     nvidiaSettings = true;
   };
 
-
   virtualisation = {
 
     # enable docker
@@ -405,7 +398,6 @@ in
   ####### Wanna share config ################
 
   wannashare.enable = true;
-
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

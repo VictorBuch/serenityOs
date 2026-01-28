@@ -204,7 +204,7 @@ New installations use the provided install scripts:
 **Use `modules/` for:**
 - System-wide services (nginx, docker, databases, caddy)
 - Hardware configuration (bluetooth, printing, sound)
-- Desktop environments and window managers (Hyprland, rofi, waybar)
+- Desktop environments and window managers (Hyprland, niri, GNOME)
 - Services requiring system privileges
 - Multi-user applications
 - Boot and system-level settings
@@ -253,9 +253,7 @@ New installations use the provided install scripts:
 - `lib/mkHomeModule.nix` - Home Manager individual module helper (similar to mkApp but for home/ directory)
 - `lib/mkHomeCategory.nix` - Home Manager category helper (similar to mkCategory but for home/ directory)
 
-**Helper Scripts:**
-- `scripts/add-package.sh` - CLI tool to add packages with proper categorization (uses mkApp)
-- `scripts/rofi-add-package.sh` - GUI version (Super+Shift+N on Hyprland systems) for interactive package addition
+
 
 ### Using the mkApp Helper
 
@@ -535,17 +533,7 @@ Look for either `homeManagerModules` or `homeModules` in the output.
 
 ### Adding a New Package
 
-**Using helper scripts (NixOS only):**
-```bash
-# CLI version
-./scripts/add-package.sh
-
-# GUI version (Hyprland with rofi)
-# Press Super+Shift+N or run:
-./scripts/rofi-add-package.sh
-```
-
-**Manual addition using mkApp helper:**
+**Using mkApp helper:**
 1. Determine placement: system (`modules/apps/<category>/`) vs user (`home/`)
 2. Create a new module file using `mkApp` helper (see "Using the mkApp Helper" section)
 3. Add the new file to the category's `default.nix` imports (or let add-package.sh do it)

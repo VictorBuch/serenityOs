@@ -61,7 +61,6 @@
           history_length = 20;
 
           # Misc/Advanced
-          dmenu = "${pkgs.rofi}/bin/rofi -dmenu -p dunst:";
           browser = "zen";
           always_run_script = true;
           title = "Dunst";

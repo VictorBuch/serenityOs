@@ -1,10 +1,8 @@
 { pkgs, lib, ... }:
 {
-
-  # Import cross-platform modules from parent
+  # Linux-specific modules
   imports = [
-    ../common.nix
-    ./system-configs
+    ./system
     ./desktop-environments
   ];
 }

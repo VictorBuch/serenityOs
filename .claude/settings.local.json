@@ -7,7 +7,9 @@
       "Bash(journalctl:*)",
       "Bash(systemctl list-units:*)",
       "WebSearch",
-      "Bash(nix-shell -p pciutils --run:*)"
+      "Bash(nix-shell -p pciutils --run:*)",
+      "WebFetch(domain:nixos.wiki)",
+      "WebFetch(domain:wiki.nixos.org)"
     ],
     "deny": [],
     "ask": []

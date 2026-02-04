@@ -2,7 +2,8 @@ args@{
   config,
   pkgs,
   lib,
-  inputs ? null,
+  inputs,
+  system,
   isLinux,
   mkApp,
   ...
@@ -20,7 +21,7 @@ mkApp {
     pkgs.unstable.ripgrep
     pkgs.unstable.fd
     pkgs.unstable.nodePackages.nodejs
-    pkgs.unstable.claude-code
+    inputs.llm-agents.packages.${system}.claude-code
     # pkgs.unstable.mcp-nixos  # Temporarily disabled due to mcp version conflict (mcp 1.25.0 incompatible with fastmcp)
     pkgs.unstable.gitea-mcp-server
     pkgs.unstable.yazi

@@ -119,6 +119,8 @@ in
 
     development = {
       enable = true;
+      android.enable = true;
+      editors.zed.enable = false;
     };
 
     emacs = {

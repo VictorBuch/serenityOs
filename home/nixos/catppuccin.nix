@@ -44,7 +44,7 @@
       enable = true;
       font = {
         name = "DejaVu Sans";
-        size = 11;
+        size = 12;
       };
       theme = {
         name = "catppuccin-mocha-blue-standard";

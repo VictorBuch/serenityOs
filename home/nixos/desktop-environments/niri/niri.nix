@@ -91,7 +91,7 @@ in
 
             default-column-width { proportion 0.85; }
 
-            center-focused-column "always"
+            center-focused-column "on-overflow"
             always-center-single-column
 
             // Transparent background for noctalia wallpapers (Option 2)

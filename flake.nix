@@ -57,6 +57,8 @@
     # Pinned nixpkgs for Wine 9.20 (audio/yabridge compatibility)
     # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
     nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
+
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs =
@@ -82,6 +84,7 @@
           config = {
             allowUnfree = true;
             allowBroken = true; # Allow broken packages (needed for Linux packages on macOS)
+            android_sdk.accept_license = true;
           };
           overlays = [ overlayWithInputs ];
         };

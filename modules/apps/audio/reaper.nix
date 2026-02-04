@@ -121,19 +121,9 @@ let
     REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
     mkdir -p "$REAPER_USER_PLUGINS"
 
-    # Install ReaPack extension if not already present or broken
-    REAPACK_SO="$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
-    if [ ! -e "$REAPACK_SO" ]; then
-      echo "Installing ReaPack extension..."
-      ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPACK_SO"
-    fi
-
-    # Install SWS extension if not already present or broken
-    SWS_SO="$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
-    if [ ! -e "$SWS_SO" ]; then
-      echo "Installing SWS extension..."
-      ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$SWS_SO"
-    fi
+    # Always recreate symlinks to handle nix store path changes after system updates
+    ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
+    ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
 
     # Create yabridge.toml for IK Multimedia plugins if it doesn't exist
     # This fixes GUI refresh issues with TONEX, Amplitube, etc.

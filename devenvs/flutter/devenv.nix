@@ -1,10 +1,18 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 
 {
   # Enable Android development support
   android = {
     enable = true;
-    platforms.version = [ "34" "35" ];
+    platforms.version = [
+      "34"
+      "35"
+    ];
     ndk.enable = true;
     emulator.enable = false;
   };
@@ -20,8 +28,6 @@
 
   # Environment variables for Flutter and Android
   env = {
-    ANDROID_HOME = config.env.ANDROID_SDK_ROOT;
-    JAVA_HOME = "${pkgs.jdk17}";
     CHROME_EXECUTABLE = "${pkgs.chromium}/bin/chromium";
   };
 

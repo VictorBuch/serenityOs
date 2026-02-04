@@ -20,6 +20,7 @@
       enable = true;
       flavor = "mocha";
       accent = "blue";
+      cache.enable = true;
 
       # Enable catppuccin for specific applications
       # kitty.enable = true;

@@ -27,6 +27,11 @@ let
       isStaticFiles = true;
       staticPath = "/var/lib/wannashare/web";
     };
+     suboptimal = {
+      url = "http://127.0.0.1:3232";
+      https = false;
+      protected = false;
+    };
   };
 
   services = {

@@ -48,6 +48,7 @@ in
         description = "User for filebrowser service";
         createHome = false;
         group = "filebrowser";
+        extraGroups = [ "resolvconf" "users" ];
       };
     };
     users.groups.filebrowser = { };

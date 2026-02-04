@@ -25,12 +25,6 @@ in
   # Define a user account.
   user.userName = username;
 
-  # Enable flakes
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-
   # Enable networking
   networking.networkmanager.enable = true;
 
@@ -101,10 +95,8 @@ in
   # Enable zsh shell
   programs.zsh.enable = true;
 
-  maintenance = {
-    enable = true;
-    linux.enable = true;
-  };
+  # Enables GC, boot-cleanup, and optimization (Linux-specific options auto-enabled)
+  maintenance.enable = true;
   ############### Apps ########################
 
   apps = {

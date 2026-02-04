@@ -9,7 +9,7 @@
 {
 
   imports = [
-    ../nixos/system-configs/user.nix
+    ../nixos/system/user.nix
     ./configs.nix
     ./storage.nix
     ./database-backups.nix
@@ -42,7 +42,7 @@
     ./lab.nix
   ];
 
-  maintenance.enable = lib.mkDefault false;
+  # maintenance.enable inherits from modules/common/maintenance.nix
   dashboard.homarr.enable = lib.mkDefault false;
   dashboard.glance.enable = lib.mkDefault false;
   uptime-kuma.enable = lib.mkDefault false;

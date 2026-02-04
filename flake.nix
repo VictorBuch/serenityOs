@@ -58,7 +58,11 @@
     # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
     nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
 
-    llm-agents.url = "github:numtide/llm-agents.nix";
+    # AI coding agents (claude-code, etc.)
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "unstable-nixpkgs";
+    };
   };
 
   outputs =
@@ -218,6 +222,8 @@
                 isLinux = true;
               };
               modules = [
+                # Common modules for all hosts (nix settings, caches, etc.)
+                ./modules/common
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
                 # Standard modules for all NixOS hosts
@@ -251,6 +257,8 @@
                 isLinux = false;
               };
               modules = [
+                # Common modules for all hosts (nix settings, caches, etc.)
+                ./modules/common
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
                 # Standard modules for all Darwin hosts

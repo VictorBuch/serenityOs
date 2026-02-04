@@ -35,6 +35,7 @@
         "cmatrix"
         "docker"
         "docker-compose"
+        "pnpm"
       ];
 
       # Casks (GUI applications)

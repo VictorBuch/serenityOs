@@ -159,6 +159,7 @@ in
             gnutar
             nodejs
             sudo
+            docker
           ];
         };
       };
@@ -205,6 +206,13 @@ in
       User = lib.mkForce "wanna-share-releaser";
       Group = lib.mkForce "wanna-share-releaser";
       NoNewPrivileges = lib.mkForce false; # Required for sudo
+    };
+
+    systemd.services.gitea-runner-docker.serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "wanna-share-releaser";
+      Group = lib.mkForce "wanna-share-releaser";
+      NoNewPrivileges = lib.mkForce false;
     };
 
   };

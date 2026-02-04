@@ -42,7 +42,7 @@ mkHomeModule {
               startup_command = "nvim";
               preview_command = "figlet serenityOs";
               windows = [
-                "git"
+                "jj"
               ];
             }
             {
@@ -56,6 +56,10 @@ mkHomeModule {
             {
               name = "git";
               startup_script = "lazygit";
+            }
+            {
+              name = "jj";
+              startup_script = "jj pull; jj log";
             }
             {
               name = "node";

@@ -9,7 +9,6 @@ let
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen";
-  menu = "rofi -show drun";
   wallpaperDaemon = "swww";
   bar = "hyprpanel";
 in
@@ -117,20 +116,9 @@ in
           "$mainMod, F, exec, ${fileManager}"
           "$mainMod SHIFT, F, fullscreen"
           "$mainMod, V, togglefloating,"
-          "$mainMod, SPACE, exec, ${menu}"
           "$mainMod, P, pseudo,"
           "$mainMod SHIFT, J, togglesplit,"
           "$mainMod SHIFT, L, exec, hyprlock"
-
-          # Rofi extended functionality (Raycast-like)
-          "$mainMod, N, exec, rofi-network-manager"
-          "$mainMod SHIFT, B, exec, rofi-bluetooth"
-          "$mainMod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
-          "$mainMod, O, exec, rofi -show obsidian"
-          "$mainMod SHIFT, C, exec, rofi -show calc"
-          "$mainMod SHIFT, E, exec, rofi -show emoji"
-          "$mainMod SHIFT, P, exec, rofi-pass-wayland"
-          "$mainMod SHIFT, A, exec, rofi -show run"
 
           # screen shot
           "CONTROL ALT, 4, exec, hyprshot -m region"
@@ -226,16 +214,11 @@ in
           "center, class:^(org.gnome.Nautilus)$"
         ];
         layerrule = [
-          "blur, rofi"
           "blur, wlogout"
-          "blur, waybar"
           "blur, notifications"
-          "ignorezero, rofi"
           "ignorezero, wlogout"
           "ignorezero, notifications"
-          "ignorealpha 0.2, rofi"
           "ignorealpha 0.2, wlogout"
-          "ignorealpha 0.2, waybar"
           "ignorealpha 0.2, notifications"
         ];
         ecosystem.no_donation_nag = true;

@@ -7,7 +7,15 @@
       "Bash(journalctl:*)",
       "Bash(systemctl list-units:*)",
       "WebSearch",
-      "Bash(nix-shell -p pciutils --run:*)"
+      "Bash(nix-shell -p pciutils --run:*)",
+      "Bash(lspci:*)",
+      "Bash(lsmod:*)",
+      "Bash(dmesg:*)",
+      "Bash(curl:*)",
+      "Bash(systemctl show:*)",
+      "Bash(systemctl is-active:*)",
+      "Bash(systemctl is-failed:*)",
+      "Bash(systemctl cat:*)"
     ],
     "deny": [],
     "ask": []

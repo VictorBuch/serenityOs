@@ -78,18 +78,18 @@ in
       users."${user.userName}".extraGroups = [ "nextcloud" ];
     };
 
-    # Ensure all Nextcloud services wait for mergerFS pool mount
+    # Ensure all Nextcloud services wait for mergerFS pool mount and database services
     systemd.services.nextcloud-setup = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
+      requires = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
     };
     systemd.services.nextcloud-update-db = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
+      requires = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
     };
     systemd.services.phpfpm-nextcloud = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
+      requires = [ "mnt-pool.mount" "mysql.service" "redis-nextcloud.service" ];
     };
 
     # Create nextcloud directories and set proper ownership

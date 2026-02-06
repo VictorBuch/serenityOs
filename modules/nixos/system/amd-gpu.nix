@@ -15,7 +15,6 @@
 
     # AMD GPU kernel parameters for performance
     boot.kernelParams = [
-      "amdgpu.ppfeaturemask=0xffffffff" # Enable all power features
       "amdgpu.gpu_recovery=1" # Enable GPU recovery
     ];
 
@@ -33,6 +32,6 @@
     services.xserver.videoDrivers = [ "amdgpu" ];
 
     # CPU performance governor for AMD systems
-    powerManagement.cpuFreqGovernor = lib.mkDefault "performance";
+    powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
   };
 }

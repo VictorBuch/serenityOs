@@ -12,9 +12,13 @@
 
   config = lib.mkIf config.desktop-environments.gnome.enable {
     services.xserver.enable = true;
-    services.xserver.displayManager.gdm.enable =
-      !(config.desktop-environments.kde.enable || config.desktop-environments.hyprland.enable || config.desktop-environments.niri.enable);
-    services.xserver.desktopManager.gnome.enable = true;
+    services.displayManager.gdm.enable =
+      !(
+        config.desktop-environments.kde.enable
+        || config.desktop-environments.hyprland.enable
+        || config.desktop-environments.niri.enable
+      );
+    services.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =
       (with pkgs.unstable; [
         gnome-tour

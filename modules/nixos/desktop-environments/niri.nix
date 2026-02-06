@@ -24,6 +24,7 @@
     };
 
     sddm.enable = true;
+    services.displayManager.defaultSession = "niri";
 
     security.polkit = {
 

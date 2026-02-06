@@ -30,8 +30,8 @@
     stylix.url = "github:danth/stylix";
 
     catppuccin = {
-      url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      url = "github:catppuccin/nix/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nvf = {

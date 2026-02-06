@@ -53,6 +53,24 @@
           };
         };
 
+        # Deprioritize emmet_ls so ts_ls completions appear first in TSX
+        fuzzy = {
+          sorts = [
+            {
+              __raw = ''
+                function(a, b)
+                  if (a.client_name == nil or b.client_name == nil) or (a.client_name == b.client_name) then
+                    return
+                  end
+                  return b.client_name == "emmet_ls"
+                end
+              '';
+            }
+            "score"
+            "sort_text"
+          ];
+        };
+
         # Sources in priority order: LSP → snippets → buffer → path
         sources = {
           default = [ "lsp" "path" "snippets" "buffer" ];

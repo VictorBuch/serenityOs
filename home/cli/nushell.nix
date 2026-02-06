@@ -80,6 +80,13 @@ mkHomeModule {
             };
           };
           extraConfig = ''
+            let starship_cache = ($nu.cache-dir | path join "starship")
+            if not ($starship_cache | path exists) {
+              mkdir $starship_cache
+            }
+            starship init nu | save -f ($starship_cache | path join "init.nu")
+            source ($starship_cache | path join "init.nu")
+
             figlet -tk ${config.home.username} | lolcat -p 3
           '';
         };

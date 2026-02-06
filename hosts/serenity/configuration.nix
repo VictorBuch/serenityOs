@@ -284,6 +284,10 @@ in
     nvidiaSettings = true;
   };
 
+  # Fix nvidia-persistenced race condition during nixos-rebuild switch
+  # Device files may briefly disappear when kernel modules reload
+  systemd.services.nvidia-persistenced.serviceConfig.RestartSec = 5;
+
   virtualisation = {
 
     # enable docker

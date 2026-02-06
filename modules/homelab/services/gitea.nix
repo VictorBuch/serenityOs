@@ -19,7 +19,7 @@ in
 
   config = lib.mkIf config.gitea.enable {
 
-    catppuccin.gitea.enable = true;
+    #catppuccin.gitea.enable = true;
 
     # PostgreSQL database for Gitea
     services.postgresql = {
@@ -207,6 +207,9 @@ in
       Group = lib.mkForce "wanna-share-releaser";
       NoNewPrivileges = lib.mkForce false; # Required for sudo
     };
+    # Ensure runners start after Gitea is ready
+    systemd.services.gitea-runner-nix.after = [ "gitea.service" ];
+    systemd.services.gitea-runner-nix.wants = [ "gitea.service" ];
 
     systemd.services.gitea-runner-docker.serviceConfig = {
       DynamicUser = lib.mkForce false;
@@ -214,6 +217,8 @@ in
       Group = lib.mkForce "wanna-share-releaser";
       NoNewPrivileges = lib.mkForce false;
     };
+    systemd.services.gitea-runner-docker.after = [ "gitea.service" ];
+    systemd.services.gitea-runner-docker.wants = [ "gitea.service" ];
 
   };
 }

@@ -1,6 +1,7 @@
 {
   programs.nixvim.opts = {
     updatetime = 100; # Faster completion
+    autoread = true; # Auto-reload files changed outside of Neovim
     number = true;
     relativenumber = true;
     splitbelow = true;

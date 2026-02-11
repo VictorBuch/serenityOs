@@ -70,8 +70,6 @@ in
 
   # System packages (keep minimal, prefer home-manager for user apps)
   environment.systemPackages = with pkgs; [
-    unstable.neovim
-    unstable.nushell
     git
     lazygit
     unstable.claude-code

@@ -53,7 +53,7 @@ in
   users.users."${username}" = {
     name = username;
     home = "/Users/${username}";
-    # shell is managed by Home Manager
+    shell = pkgs.nushell;
   };
 
   # Set up nix channels
@@ -70,8 +70,6 @@ in
 
   # System packages (keep minimal, prefer home-manager for user apps)
   environment.systemPackages = with pkgs; [
-    unstable.neovim
-    unstable.nushell
     git
     lazygit
     unstable.claude-code

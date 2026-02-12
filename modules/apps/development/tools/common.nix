@@ -18,6 +18,7 @@ mkApp {
     pkgs.unstable.zoxide
     pkgs.unstable.fzf
     pkgs.unstable.lazygit
+    pkgs.unstable.lazysql
     pkgs.unstable.ripgrep
     pkgs.unstable.fd
     pkgs.unstable.nodejs_22
@@ -26,6 +27,7 @@ mkApp {
     pkgs.unstable.yazi
     pkgs.unstable.devenv
     pkgs.unstable.jujutsu
+    pkgs.unstable.jjui
     pkgs.unstable.go
     pkgs.unstable.opencode
   ];

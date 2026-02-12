@@ -52,10 +52,28 @@
       '';
       desc = "Close toggleterm with q";
     }
+
+    # Auto-reload files when changed externally
+    {
+      event = [ "FocusGained" "BufEnter" ];
+      group = "auto_reload";
+      pattern = "*";
+      callback.__raw = ''
+        function()
+          if vim.fn.getcmdwintype() == "" and vim.bo.buftype == "" then
+            vim.cmd("checktime")
+          end
+        end
+      '';
+      desc = "Check for file changes and reload";
+    }
   ];
 
   programs.nixvim.autoGroups = {
     highlight_yank = {
+      clear = true;
+    };
+    auto_reload = {
       clear = true;
     };
   };

@@ -152,21 +152,21 @@ mkApp {
             };
           };
 
-          tidal = {
-            name = "Tidal";
-            genericName = "Music Streaming";
-            exec = "${browser} --app=https://listen.tidal.com --no-first-run --disable-default-apps";
-            icon = "tidal";
-            categories = [
-              "AudioVideo"
-              "Audio"
-              "Music"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "listen.tidal.com";
-            };
-          };
+          # tidal = {
+          #   name = "Tidal";
+          #   genericName = "Music Streaming";
+          #   exec = "${browser} --app=https://listen.tidal.com --no-first-run --disable-default-apps";
+          #   icon = "tidal";
+          #   categories = [
+          #     "AudioVideo"
+          #     "Audio"
+          #     "Music"
+          #   ];
+          #   terminal = false;
+          #   settings = {
+          #     StartupWMClass = "listen.tidal.com";
+          #   };
+          # };
         };
       };
   };

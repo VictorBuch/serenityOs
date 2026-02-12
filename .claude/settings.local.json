@@ -9,7 +9,8 @@
       "WebSearch",
       "Bash(nix-shell -p pciutils --run:*)",
       "WebFetch(domain:nixos.wiki)",
-      "WebFetch(domain:wiki.nixos.org)"
+      "WebFetch(domain:wiki.nixos.org)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

@@ -92,12 +92,17 @@ in
     gaming.enable = true;
     media = {
       enable = true;
-      davinci-resolve.enable = false;
+      davinci-resolve.enable = true;
     };
     productivity.enable = true;
     utilities.enable = true;
     work.enable = true;
   };
+
+  nix.settings.trusted-users = [
+    "root"
+    "jayne"
+  ];
 
   system.stateVersion = "25.05";
 }

@@ -52,7 +52,6 @@ mkHomeModule {
             EDITOR = "nvim";
           };
           extraEnv = ''
-            		def nrc [] { npm run prettier --write; npm run lint; npm run ts-check }
             	  '';
 
           # Set up Nix environment for Darwin (nushell doesn't auto-source /etc/bashrc)
@@ -80,14 +79,8 @@ mkHomeModule {
             };
           };
           extraConfig = ''
-            let starship_cache = ($nu.cache-dir | path join "starship")
-            if not ($starship_cache | path exists) {
-              mkdir $starship_cache
-            }
-            starship init nu | save -f ($starship_cache | path join "init.nu")
-            source ($starship_cache | path join "init.nu")
-
-            figlet -tk ${config.home.username} | lolcat -p 3
+            def nrc [] { npm run prettier --write; npm run lint; npm run ts-check }
+            figlet -k ${config.home.username} | lolcat -p 3
           '';
         };
 
@@ -96,15 +89,15 @@ mkHomeModule {
           enableNushellIntegration = true;
         };
 
-        # direnv = {
-        #   enable = true;
-        #   enableNushellIntegration = true;
-        #   nix-direnv.enable = true;
-        #   stdlib = ''
-        #     # Source devenv's direnvrc for use_devenv function
-        #     source <(${pkgs.devenv}/bin/devenv direnvrc)
-        #   '';
-        # };
+        direnv = {
+          enable = true;
+          enableNushellIntegration = true;
+          nix-direnv.enable = true;
+          stdlib = ''
+            # Source devenv's direnvrc for use_devenv function
+            source <(${pkgs.devenv}/bin/devenv direnvrc)
+          '';
+        };
       };
     };
 } args

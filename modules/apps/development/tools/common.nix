@@ -17,6 +17,7 @@ mkApp {
     pkgs.unstable.zoxide
     pkgs.unstable.fzf
     pkgs.unstable.lazygit
+    pkgs.unstable.lazysql
     pkgs.unstable.ripgrep
     pkgs.unstable.fd
     pkgs.unstable.nodePackages.nodejs

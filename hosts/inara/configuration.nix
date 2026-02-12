@@ -53,7 +53,7 @@ in
   users.users."${username}" = {
     name = username;
     home = "/Users/${username}";
-    # shell is managed by Home Manager
+    shell = pkgs.nushell;
   };
 
   # Set up nix channels

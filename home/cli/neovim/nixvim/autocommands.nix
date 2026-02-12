@@ -55,12 +55,12 @@
 
     # Auto-reload files when changed externally
     {
-      event = [ "FocusGained" "BufEnter" "CursorHold" "CursorHoldI" ];
+      event = [ "FocusGained" "BufEnter" ];
       group = "auto_reload";
       pattern = "*";
       callback.__raw = ''
         function()
-          if vim.fn.getcmdwintype() == "" then
+          if vim.fn.getcmdwintype() == "" and vim.bo.buftype == "" then
             vim.cmd("checktime")
           end
         end

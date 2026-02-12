@@ -1,12 +1,22 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs ? null,
+  isLinux,
+  mkApp,
+  ...
+}:
 
 mkApp {
   _file = toString ./.;
   name = "syncthing";
-  linuxPackages = pkgs: [
-    pkgs.syncthing
-    pkgs.gnomeExtensions.syncthing-toggle
-  ];
+  linuxPackages =
+    { pkgs, ... }:
+    [
+      pkgs.syncthing
+      pkgs.gnomeExtensions.syncthing-toggle
+    ];
   description = "Syncthing file synchronization (Linux only)";
   linuxExtraConfig = {
     services.syncthing = {

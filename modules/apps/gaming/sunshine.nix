@@ -1,9 +1,17 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs ? null,
+  isLinux,
+  mkApp,
+  ...
+}:
 
 mkApp {
   _file = toString ./.;
   name = "sunshine";
-  linuxPackages = pkgs: [ ]; # Sunshine is enabled via services.sunshine
+  linuxPackages = { pkgs, ... }: [ ]; # Sunshine is enabled via services.sunshine
   description = "Sunshine game streaming (Linux only)";
   linuxExtraConfig = {
     services.sunshine = {

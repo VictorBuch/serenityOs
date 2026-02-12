@@ -3,6 +3,7 @@
 {
   inputs,
   isLinux,
+  pkgs-stable,
   mkHomeModule,
   mkHomeCategory,
   ...
@@ -30,6 +31,7 @@ in
         username
         inputs
         isLinux
+        pkgs-stable
         mkHomeModule
         mkHomeCategory
         ;

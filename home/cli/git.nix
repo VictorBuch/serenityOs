@@ -20,7 +20,7 @@ mkHomeModule {
     {
       programs.git = {
         enable = true;
-        package = pkgs.unstable.git;
+        package = pkgs.git;
 
         # Git settings (new format for HM 26.05)
         settings = {

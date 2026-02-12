@@ -20,7 +20,7 @@ mkHomeModule {
     {
       programs.jujutsu = {
         enable = true;
-        package = pkgs.unstable.jujutsu;
+        package = pkgs.jujutsu;
         settings = {
           user = {
             email = "victorbuch@protonmail.com";

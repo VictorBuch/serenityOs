@@ -5,13 +5,13 @@
 # Usage Examples:
 #
 # Need to add to top of module:
-# args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+# args@{ config, pkgs, pkgs-stable, lib, inputs ? null, isLinux, mkApp, ... }:
 #
 # 1. Cross-platform (same package):
 #   mkApp {
 #     _file = toString ./.;
 #     name = "firefox";
-#     packages = pkgs: [ pkgs.firefox ];
+#     packages = { pkgs, ... }: [ pkgs.firefox ];
 #     extraConfig = {};
 #   } args
 #
@@ -19,8 +19,8 @@
 #   mkApp {
 #     _file = toString ./.;
 #     name = "ghostty";
-#     linuxPackages = pkgs: [ pkgs.ghostty ];
-#     darwinPackages = pkgs: [ ];  # Installed via homebrew
+#     linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
+#     darwinPackages = { pkgs, ... }: [ ];  # Installed via homebrew
 #     darwinExtraConfig = { homebrew.casks = [ "ghostty" ]; };
 #   } args
 #
@@ -28,16 +28,16 @@
 #   mkApp {
 #     _file = toString ./.;
 #     name = "steam";
-#     linuxPackages = pkgs: [ pkgs.steam ];
+#     linuxPackages = { pkgs, ... }: [ pkgs.steam ];
 #   } args
 #
-# 4. Stable/unstable mix:
+# 4. Stable packages (for audio/wine that need stability):
 #   mkApp {
 #     _file = toString ./.;
 #     name = "myapp";
-#     packages = pkgs: [
-#       pkgs.firefox             # stable (main branch)
-#       pkgs.unstable.neovim     # unstable via overlay
+#     packages = { pkgs, pkgs-stable, ... }: [
+#       pkgs.reaper              # unstable (default, latest)
+#       pkgs-stable.yabridge     # stable (escape hatch for reliability)
 #     ];
 #   } args
 #
@@ -45,7 +45,7 @@
 #   mkApp {
 #     name = "myapp";
 #     optionPath = "apps.custom.path";
-#     packages = pkgs: [ pkgs.myapp ];
+#     packages = { pkgs, ... }: [ pkgs.myapp ];
 #   } args
 
 {
@@ -70,6 +70,7 @@
 {
   config,
   pkgs,
+  pkgs-stable ? pkgs, # Fallback to pkgs if not provided (shouldn't happen with specialArgs)
   lib,
   inputs ? null,
   isLinux ? pkgs.stdenv.isLinux,
@@ -102,13 +103,14 @@ let
   platformPackages = if isLinux then linuxPackages else darwinPackages;
 
   # Resolve packages (support functions or direct lists)
+  # Functions receive { pkgs, pkgs-stable } for flexibility
   resolvePackages =
     pkgList:
     if pkgList == null then
       [ ]
     else if lib.isFunction pkgList then
-      # Function: takes pkgs (which has unstable via overlay)
-      pkgList pkgs
+      # Function: receives { pkgs, pkgs-stable } for stable/unstable choice
+      pkgList { inherit pkgs pkgs-stable; }
     else
       # Direct list
       pkgList;

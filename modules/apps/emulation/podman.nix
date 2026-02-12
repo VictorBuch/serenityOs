@@ -1,9 +1,17 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs ? null,
+  isLinux,
+  mkApp,
+  ...
+}:
 
 mkApp {
   _file = toString ./.;
   name = "podman";
-  linuxPackages = pkgs: [ ]; # Podman enabled via virtualisation.podman
+  linuxPackages = { pkgs, ... }: [ ]; # Podman enabled via virtualisation.podman
   description = "Podman container engine (Linux only)";
   linuxExtraConfig = {
     virtualisation.containers.enable = true;

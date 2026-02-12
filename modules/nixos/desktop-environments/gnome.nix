@@ -20,7 +20,7 @@
       );
     services.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =
-      (with pkgs.unstable; [
+      (with pkgs; [
         gnome-tour
         gedit
         cheese # webcam tool
@@ -35,14 +35,14 @@
         hitori # sudoku game
         atomix # puzzle game
       ])
-      ++ (with pkgs.unstable.gnome; [
-        pkgs.unstable.gnome-console
-        pkgs.unstable.gnome-connections
+      ++ (with pkgs.gnome; [
+        pkgs.gnome-console
+        pkgs.gnome-connections
       ]);
 
     environment.systemPackages = [
-      pkgs.unstable.sushi
-      pkgs.unstable.gnome-tweaks
+      pkgs.sushi
+      pkgs.gnome-tweaks
     ];
     networking.firewall.allowedTCPPortRanges = [
       {

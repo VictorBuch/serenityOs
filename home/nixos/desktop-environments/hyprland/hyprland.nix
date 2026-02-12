@@ -40,8 +40,8 @@ in
           border_size = 0;
 
           # Catppuccin Mocha colors
-          "col.active_border" = "rgb(cba6f7) rgb(f2cdcd) 45deg";
-          "col.inactive_border" = "rgba(6c7086aa)";
+          # "col.active_border" = "rgb(cba6f7) rgb(f2cdcd) 45deg";
+          # "col.inactive_border" = "rgba(6c7086aa)";
 
           # Set to true enable resizing windows by clicking and dragging on borders and gaps
           resize_on_border = false;

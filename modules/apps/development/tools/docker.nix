@@ -11,10 +11,12 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "docker";
-  linuxPackages = pkgs: [
-    pkgs.docker
-    pkgs.docker-compose
-  ];
+  linuxPackages =
+    { pkgs, ... }:
+    [
+      pkgs.docker
+      pkgs.docker-compose
+    ];
   description = "Docker containerization platform (Linux only)";
   linuxExtraConfig = {
     virtualisation.docker.enable = true;

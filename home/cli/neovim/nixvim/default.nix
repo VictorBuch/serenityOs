@@ -54,7 +54,7 @@
   };
 
   config = lib.mkIf config.home.cli.neovim.nixvim.enable {
-    home.packages = with pkgs.unstable; [
+    home.packages = with pkgs; [
       ripgrep
       fd
       fzf

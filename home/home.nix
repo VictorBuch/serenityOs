@@ -8,22 +8,16 @@
   ...
 }:
 
-# let
-#   system = config.system;
-# in
-
 {
-
   home.username = username;
   home.homeDirectory = if isLinux then "/home/${username}" else "/Users/${username}";
 
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
-  # Disable nixpkgs release check since we use unstable home-manager with stable nixpkgs
-  # This is intentional to get access to newer HM modules like programs.opencode
-  home.enableNixpkgsReleaseCheck = false;
+  # HM now follows unstable nixpkgs (same as our hosts), so no version mismatch anymore
+  # No need to disable the release check
 
-  # # Let Home Manager install and manage itself.
+  # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   # The home.packages option allows you to install Nix packages into your

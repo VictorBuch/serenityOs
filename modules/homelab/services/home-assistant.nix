@@ -34,7 +34,7 @@ in
 
     services.home-assistant = {
       enable = true;
-      package = pkgs.unstable.home-assistant.overrideAttrs (oldAttrs: {
+      package = pkgs.home-assistant.overrideAttrs (oldAttrs: {
         doInstallCheck = false;
       });
 
@@ -55,7 +55,7 @@ in
         "esphome"
         "cast" # Chromecast
         "spotify"
-	"tuya"
+        "tuya"
         "mobile_app" # For HA companion app
       ];
 
@@ -64,7 +64,7 @@ in
 
       config = {
         # Basic setup with default integrations
-        default_config = {};
+        default_config = { };
 
         # HTTP configuration for Nabu Casa remote access
         http = {

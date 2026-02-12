@@ -10,16 +10,18 @@
       enable = true;
       settings = {
         general = {
-            ignore_empty_input = true;
+          ignore_empty_input = true;
         };
-        background = [
-            {
-              path = "${config.wallpaper}";
-              blur_passes = 3;
-              blur_size = 8;
-            }
-        ];
-        label =[ {
+        # Background managed by stylix - commented out manual config
+        # background = [
+        #     {
+        #       path = "${config.wallpaper}";
+        #       blur_passes = 3;
+        #       blur_size = 8;
+        #     }
+        # ];
+        label = [
+          {
             #clock
             text = "cmd[update:1000] echo '$TIME'";
             color = "rgba(200, 200, 200, 1.0)";
@@ -30,8 +32,8 @@
             valign = "bottom";
             shadow_passes = 5;
             shadow_size = 10;
-        }
-        {
+          }
+          {
             text = "$USER";
             color = "rgba(200, 200, 200, 1.0)";
             font_size = 20;
@@ -41,7 +43,7 @@
             valign = "bottom";
             shadow_passes = 5;
             shadow_size = 10;
-        }
+          }
         ];
       };
     };

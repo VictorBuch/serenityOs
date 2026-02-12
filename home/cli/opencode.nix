@@ -20,11 +20,11 @@ mkHomeModule {
     {
       programs.opencode = {
         enable = true;
-        package = pkgs.unstable.opencode;
+        package = pkgs.opencode;
 
         # Basic settings (these override/extend defaults)
         settings = {
-          theme = "catppuccin";
+          # theme = "catppuccin"; # managed by stylix
           model = "anthropic/claude-opus-4-5";
           autoupdate = true;
 

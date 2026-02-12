@@ -12,7 +12,7 @@
     inputs.noctalia.homeModules.default
     {
       home = {
-        catppuccin.enable = true;
+        # catppuccin.enable = true;
         desktop-environments = {
           niri.enable = true;
           noctalia.enable = true;

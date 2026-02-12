@@ -20,7 +20,7 @@
     # Enable the Niri Window Manager
     programs.niri = {
       enable = true;
-      package = pkgs.unstable.niri;
+      package = pkgs.niri;
     };
 
     sddm.enable = true;
@@ -46,7 +46,7 @@
     };
 
     # Enable portals with proper configuration for niri
-    # Use xdg-desktop-portal-gtk only (gnome portal causes conflicts)
+    # Use xdg-desktop-portal-gtk (nixpkgs niri module sets niri.default)
     xdg.portal = {
       enable = true;
       xdgOpenUsePortal = true;
@@ -55,7 +55,8 @@
       ];
       config = {
         common.default = [ "gtk" ];
-        niri.default = [ "gtk" ];
+        # niri.default managed by nixpkgs niri module
+        # niri.default = [ "gtk" ];
       };
     };
 
@@ -85,7 +86,7 @@
     security.rtkit.enable = true;
 
     environment.systemPackages =
-      (with pkgs.unstable; [
+      (with pkgs; [
         libnotify
         swww # Wallpaper daemon
         hyprlock # Lock screen (compatible with niri)

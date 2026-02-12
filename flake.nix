@@ -2,16 +2,19 @@
   description = "Nixos config flake";
 
   inputs = {
-    unstable-nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    # Primary nixpkgs - unstable for all hosts (dev tools, latest packages)
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # Stable nixpkgs - escape hatch for packages that need stability (audio/wine)
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs"; # Matches our unstable base - no more version mismatch
     };
 
     nix-darwin = {
-      url = "github:LnL7/nix-darwin/nix-darwin-25.11";
+      url = "github:nix-darwin/nix-darwin"; # Master branch tracks unstable
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -19,34 +22,37 @@
 
     quickshell = {
       url = "github:outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
-    };
-
-    # stylix.url = "github:danth/stylix";
-
-    catppuccin = {
-      url = "github:catppuccin/nix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # catppuccin = {
+    #   url = "github:catppuccin/nix"; # Main branch for unstable nixpkgs compatibility
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     nvf = {
       url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     sops-nix = {
@@ -61,7 +67,7 @@
     # AI coding agents (claude-code, etc.)
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "unstable-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -69,7 +75,7 @@
     {
       self,
       nixpkgs,
-      unstable-nixpkgs,
+      nixpkgs-stable,
       nix-darwin,
       ...
     }@inputs:
@@ -80,7 +86,7 @@
       # Import the overlay with inputs
       overlayWithInputs = import ./overlays { inherit inputs; };
 
-      # Import nixpkgs with overlays and config for all systems
+      # Primary pkgs - unstable for all hosts (dev tools, latest packages)
       pkgsFor =
         system:
         import nixpkgs {
@@ -93,39 +99,27 @@
           overlays = [ overlayWithInputs ];
         };
 
-      # Import unstable nixpkgs for serenity (homelab server)
-      # This makes unstable the default, with stable available as pkgs.stable
-      unstablePkgsFor =
+      # Stable pkgs - escape hatch for packages that need stability (audio/wine)
+      # Instantiated once here, passed via specialArgs - avoids "1000 instances of nixpkgs" problem
+      stablePkgsFor =
         system:
-        import unstable-nixpkgs {
+        import nixpkgs-stable {
           inherit system;
           config = {
             allowUnfree = true;
             allowBroken = true;
           };
-          overlays = [
-            overlayWithInputs
-            # Add stable packages as pkgs.stable
-            (final: prev: {
-              stable = import nixpkgs {
-                inherit system;
-                config = {
-                  allowUnfree = true;
-                  allowBroken = true;
-                };
-              };
-            })
-          ];
         };
 
       # Host definitions with their specific configurations
+      # All hosts now use unstable nixpkgs as base, with pkgs-stable available as escape hatch
       nixosHosts = [
         {
           name = "jayne";
           # system defaults to x86_64-linux
           extraModules = [
             ./modules/nixos
-            inputs.catppuccin.nixosModules.catppuccin
+            # inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {
@@ -133,18 +127,16 @@
           # system defaults to x86_64-linux
           extraModules = [
             ./modules/nixos
-            inputs.catppuccin.nixosModules.catppuccin
+            # inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {
           name = "serenity";
           # system defaults to x86_64-linux
           # Serenity is a homelab server with different modules
-          # Uses unstable nixpkgs by default
-          useUnstable = true;
           extraModules = [
             ./modules/homelab
-            inputs.catppuccin.nixosModules.catppuccin
+            # inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {
@@ -152,7 +144,7 @@
           # system defaults to x86_64-linux
           extraModules = [
             ./modules/nixos
-            inputs.catppuccin.nixosModules.catppuccin
+            # inputs.catppuccin.nixosModules.catppuccin
           ];
         }
         {
@@ -161,7 +153,7 @@
           hostConfig = "./hosts/shepherd/configuration.nix"; # Uses shepherd's config
           extraModules = [
             ./modules/nixos
-            inputs.catppuccin.nixosModules.catppuccin
+            # inputs.catppuccin.nixosModules.catppuccin
           ];
         }
       ];
@@ -179,7 +171,7 @@
           (system: {
             name = system;
             value = import ./packages {
-              pkgs = pkgsFor system; # Now has unstable available via pkgs.unstable
+              pkgs = pkgsFor system;
             };
           })
           [
@@ -204,13 +196,10 @@
           value =
             let
               system = host.system or "x86_64-linux"; # Default to x86_64-linux
-              useUnstable = host.useUnstable or false;
-              # Use matching nixpkgs lib for modules to match packages
-              nixpkgsToUse = if useUnstable then unstable-nixpkgs else nixpkgs;
             in
-            nixpkgsToUse.lib.nixosSystem {
+            nixpkgs.lib.nixosSystem {
               inherit system;
-              pkgs = if useUnstable then unstablePkgsFor system else pkgsFor system;
+              pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
                 inherit (customLib)
@@ -220,6 +209,8 @@
                   mkHomeCategory
                   ;
                 isLinux = true;
+                # Stable pkgs escape hatch - for packages that need stability (audio/wine)
+                pkgs-stable = stablePkgsFor system;
               };
               modules = [
                 # Common modules for all hosts (nix settings, caches, etc.)
@@ -245,7 +236,7 @@
             in
             {
               inherit system;
-              pkgs = pkgsFor system; # Use universal pkgsFor with overlay
+              pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
                 inherit (customLib)
@@ -255,6 +246,8 @@
                   mkHomeCategory
                   ;
                 isLinux = false;
+                # Stable pkgs escape hatch - for packages that need stability
+                pkgs-stable = stablePkgsFor system;
               };
               modules = [
                 # Common modules for all hosts (nix settings, caches, etc.)

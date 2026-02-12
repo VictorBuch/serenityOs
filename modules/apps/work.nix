@@ -12,7 +12,7 @@ mkApp {
   _file = toString ./work.nix;
   name = "work";
   optionPath = "apps.work";
-  packages = pkgs: [
+  packages = { pkgs, ... }: [
     pkgs.google-cloud-sdk
     pkgs.prisma-engines
     pkgs.prisma

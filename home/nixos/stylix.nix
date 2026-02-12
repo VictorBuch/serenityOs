@@ -20,16 +20,16 @@
       enable = true;
       autoEnable = true;
       polarity = "dark";
-      # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-      image = "${config.wallpaper}";
+      base16Scheme = "${pkgs.base16-schemes}/share/themes/ayu-dark.yaml";
+      # image = "${config.wallpaper}";
 
       cursor = {
         package = pkgs.whitesur-cursors;
         name = "WhiteSur-cursors";
-        size = 14;
+        size = 16;
       };
 
-      iconTheme = {
+      icons = {
         package = pkgs.whitesur-icon-theme;
         dark = "WhiteSur-icon-theme-dark";
       };
@@ -50,17 +50,12 @@
       };
       opacity.terminal = 0.85;
 
-      # targets = {
-      #   gnome.enable = true;
-      #   gtk.enable = true;
-      #   hyprland.enable = true;
-      #   hyprlock.enable = true;
-      #   kitty.enable = true;
-      #   rofi.enable = true;
-      #   dunst.enable = true;
-      #   swww.enable = false;
-      #   zed.enable = false;
-      # };
+      # Disable targets that set nixpkgs.overlays in HM context
+      # (conflicts with home-manager.useGlobalPkgs)
+      targets = {
+        nixos-icons.enable = false;
+        gtksourceview.enable = false;
+      };
     };
 
   };

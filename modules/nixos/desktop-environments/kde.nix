@@ -23,7 +23,7 @@
     services.displayManager.sddm.settings.General.DisplayServer = "wayland";
     services.displayManager.defaultSession = "plasma";
 
-    environment.plasma6.excludePackages = with pkgs.unstable.kdePackages; [
+    environment.plasma6.excludePackages = with pkgs.kdePackages; [
       plasma-browser-integration
       konsole
       oxygen

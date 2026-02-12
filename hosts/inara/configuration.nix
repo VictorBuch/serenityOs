@@ -3,6 +3,7 @@
   pkgs,
   inputs,
   isLinux,
+  pkgs-stable,
   mkHomeModule,
   mkHomeCategory,
   ...
@@ -21,6 +22,7 @@ in
         username
         inputs
         isLinux
+        pkgs-stable
         mkHomeModule
         mkHomeCategory
         ;
@@ -72,16 +74,16 @@ in
   environment.systemPackages = with pkgs; [
     git
     lazygit
-    unstable.claude-code
-    #unstable.mcp-nixos
+    claude-code
+    #mcp-nixos
     lolcat
     figlet
     bat
 
     # TO BE MOVED LATER
-    unstable.tailscale
-    unstable.flutter
-    unstable.opencode
+    tailscale
+    flutter
+    opencode
     postman
   ];
 

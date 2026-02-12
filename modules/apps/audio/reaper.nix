@@ -1,6 +1,7 @@
 args@{
   config,
   pkgs,
+  pkgs-stable,
   lib,
   inputs ? null,
   isLinux,
@@ -115,90 +116,93 @@ let
   # This is more reliable than environment.sessionVariables for all shells
   # Also handles automatic installation of ReaPack and SWS extensions
   reaperWrapper = pkgs.writeShellScriptBin "reaper" ''
-    #!/usr/bin/env bash
+        #!/usr/bin/env bash
 
-    # Ensure REAPER UserPlugins directory exists
-    REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
-    mkdir -p "$REAPER_USER_PLUGINS"
+        # Ensure REAPER UserPlugins directory exists
+        REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
+        mkdir -p "$REAPER_USER_PLUGINS"
 
-    # Always recreate symlinks to handle nix store path changes after system updates
-    ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
-    ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
+        # Always recreate symlinks to handle nix store path changes after system updates
+        ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
+        ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
 
-    # Create yabridge.toml for IK Multimedia plugins if it doesn't exist
-    # This fixes GUI refresh issues with TONEX, Amplitube, etc.
-    YABRIDGE_CONFIG="$HOME/.config/yabridge/yabridge.toml"
-    if [ ! -e "$YABRIDGE_CONFIG" ]; then
-      echo "Creating yabridge.toml for IK Multimedia plugins..."
-      mkdir -p "$(dirname "$YABRIDGE_CONFIG")"
-      cat > "$YABRIDGE_CONFIG" << 'YABRIDGE_EOF'
-# Yabridge configuration for audio plugins
-# See: https://github.com/robbert-vdh/yabridge#configuration
+        # Create yabridge.toml for IK Multimedia plugins if it doesn't exist
+        # This fixes GUI refresh issues with TONEX, Amplitube, etc.
+        YABRIDGE_CONFIG="$HOME/.config/yabridge/yabridge.toml"
+        if [ ! -e "$YABRIDGE_CONFIG" ]; then
+          echo "Creating yabridge.toml for IK Multimedia plugins..."
+          mkdir -p "$(dirname "$YABRIDGE_CONFIG")"
+          cat > "$YABRIDGE_CONFIG" << 'YABRIDGE_EOF'
+    # Yabridge configuration for audio plugins
+    # See: https://github.com/robbert-vdh/yabridge#configuration
 
-# Global settings
-frame_rate = 60
+    # Global settings
+    frame_rate = 60
 
-# IK Multimedia plugins (TONEX, Amplitube, MODO Bass, etc.)
-# These need editor_xembed for proper GUI refresh on Wayland/Hyprland
-["**/IK Multimedia/**"]
-frame_rate = 120
-editor_xembed = true
-YABRIDGE_EOF
-    fi
+    # IK Multimedia plugins (TONEX, Amplitube, MODO Bass, etc.)
+    # These need editor_xembed for proper GUI refresh on Wayland/Hyprland
+    ["**/IK Multimedia/**"]
+    frame_rate = 120
+    editor_xembed = true
+    YABRIDGE_EOF
+        fi
 
-    # Set Wine environment for yabridge
-    export WINELOADER="${wineStaging}/bin/wine"
-    export WINEARCH="win64"
-    export WINEDEBUG="-all"
-    export WINEFSYNC="1"
-    export WINE_LARGE_ADDRESS_AWARE="1"
-    export DXVK_HUD="0"
-    export DXVK_LOG_LEVEL="none"
-    # Force DXVK DLLs - fixes IK Multimedia (TONEX, Amplitube) GUI refresh issues
-    export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
+        # Set Wine environment for yabridge
+        export WINELOADER="${wineStaging}/bin/wine"
+        export WINEARCH="win64"
+        export WINEDEBUG="-all"
+        export WINEFSYNC="1"
+        export WINE_LARGE_ADDRESS_AWARE="1"
+        export DXVK_HUD="0"
+        export DXVK_LOG_LEVEL="none"
+        # Force DXVK DLLs - fixes IK Multimedia (TONEX, Amplitube) GUI refresh issues
+        export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
 
-    # Launch REAPER
-    exec ${pkgs.unstable.reaper}/bin/reaper "$@"
+        # Launch REAPER
+        exec ${pkgs.reaper}/bin/reaper "$@"
   '';
 in
 
 mkApp {
   _file = toString ./.;
   name = "reaper";
-  linuxPackages = pkgs: [
-    # Use our wrapper instead of reaper directly
-    reaperWrapper
+  linuxPackages =
+    { pkgs, pkgs-stable, ... }:
+    [
+      # Use our wrapper instead of reaper directly
+      reaperWrapper
 
-    # === Wine Setup ===
-    # Wine Staging with WoW64 support (64-bit + 32-bit Windows apps)
-    # Staging is required for best plugin compatibility
-    wineStaging
+      # === Wine Setup ===
+      # Wine Staging with WoW64 support (64-bit + 32-bit Windows apps)
+      # Staging is required for best plugin compatibility
+      wineStaging
 
-    # Yabridge - bridge for Windows VST plugins (uses our staging Wine)
-    (pkgs.yabridge.override { wine = wineStaging; })
-    pkgs.yabridgectl
+      # Yabridge - bridge for Windows VST plugins (uses our staging Wine)
+      # Use pkgs-stable for yabridge to avoid breaking changes
+      (pkgs-stable.yabridge.override { wine = wineStaging; })
+      pkgs-stable.yabridgectl
 
-    # Winetricks for installing Windows dependencies
-    pkgs.winetricks
+      # Winetricks for installing Windows dependencies
+      pkgs-stable.winetricks
 
-    # === DXVK & Vulkan (Critical for modern plugin GUIs) ===
-    pkgs.dxvk # Direct3D to Vulkan translation layer
-    pkgs.vulkan-loader # Vulkan runtime (AMD RADV driver used automatically)
-    pkgs.vulkan-tools # For debugging (vulkaninfo, etc.)
+      # === DXVK & Vulkan (Critical for modern plugin GUIs) ===
+      pkgs.dxvk # Direct3D to Vulkan translation layer
+      pkgs.vulkan-loader # Vulkan runtime (AMD RADV driver used automatically)
+      pkgs.vulkan-tools # For debugging (vulkaninfo, etc.)
 
-    # === Runtime Dependencies ===
-    pkgs.cabextract # Extract Windows cab files
-    pkgs.wineasio # ASIO to JACK driver for Wine
-    pkgs.p7zip # For extracting various installer formats
-    pkgs.unzip # Common archive extraction
-    pkgs.reaper-sws-extension
-    pkgs.reaper-reapack-extension
+      # === Runtime Dependencies ===
+      pkgs.cabextract # Extract Windows cab files
+      pkgs-stable.wineasio # ASIO to JACK driver for Wine (stable for audio reliability)
+      pkgs.p7zip # For extracting various installer formats
+      pkgs.unzip # Common archive extraction
+      pkgs.reaper-sws-extension
+      pkgs.reaper-reapack-extension
 
-    # === Helper Scripts ===
-    audioWinePrefixSetup # setup-audio-wineprefix command
-    audioWine # audio-wine command
-    audioWinetricks # audio-winetricks command
-  ];
+      # === Helper Scripts ===
+      audioWinePrefixSetup # setup-audio-wineprefix command
+      audioWine # audio-wine command
+      audioWinetricks # audio-winetricks command
+    ];
 
   description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
 

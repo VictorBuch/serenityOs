@@ -11,6 +11,6 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "blender";
-  packages = pkgs: [ pkgs.blender ];
+  packages = { pkgs, ... }: [ pkgs.blender ];
   description = "Blender 3D modeling";
 } args

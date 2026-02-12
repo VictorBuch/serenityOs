@@ -1,6 +1,7 @@
 args@{
   config,
   pkgs,
+  pkgs-stable,
   lib,
   mkHomeModule,
   ...
@@ -14,30 +15,32 @@ mkHomeModule {
     {
       config,
       pkgs,
+      pkgs-stable,
       lib,
       ...
     }:
     {
       # Create symlinks to yabridge binaries in the expected location
+      # Use pkgs-stable for yabridge to avoid breaking changes in audio stack
       home.file = {
         ".local/share/yabridge/yabridge-host.exe" = {
-          source = "${pkgs.yabridge}/bin/yabridge-host.exe";
+          source = "${pkgs-stable.yabridge}/bin/yabridge-host.exe";
           force = true; # Overwrite existing files from manual installation
         };
         ".local/share/yabridge/yabridge-host-32.exe" = {
-          source = "${pkgs.yabridge}/bin/yabridge-host-32.exe";
+          source = "${pkgs-stable.yabridge}/bin/yabridge-host-32.exe";
           force = true;
         };
         ".local/share/yabridge/libyabridge-chainloader-vst2.so" = {
-          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-vst2.so";
+          source = "${pkgs-stable.yabridge}/lib/libyabridge-chainloader-vst2.so";
           force = true;
         };
         ".local/share/yabridge/libyabridge-chainloader-vst3.so" = {
-          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-vst3.so";
+          source = "${pkgs-stable.yabridge}/lib/libyabridge-chainloader-vst3.so";
           force = true;
         };
         ".local/share/yabridge/libyabridge-chainloader-clap.so" = {
-          source = "${pkgs.yabridge}/lib/libyabridge-chainloader-clap.so";
+          source = "${pkgs-stable.yabridge}/lib/libyabridge-chainloader-clap.so";
           force = true;
         };
 
@@ -172,39 +175,39 @@ mkHomeModule {
           # === Audio WINEPREFIX paths (primary) ===
           # VST2 plugins (Steinberg convention)
           if [ -d "$AUDIO_PREFIX/drive_c/Program Files/Steinberg/VstPlugins" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Steinberg/VstPlugins"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Steinberg/VstPlugins"
           fi
 
           # VST2 plugins (alternative location)
           if [ -d "$AUDIO_PREFIX/drive_c/Program Files/VstPlugins" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/VstPlugins"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/VstPlugins"
           fi
 
           # VST3 plugins (Windows standard)
           if [ -d "$AUDIO_PREFIX/drive_c/Program Files/Common Files/VST3" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Common Files/VST3"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Common Files/VST3"
           fi
 
           # CLAP plugins
           if [ -d "$AUDIO_PREFIX/drive_c/Program Files/Common Files/CLAP" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Common Files/CLAP"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$AUDIO_PREFIX/drive_c/Program Files/Common Files/CLAP"
           fi
 
           # === Legacy .wine prefix paths (fallback for existing installations) ===
           if [ -d "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins"
           fi
 
           if [ -d "$HOME/.wine/drive_c/Program Files/Common Files/VST3" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VST3"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VST3"
           fi
 
           if [ -d "$HOME/.wine/drive_c/Program Files/Common Files/VstPlugins" ]; then
-            $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VstPlugins"
+            $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VstPlugins"
           fi
 
           # Sync yabridge configuration
-          $DRY_RUN_CMD ${pkgs.yabridgectl}/bin/yabridgectl sync
+          $DRY_RUN_CMD ${pkgs-stable.yabridgectl}/bin/yabridgectl sync
         fi
       '';
     };

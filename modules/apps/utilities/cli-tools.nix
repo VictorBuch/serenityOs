@@ -11,7 +11,7 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "cli-tools";
-  packages = pkgs: [
+  packages = { pkgs, ... }: [
     pkgs.pam-cli
   ];
   description = "Command-line development and management tools";

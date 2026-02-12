@@ -8,7 +8,7 @@
 #   mkHomeModule {
 #     _file = toString ./.;
 #     name = "git";
-#     homeConfig = { config, pkgs, lib, ... }: {
+#     homeConfig = { config, pkgs, pkgs-stable, lib, ... }: {
 #       home.packages = [ pkgs.delta ];
 #       programs.git = {
 #         enable = true;
@@ -21,7 +21,7 @@
 #   mkHomeModule {
 #     name = "tmux";
 #     optionPath = "home.cli.tmux";
-#     homeConfig = { config, pkgs, lib, ... }: {
+#     homeConfig = { config, pkgs, pkgs-stable, lib, ... }: {
 #       programs.tmux = {
 #         enable = true;
 #         prefix = "C-Space";
@@ -29,12 +29,13 @@
 #     };
 #   }
 #
-# 3. Module with description:
+# 3. Module with stable packages (for audio/wine that need reliability):
 #   mkHomeModule {
 #     _file = toString ./.;
-#     name = "neovim";
-#     description = "Neovim text editor with custom configuration";
-#     homeConfig = { ... }: { ... };
+#     name = "yabridge";
+#     homeConfig = { config, pkgs, pkgs-stable, lib, ... }: {
+#       home.packages = [ pkgs-stable.yabridge ];  # Use stable for audio reliability
+#     };
 #   }
 
 {

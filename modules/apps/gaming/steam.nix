@@ -1,9 +1,17 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs ? null,
+  isLinux,
+  mkApp,
+  ...
+}:
 
 mkApp {
   _file = toString ./.;
   name = "steam";
-  linuxPackages = pkgs: [ ]; # Steam is enabled via programs.steam
+  linuxPackages = { pkgs, ... }: [ ]; # Steam is enabled via programs.steam
   description = "Steam gaming platform (Linux only)";
   linuxExtraConfig = {
     programs.steam = {

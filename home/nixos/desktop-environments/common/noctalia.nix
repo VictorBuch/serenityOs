@@ -23,10 +23,11 @@ mkHomeModule {
         enable = true;
 
         # Custom settings - translated from .config/noctalia/settings.json
+        # Stylix provides colors via programs.noctalia-shell.colors
         settings = {
           # App Launcher
           appLauncher = {
-            backgroundOpacity = 0.75;
+            # backgroundOpacity = 0.75; # managed by stylix
             enableClipboardHistory = true;
             terminalCommand = "ghostty -e";
           };
@@ -41,7 +42,7 @@ mkHomeModule {
           bar = {
             floating = true;
             position = "top";
-            backgroundOpacity = 0.0;
+            # backgroundOpacity = 0.0; # managed by stylix
             density = "compact";
 
             widgets = {
@@ -152,15 +153,15 @@ mkHomeModule {
           location.name = "Brno";
 
           # Notifications
-          notifications.backgroundOpacity = 0.9;
+          # notifications.backgroundOpacity = 0.9; # managed by stylix
 
           # Templates
           templates.fuzzel = true;
 
-          # Fonts
+          # Fonts - managed by stylix
           ui = {
-            fontDefault = "JetBrainsMono Nerd Font Propo";
-            fontFixed = "JetBrainsMono Nerd Font Propo";
+            # fontDefault = "JetBrainsMono Nerd Font Propo"; # managed by stylix
+            # fontFixed = "JetBrainsMono Nerd Font Propo"; # managed by stylix
             panelsOverlayLayer = false;
           };
 
@@ -188,23 +189,23 @@ mkHomeModule {
           };
         };
 
-        # Custom color scheme (Monochrome) - translated from .config/noctalia/colors.json
-        colors = {
-          mError = "#dddddd";
-          mOnError = "#111111";
-          mOnPrimary = "#111111";
-          mOnSecondary = "#111111";
-          mOnSurface = "#828282";
-          mOnSurfaceVariant = "#5d5d5d";
-          mOnTertiary = "#111111";
-          mOutline = "#3c3c3c";
-          mPrimary = "#aaaaaa";
-          mSecondary = "#a7a7a7";
-          mShadow = "#000000";
-          mSurface = "#111111";
-          mSurfaceVariant = "#191919";
-          mTertiary = "#cccccc";
-        };
+        # Colors managed by stylix - commented out manual monochrome scheme
+        # colors = {
+        #   mError = "#dddddd";
+        #   mOnError = "#111111";
+        #   mOnPrimary = "#111111";
+        #   mOnSecondary = "#111111";
+        #   mOnSurface = "#828282";
+        #   mOnSurfaceVariant = "#5d5d5d";
+        #   mOnTertiary = "#111111";
+        #   mOutline = "#3c3c3c";
+        #   mPrimary = "#aaaaaa";
+        #   mSecondary = "#a7a7a7";
+        #   mShadow = "#000000";
+        #   mSurface = "#111111";
+        #   mSurfaceVariant = "#191919";
+        #   mTertiary = "#cccccc";
+        # };
       };
 
       # Fix missing app icons in Qt applications

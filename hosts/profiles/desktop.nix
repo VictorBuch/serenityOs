@@ -61,5 +61,5 @@
   maintenance.enable = true;
 
   # Theming
-  catppuccin.enable = true;
+  # catppuccin.enable = true;
 }

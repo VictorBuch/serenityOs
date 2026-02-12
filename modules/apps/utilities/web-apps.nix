@@ -11,7 +11,7 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "web-apps";
-  linuxPackages = pkgs: [ pkgs.chromium ];
+  linuxPackages = { pkgs, ... }: [ pkgs.chromium ];
   description = "Web desktop apps (PWAs, Linux only)";
   linuxExtraConfig = {
     home-manager.users.${config.user.userName} =

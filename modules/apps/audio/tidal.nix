@@ -11,6 +11,6 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "tidal";
-  packages = pkgs: [ pkgs.tidal-hifi ];
+  packages = { pkgs, ... }: [ pkgs.tidal-hifi ];
   description = "Tidal music streaming";
 } args

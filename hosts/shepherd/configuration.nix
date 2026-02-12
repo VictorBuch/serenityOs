@@ -3,6 +3,7 @@
   pkgs,
   inputs,
   isLinux,
+  pkgs-stable,
   mkHomeModule,
   mkHomeCategory,
   ...
@@ -58,6 +59,7 @@ in
         username
         inputs
         isLinux
+        pkgs-stable
         mkHomeModule
         mkHomeCategory
         ;
@@ -71,7 +73,7 @@ in
       inputs.noctalia.homeModules.default
       {
         home = {
-          catppuccin.enable = true;
+          # catppuccin.enable = true;
           desktop-environments = {
             niri.enable = true;
             noctalia.enable = true;

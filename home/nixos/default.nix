@@ -2,14 +2,14 @@
 {
 
   imports = [
-    ./stylix.nix
+    # ./stylix.nix
     ./catppuccin.nix
     ./desktop-environments
     ./audio
   ];
 
   config = {
-    home.stylix.enable = lib.mkDefault false;
+    # home.stylix.enable = lib.mkDefault false;
     home.catppuccin.enable = lib.mkDefault true;
   };
 }

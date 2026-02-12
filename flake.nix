@@ -27,7 +27,7 @@
       inputs.nixpkgs.follows = "unstable-nixpkgs";
     };
 
-    stylix.url = "github:danth/stylix";
+    # stylix.url = "github:danth/stylix";
 
     catppuccin = {
       url = "github:catppuccin/nix/release-25.11";

@@ -114,7 +114,7 @@ in
             Alt+1 { spawn "focus-or-run" "zen-beta" "zen"; }
             Alt+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
             Alt+3 { spawn "focus-or-run" "Slack" "slack"; }
-            Alt+T { spawn "focus-or-run" "chrome-listen.tidal.com__-Default" "tidal"; }
+            Alt+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
             Alt+D { spawn "focus-or-run" "discord" "discord"; }
 
             // Noctalia shell controls

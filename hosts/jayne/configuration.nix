@@ -19,7 +19,6 @@ in
   ];
 
   networking.hostName = "jayne";
-  networking.wireless.enable = false;
 
   user.userName = username;
 

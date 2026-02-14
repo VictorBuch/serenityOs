@@ -28,7 +28,11 @@
   git-hooks.hooks = {
     prettier = {
       enable = true;
-      excludes = [ "package-lock.json" "pnpm-lock.yaml" "yarn.lock" ];
+      excludes = [
+        "package-lock.json"
+        "pnpm-lock.yaml"
+        "yarn.lock"
+      ];
     };
   };
 

@@ -21,7 +21,7 @@
       autoEnable = true;
       polarity = "dark";
       base16Scheme = "${pkgs.base16-schemes}/share/themes/ayu-dark.yaml";
-      # image = "${config.wallpaper}";
+      image = "${config.wallpaper}";
 
       cursor = {
         package = pkgs.whitesur-cursors;

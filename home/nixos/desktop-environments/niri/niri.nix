@@ -65,17 +65,17 @@ in
 
         // Layout configuration
         layout {
-            gaps 8
+            gaps 4
 
             struts {
-                top 8
-                bottom 8
-                left 8
-                right 8
+                top 4
+                bottom 4
+                left 4
+                right 4
             }
 
             focus-ring {
-                width 1.25
+                width 1.5
                 active-color "#aaaaaa"
                 inactive-color "#6c7086"
             }
@@ -86,10 +86,10 @@ in
 
             preset-column-widths {
                 proportion 0.5
-                proportion 0.85
+                proportion 0.90
             }
 
-            default-column-width { proportion 0.85; }
+            default-column-width { proportion 0.90; }
 
             center-focused-column "on-overflow"
             always-center-single-column
@@ -98,10 +98,9 @@ in
             background-color "transparent"
         }
 
+        workspace "scratchpad"
         workspace "main"
         workspace "chat"
-        workspace "gaming"
-        workspace "scratchpad"
 
         // Key bindings
         binds {
@@ -119,10 +118,7 @@ in
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
-            Mod+S { spawn "noctalia-shell" "ipc" "call" "controlcenter" "toggle"; }
             Mod+Comma { spawn "noctalia-shell" "ipc" "call" "settings" "toggle"; }
-            Mod+Y { spawn "noctalia-shell" "ipc" "call" "clipboard" "toggle"; }
-            Mod+C { spawn "noctalia-shell" "ipc" "call" "calculator" "toggle"; }
             Mod+Escape { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
             Mod+Shift+Escape { spawn "noctalia-shell" "ipc" "call" "sessionMenu" "lockAndSuspend";}
 
@@ -148,26 +144,26 @@ in
             Mod+Shift+K { move-column-to-workspace-up; }
 
             // Workspace switching
-            Mod+1 { focus-workspace 1; }
-            Mod+2 { focus-workspace 2; }
-            Mod+3 { focus-workspace 3; }
-            Mod+4 { focus-workspace 4; }
-            Mod+5 { focus-workspace 5; }
-            Mod+6 { focus-workspace 6; }
-            Mod+7 { focus-workspace 7; }
-            Mod+8 { focus-workspace 8; }
-            Mod+9 { focus-workspace 9; }
+            // Mod+1 { focus-workspace 1; }
+            // Mod+2 { focus-workspace 2; }
+            // Mod+3 { focus-workspace 3; }
+            // Mod+4 { focus-workspace 4; }
+            // Mod+5 { focus-workspace 5; }
+            // Mod+6 { focus-workspace 6; }
+            // Mod+7 { focus-workspace 7; }
+            // Mod+8 { focus-workspace 8; }
+            // Mod+9 { focus-workspace 9; }
 
             // Move window to workspace
             Mod+Shift+1 { move-column-to-workspace 1; }
             Mod+Shift+2 { move-column-to-workspace 2; }
             Mod+Shift+3 { move-column-to-workspace 3; }
-            Mod+Shift+4 { move-column-to-workspace 4; }
-            Mod+Shift+5 { move-column-to-workspace 5; }
-            Mod+Shift+6 { move-column-to-workspace 6; }
-            Mod+Shift+7 { move-column-to-workspace 7; }
-            Mod+Shift+8 { move-column-to-workspace 8; }
-            Mod+Shift+9 { move-column-to-workspace 9; }
+            // Mod+Shift+4 { move-column-to-workspace 4; }
+            // Mod+Shift+5 { move-column-to-workspace 5; }
+            // Mod+Shift+6 { move-column-to-workspace 6; }
+            // Mod+Shift+7 { move-column-to-workspace 7; }
+            // Mod+Shift+8 { move-column-to-workspace 8; }
+            // Mod+Shift+9 { move-column-to-workspace 9; }
 
             // Screenshots
             Alt+Shift+4 { screenshot; }
@@ -202,12 +198,12 @@ in
             open-on-workspace "main"
         }
         window-rule {
-            match app-id=r#"^zen-alpha$|^zen$|^firefox$"#
+            match app-id=r#"^zen-beta$|^zen$|^firefox$"#
             open-on-workspace "main"
         }
         window-rule {
             match app-id=r#"^steam$|^steam_app_.*$"#
-            open-on-workspace "gaming"
+            open-on-workspace "main"
         }
         window-rule {
             match app-id=r#"^discord$|^[Dd]iscord$"#
@@ -218,7 +214,7 @@ in
             open-on-workspace "chat"
         }
         window-rule {
-            match app-id=r#"^tidal$|^[Tt]idal$"#
+            match app-id=r#"^tidal-hifi$|^[Tt]idal-hifi$"#
             open-on-workspace "scratchpad"
         }
 
@@ -312,9 +308,12 @@ in
         // Prefer dark themes
         prefer-no-csd
 
-        debug {
-          // Allows notification actions and window activation from Noctalia.
-          honor-xdg-activation-with-invalid-serial
+        clipboard {
+            disable-primary
+        }
+
+        hotkey-overlay {
+            skip-at-startup
         }
     '';
   };

@@ -250,6 +250,14 @@ in
             default-column-width { proportion 0.6; }
         }
 
+        // DaVinci Convert - float the conversion script terminal
+        window-rule {
+            match app-id=r#"^davinci-convert$"#
+            open-floating true
+            default-column-width { fixed 640; }
+            default-window-height { fixed 400; }
+        }
+
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)
         layer-rule {
           match namespace="^noctalia-wallpaper*"

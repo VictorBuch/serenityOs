@@ -2,6 +2,7 @@ args@{
   config,
   pkgs,
   lib,
+  osConfig ? { },
   mkHomeModule,
   ...
 }:
@@ -18,6 +19,15 @@ mkHomeModule {
       lib,
       ...
     }:
+    let
+      # Check if DaVinci Resolve is enabled at the system level
+      davinciEnabled = (osConfig.apps.media.davinci-resolve.enable or false);
+
+      # Conditionally include the DaVinci Convert widget in the right bar section
+      davinciWidget = lib.optional davinciEnabled {
+        id = "plugin:davinci-convert";
+      };
+    in
     {
       programs.noctalia-shell = {
         enable = true;
@@ -78,7 +88,7 @@ mkHomeModule {
                 }
               ];
 
-              right = [
+              right = davinciWidget ++ [
                 {
                   id = "Tray";
                   blacklist = [ ];
@@ -186,6 +196,15 @@ mkHomeModule {
                 wallpaper = "${config.home.homeDirectory}/serenityOs/home/wallpapers/house-in-mountains.png";
               }
             ];
+          };
+        };
+
+        # Enable the DaVinci Convert plugin when available
+        plugins = lib.mkIf davinciEnabled {
+          states = {
+            davinci-convert = {
+              enabled = true;
+            };
           };
         };
 

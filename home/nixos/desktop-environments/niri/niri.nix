@@ -12,6 +12,8 @@ let
   wallpaperDaemon = "swww";
   shell = "noctalia-shell";
   applicationLauncher = "fuzzel";
+  # Stylix colors for niri (no upstream Stylix target for niri)
+  colors = config.lib.stylix.colors.withHashtag;
 in
 
 {
@@ -79,8 +81,8 @@ in
 
             focus-ring {
                 width 1.5
-                active-color "#aaaaaa"
-                inactive-color "#6c7086"
+                active-color "${colors.base04}"
+                inactive-color "${colors.base03}"
             }
 
             border {
@@ -113,11 +115,11 @@ in
             Mod+F { spawn "${fileManager}"; }
 
             // Raycast-style focus-or-run bindings (Alt + numbers)
-            Alt+1 { spawn "focus-or-run" "zen-beta" "zen"; }
-            Alt+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
-            Alt+3 { spawn "focus-or-run" "Slack" "slack"; }
-            Alt+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
-            Alt+D { spawn "focus-or-run" "discord" "discord"; }
+            Mod+1 { spawn "focus-or-run" "zen-beta" "zen"; }
+            Mod+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
+            Mod+3 { spawn "focus-or-run" "Slack" "slack"; }
+            Mod+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
+            Mod+D { spawn "focus-or-run" "discord" "discord"; }
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
@@ -259,6 +261,13 @@ in
             open-floating true
             default-column-width { fixed 640; }
             default-window-height { fixed 400; }
+        }
+
+        window-rule {
+          match title=r#"^Picture-in-Picture$"#
+          open-floating true
+          default-column-width { fixed 345; }
+          default-window-height { fixed 200; }
         }
 
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)

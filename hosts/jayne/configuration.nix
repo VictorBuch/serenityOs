@@ -85,6 +85,7 @@ in
     browsers = {
       enable = true;
       floorp.enable = false;
+      zen.enable = false; # Managed by home-manager for Stylix theming
     };
     communication.enable = true;
     development.enable = true;

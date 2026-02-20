@@ -10,6 +10,7 @@
 {
   home-manager.sharedModules = [
     inputs.noctalia.homeModules.default
+    inputs.zen-browser.homeModules.default
     {
       home = {
         # catppuccin.enable = true;

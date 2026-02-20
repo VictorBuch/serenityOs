@@ -8,12 +8,10 @@ args@{
 
 let
   ghosttySettings = {
-    background-opacity = 0.9;
+    # Colors, fonts, and opacity are managed by Stylix (gruvbox-dark)
     background-blur-radius = 25;
     window-decoration = false;
-    theme = "Catppuccin Mocha";
     confirm-close-surface = false;
-    font-family = "JetBrainsMono Nerd Font";
     font-size = 14;
     mouse-scroll-multiplier = 1;
   };

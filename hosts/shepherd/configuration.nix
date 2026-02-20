@@ -71,6 +71,7 @@ in
     # Per-host Home Manager configuration
     sharedModules = [
       inputs.noctalia.homeModules.default
+      inputs.zen-browser.homeModules.default
       {
         home = {
           # catppuccin.enable = true;
@@ -109,6 +110,7 @@ in
     browsers = {
       enable = true;
       floorp.enable = false; # Disable specific browser
+      zen.enable = false; # Managed by home-manager for Stylix theming
     };
 
     communication = {

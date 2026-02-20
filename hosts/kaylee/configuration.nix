@@ -56,7 +56,7 @@ in
   # Apps - lighter setup for laptop
   apps = {
     audio.enable = true;
-    browsers.zen.enable = true;
+    browsers.zen.enable = false; # Managed by home-manager for Stylix theming
     communication.enable = true;
     development.enable = true;
     utilities.enable = true;

@@ -28,6 +28,7 @@
 
       # Taps (additional repositories)
       taps = [
+        "PeonPing/tap"
       ];
 
       # Formulae (CLI tools)
@@ -36,6 +37,8 @@
         "docker"
         "docker-compose"
         "pnpm"
+        "PeonPing/tap/peon-ping"
+        "terminal-notifier"
       ];
 
       # Casks (GUI applications)

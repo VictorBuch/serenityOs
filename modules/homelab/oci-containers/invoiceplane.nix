@@ -61,9 +61,14 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${pkgs.docker}/bin/docker network create invoiceplane-net || true";
-        ExecStop = "${pkgs.docker}/bin/docker network rm invoiceplane-net || true";
       };
+      script = ''
+        ${pkgs.docker}/bin/docker network inspect invoiceplane-net >/dev/null 2>&1 || \
+          ${pkgs.docker}/bin/docker network create invoiceplane-net
+      '';
+      preStop = ''
+        ${pkgs.docker}/bin/docker network rm invoiceplane-net || true
+      '';
       wantedBy = [ "multi-user.target" ];
     };
 

@@ -398,6 +398,7 @@ in
   crafty.enable = true;
   mealie.enable = true;
   lab.enable = false;
+  invoiceplane.enable = true;
 
   # Development
   gitea.enable = true;

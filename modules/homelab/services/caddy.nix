@@ -101,6 +101,12 @@ let
       https = false;
       protected = true;
     };
+    transcode = {
+      # Tdarr
+      url = "http://127.0.0.1:8265";
+      https = false;
+      protected = true;
+    };
     prowlarr = {
       url = "http://127.0.0.1:9696";
       https = false;
@@ -180,6 +186,12 @@ let
       url = "http://127.0.0.1:28981";
       https = false;
       protected = true;
+    };
+    invoice = {
+      # InvoicePlane
+      url = "http://127.0.0.1:8300";
+      https = false;
+      protected = false;
     };
   };
 

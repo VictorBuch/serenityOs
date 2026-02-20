@@ -24,10 +24,13 @@
       };
     };
 
-    environment.systemPackages = with pkgs.kdePackages; [
+    services.displayManager.sddm.extraPackages = with pkgs.kdePackages; [
       qtsvg
       qtmultimedia
       qtvirtualkeyboard
+    ];
+
+    environment.systemPackages = [
       (pkgs.sddm-astronaut.override {
         embeddedTheme = "japanese_aesthetic";
         themeConfig = {

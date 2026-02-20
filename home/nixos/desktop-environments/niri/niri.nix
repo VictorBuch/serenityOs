@@ -208,7 +208,7 @@ in
         }
         window-rule {
             match app-id=r#"^steam$|^steam_app_.*$"#
-            open-on-workspace "main"
+            open-on-workspace "scratchpad"
         }
         window-rule {
             match app-id=r#"^discord$|^[Dd]iscord$"#
@@ -268,6 +268,7 @@ in
           open-floating true
           default-column-width { fixed 345; }
           default-window-height { fixed 200; }
+          default-floating-position x=0 y=40 relative-to="top"
         }
 
         // Noctalia wallpaper layer rule (Option 2: Stationary wallpapers)

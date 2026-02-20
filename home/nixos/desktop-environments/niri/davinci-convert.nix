@@ -330,7 +330,7 @@ mkHomeModule {
           // Launch script in a floating terminal
           Process {
             id: launchProcess
-            command: ["ghostty", "--title=DaVinci Convert", "--class=davinci-convert", "-e", "davinci-convert"]
+            command: ["foot", "--app-id=davinci-convert", "--title=DaVinci Convert", "-e", "davinci-convert"]
           }
 
           MouseArea {
@@ -364,6 +364,7 @@ mkHomeModule {
         davinciConvertScript
         davinciConvertStatus
         pkgs.ffmpeg
+        pkgs.foot
         pkgs.libnotify
       ];
 

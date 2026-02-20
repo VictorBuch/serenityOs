@@ -316,6 +316,7 @@ in
         // Prefer dark themes
         prefer-no-csd
 
+
         clipboard {
             disable-primary
         }
@@ -323,6 +324,7 @@ in
         hotkey-overlay {
             skip-at-startup
         }
+
     '';
   };
 }

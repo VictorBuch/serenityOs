@@ -94,6 +94,7 @@ in
         "PROVIDERS_POCKETID_SCOPES" = "openid email profile groups";
         "PROVIDERS_POCKETID_NAME" = "Pocket ID";
         "PROVIDERS_POCKETID_REDIRECT_URL" = "https://auth.${domain}/api/oauth/callback/pocketid";
+	"OAUTH_AUTO_REDIRECT" = "pocketid";
         "TZ" = "Europe/Copenhagen";
       };
     };

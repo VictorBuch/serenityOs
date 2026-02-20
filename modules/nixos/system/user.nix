@@ -27,7 +27,7 @@ in
     users.users."${user.userName}" = {
       isNormalUser = true;
       home = "/home/${user.userName}";
-      description = "system user";
+      description = user.userName;
       extraGroups = [
         "networkmanager"
         "wheel"

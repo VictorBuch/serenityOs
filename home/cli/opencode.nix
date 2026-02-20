@@ -25,7 +25,7 @@ mkHomeModule {
         # Basic settings (these override/extend defaults)
         settings = {
           # theme = "catppuccin"; # managed by stylix
-          model = "anthropic/claude-opus-4-5";
+          model = "anthropic/claude-opus-4-6";
           autoupdate = true;
 
           # TUI configuration

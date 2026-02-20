@@ -24,6 +24,9 @@ in
     # Set Wayland environment variable
     home.sessionVariables.NIXOS_OZONE_WL = "1";
 
+    # Bluetooth applet (tray icon for managing bluetooth connections)
+    services.blueman-applet.enable = true;
+
     # Write niri config.kdl to ~/.config/niri/
     xdg.configFile."niri/config.kdl".text = ''
       // Input configuration
@@ -86,10 +89,10 @@ in
 
             preset-column-widths {
                 proportion 0.5
-                proportion 0.90
+                proportion 0.98
             }
 
-            default-column-width { proportion 0.90; }
+            default-column-width { proportion 0.98; }
 
             center-focused-column "on-overflow"
             always-center-single-column

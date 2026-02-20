@@ -43,7 +43,7 @@
 
         # Formatters
         nodePackages.prettier
-        nixfmt-rfc-style
+        nixfmt
 
         # Linters
         nodePackages.eslint_d

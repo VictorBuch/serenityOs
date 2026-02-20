@@ -60,7 +60,7 @@
       fzf
       lazygit
       nodePackages.prettier
-      nixfmt-rfc-style
+      nixfmt
     ];
     programs.nixvim = {
       enable = true;

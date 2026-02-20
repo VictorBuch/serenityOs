@@ -289,6 +289,9 @@ in
   # Device files may briefly disappear when kernel modules reload
   systemd.services.nvidia-persistenced.serviceConfig.RestartSec = 5;
 
+  # Enable NVIDIA Container Toolkit for GPU passthrough to Docker containers (NVENC)
+  hardware.nvidia-container-toolkit.enable = true;
+
   virtualisation = {
 
     # enable docker
@@ -380,6 +383,7 @@ in
   wallos.enable = true;
 
   # Media
+  tdarr.enable = true;
   streaming.enable = true;
   immich.enable = true;
   deluge-vpn.enable = true;

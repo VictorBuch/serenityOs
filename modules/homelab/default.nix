@@ -20,6 +20,7 @@
     ./oci-containers/wallos.nix
     ./oci-containers/tinyauth.nix
     ./oci-containers/tdarr.nix
+    ./oci-containers/invoiceplane.nix
     ./services/dashboard.nix
     ./services/streaming.nix
     ./services/nginx-proxy.nix
@@ -54,6 +55,7 @@
   wallos.enable = lib.mkDefault false;
   tinyauth.enable = lib.mkDefault false;
   tdarr.enable = lib.mkDefault false;
+  invoiceplane.enable = lib.mkDefault false;
   cloudflare-tunnel.enable = lib.mkDefault false;
   nginx-reverse-proxy.enable = lib.mkDefault false;
   caddy.enable = lib.mkDefault false;

@@ -832,6 +832,18 @@ in
                           icon = "sh:minecraft";
                           check-url = "https://127.0.0.1:8443";
                         }
+                        {
+                          title = "InvoicePlane";
+                          url = "https://invoice.${hl.domain}";
+                          icon = "sh:invoice-ninja";
+                          check-url = "${local}:8380";
+                        }
+                        {
+                          title = "Tdarr";
+                          url = "https://transcode.${hl.domain}";
+                          icon = "sh:tdarr";
+                          check-url = "${local}:8265";
+                        }
                       ];
                     }
                     # Bookmarks

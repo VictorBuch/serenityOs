@@ -17,6 +17,10 @@
 
   config = lib.mkIf config.desktop-environments.niri.enable {
 
+    # Disable IBus input method framework (pulled in by GNOME)
+    # IBus is not needed for Latin-based layouts (US, Danish, Czech) - XKB handles those
+    i18n.inputMethod.enable = false;
+
     # Enable the Niri Window Manager
     programs.niri = {
       enable = true;

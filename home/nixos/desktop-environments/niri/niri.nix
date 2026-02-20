@@ -40,7 +40,7 @@ in
 
           keyboard {
               xkb {
-                  layout "us"
+                  layout "us,dk,cz"
               }
               repeat-delay 200
               repeat-rate 35
@@ -169,6 +169,9 @@ in
             // Mod+Shift+7 { move-column-to-workspace 7; }
             // Mod+Shift+8 { move-column-to-workspace 8; }
             // Mod+Shift+9 { move-column-to-workspace 9; }
+
+            // Keyboard layout switching (US -> Danish -> Czech)
+            Mod+Shift+Space { switch-layout "next"; }
 
             // Screenshots
             Alt+Shift+4 { screenshot; }

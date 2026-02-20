@@ -92,9 +92,9 @@
           HoverVirtualKeyboardButtonTextColor = "#689d6a";
 
           # Form blur
-          PartialBlur = "true";
-          BlurMax = "48";
-          Blur = "2.0";
+          FullBlur = "true";
+          BlurMax = "64";
+          Blur = "1.0";
           HaveFormBackground = "true";
 
           # Behavior

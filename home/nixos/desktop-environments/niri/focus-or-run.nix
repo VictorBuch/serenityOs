@@ -31,7 +31,7 @@ let
           niri msg action focus-window --id "$window_id"
       else
           # Launch app if not running
-          exec "$@" &
+          setsid "$@" >/dev/null 2>&1 &
       fi
     '';
   };

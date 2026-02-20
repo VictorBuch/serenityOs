@@ -110,8 +110,9 @@ in
         MYSQL_USER = "invoiceplane";
         MYSQL_DB = "invoiceplane";
         MYSQL_PORT = "3306";
-        IP_URL = "https://invoiceplane.${domain}";
+        IP_URL = "http://invoiceplane.${domain}";
         REMOVE_INDEXPHP = "true";
+        PROXY_IPS = "127.0.0.1,172.0.0.0/8,192.168.0.0/16";
         TZ = "Europe/Prague";
       };
       environmentFiles = [

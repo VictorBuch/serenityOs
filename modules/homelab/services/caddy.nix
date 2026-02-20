@@ -27,7 +27,7 @@ let
       isStaticFiles = true;
       staticPath = "/var/lib/wannashare/web";
     };
-     suboptimal = {
+    suboptimal = {
       url = "http://127.0.0.1:3232";
       https = false;
       protected = false;
@@ -189,7 +189,7 @@ let
     };
     invoice = {
       # InvoicePlane
-      url = "http://127.0.0.1:8300";
+      url = "http://127.0.0.1:8380";
       https = false;
       protected = false;
     };
@@ -302,15 +302,15 @@ let
       ${
         if service.isStaticFiles or false then
           ''
-	    # CORS headers for Flutter WASM multi-threading
-	    header {
-	     Cross-Origin-Embedder-Policy "credentialless"
-	     Cross-Origin-Opener-Policy "same-origin"
-	    }
+            	    # CORS headers for Flutter WASM multi-threading
+            	    header {
+            	     Cross-Origin-Embedder-Policy "credentialless"
+            	     Cross-Origin-Opener-Policy "same-origin"
+            	    }
 
-            # Serve static files
-            root * ${service.staticPath}
-            file_server
+                        # Serve static files
+                        root * ${service.staticPath}
+                        file_server
           ''
         else if service.isPocketBase or false then
           ''

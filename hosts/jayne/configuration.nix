@@ -98,7 +98,6 @@ in
     };
     productivity.enable = true;
     utilities.enable = true;
-    work.enable = true;
   };
 
   nix.settings.trusted-users = [

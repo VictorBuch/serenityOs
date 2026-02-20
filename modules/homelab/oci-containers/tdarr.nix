@@ -70,8 +70,7 @@ in
       ];
 
       extraOptions = [
-        "--gpus=all"
-        "--device=/dev/dri:/dev/dri"
+        "--device=nvidia.com/gpu=all"
       ];
     };
 

@@ -844,6 +844,12 @@ in
                           icon = "sh:tdarr";
                           check-url = "${local}:8265";
                         }
+                        {
+                          title = "Reactive Resume";
+                          url = "https://cv.${hl.domain}";
+                          icon = "sh:reactive-resume";
+                          check-url = "${local}:3200";
+                        }
                       ];
                     }
                     # Bookmarks

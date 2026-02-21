@@ -405,7 +405,7 @@ in
   # Document Management
   paperless.enable = true;
   reactive-resume.enable = true;
-  invoiceplane.enable = true;
+  invoice-ninja.enable = true;
 
   ####### Wanna share config ################
 

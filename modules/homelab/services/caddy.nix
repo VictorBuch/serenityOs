@@ -173,6 +173,12 @@ let
       https = false;
       protected = false;
     };
+    cv = {
+      # Reactive Resume
+      url = "http://127.0.0.1:3200";
+      https = false;
+      protected = false;
+    };
     tools = {
       # IT Tools - static site
       url = "";

@@ -21,6 +21,7 @@
     ./oci-containers/tinyauth.nix
     ./oci-containers/tdarr.nix
     ./oci-containers/invoiceplane.nix
+    ./oci-containers/invoice-ninja.nix
     ./oci-containers/reactive-resume.nix
     ./services/dashboard.nix
     ./services/streaming.nix
@@ -57,6 +58,7 @@
   tinyauth.enable = lib.mkDefault false;
   tdarr.enable = lib.mkDefault false;
   invoiceplane.enable = lib.mkDefault false;
+  invoice-ninja.enable = lib.mkDefault false;
   reactive-resume.enable = lib.mkDefault false;
   cloudflare-tunnel.enable = lib.mkDefault false;
   nginx-reverse-proxy.enable = lib.mkDefault false;

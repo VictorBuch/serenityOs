@@ -191,7 +191,7 @@ in
           echo "Waiting for SeaweedFS to be ready..."
           MAX_WAIT=60
           WAITED=0
-          while ! ${pkgs.docker}/bin/docker exec rxresume-seaweedfs wget -q -O /dev/null http://localhost:8333 2>/dev/null; do
+          while ! ${pkgs.docker}/bin/docker exec rxresume-seaweedfs wget -q -O /dev/null http://localhost:8888 2>/dev/null; do
             sleep 5
             WAITED=$((WAITED + 5))
             if [ $WAITED -ge $MAX_WAIT ]; then

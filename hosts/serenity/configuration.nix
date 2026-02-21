@@ -398,13 +398,14 @@ in
   crafty.enable = true;
   mealie.enable = true;
   lab.enable = false;
-  invoiceplane.enable = true;
 
   # Development
   gitea.enable = true;
 
   # Document Management
   paperless.enable = true;
+  reactive-resume.enable = true;
+  invoiceplane.enable = true;
 
   ####### Wanna share config ################
 

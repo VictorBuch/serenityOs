@@ -15,9 +15,9 @@ let
     n = "nvim ~/serenityOs/ ";
     y = "yazi";
     s = "sesh connect (sesh list --icons | fzf --ansi)";
-    nr = "npm run ";
-    nrd = "npm run dev";
-    ni = "npm install";
+    nr = "pnpm run ";
+    nrd = "pnpm run dev";
+    ni = "pnpm install";
     dcu = "docker compose up -d";
     dcd = "docker compose down";
     nfu = "nix flake update";

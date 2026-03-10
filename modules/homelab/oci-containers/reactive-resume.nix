@@ -40,7 +40,7 @@ in
     systemd.tmpfiles.rules = [
       "d /var/lib/rxresume 755 root root"
       "d /var/lib/rxresume/postgres 755 root root"
-      "d /var/lib/rxresume/seaweedfs 755 root root"
+      "d /var/lib/rxresume/seaweedfs 755 1000 1000"
       "d /var/lib/rxresume/data 755 root root"
     ];
 

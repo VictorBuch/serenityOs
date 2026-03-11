@@ -233,20 +233,22 @@ mkApp {
     ];
 
     # Low-latency PipeWire configuration for professional audio
+    # Keys must be quoted strings to preserve dot-notation in the generated JSON,
+    # otherwise Nix expands them into nested objects that PipeWire ignores.
     services.pipewire.extraConfig.pipewire."10-low-latency" = {
-      context.properties = {
-        default.clock.rate = 48000;
-        default.clock.quantum = 32;
-        default.clock.min-quantum = 32;
-        default.clock.max-quantum = 32;
+      "context.properties" = {
+        "default.clock.rate" = 48000;
+        "default.clock.quantum" = 64;
+        "default.clock.min-quantum" = 64;
+        "default.clock.max-quantum" = 64;
       };
     };
 
     # JACK-specific PipeWire configuration
     services.pipewire.extraConfig.jack."20-realtime" = {
-      jack.properties = {
+      "jack.properties" = {
         # Match PipeWire's sample rate
-        "node.latency" = "32/48000";
+        "node.latency" = "64/48000";
         # Enable realtime scheduling
         "jack.realtime" = true;
         "jack.realtime-priority" = 88;

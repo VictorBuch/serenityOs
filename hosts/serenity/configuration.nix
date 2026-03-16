@@ -314,13 +314,15 @@ in
     oci-containers.backend = "docker";
   };
 
-  users.users."${username}".extraGroups = [ "docker" ];
 
   # FIDO2 SSH authorized keys -- one per YubiKey
-  # inara's key will be added here once inara's YubiKey is set up
-  users.users."${username}".openssh.authorizedKeys.keys = [
-    "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"
-  ];
+  users.users."${username}"= {
+    extraGroups = [ "docker" ];
+    openssh.authorizedKeys.keys = [
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIJvUM1QnLCbxff2rLeHmJ/uwOPwSYpxoxoh644OaMK6CAAAABHNzaDo= inara@yubikey-5c-nano"
+    ];
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

@@ -65,7 +65,7 @@ in
 
     # TinyAuth container
     virtualisation.oci-containers.containers.tinyauth = {
-      image = "ghcr.io/steveiliop56/tinyauth:v4.1.0";
+      image = "ghcr.io/steveiliop56/tinyauth:v5.0.4";
       autoStart = true;
 
       ports = [
@@ -81,20 +81,32 @@ in
       ];
 
       environment = {
-        "PORT" = "3000";
-        "ADDRESS" = "0.0.0.0";
-        "APP_URL" = cfg.appUrl;
-        "SECURE_COOKIE" = lib.boolToString cfg.cookieSecure;
-        "SESSION_EXPIRY" = toString cfg.sessionExpiry;
-        "LOG_LEVEL" = toString cfg.logLevel;
-        "LOGIN_MAX_RETRIES" = toString cfg.loginMaxRetries;
-        "PROVIDERS_POCKETID_AUTH_URL" = "https://id.${domain}/authorize";
-        "PROVIDERS_POCKETID_TOKEN_URL" = "https://id.${domain}/api/oidc/token";
-        "PROVIDERS_POCKETID_USER_INFO_URL" = "https://id.${domain}/api/oidc/userinfo";
-        "PROVIDERS_POCKETID_SCOPES" = "openid email profile groups";
-        "PROVIDERS_POCKETID_NAME" = "Pocket ID";
-        "PROVIDERS_POCKETID_REDIRECT_URL" = "https://auth.${domain}/api/oauth/callback/pocketid";
-	"OAUTH_AUTO_REDIRECT" = "pocketid";
+        # Server config
+        "TINYAUTH_SERVER_PORT" = "3000";
+        "TINYAUTH_SERVER_ADDRESS" = "0.0.0.0";
+        "TINYAUTH_APPURL" = cfg.appUrl;
+
+        # Auth config
+        "TINYAUTH_AUTH_SECURECOOKIE" = lib.boolToString cfg.cookieSecure;
+        "TINYAUTH_AUTH_SESSIONEXPIRY" = toString cfg.sessionExpiry;
+        "TINYAUTH_AUTH_LOGINMAXRETRIES" = toString cfg.loginMaxRetries;
+
+        # Logging
+        "TINYAUTH_LOG_LEVEL" = toString cfg.logLevel;
+
+        # Pocket ID OAuth provider
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL" = "https://id.${domain}/authorize";
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL" = "https://id.${domain}/api/oidc/token";
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL" = "https://id.${domain}/api/oidc/userinfo";
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES" = "openid email profile groups";
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_NAME" = "Pocket ID";
+        "TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL" =
+          "https://auth.${domain}/api/oauth/callback/pocketid";
+        "TINYAUTH_OAUTH_AUTOREDIRECT" = "pocketid";
+
+        # Analytics disabled for privacy
+        "TINYAUTH_ANALYTICS_ENABLED" = "false";
+
         "TZ" = "Europe/Copenhagen";
       };
     };
@@ -102,9 +114,11 @@ in
     # Create environment file template for TinyAuth with credentials
     sops.templates."tinyauth-env" = {
       content = ''
-        USERS=${config.sops.placeholder."tinyauth/users"}
-        PROVIDERS_POCKETID_CLIENT_ID=${config.sops.placeholder."pocket-id/oidc_client_id"}
-        PROVIDERS_POCKETID_CLIENT_SECRET=${config.sops.placeholder."pocket-id/oidc_client_secret"}
+        TINYAUTH_AUTH_USERS=${config.sops.placeholder."tinyauth/users"}
+        TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${config.sops.placeholder."pocket-id/oidc_client_id"}
+        TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRET=${
+          config.sops.placeholder."pocket-id/oidc_client_secret"
+        }
       '';
       owner = "root";
       group = "root";

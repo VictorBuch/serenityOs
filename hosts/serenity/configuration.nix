@@ -230,11 +230,6 @@ in
         owner = "mealie";
         group = "mealie";
       };
-      "tinyauth/secret" = {
-        mode = "0400";
-        owner = "root";
-        group = "root";
-      };
       "tinyauth/users" = {
         mode = "0400";
         owner = "root";
@@ -314,9 +309,8 @@ in
     oci-containers.backend = "docker";
   };
 
-
   # FIDO2 SSH authorized keys -- one per YubiKey
-  users.users."${username}"= {
+  users.users."${username}" = {
     extraGroups = [ "docker" ];
     openssh.authorizedKeys.keys = [
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"

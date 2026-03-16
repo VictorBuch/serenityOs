@@ -1,7 +1,8 @@
 # TODO
 
+- [ ] Fix convert video script to use GPU acceleration
 - [ ] try out authentik to replace tinyauth and pocketId/ is there a reason?!
-- [ ] find a way to add YubiKey support to nixos for sudo and git auth
+- [x] find a way to add YubiKey support to nixos for sudo and git auth
 - [x] try out invoicePlane
 - [x] try out some resume builder
 - [x] add Tdarr to homelab

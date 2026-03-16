@@ -2,52 +2,111 @@
 
 ## Summary
 
-Transform your YubiKey 5C Nano into a central security key across your fleet: FIDO2 SSH authentication, touch-to-sudo, YubiKey-backed sops-nix secrets on all hosts, git commit signing, screen locking, and more.
+Transform your two YubiKey 5C Nanos into central security keys across your fleet: FIDO2 SSH authentication, touch-to-sudo, YubiKey-backed sops-nix secrets, git commit signing, screen locking, and more. Each YubiKey is dedicated to one machine -- one for `jayne` (desktop) and one for `inara` (laptop). Hosts without a physical YubiKey (like `serenity`) continue using the file-based age key for sops decryption.
 
 ---
 
-## Phase 1: YubiKey Initial Setup (Manual, one-time)
+## Phase 1: YubiKey Initial Setup (Manual, one-time per key)
 
-These steps happen on `jayne` (your primary machine) with the YubiKey plugged in, **before** any Nix changes.
+Each YubiKey must be set up independently. Repeat steps 1a-1d for **both** keys.
 
-### 1a. Set FIDO2 PIN on YubiKey
+### 1a. Set FIDO2 PIN on each YubiKey
+
+**On jayne** (with jayne's YubiKey plugged in):
 
 ```bash
 nix-shell -p yubikey-manager
-ykman fido access change-pin  # Set a strong FIDO2 PIN
+ykman fido access change-pin  # Set a strong FIDO2 PIN for jayne's key
 ```
 
-### 1b. Generate FIDO2 SSH Key (resident, on-device)
+**On inara** (with inara's YubiKey plugged in):
+
+```bash
+nix-shell -p yubikey-manager
+ykman fido access change-pin  # Set a strong FIDO2 PIN for inara's key
+```
+
+Use different PINs for each key so a compromised PIN doesn't affect both.
+
+### 1b. Generate FIDO2 SSH Key on each YubiKey (resident, on-device)
+
+**On jayne:**
 
 ```bash
 ssh-keygen -t ed25519-sk -O resident -O verify-required -C "jayne@yubikey-5c-nano"
-# Saves handle to ~/.ssh/id_ed25519_sk (this is just a reference, not the private key)
+# Saves handle to ~/.ssh/id_ed25519_sk
 # The actual private key never leaves the YubiKey
 ```
 
-### 1c. Register YubiKey for PAM U2F
+**On inara:**
+
+```bash
+ssh-keygen -t ed25519-sk -O resident -O verify-required -C "inara@yubikey-5c-nano"
+# Saves handle to ~/.ssh/id_ed25519_sk
+# The actual private key never leaves the YubiKey
+```
+
+You now have **two** distinct FIDO2 SSH public keys. Both will be added to serenity's `authorized_keys`.
+
+### 1c. Register each YubiKey for PAM U2F
+
+**On jayne** (with jayne's YubiKey):
 
 ```bash
 nix-shell -p pam_u2f
 mkdir -p ~/.config/Yubico
 pamu2fcfg -o pam://serenityOs -i pam://serenityOs > ~/.config/Yubico/u2f_keys
-# Uses a fixed origin/appid so the same registration works across all machines
+# Uses a fixed origin/appid so the registration works across all NixOS machines
 ```
 
-### 1d. Set up age-plugin-yubikey for sops
+**On inara** (with inara's YubiKey):
+
+```bash
+nix-shell -p pam_u2f
+mkdir -p ~/.config/Yubico
+pamu2fcfg -o pam://serenityOs -i pam://serenityOs > ~/.config/Yubico/u2f_keys
+```
+
+**Combining both keys for cross-machine use:**
+
+The U2F mappings file supports multiple keys per user. To allow either YubiKey to authenticate on any NixOS machine, combine both registrations into a single line:
+
+```bash
+# Format: <username>:<keydata1>:<keydata2>
+# After registering the first key, append the second key's data to the same user line.
+# The pamu2fcfg output for each key looks like:
+#   jayne:<KeyHandle1>,<UserKey1>,<CoseType1>,<Options1>
+# Combine them as:
+#   jayne:<KeyHandle1>,<UserKey1>,<CoseType1>,<Options1>:<KeyHandle2>,<UserKey2>,<CoseType2>,<Options2>
+```
+
+This combined mapping will be stored in sops and deployed to `/etc/u2f-mappings` via Nix.
+
+### 1d. Set up age-plugin-yubikey for sops (on each key)
+
+**On jayne** (with jayne's YubiKey):
 
 ```bash
 nix-shell -p age-plugin-yubikey
-age-plugin-yubikey  # Generates a new age identity tied to the YubiKey PIV slot
-# Outputs a recipient string like: age1yubikey1q...
-# Save this - you'll add it to .sops.yaml
+age-plugin-yubikey  # Generates a new age identity tied to jayne's YubiKey PIV slot
+# Outputs a recipient string like: age1yubikey1qJAYNE...
+# Save this -- it becomes &yubikey-jayne in .sops.yaml
 ```
 
-### 1e. Copy registrations to other machines
+**On inara** (with inara's YubiKey):
 
-- The `~/.config/Yubico/u2f_keys` file needs to be on each machine (can be managed via home-manager or sops)
-- The SSH public key (`~/.ssh/id_ed25519_sk.pub`) goes into `authorized_keys` on serenity
-- On new machines, recover the resident SSH key with `ssh-keygen -K`
+```bash
+nix-shell -p age-plugin-yubikey
+age-plugin-yubikey  # Generates a new age identity tied to inara's YubiKey PIV slot
+# Outputs a recipient string like: age1yubikey1qINARA...
+# Save this -- it becomes &yubikey-inara in .sops.yaml
+```
+
+### 1e. Cross-machine registration
+
+- **U2F mappings**: The combined `u2f_keys` file (with both keys) gets stored in sops and deployed to `/etc/u2f-mappings` on all NixOS hosts.
+- **SSH public keys**: Both `id_ed25519_sk.pub` keys go into `authorized_keys` on serenity.
+- **Resident key recovery**: On a fresh machine (or after reinstall), recover the resident SSH key with `ssh-keygen -K` while the YubiKey for that machine is plugged in.
 
 ---
 
@@ -93,7 +152,7 @@ security.pam.services = {
 };
 ```
 
-The `/etc/u2f-mappings` file will be deployed via `environment.etc` with contents from sops or directly from the u2f_keys data.
+The `/etc/u2f-mappings` file contains both YubiKey registrations (from step 1c) and is deployed via `environment.etc` with contents from sops. Either YubiKey can authenticate `sudo` on any NixOS machine.
 
 ### 2c. SSH hardening on serenity: `hosts/serenity/configuration.nix`
 
@@ -110,8 +169,9 @@ services.openssh = {
 };
 
 users.users.serenity.openssh.authorizedKeys.keys = [
-  # Your FIDO2 SSH public key (from step 1b)
+  # Both FIDO2 SSH public keys -- one per YubiKey
   "sk-ssh-ed25519@openssh.com AAAA... jayne@yubikey-5c-nano"
+  "sk-ssh-ed25519@openssh.com AAAA... inara@yubikey-5c-nano"
 ];
 ```
 
@@ -132,42 +192,58 @@ services.udev.extraRules = ''
 
 ## Phase 3: sops-nix Expansion
 
-### 3a. Update `.sops.yaml` with new keys
+### 3a. Update `.sops.yaml` with all keys
+
+Three age recipients -- the file-based key plus one per YubiKey:
 
 ```yaml
 keys:
   - &primary age1zteescyshskm3n35s23875vjj2358zkejtcyxaeah5p46q4xk5qqjq2nzt
-  - &yubikey age1yubikey1q...   # YubiKey-backed age key
+  - &yubikey-jayne age1yubikey1q... # YubiKey on jayne (desktop)
+  - &yubikey-inara age1yubikey1q... # YubiKey on inara (laptop)
 
 creation_rules:
   - path_regex: secrets/secrets.yaml$
     key_groups:
       - age:
           - *primary
-          - *yubikey
+          - *yubikey-jayne
+          - *yubikey-inara
 
   # Host-specific secrets (optional, for per-host secret files)
   - path_regex: secrets/jayne\.yaml$
     key_groups:
       - age:
           - *primary
-          - *yubikey
+          - *yubikey-jayne
+          - *yubikey-inara
 
   - path_regex: secrets/inara\.yaml$
     key_groups:
       - age:
           - *primary
-          - *yubikey
+          - *yubikey-jayne
+          - *yubikey-inara
 ```
+
+All three keys are encryption targets. Only **one** is needed to decrypt:
+
+| Host                | Decrypts with                                             |
+| ------------------- | --------------------------------------------------------- |
+| **serenity**        | `&primary` file-based age key                             |
+| **jayne**           | jayne's YubiKey touch OR `&primary` (if key file present) |
+| **inara**           | inara's YubiKey touch OR `&primary` (if key file present) |
+| **kaylee/shepherd** | `&primary` file-based age key                             |
 
 ### 3b. Add secrets for jayne and inara
 
 Add to `secrets/secrets.yaml` (or create per-host files):
 
-- `ssh/authorized_keys` - Your FIDO2 public key
+- `ssh/jayne_authorized_key` - jayne's FIDO2 public key
+- `ssh/inara_authorized_key` - inara's FIDO2 public key
 - `tailscale/jayne_auth_key` - Tailscale auth key for jayne
 - `tailscale/inara_auth_key` - Tailscale auth key for inara
-- `u2f/mappings` - The U2F key registration data
+- `u2f/mappings` - Combined U2F key registration data (both keys)
 
 ### 3c. Configure sops on jayne host
 
@@ -210,12 +286,12 @@ sops = {
 };
 ```
 
-### 3e. Re-encrypt secrets with new key
+### 3e. Re-encrypt secrets with new keys
 
 ```bash
-# After updating .sops.yaml with the YubiKey age recipient:
+# After updating .sops.yaml with both YubiKey age recipients:
 sops updatekeys secrets/secrets.yaml
-# This adds the YubiKey as a decryption recipient
+# This adds both YubiKeys as decryption recipients alongside the primary key
 ```
 
 ---
@@ -224,13 +300,13 @@ sops updatekeys secrets/secrets.yaml
 
 ### 4a. Git commit signing with SSH key
 
-Since you're using FIDO2 SSH keys, you can also sign git commits with them (no GPG needed):
+Since each machine has its own FIDO2 SSH key, configure git to use the local key:
 
 ```nix
 # In home/cli/git.nix, add:
 programs.git = {
   signing = {
-    key = "~/.ssh/id_ed25519_sk.pub";
+    key = "~/.ssh/id_ed25519_sk.pub";  # Points to whichever YubiKey's key is on this machine
     signByDefault = true;
     format = "ssh";
   };
@@ -238,9 +314,19 @@ programs.git = {
 };
 ```
 
+The `allowed_signers` file must contain **both** public keys so commits from either machine verify correctly:
+
+```
+# ~/.config/git/allowed_signers
+jayne@serenityos.dev sk-ssh-ed25519@openssh.com AAAA... jayne@yubikey-5c-nano
+jayne@serenityos.dev sk-ssh-ed25519@openssh.com AAAA... inara@yubikey-5c-nano
+```
+
+This file can be managed via home-manager and deployed to both machines.
+
 ### 4b. OATH/TOTP codes on YubiKey
 
-Your YubiKey 5C Nano can store TOTP codes (like Google Authenticator) directly on the hardware:
+Your YubiKey 5C Nanos can store TOTP codes (like Google Authenticator) directly on the hardware:
 
 ```bash
 # Store TOTP secrets on YubiKey instead of a phone app
@@ -248,27 +334,27 @@ ykman oath accounts add -t GitHub <secret>
 ykman oath accounts code GitHub  # Touch to get code
 ```
 
-Install `yubioath-flutter` for a GUI, or use `ykman oath` CLI.
+Install `yubioath-flutter` for a GUI, or use `ykman oath` CLI. Each YubiKey stores its own set of OATH credentials, so you may want to register the same TOTP secrets on both keys for services you access from either machine.
 
 ### 4c. WebAuthn/Passkeys for web services
 
-The YubiKey already works as a FIDO2 authenticator for websites. Consider registering it as a passkey for:
+Each YubiKey works as a FIDO2 authenticator for websites. Register **both** keys as passkeys for critical services:
 
 - GitHub, GitLab, Gitea (your self-hosted instance)
 - Google, Microsoft, Cloudflare
 - Any service supporting WebAuthn
 
-This is browser-native, no NixOS config needed.
+Most services allow multiple security keys. Register both so you can log in from either machine. This is browser-native, no NixOS config needed.
 
 ### 4d. Disk encryption unlock (future)
 
-Your YubiKey can be used to unlock LUKS-encrypted drives at boot via `systemd-cryptenroll`:
+Your YubiKeys can be used to unlock LUKS-encrypted drives at boot via `systemd-cryptenroll`:
 
 ```bash
 systemd-cryptenroll /dev/nvme0n1p2 --fido2-device=auto
 ```
 
-This is more advanced and can be added later.
+This is more advanced and can be added later. Only relevant for jayne (NixOS desktop with LUKS).
 
 ---
 
@@ -283,64 +369,70 @@ macOS needs Homebrew's OpenSSH for FIDO2 support (Apple's bundled version is too
 homebrew.brews = [ "openssh" ];
 ```
 
-The resident key can be recovered on inara with `ssh-keygen -K`.
+The resident key can be recovered on inara with `ssh-keygen -K` (using inara's YubiKey).
 
 ### 5b. Touch ID + YubiKey for sudo
 
-You already have Touch ID for sudo on inara. The YubiKey can be an additional option alongside it.
+You already have Touch ID for sudo on inara. The YubiKey can be an additional option alongside it. On macOS, either Touch ID or YubiKey touch can authorize `sudo`.
 
 ---
 
 ## File Changes Summary
 
-| File | Change |
-|------|--------|
-| `modules/common/yubikey.nix` | **New** - Cross-platform YubiKey packages/services |
-| `modules/common/default.nix` | Import `yubikey.nix` |
-| `modules/nixos/system/security.nix` | **New** - PAM U2F, sudo with YubiKey, screen lock |
-| `modules/nixos/system/default.nix` | Import `security.nix` |
-| `hosts/serenity/configuration.nix` | SSH hardening, authorized keys |
-| `hosts/jayne/configuration.nix` | sops config, Tailscale |
-| `hosts/inara/configuration.nix` | sops config |
-| `.sops.yaml` | Add YubiKey age recipient |
-| `secrets/secrets.yaml` | Add SSH keys, Tailscale keys, U2F mappings |
-| `flake.nix` | Add `sops-nix.darwinModules.sops` to Darwin hosts |
-| `home/cli/git.nix` | SSH commit signing |
+| File                                | Change                                                               |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `modules/common/yubikey.nix`        | **New** - Cross-platform YubiKey packages/services                   |
+| `modules/common/default.nix`        | Import `yubikey.nix`                                                 |
+| `modules/nixos/system/security.nix` | **New** - PAM U2F (both keys), sudo with YubiKey, screen lock        |
+| `modules/nixos/system/default.nix`  | Import `security.nix`                                                |
+| `hosts/serenity/configuration.nix`  | SSH hardening, both FIDO2 authorized keys                            |
+| `hosts/jayne/configuration.nix`     | sops config, Tailscale                                               |
+| `hosts/inara/configuration.nix`     | sops config                                                          |
+| `.sops.yaml`                        | Add both YubiKey age recipients (`&yubikey-jayne`, `&yubikey-inara`) |
+| `secrets/secrets.yaml`              | Add both SSH keys, Tailscale keys, combined U2F mappings             |
+| `flake.nix`                         | Add `sops-nix.darwinModules.sops` to Darwin hosts                    |
+| `home/cli/git.nix`                  | SSH commit signing + `allowed_signers` with both keys                |
 
 ---
 
 ## Implementation Order
 
-1. **Manual**: Set up YubiKey (FIDO2 PIN, SSH key, U2F registration, age identity)
-2. **Code**: Create `yubikey.nix` module with packages/udev/pcscd
-3. **Code**: Create security module with PAM U2F config
-4. **Code**: Harden SSH on serenity + add authorized keys
-5. **Code**: Expand sops-nix to jayne, inara, and flake.nix
-6. **Code**: Update `.sops.yaml` and re-encrypt secrets
-7. **Code**: Add git commit signing config
-8. **Code**: Add screen lock udev rule
-9. **Test**: Build and switch on jayne first, then serenity, then inara
-10. **Manual**: Register YubiKey for web services (GitHub passkey, etc.)
+1. **Manual**: Set up jayne's YubiKey (FIDO2 PIN, SSH key, U2F registration, age identity)
+2. **Manual**: Set up inara's YubiKey (same steps, on inara with its own key)
+3. **Manual**: Combine U2F registrations into a single mappings entry
+4. **Code**: Create `yubikey.nix` module with packages/udev/pcscd
+5. **Code**: Create security module with PAM U2F config (both keys in mappings)
+6. **Code**: Harden SSH on serenity + add both authorized keys
+7. **Code**: Expand sops-nix to jayne, inara, and flake.nix
+8. **Code**: Update `.sops.yaml` with both YubiKey recipients and re-encrypt secrets
+9. **Code**: Add git commit signing config + shared `allowed_signers`
+10. **Code**: Add screen lock udev rule
+11. **Test**: Build and switch on jayne first, then serenity, then inara
+12. **Manual**: Register both YubiKeys for web services (GitHub passkeys, etc.)
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Mitigation |
-|------|-----------|
-| Locked out of sudo if YubiKey lost | `control = "sufficient"` falls back to password |
-| Locked out of SSH to serenity | Keep Tailscale SSH as backup path; also keep password auth during transition |
-| Can't rebuild without YubiKey for sops | Keep the existing age key file (`&primary`) as a co-recipient |
-| macOS OpenSSH doesn't support FIDO2 | Install Homebrew OpenSSH |
-| YubiKey PIN forgotten | Document PIN securely; 8 attempts before lockout |
+| Risk                                      | Mitigation                                                                                            |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Locked out of sudo if YubiKey lost/broken | `control = "sufficient"` falls back to password                                                       |
+| Locked out of SSH to serenity             | Keep Tailscale SSH as backup path; both YubiKeys are authorized; keep password auth during transition |
+| Can't rebuild without YubiKey for sops    | `&primary` file-based age key is always a co-recipient on every host                                  |
+| One YubiKey lost or damaged               | The other YubiKey + `&primary` key still work; re-enroll a replacement key                            |
+| macOS OpenSSH doesn't support FIDO2       | Install Homebrew OpenSSH                                                                              |
+| YubiKey PIN forgotten                     | Document PINs securely (separately); 8 attempts before lockout                                        |
+| TOTP codes only on one key                | Register same TOTP secrets on both keys for critical services                                         |
 
 ---
 
 ## Decisions Made
 
-- **SSH auth method**: FIDO2 `ed25519-sk` (modern, simple, hardware-bound)
+- **Two YubiKeys**: One dedicated to jayne (desktop), one to inara (laptop) -- not shared between machines
+- **SSH auth method**: FIDO2 `ed25519-sk` (modern, simple, hardware-bound) -- one key pair per YubiKey
 - **Sudo mode**: `sufficient` with password fallback (touch YubiKey OR type password)
-- **sops decryption**: YubiKey-backed age (touch required during rebuilds)
-- **SSH daemon**: Only on serenity (hardened); desktops use Tailscale SSH
-- **Backup YubiKey**: Planning to get one; enroll it when acquired
-- **Secrets needed**: SSH authorized keys + Tailscale auth keys for jayne and inara
+- **sops decryption**: Three recipients per secret -- `&primary` (file-based) + both YubiKeys
+- **serenity sops**: Continues using file-based `&primary` key only (no YubiKey plugged in)
+- **SSH daemon**: Only on serenity (hardened, both FIDO2 keys authorized); desktops use Tailscale SSH
+- **Git signing**: Per-machine key with shared `allowed_signers` containing both public keys
+- **Secrets needed**: Both SSH authorized keys + Tailscale auth keys + combined U2F mappings

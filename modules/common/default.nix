@@ -6,10 +6,12 @@
     ./fonts.nix
     ./nh.nix
     ./maintenance.nix
+    ./yubikey.nix
     ../apps # System-wide applications
   ];
 
   # Enable by default
   fonts.enable = lib.mkDefault true;
   nh.enable = lib.mkDefault true;
+  yubikey.enable = lib.mkDefault true;
 }

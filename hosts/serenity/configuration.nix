@@ -106,7 +106,16 @@ in
     getty.autologinUser = username;
 
     # Enable the OpenSSH daemon.
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = false;
+        PermitRootLogin = "no";
+        KbdInteractiveAuthentication = false;
+        PubkeyAuthentication = true;
+        AuthenticationMethods = "publickey";
+      };
+    };
 
     # SSH protection
     fail2ban = {
@@ -307,6 +316,12 @@ in
 
   users.users."${username}".extraGroups = [ "docker" ];
 
+  # FIDO2 SSH authorized keys -- one per YubiKey
+  # inara's key will be added here once inara's YubiKey is set up
+  users.users."${username}".openssh.authorizedKeys.keys = [
+    "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"
+  ];
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -383,7 +398,7 @@ in
   wallos.enable = true;
 
   # Media
-  fileflows.enable = true; 
+  fileflows.enable = true;
   streaming.enable = true;
   immich.enable = true;
   deluge-vpn.enable = true;

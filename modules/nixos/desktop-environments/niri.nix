@@ -99,7 +99,7 @@
         wireplumber
         nautilus
         pavucontrol
-        blueberry # Bluetooth manager
+        blueman # Bluetooth manager
         networkmanagerapplet
         waybar # Status bar with niri support
         wlogout

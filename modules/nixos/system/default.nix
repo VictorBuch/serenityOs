@@ -6,5 +6,6 @@
     ./user.nix
     ./nvidia-gpu.nix
     ./networking.nix
+    ./security.nix
   ];
 }

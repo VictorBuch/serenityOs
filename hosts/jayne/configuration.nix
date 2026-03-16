@@ -91,13 +91,31 @@ in
     development.enable = true;
     emacs.enable = false;
     emulation.enable = false;
-    gaming.enable = true;
+    gaming = {
+      enable = true;
+      heroic.enable = false;
+    };
     media = {
       enable = true;
       davinci-resolve.enable = true;
     };
     productivity.enable = true;
     utilities.enable = true;
+  };
+
+  # YubiKey: PAM U2F sudo + screen lock on removal
+  yubikey-security.enable = true;
+
+  # U2F key mappings -- deployed to /etc/u2f-mappings
+  # Generated with: pamu2fcfg -o pam://serenityOs -i pam://serenityOs
+  environment.etc."u2f-mappings".text = ''
+    jayne:nOoddQutVofHylA4WNRaidjr+w1mzhNglmLqCOFxh/y0G4KU4691+8AWOmofdOcrdY2a62vljX5aj3Gdn9HmAg==,4neONWeZ0hThNvKlidWWEle3+cUHglUOSlcn5VTcXeO0lPQLXtsyOpq31L4ZLGeRiJVAoQji+/p/RJKumPWzFg==,es256,+presence
+  '';
+
+  sops = {
+    defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
+    defaultSopsFormat = "yaml";
+    age.keyFile = "/home/jayne/.config/sops/age/keys.txt";
   };
 
   nix.settings.trusted-users = [

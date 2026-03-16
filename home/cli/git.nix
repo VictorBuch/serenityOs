@@ -78,6 +78,18 @@ mkHomeModule {
           branch = {
             sort = "-committerdate";
           };
+
+          # SSH commit signing via FIDO2 YubiKey
+          commit = {
+            gpgsign = true;
+          };
+          gpg = {
+            format = "ssh";
+            ssh.allowedSignersFile = "~/.config/git/allowed_signers";
+          };
+          user = {
+            signingkey = "~/.ssh/id_ed25519_sk.pub";
+          };
         };
 
         # Global gitignore patterns
@@ -112,6 +124,12 @@ mkHomeModule {
           "result-*"
         ];
       };
+
+      # Allowed signers for SSH commit verification
+      # Add both YubiKey public keys so commits from either machine verify correctly
+      home.file.".config/git/allowed_signers".text = ''
+        victorbuch@protonmail.com sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano
+      '';
 
       # Delta configuration for beautiful diffs (separate program in HM 26.05)
       programs.delta = {

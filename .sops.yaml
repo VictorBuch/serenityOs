@@ -1,10 +1,11 @@
 keys:
   - &primary age1zteescyshskm3n35s23875vjj2358zkejtcyxaeah5p46q4xk5qqjq2nzt
   - &yubikey-jayne age1yubikey1qgd5kj7y87zlqpgww0y75ged7cr87uksfnpj9weyc4h66y2luv3vgz9rr6l
-  # &yubikey-inara will be added once inara's YubiKey is set up
+  - &yubikey-inara age1yubikey1qv4da2ly444pmvjc8zj89ve7zq263mp50nzgtpsrvl4rs94na3frvm6zq69
 creation_rules:
   - path_regex: secrets/secrets.yaml$
     key_groups:
       - age:
           - *primary
           - *yubikey-jayne
+          - *yubikey-inara

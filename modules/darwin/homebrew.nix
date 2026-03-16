@@ -36,6 +36,7 @@
         "cmatrix"
         "docker"
         "docker-compose"
+        "openssh" # FIDO2-capable OpenSSH (Apple's bundled version lacks FIDO2 support)
         "pnpm"
         "PeonPing/tap/peon-ping"
         "terminal-notifier"

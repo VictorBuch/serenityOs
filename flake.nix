@@ -258,6 +258,7 @@
                 # Standard modules for all Darwin hosts
                 ./modules/darwin
                 inputs.home-manager.darwinModules.default
+                inputs.sops-nix.darwinModules.sops
                 { home-manager.useGlobalPkgs = true; }
               ]
               ++ (host.extraModules or [ ]);

@@ -154,7 +154,7 @@ in
         "/Applications/Zen.app"
         "/Applications/Linear.app"
         "/Applications/Figma.app"
-        "/Applications/Slack.app"
+        "/Applications/Nix Apps/Slack.app"
       ];
     };
 
@@ -231,6 +231,13 @@ in
 
   # Enable Touch ID for sudo
   security.pam.services.sudo_local.touchIdAuth = true;
+
+  sops = {
+    defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
+    defaultSopsFormat = "yaml";
+    age.keyFile = "/Users/${username}/.config/sops/age/age-yubikey-identity-907e6f67.txt";
+    age.sshKeyPaths = [ ]; # Don't try SSH keys, use YubiKey identity only
+  };
 
   # Set hostname
   networking.hostName = "inara";

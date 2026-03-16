@@ -199,6 +199,12 @@ let
       https = false;
       protected = false;
     };
+    fileflows = {
+      # FileFlows media processing
+      url = "http://127.0.0.1:19200";
+      https = false;
+      protected = false; # OIDC handled by FileFlows itself
+    };
   };
 
   # --- HELPER FUNCTIONS ---

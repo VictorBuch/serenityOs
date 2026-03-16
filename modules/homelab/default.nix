@@ -19,7 +19,7 @@
     ./oci-containers/deluge-vpn.nix
     ./oci-containers/wallos.nix
     ./oci-containers/tinyauth.nix
-    ./oci-containers/tdarr.nix
+    ./oci-containers/fileflows.nix
     ./oci-containers/invoice-ninja.nix
     ./oci-containers/reactive-resume.nix
     ./services/dashboard.nix
@@ -55,7 +55,6 @@
   immich.enable = lib.mkDefault false;
   wallos.enable = lib.mkDefault false;
   tinyauth.enable = lib.mkDefault false;
-  tdarr.enable = lib.mkDefault false;
   invoice-ninja.enable = lib.mkDefault false;
   reactive-resume.enable = lib.mkDefault false;
   cloudflare-tunnel.enable = lib.mkDefault false;

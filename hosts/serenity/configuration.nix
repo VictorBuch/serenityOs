@@ -383,7 +383,7 @@ in
   wallos.enable = true;
 
   # Media
-  tdarr.enable = true;
+  fileflows.enable = true; 
   streaming.enable = true;
   immich.enable = true;
   deluge-vpn.enable = true;

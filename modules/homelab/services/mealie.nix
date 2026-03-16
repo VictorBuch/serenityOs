@@ -62,6 +62,7 @@ in
       settings = {
         PUID = 998;
         GUID = 998;
+	TOKEN_TIME = 9600;
       };
       credentialsFile = config.sops.templates."mealie".path;
       database.createLocally = true;

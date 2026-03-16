@@ -42,6 +42,14 @@ in
             command = "/run/current-system/sw/bin/systemctl start wannashare";
             options = [ "NOPASSWD" ];
           }
+	  {
+            command = "/run/current-system/sw/bin/install -m 640 -o wannashare -g wannashare /tmp/firebase-credentials.json /var/lib/wannashare/firebase-credentials.json";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/rm -f /tmp/firebase-credentials.json";
+            options = [ "NOPASSWD" ];
+          }
         ];
 
       }

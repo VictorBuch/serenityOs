@@ -77,7 +77,7 @@ in
       "d ${stateDir}/db 755 root root"
       "d ${stateDir}/public 755 root root"
       "d ${stateDir}/storage 755 root root"
-      "d ${stateDir}/redis 755 root root"
+      "d ${stateDir}/redis 755 999 root"
       "d ${stateDir}/nginx 755 root root"
     ];
 

@@ -185,4 +185,82 @@
   systemd.services.snapraid-sync = {
     after = ["mergerfs-cache-mover.service"];
   };
+
+  # Watchdog service to detect and recover from stale mergerfs mounts
+  # mergerfs v2.41.1 has a known crash bug (CREATE_UPDATE_LAMBDA assertion)
+  # that leaves /mnt/pool as a stale FUSE mount ("Transport endpoint is not connected")
+  systemd.services.mergerfs-pool-watchdog = {
+    description = "Monitor mergerfs pool health and recover from stale mounts";
+    path = with pkgs; [bash coreutils util-linux systemd];
+    script = ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      check_mount() {
+        local mount_point="$1"
+        # Try to stat the mount point - this will fail with ENOTCONN if stale
+        if stat "$mount_point" >/dev/null 2>&1; then
+          return 0
+        else
+          return 1
+        fi
+      }
+
+      if check_mount /mnt/pool; then
+        echo "mergerfs pool at /mnt/pool is healthy"
+        exit 0
+      fi
+
+      echo "ERROR: /mnt/pool is stale (Transport endpoint is not connected)"
+      echo "Attempting recovery..."
+
+      # Lazy unmount the stale FUSE mount
+      umount -l /mnt/pool 2>/dev/null || true
+      sleep 1
+
+      # Also check /mnt/cold since /mnt/pool depends on it
+      if ! check_mount /mnt/cold; then
+        echo "ERROR: /mnt/cold is also stale, recovering..."
+        umount -l /mnt/cold 2>/dev/null || true
+        sleep 1
+        # Remount cold pool first
+        systemctl restart mnt-cold.mount
+        sleep 2
+      fi
+
+      # Remount the pool
+      systemctl restart mnt-pool.mount
+      sleep 2
+
+      # Verify recovery
+      if check_mount /mnt/pool; then
+        echo "Recovery successful! /mnt/pool is accessible again"
+
+        # Restart dependent services that may have failed
+        echo "Restarting dependent services..."
+        systemctl try-restart nextcloud-directories.service 2>/dev/null || true
+        systemctl try-restart nextcloud-setup.service 2>/dev/null || true
+        systemctl try-restart phpfpm-nextcloud.service 2>/dev/null || true
+        systemctl try-restart paperless-directories.service 2>/dev/null || true
+        systemctl try-restart paperless-scheduler.service 2>/dev/null || true
+      else
+        echo "CRITICAL: Recovery failed! /mnt/pool is still inaccessible"
+        exit 1
+      fi
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+    };
+  };
+
+  # Run the watchdog every 5 minutes
+  systemd.timers.mergerfs-pool-watchdog = {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "5min";
+      RandomizedDelaySec = "30s";
+    };
+  };
 }

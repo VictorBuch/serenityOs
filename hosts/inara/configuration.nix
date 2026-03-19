@@ -85,6 +85,7 @@ in
     flutter
     opencode
     postman
+    sops
   ];
 
   maintenance.enable = true;

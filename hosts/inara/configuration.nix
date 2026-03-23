@@ -120,6 +120,7 @@ in
 
     utilities = {
       cli-tools.enable = true;
+      localsend.enable = true;
     };
   };
 

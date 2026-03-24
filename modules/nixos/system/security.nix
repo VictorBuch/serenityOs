@@ -12,7 +12,7 @@
     # PAM U2F -- touch YubiKey as a sufficient factor for sudo and login
     security.pam.u2f = {
       enable = true;
-      control = "sufficient"; # YubiKey touch works standalone; falls back to password
+      control = "required"; # Require both password and YubiKey touch
       settings = {
         cue = true; # Print "Please touch your YubiKey" prompt
         origin = "pam://serenityOs";

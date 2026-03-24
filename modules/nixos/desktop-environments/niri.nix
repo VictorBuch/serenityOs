@@ -30,6 +30,10 @@
     sddm.enable = true;
     services.displayManager.defaultSession = "niri";
 
+    # GNOME Keyring: auto-unlock on login via PAM
+    services.gnome.gnome-keyring.enable = true;
+    security.pam.services.sddm.enableGnomeKeyring = true;
+
     security.polkit = {
 
       # Enable polkit

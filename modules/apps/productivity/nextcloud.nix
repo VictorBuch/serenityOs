@@ -14,7 +14,7 @@ mkApp {
   packages =
     { pkgs, ... }:
     [
-      pkgs.nextcloud32
+      pkgs.nextcloud33
       pkgs.nextcloud-client
     ];
   description = "Nextcloud client";

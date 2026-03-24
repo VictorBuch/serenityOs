@@ -22,6 +22,7 @@ mkApp {
       pkgs.lm_sensors
       pkgs.pciutils
       pkgs.gparted
+      pkgs.sops
     ];
   description = "System utility tools";
 } args

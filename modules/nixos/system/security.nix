@@ -12,7 +12,7 @@
     # PAM U2F -- touch YubiKey as a sufficient factor for sudo and login
     security.pam.u2f = {
       enable = true;
-      control = "required"; # Require both password and YubiKey touch
+      control = "sufficient"; # Touch alone grants auth; password is fallback if key absent
       settings = {
         cue = true; # Print "Please touch your YubiKey" prompt
         origin = "pam://serenityOs";
@@ -24,6 +24,8 @@
     security.pam.services = {
       sudo.u2fAuth = true;
       login.u2fAuth = true;
+      polkit-1.u2fAuth = true; # GUI privilege escalation dialogs
+      hyprlock.u2fAuth = true; # Screen lock unlock
     };
 
     # Lock screen when any YubiKey is physically removed

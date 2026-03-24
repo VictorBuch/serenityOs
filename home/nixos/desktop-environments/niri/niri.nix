@@ -8,7 +8,7 @@
 let
   terminal = "ghostty";
   fileManager = "nautilus";
-  browser = "zen";
+  browser = "zen-beta";
   wallpaperDaemon = "swww";
   shell = "noctalia-shell";
   applicationLauncher = "fuzzel";
@@ -25,6 +25,15 @@ in
 
     # Set Wayland environment variable
     home.sessionVariables.NIXOS_OZONE_WL = "1";
+
+    # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
+    # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
+    home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
+    xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Hidden=true
+    '';
 
     # Bluetooth applet (tray icon for managing bluetooth connections)
     services.blueman-applet.enable = true;

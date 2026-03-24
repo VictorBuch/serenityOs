@@ -12,7 +12,7 @@
     # Work-specific
     google-cloud-sdk
     prisma-engines_6
-    prisma
+    prisma_6
     openssl
 
     # Docker

@@ -11,6 +11,7 @@ args@{
 mkApp {
   _file = toString ./.;
   name = "localsend";
+  linuxPackages = _: [ ];
   darwinPackages = { pkgs, ... }: [ pkgs.localsend ];
   linuxExtraConfig = {
     programs.localsend = {

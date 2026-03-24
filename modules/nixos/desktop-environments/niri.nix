@@ -30,9 +30,14 @@
     sddm.enable = true;
     services.displayManager.defaultSession = "niri";
 
-    # GNOME Keyring: auto-unlock on login via PAM
+    # GNOME Keyring: auto-unlock on login via PAM (secrets/passwords only)
     services.gnome.gnome-keyring.enable = true;
     security.pam.services.sddm.enableGnomeKeyring = true;
+
+    # Disable GNOME's gcr SSH agent — it can't handle FIDO2/SK key signing
+    # Use real OpenSSH agent instead
+    services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
+    programs.ssh.startAgent = true;
 
     security.polkit = {
 

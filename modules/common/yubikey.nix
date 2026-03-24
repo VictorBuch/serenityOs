@@ -27,6 +27,7 @@
           services.udev.packages = [
             pkgs.yubikey-personalization
             pkgs.libu2f-host
+            pkgs.libfido2
           ];
         }
         # Linux-only: smart card daemon

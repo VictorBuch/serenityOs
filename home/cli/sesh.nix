@@ -32,7 +32,7 @@ mkHomeModule {
               startup_command = "nvim";
               preview_command = "figlet web-builder";
               windows = [
-                "git"
+                "jj"
                 "node"
               ];
             }
@@ -59,11 +59,11 @@ mkHomeModule {
             }
             {
               name = "jj";
-              startup_script = "jj pull; jj log";
+              startup_script = "jj pull; jjui";
             }
             {
               name = "node";
-              startup_script = "npm run dev";
+              startup_script = "pnpm run dev";
             }
           ];
         };

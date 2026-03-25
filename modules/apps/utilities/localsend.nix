@@ -19,4 +19,4 @@ mkApp {
     };
   };
   description = "LocalSend - share files locally";
-}
+} args

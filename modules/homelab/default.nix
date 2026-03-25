@@ -22,6 +22,7 @@
     ./oci-containers/fileflows.nix
     ./oci-containers/invoice-ninja.nix
     ./oci-containers/reactive-resume.nix
+    ./oci-containers/rreading-glasses.nix
     ./services/dashboard.nix
     ./services/streaming.nix
     ./services/nginx-proxy.nix
@@ -57,6 +58,7 @@
   tinyauth.enable = lib.mkDefault false;
   invoice-ninja.enable = lib.mkDefault false;
   reactive-resume.enable = lib.mkDefault false;
+  rreading-glasses.enable = lib.mkDefault false;
   cloudflare-tunnel.enable = lib.mkDefault false;
   nginx-reverse-proxy.enable = lib.mkDefault false;
   caddy.enable = lib.mkDefault false;

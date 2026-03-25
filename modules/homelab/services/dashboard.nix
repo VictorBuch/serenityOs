@@ -806,7 +806,6 @@ in
                           title = "Paperless";
                           url = "https://paperless.${hl.domain}/";
                           icon = "sh:paperless-ngx";
-                          check-url = "${local}:28981";
                         }
                         {
                           title = "Filebrowser";
@@ -824,7 +823,6 @@ in
                           title = "It-Tools";
                           url = "https://tools.${hl.domain}";
                           icon = "sh:it-tools";
-                          check-url = "https://tools.${hl.domain}";
                         }
                         {
                           title = "Crafty";
@@ -839,10 +837,10 @@ in
                           check-url = "${local}:8380";
                         }
                         {
-                          title = "Tdarr";
-                          url = "https://transcode.${hl.domain}";
-                          icon = "sh:tdarr";
-                          check-url = "${local}:8265";
+                          title = "FileFlows";
+                          url = "https://fileflows.${hl.domain}";
+                          icon = "sh:fileflows";
+                          check-url = "${local}:19200";
                         }
                         {
                           title = "Reactive Resume";

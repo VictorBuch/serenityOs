@@ -25,6 +25,19 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
+  # Windows 500GB SSD
+  fileSystems."/mnt/windows" =
+    { device = "/dev/disk/by-uuid/8636BCCE36BCC08B";
+      fsType = "ntfs-3g";
+      options = [ "defaults" "nofail" ];
+    };
+
+  fileSystems."/mnt/winefi" =
+    { device = "/dev/disk/by-uuid/79DF-17C2";
+      fsType = "vfat";
+      options = [ "fmask=0077" "dmask=0077" "nofail" ];
+    };
+
   swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

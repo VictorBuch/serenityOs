@@ -364,8 +364,25 @@ in
         ;
     };
     users = {
-      "${username}" = import ../../home/server.nix;
+      "${username}" = import ../../home/default.nix;
     };
+    sharedModules = [ ];
+  };
+
+  # Server: enable tmux
+  apps.development.terminals.tmux.enable = true;
+
+  # Server CLI tools (selective enables)
+  apps.cli = {
+    enable = true;
+    git.enable = true;
+    fzf.enable = true;
+    nushell.enable = true;
+    zsh.enable = false;
+    starship.enable = true;
+    sesh.enable = true;
+    jujutsu.enable = false;
+    opencode.enable = false;
   };
 
   # Networking and Auth

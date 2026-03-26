@@ -1,29 +1,19 @@
-# Shared Home Manager sharedModules for Linux desktop machines (jayne, kaylee)
-# Sets up catppuccin theming, niri, nixvim, and common CLI tools
-#
-# Usage: Import this profile and it will add common sharedModules.
-# Each host must still define home-manager.users and extraSpecialArgs.
-#
-# Note: nixvim module is imported by home/cli/neovim/nixvim/default.nix,
-# so we just enable it here rather than importing the module again.
+# Shared configuration for Linux desktop machines (jayne, kaylee)
+# Enables common app categories for desktops.
+# HM config is now injected by unified modules via home-manager.sharedModules.
 { inputs, ... }:
 {
+  # Flake HM modules still need to be imported here
+  # (they define HM options used by our modules)
   home-manager.sharedModules = [
     inputs.noctalia.homeModules.default
     inputs.zen-browser.homeModules.default
-    {
-      home = {
-        # catppuccin.enable = true;
-        desktop-environments = {
-          niri.enable = true;
-          noctalia.enable = true;
-        };
-        cli = {
-          enable = true;
-          neovim.nixvim.enable = true;
-        };
-        terminals.enable = true;
-      };
-    }
   ];
+
+  # Enable app categories for desktop use
+  apps = {
+    cli.enable = true;
+    neovim.nixvim.enable = true;
+    theming.stylix.enable = true;
+  };
 }

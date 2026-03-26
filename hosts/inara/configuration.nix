@@ -31,24 +31,7 @@ in
       "${username}" = import ../../home/default.nix;
     };
 
-    sharedModules = [
-      {
-        home = {
-          cli = {
-            enable = true;
-            zsh.enable = false;
-            neovim = {
-              nixvim.enable = true;
-              nvf.enable = false;
-            };
-          };
-          terminals = {
-            enable = true;
-            kitty.enable = false;
-          };
-        };
-      }
-    ];
+    sharedModules = [ ];
   };
 
   # User configuration
@@ -91,6 +74,13 @@ in
   maintenance.enable = true;
   apps = {
 
+    # CLI tools and neovim (unified modules)
+    cli = {
+      enable = true;
+      zsh.enable = false;
+    };
+    neovim.nixvim.enable = true;
+
     browsers = {
       # Zen is still too experimental on macOS with nix
       enable = false;
@@ -104,6 +94,7 @@ in
       enable = true;
       terminals = {
         ghostty.enable = false;
+        kitty.enable = false;
       };
       editors = {
         zed.enable = false; # Use homebrew cask instead to avoid compilation

@@ -17,6 +17,9 @@
 
   config = lib.mkIf config.desktop-environments.niri.enable {
 
+    # Inject Home Manager config for niri (keybinds, window rules, noctalia, etc.)
+    home-manager.sharedModules = [ ./home/niri ];
+
     # Disable IBus input method framework (pulled in by GNOME)
     # IBus is not needed for Latin-based layouts (US, Danish, Czech) - XKB handles those
     i18n.inputMethod.enable = false;

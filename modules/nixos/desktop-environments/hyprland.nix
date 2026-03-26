@@ -16,6 +16,9 @@
 
   config = lib.mkIf config.desktop-environments.hyprland.enable {
 
+    # Inject Home Manager config for hyprland (keybinds, animations, etc.)
+    home-manager.sharedModules = [ ./home/hyprland ];
+
     # Enable the Hyprland Window Manager
     programs.hyprland = {
       enable = true;

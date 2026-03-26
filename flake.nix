@@ -151,7 +151,7 @@
         {
           name = "shepherd-arm";
           system = "aarch64-linux"; # Override default system
-          hostConfig = "./hosts/shepherd/configuration.nix"; # Uses shepherd's config
+          hostConfig = ./hosts/shepherd/configuration.nix; # Uses shepherd's config
           extraModules = [
             ./modules/nixos
             # inputs.catppuccin.nixosModules.catppuccin

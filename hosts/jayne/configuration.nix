@@ -38,12 +38,7 @@ in
     };
     users.${username} = import ../../home/default.nix;
 
-    # Jayne-specific Home Manager additions (extends desktop-home.nix sharedModules)
-    sharedModules = [
-      {
-        home.audio.yabridge.enable = true;
-      }
-    ];
+    sharedModules = [ ];
   };
 
   # Jayne-specific boot configuration
@@ -81,11 +76,14 @@ in
 
   # Apps - full workstation
   apps = {
-    audio.enable = true;
+    audio = {
+      enable = true;
+      yabridge.enable = true;
+    };
     browsers = {
       enable = true;
       floorp.enable = false;
-      zen.enable = false; # Managed by home-manager for Stylix theming
+      zen.enable = true; # Now unified: system package + HM config in one module
     };
     communication.enable = true;
     development.enable = true;

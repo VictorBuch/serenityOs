@@ -68,30 +68,9 @@ in
       "${username}" = import ../../home/default.nix;
     };
 
-    # Per-host Home Manager configuration
     sharedModules = [
       inputs.noctalia.homeModules.default
       inputs.zen-browser.homeModules.default
-      {
-        home = {
-          # catppuccin.enable = true;
-          desktop-environments = {
-            niri.enable = true;
-            noctalia.enable = true;
-          };
-          cli = {
-            enable = true;
-            neovim = {
-              enable = true;
-              nixvim.enable = false;
-              nvf.enable = true;
-            };
-          };
-          terminals = {
-            enable = true;
-          };
-        };
-      }
     ];
   };
 
@@ -103,14 +82,18 @@ in
   ############### Apps ########################
 
   apps = {
+    # CLI and neovim (unified)
+    cli.enable = true;
+    neovim.nixvim.enable = true;
+    theming.stylix.enable = true;
     audio = {
       enable = false;
     };
 
     browsers = {
       enable = true;
-      floorp.enable = false; # Disable specific browser
-      zen.enable = false; # Managed by home-manager for Stylix theming
+      floorp.enable = false;
+      zen.enable = true;
     };
 
     communication = {

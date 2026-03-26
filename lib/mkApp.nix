@@ -47,6 +47,25 @@
 #     optionPath = "apps.custom.path";
 #     packages = { pkgs, ... }: [ pkgs.myapp ];
 #   } args
+#
+# 6. System packages + Home Manager config (unified module):
+#   mkApp {
+#     _file = toString ./.;
+#     name = "ghostty";
+#     linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
+#     homeConfig = { config, pkgs, lib, ... }: {
+#       programs.ghostty = { enable = true; settings = { font-size = 14; }; };
+#     };
+#   } args
+#
+# 7. Pure Home Manager config (no system packages):
+#   mkApp {
+#     _file = toString ./.;
+#     name = "git";
+#     homeConfig = { config, pkgs, lib, ... }: {
+#       programs.git = { enable = true; userName = "..."; };
+#     };
+#   } args
 
 {
   name,
@@ -65,6 +84,12 @@
   # Platform-specific extra config
   linuxExtraConfig ? { },
   darwinExtraConfig ? { },
+  # Optional Home Manager configuration (injected via home-manager.sharedModules)
+  # Can be a function { config, pkgs, lib, ... }: { ... } or an attrset
+  homeConfig ? null,
+  # Platform-specific Home Manager config
+  linuxHomeConfig ? homeConfig,
+  darwinHomeConfig ? homeConfig,
 }:
 
 {
@@ -117,13 +142,17 @@ let
 
   resolvedPackages = resolvePackages platformPackages;
 
-  # Detect if this is platform-specific
+  # Detect if this is platform-specific (only for packages, not homeConfig)
+  hasPackages = platformPackages != null;
   isLinuxOnly = linuxPackages != null && darwinPackages == null;
   isDarwinOnly = darwinPackages != null && linuxPackages == null;
 
   # Merge platform-specific and common extra config
   platformExtraConfig = if isLinux then linuxExtraConfig else darwinExtraConfig;
   finalExtraConfig = lib.recursiveUpdate extraConfig platformExtraConfig;
+
+  # Select platform-specific Home Manager config
+  platformHomeConfig = if isLinux then linuxHomeConfig else darwinHomeConfig;
 
   # Build the option path dynamically from derived or provided optionPath
   optionParts = lib.splitString "." derivedOptionPath;
@@ -136,25 +165,27 @@ in
     let
       # Use attrByPath with default to avoid errors when option doesn't exist yet
       optionEnabled = lib.attrByPath optionParts { enable = false; } config;
+      platformCompatible =
+        optionEnabled.enable
+        && !(isLinuxOnly && !isLinux)
+        && !(isDarwinOnly && isLinux);
     in
     lib.mkMerge [
-      # Apply configuration when enabled AND platform is compatible
-      # Silently skip if platform is incompatible (no error, just don't enable)
-      (lib.mkIf
-        (
-          optionEnabled.enable
-          &&
-            # Skip if Linux-only and we're on Darwin
-            !(isLinuxOnly && !isLinux)
-          &&
-            # Skip if Darwin-only and we're on Linux
-            !(isDarwinOnly && isLinux)
-        )
-        (
-          lib.recursiveUpdate {
-            environment.systemPackages = resolvedPackages;
-          } finalExtraConfig
-        )
-      )
+      # Apply system packages and extra config when enabled AND platform is compatible
+      (lib.mkIf (platformCompatible && hasPackages) (
+        lib.recursiveUpdate {
+          environment.systemPackages = resolvedPackages;
+        } finalExtraConfig
+      ))
+
+      # Apply extra config even without packages (for pure extraConfig modules)
+      (lib.mkIf (platformCompatible && !hasPackages && finalExtraConfig != { }) finalExtraConfig)
+
+      # Inject Home Manager config via sharedModules when enabled
+      (lib.mkIf (optionEnabled.enable && platformHomeConfig != null) {
+        home-manager.sharedModules = [
+          platformHomeConfig
+        ];
+      })
     ];
 }

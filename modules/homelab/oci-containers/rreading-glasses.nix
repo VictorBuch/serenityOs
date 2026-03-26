@@ -20,13 +20,46 @@ in
       "d /home/${user.userName}/rreading-glasses/db 775 ${user.userName} ${user.group}"
     ];
 
-    sops.templates."rreading-glasses-env" = {
+    sops.templates."rreading-glasses-db-env" = {
       content = ''
+        POSTGRES_USER=rreading-glasses
+        POSTGRES_DB=rreading-glasses
         POSTGRES_PASSWORD=${config.sops.placeholder."rreading-glasses/postgres-password"}
       '';
       owner = "root";
       group = "root";
       mode = "0400";
+    };
+
+    sops.templates."rreading-glasses-env" = {
+      content = ''
+        POSTGRES_HOST=rreading-glasses-db
+        POSTGRES_USER=rreading-glasses
+        POSTGRES_DATABASE=rreading-glasses
+        POSTGRES_PASSWORD=${config.sops.placeholder."rreading-glasses/postgres-password"}
+      '';
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    # Docker network for rreading-glasses containers
+    systemd.services.rreading-glasses-network = {
+      description = "Create Docker network for rreading-glasses";
+      after = [ "docker.service" ];
+      requires = [ "docker.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        ${pkgs.docker}/bin/docker network inspect rreading-glasses-net >/dev/null 2>&1 || \
+          ${pkgs.docker}/bin/docker network create rreading-glasses-net
+      '';
+      preStop = ''
+        ${pkgs.docker}/bin/docker network rm rreading-glasses-net || true
+      '';
+      wantedBy = [ "multi-user.target" ];
     };
 
     # PostgreSQL database for rreading-glasses
@@ -39,8 +72,10 @@ in
       ];
 
       environmentFiles = [
-        config.sops.templates."rreading-glasses-env".path
+        config.sops.templates."rreading-glasses-db-env".path
       ];
+
+      extraOptions = [ "--network=rreading-glasses-net" ];
     };
 
     # rreading-glasses metadata proxy (Goodreads source)
@@ -54,16 +89,18 @@ in
       environmentFiles = [
         config.sops.templates."rreading-glasses-env".path
       ];
+
+      extraOptions = [ "--network=rreading-glasses-net" ];
     };
 
     systemd.services.docker-rreading-glasses-db = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "rreading-glasses-network.service" ];
+      requires = [ "mnt-pool.mount" "rreading-glasses-network.service" ];
     };
 
     systemd.services.docker-rreading-glasses = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "rreading-glasses-network.service" ];
+      requires = [ "mnt-pool.mount" "rreading-glasses-network.service" ];
     };
   };
 }

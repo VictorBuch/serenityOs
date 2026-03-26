@@ -313,20 +313,20 @@ in
         spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
         // Animations
-        // animations {
-        //     slowdown 1.0
-        //     horizontal-view-movement {
-        //         spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
-        //     }
-        //     window-open {
-        //         duration-ms 150
-        //         curve "ease-out-quad"
-        //     }
-        //     window-close {
-        //         duration-ms 150
-        //         curve "ease-out-quad"
-        //     }
-        // }
+        animations {
+            slowdown 0.3
+            horizontal-view-movement {
+                spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+            }
+            window-open {
+                duration-ms 100
+                curve "ease-out-quad"
+            }
+            window-close {
+                duration-ms 100
+                curve "ease-out-quad"
+            }
+        }
 
         // Environment variables
         environment {

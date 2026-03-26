@@ -10,7 +10,12 @@
       "Bash(nix-shell -p pciutils --run:*)",
       "WebFetch(domain:nixos.wiki)",
       "WebFetch(domain:wiki.nixos.org)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(wc -l /Users/victorbuch/serenityOs/modules/apps/*/*.nix)",
+      "Bash(wc:*)",
+      "WebFetch(domain:import-tree.oeiuwq.com)"
     ],
     "deny": [],
     "ask": []

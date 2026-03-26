@@ -199,6 +199,12 @@ let
       https = false;
       protected = false; # OIDC handled by FileFlows itself
     };
+    ntfy = {
+      # ntfy-sh push notifications
+      url = "http://127.0.0.1:8090";
+      https = false;
+      protected = false; # Needs to be accessible for push clients
+    };
   };
 
   # --- HELPER FUNCTIONS ---

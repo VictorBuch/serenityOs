@@ -410,6 +410,7 @@ in
   # Utils
   mam-dynamic-seedbox.enable = true;
   it-tools.enable = true;
+  ntfy-sh.enable = true;
 
   # Other
   crafty.enable = true;

@@ -42,6 +42,7 @@
     ./services/tailscale.nix
     ./services/it-tools.nix
     ./services/paperless.nix
+    ./services/ntfy-sh.nix
     ./services/wannashare.nix
     ./lab.nix
   ];
@@ -72,5 +73,6 @@
   tailscale.enable = lib.mkDefault false;
   it-tools.enable = lib.mkDefault false;
   paperless.enable = lib.mkDefault false;
+  ntfy-sh.enable = lib.mkDefault false;
   wannashare.enable = lib.mkDefault false;
 }

@@ -215,6 +215,11 @@ in
         owner = "root";
         group = "root";
       };
+      "rreading-glasses/postgres-password" = {
+        mode = "0400";
+        owner = "root";
+        group = "root";
+      };
       "immich/db_password" = {
         mode = "0444";
         owner = "root";
@@ -396,6 +401,7 @@ in
   # Media
   fileflows.enable = true;
   streaming.enable = true;
+  rreading-glasses.enable = true;
   immich.enable = true;
   deluge-vpn.enable = true;
   filebrowser.enable = true;

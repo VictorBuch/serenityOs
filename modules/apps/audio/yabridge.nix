@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "yabridge";
@@ -164,4 +164,4 @@ mkModule {
         fi
       '';
     };
-}
+} args

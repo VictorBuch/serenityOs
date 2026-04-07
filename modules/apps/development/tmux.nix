@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "tmux";
@@ -98,4 +98,4 @@ mkModule {
           		'';
       };
     };
-}
+} args

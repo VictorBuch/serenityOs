@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "kitty";
@@ -29,4 +29,4 @@ mkModule {
         };
       };
     };
-}
+} args

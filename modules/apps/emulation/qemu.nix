@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "qemu";
@@ -9,4 +9,4 @@ mkModule {
     pkgs.quickgui
   ];
   description = "QEMU virtualization with quickemu and quickgui";
-}
+} args

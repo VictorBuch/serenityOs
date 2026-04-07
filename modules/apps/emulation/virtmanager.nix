@@ -1,4 +1,4 @@
-{ config, mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "virtmanager";
@@ -11,4 +11,4 @@ mkModule {
     virtualisation.libvirtd.enable = true;
     virtualisation.spiceUSBRedirection.enable = true;
   };
-}
+} args

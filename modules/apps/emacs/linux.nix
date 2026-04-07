@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "linux";
@@ -8,4 +8,4 @@ mkModule {
   linuxExtraConfig = {
     services.emacs.enable = true;
   };
-}
+} args

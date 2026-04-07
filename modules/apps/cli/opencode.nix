@@ -1,4 +1,10 @@
-{ mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "opencode";
@@ -21,14 +27,6 @@ mkModule {
           # theme = "catppuccin"; # managed by stylix
           model = "anthropic/claude-opus-4-6";
           autoupdate = true;
-
-          # TUI configuration
-          tui = {
-            scroll_speed = 3;
-            scroll_acceleration = {
-              enabled = true;
-            };
-          };
 
           # MCP servers already configured by default, but can be overridden
           mcp = {
@@ -235,4 +233,4 @@ mkModule {
         };
       };
     };
-}
+} args

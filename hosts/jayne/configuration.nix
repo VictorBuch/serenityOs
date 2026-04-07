@@ -95,7 +95,6 @@ in
     };
     media = {
       enable = true;
-      davinci-resolve.enable = true;
     };
     productivity.enable = true;
     utilities.enable = true;

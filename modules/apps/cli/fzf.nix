@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "fzf";
@@ -19,4 +19,4 @@ mkModule {
         tmux.enableShellIntegration = true;
       };
     };
-}
+} args

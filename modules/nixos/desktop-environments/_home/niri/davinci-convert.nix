@@ -373,6 +373,6 @@ in
       # Install the Noctalia plugin
       xdg.configFile."noctalia/plugins/davinci-convert/manifest.json".text = pluginManifest;
       xdg.configFile."noctalia/plugins/davinci-convert/BarWidget.qml".text = barWidgetQml;
-    };
+    }
   );
 }

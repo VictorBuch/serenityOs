@@ -23,23 +23,25 @@ in
 
   config = lib.mkIf config.home.desktop-environments.niri.enable {
 
-    # Set Wayland environment variable
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
+    home-manager.sharedModules = [
+      {
+        # Set Wayland environment variable
+        home.sessionVariables.NIXOS_OZONE_WL = "1";
 
-    # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
-    # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
-    home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
-    xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
-      [Desktop Entry]
-      Type=Application
-      Hidden=true
-    '';
+        # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
+        # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
+        home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
+        xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
+          [Desktop Entry]
+          Type=Application
+          Hidden=true
+        '';
 
-    # Bluetooth applet (tray icon for managing bluetooth connections)
-    services.blueman-applet.enable = true;
+        # Bluetooth applet (tray icon for managing bluetooth connections)
+        services.blueman-applet.enable = true;
 
-    # Write niri config.kdl to ~/.config/niri/
-    xdg.configFile."niri/config.kdl".text = ''
+        # Write niri config.kdl to ~/.config/niri/
+        xdg.configFile."niri/config.kdl".text = ''
       // Input configuration
       input {
           // Focus windows automatically when moving the mouse into them.
@@ -351,5 +353,7 @@ in
         }
 
     '';
+      }
+    ];
   };
 }

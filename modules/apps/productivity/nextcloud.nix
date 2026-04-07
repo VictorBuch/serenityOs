@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "nextcloud";
@@ -10,4 +10,4 @@ mkModule {
       pkgs.nextcloud-client
     ];
   description = "Nextcloud client";
-}
+} args

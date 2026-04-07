@@ -3,9 +3,11 @@
   config,
   pkgs,
   lib,
-  isLinux ? false,
   ...
 }:
+let
+  isLinux = pkgs.stdenv.isLinux;
+in
 {
   options.yubikey.enable = lib.mkEnableOption "YubiKey support";
 

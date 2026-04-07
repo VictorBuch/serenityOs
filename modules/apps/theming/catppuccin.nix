@@ -1,4 +1,11 @@
-{ inputs, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "catppuccin";
@@ -9,7 +16,12 @@ mkModule {
     home-manager.sharedModules = [
       inputs.catppuccin.homeModules.catppuccin
       (
-        { config, pkgs, lib, ... }:
+        {
+          config,
+          pkgs,
+          lib,
+          ...
+        }:
         {
           catppuccin = {
             enable = true;
@@ -93,4 +105,4 @@ mkModule {
       )
     ];
   };
-}
+} args

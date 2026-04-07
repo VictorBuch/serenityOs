@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "common";
@@ -25,4 +25,4 @@ mkModule {
       pkgs.opencode
     ];
   description = "Common development tools";
-}
+} args

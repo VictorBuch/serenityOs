@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "sunshine";
@@ -13,4 +13,4 @@ mkModule {
       openFirewall = true;
     };
   };
-}
+} args

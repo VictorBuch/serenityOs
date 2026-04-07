@@ -56,7 +56,7 @@
       fd
       fzf
       lazygit
-      nodePackages.prettier
+      prettier
       nixfmt
     ];
     programs.nixvim = {

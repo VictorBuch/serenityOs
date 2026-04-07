@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "cli-tools";
@@ -7,4 +7,4 @@ mkModule {
     pkgs.pam-cli
   ];
   description = "Command-line development and management tools";
-}
+} args

@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "language-learning";
@@ -11,4 +11,4 @@ mkModule {
       pkgs.anki
     ];
   description = "Language learning apps (Whisper, Anki, yt-dlp)";
-}
+} args

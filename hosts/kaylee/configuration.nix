@@ -2,10 +2,7 @@
 # Lighter setup - no audio production, video editing, or gaming
 {
   inputs,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -30,10 +27,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users.${username} = import ../../home/default.nix;

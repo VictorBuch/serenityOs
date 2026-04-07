@@ -2,10 +2,7 @@
   config,
   pkgs,
   inputs,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -58,10 +55,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users = {
@@ -102,9 +96,9 @@ in
 
     development = {
       enable = false;
-      editors.neovim.enable = true;
-      terminals.ghostty.enable = true;
-      tools.enable = true;
+      neovim.enable = true;
+      ghostty.enable = true;
+      common.enable = true;
     };
 
     emacs = {

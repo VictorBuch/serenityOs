@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "wine";
@@ -13,4 +13,4 @@ mkModule {
       pkgs.protontricks # protontricks can stay on unstable
     ];
   description = "Wine Windows compatibility layer";
-}
+} args

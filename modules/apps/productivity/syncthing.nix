@@ -1,4 +1,4 @@
-{ config, mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "syncthing";
@@ -20,4 +20,4 @@ mkModule {
       openDefaultPorts = true;
     };
   };
-}
+} args

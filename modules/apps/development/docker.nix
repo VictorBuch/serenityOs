@@ -1,4 +1,4 @@
-{ config, mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "docker";
@@ -14,4 +14,4 @@ mkModule {
     virtualisation.docker.enable = true;
     users.users.${config.user.userName}.extraGroups = [ "docker" ];
   };
-}
+} args

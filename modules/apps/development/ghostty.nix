@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 let
   ghosttySettings = {
@@ -33,4 +33,4 @@ mkModule {
         text = lib.generators.toKeyValue { } ghosttySettings;
       };
     };
-}
+} args

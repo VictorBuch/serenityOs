@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "system-tools";
@@ -17,4 +17,4 @@ mkModule {
       pkgs.sops
     ];
   description = "System utility tools";
-}
+} args

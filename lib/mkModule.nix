@@ -4,12 +4,12 @@
 # Creates an enable option and conditionally applies config when enabled.
 #
 # Usage:
-#   { mkModule, ... }:
+#   args@{ config, pkgs, lib, mkModule, ... }:
 #   mkModule {
 #     name = "discord";
 #     category = "communication";
 #     packages = { pkgs, ... }: [ pkgs.discord ];
-#   }
+#   } args
 
 {
   name,
@@ -27,6 +27,7 @@
   darwinHomeConfig ? null,
 }:
 
+# Inner module function -- receives the full NixOS module args via `args` passthrough
 { config, pkgs, pkgs-stable ? pkgs, lib, ... }:
 let
   isLinux = pkgs.stdenv.isLinux;

@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "nixvim";
@@ -8,4 +8,4 @@ mkModule {
   extraConfig = {
     home-manager.sharedModules = [ ./_nixvim/config.nix ];
   };
-}
+} args

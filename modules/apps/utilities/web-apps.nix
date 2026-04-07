@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "web-apps";
@@ -162,4 +162,4 @@ mkModule {
         };
       };
   };
-}
+} args

@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "minecraft";
@@ -8,4 +8,4 @@ mkModule {
     pkgs.prismlauncher
   ];
   description = "Minecraft with PrismLauncher";
-}
+} args

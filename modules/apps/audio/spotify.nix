@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "spotify";
@@ -8,4 +8,4 @@ mkModule {
   linuxExtraConfig = {
     networking.firewall.allowedUDPPorts = [ 5353 ];
   };
-}
+} args

@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "podman";
@@ -17,4 +17,4 @@ mkModule {
       defaultNetwork.settings.dns_enabled = true;
     };
   };
-}
+} args

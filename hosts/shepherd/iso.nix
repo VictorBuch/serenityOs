@@ -4,9 +4,6 @@
   lib,
   modulesPath,
   inputs,
-  isLinux,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 {

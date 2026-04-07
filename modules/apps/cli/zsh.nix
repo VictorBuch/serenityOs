@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 let
   aliases = {
@@ -38,4 +38,4 @@ mkModule {
         '';
       };
     };
-}
+} args

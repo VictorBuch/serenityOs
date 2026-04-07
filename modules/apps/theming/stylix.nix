@@ -1,4 +1,4 @@
-{ inputs, mkModule, ... }:
+args@{ config, pkgs, lib, inputs, mkModule, ... }:
 
 mkModule {
   name = "stylix";
@@ -59,4 +59,4 @@ mkModule {
       )
     ];
   };
-}
+} args

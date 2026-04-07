@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "corectrl";
@@ -8,4 +8,4 @@ mkModule {
   linuxExtraConfig = {
     programs.corectrl.enable = true;
   };
-}
+} args

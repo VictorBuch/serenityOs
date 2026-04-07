@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "sesh";
@@ -63,4 +63,4 @@ mkModule {
         };
       };
     };
-}
+} args

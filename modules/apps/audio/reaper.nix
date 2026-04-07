@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, mkModule, ... }:
+args@{ config, pkgs, pkgs-stable, lib, mkModule, ... }:
 
 let
   # Use Wine Staging 9.20 Full - required for audio plugins and copy protection
@@ -278,4 +278,4 @@ mkModule {
       YABRIDGE_DEBUG_LEVEL = "0"; # Set to 1 or 2 for debugging plugin issues
     };
   };
-}
+} args

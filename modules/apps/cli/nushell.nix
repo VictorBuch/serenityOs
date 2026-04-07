@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 let
   aliases = {
@@ -27,9 +27,11 @@ mkModule {
       config,
       pkgs,
       lib,
-      isLinux,
       ...
     }:
+    let
+      isLinux = pkgs.stdenv.isLinux;
+    in
     {
       home.packages = with pkgs; [
         nushell
@@ -91,4 +93,4 @@ mkModule {
         };
       };
     };
-}
+} args

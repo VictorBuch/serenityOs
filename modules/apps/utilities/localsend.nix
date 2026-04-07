@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "localsend";
@@ -12,4 +12,4 @@ mkModule {
     };
   };
   description = "LocalSend - share files locally";
-}
+} args

@@ -138,6 +138,7 @@
           extraModules = [
             (import-tree ./modules/homelab)
             ./modules/homelab/_config.nix
+            ./modules/nixos/system/user.nix
           ];
         }
         {
@@ -197,6 +198,7 @@
               specialArgs = {
                 inherit inputs system;
                 inherit (customLib) mkModule;
+                pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };
               modules = [
@@ -231,6 +233,7 @@
               specialArgs = {
                 inherit inputs system;
                 inherit (customLib) mkModule;
+                pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };
               modules = [

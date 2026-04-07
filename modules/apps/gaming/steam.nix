@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "steam";
@@ -13,4 +13,4 @@ mkModule {
       localNetworkGameTransfers.openFirewall = true; # Open ports for Steam Local Network Game Transfers
     };
   };
-}
+} args

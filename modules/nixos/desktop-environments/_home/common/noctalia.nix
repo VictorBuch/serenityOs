@@ -245,6 +245,6 @@ in
         libsForQt5.qt5.qtsvg
         kdePackages.qtsvg
       ];
-    };
+    }
   );
 }

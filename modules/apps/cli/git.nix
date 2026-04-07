@@ -1,4 +1,4 @@
-{ mkModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "git";
@@ -151,4 +151,4 @@ mkModule {
         };
       };
     };
-}
+} args

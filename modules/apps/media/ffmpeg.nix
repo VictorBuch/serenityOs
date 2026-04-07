@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "ffmpeg";
+  category = "media";
   packages = { pkgs, ... }: [ pkgs.ffmpeg ];
   description = "FFmpeg for video editing";
-} args
+}

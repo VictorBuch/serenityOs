@@ -1,15 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  mkApp,
-  ...
-}:
+{ inputs, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "catppuccin";
+  category = "theming";
   description = "Catppuccin home manager theming";
   # Inject catppuccin HM module and config via sharedModules
   linuxExtraConfig = {
@@ -100,4 +93,4 @@ mkApp {
       )
     ];
   };
-} args
+}

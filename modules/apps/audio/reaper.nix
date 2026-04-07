@@ -1,13 +1,4 @@
-args@{
-  config,
-  pkgs,
-  pkgs-stable,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ config, pkgs, pkgs-stable, mkModule, ... }:
 
 let
   # Use Wine Staging 9.20 Full - required for audio plugins and copy protection
@@ -163,9 +154,9 @@ let
   '';
 in
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "reaper";
+  category = "audio";
   linuxPackages =
     { pkgs, pkgs-stable, ... }:
     [
@@ -287,4 +278,4 @@ mkApp {
       YABRIDGE_DEBUG_LEVEL = "0"; # Set to 1 or 2 for debugging plugin issues
     };
   };
-} args
+}

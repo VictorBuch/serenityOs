@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "davinci-resolve";
+  category = "media";
   packages = { pkgs, ... }: [ pkgs.davinci-resolve ];
   description = "DaVinci Resolve video editor";
-} args
+}

@@ -70,6 +70,12 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Auto-import module directories (replaces manual import lists)
+    import-tree = {
+      url = "github:vic/import-tree";
+      flake = false;
+    };
   };
 
   outputs =

@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "fzf";
+  category = "cli";
   description = "Fuzzy finder";
   homeConfig =
     {
@@ -25,4 +19,4 @@ mkApp {
         tmux.enableShellIntegration = true;
       };
     };
-} args
+}

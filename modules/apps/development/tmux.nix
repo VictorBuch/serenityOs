@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "tmux";
+  category = "development";
   packages = { pkgs, ... }: [ pkgs.tmux ];
   description = "Tmux terminal multiplexer";
   homeConfig =
@@ -106,4 +98,4 @@ mkApp {
           		'';
       };
     };
-} args
+}

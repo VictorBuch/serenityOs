@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "handbrake";
+  category = "media";
   packages = { pkgs, ... }: [ pkgs.handbrake ];
   description = "HandBrake video transcoder";
-} args
+}

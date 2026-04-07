@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "discord";
+  category = "communication";
   packages = { pkgs, ... }: [ pkgs.discord ];
   description = "Discord chat and voice communication";
-} args
+}

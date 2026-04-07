@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ config, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "docker";
+  category = "development";
   linuxPackages =
     { pkgs, ... }:
     [
@@ -22,4 +14,4 @@ mkApp {
     virtualisation.docker.enable = true;
     users.users.${config.user.userName}.extraGroups = [ "docker" ];
   };
-} args
+}

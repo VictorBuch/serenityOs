@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "language-learning";
+  category = "productivity";
   packages =
     { pkgs, ... }:
     [
@@ -19,4 +11,4 @@ mkApp {
       pkgs.anki
     ];
   description = "Language learning apps (Whisper, Anki, yt-dlp)";
-} args
+}

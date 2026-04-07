@@ -1,22 +1,15 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  mkApp,
-  ...
-}:
+{ inputs, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "stylix";
+  category = "theming";
   description = "Stylix home manager theming";
   # Inject stylix HM module and config via sharedModules
   linuxExtraConfig = {
     home-manager.sharedModules = [
       inputs.stylix.homeModules.stylix
       (
-        { config, pkgs, ... }:
+        { config, pkgs, lib, ... }:
         {
           stylix = {
             enable = true;
@@ -66,4 +59,4 @@ mkApp {
       )
     ];
   };
-} args
+}

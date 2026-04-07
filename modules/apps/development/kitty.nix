@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "kitty";
+  category = "development";
   packages = { pkgs, ... }: [ pkgs.kitty ];
   description = "Kitty terminal emulator";
   homeConfig =
@@ -37,4 +29,4 @@ mkApp {
         };
       };
     };
-} args
+}

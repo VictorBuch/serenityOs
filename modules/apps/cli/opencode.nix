@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "opencode";
+  category = "cli";
   description = "opencode ai cli";
   homeConfig =
     {
@@ -241,4 +235,4 @@ mkApp {
         };
       };
     };
-} args
+}

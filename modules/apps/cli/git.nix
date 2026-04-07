@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "git";
+  category = "cli";
   description = "Git version control";
   homeConfig =
     {
@@ -157,4 +151,4 @@ mkApp {
         };
       };
     };
-} args
+}

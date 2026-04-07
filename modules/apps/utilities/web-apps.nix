@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "web-apps";
+  category = "utilities";
   linuxPackages = { pkgs, ... }: [ pkgs.chromium ];
   description = "Web desktop apps (PWAs, Linux only)";
   linuxExtraConfig = {
@@ -170,4 +162,4 @@ mkApp {
         };
       };
   };
-} args
+}

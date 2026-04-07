@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ config, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "virtmanager";
+  category = "emulation";
   linuxPackages = { pkgs, ... }: [ ]; # virt-manager enabled via programs.virt-manager
   description = "Virtual Machine Manager (Linux only)";
   linuxExtraConfig = {
@@ -19,4 +11,4 @@ mkApp {
     virtualisation.libvirtd.enable = true;
     virtualisation.spiceUSBRedirection.enable = true;
   };
-} args
+}

@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "system-tools";
+  category = "utilities";
   packages =
     { pkgs, ... }:
     [
@@ -25,4 +17,4 @@ mkApp {
       pkgs.sops
     ];
   description = "System utility tools";
-} args
+}

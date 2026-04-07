@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "jujutsu";
+  category = "cli";
   description = "Jujutsu git";
   homeConfig =
     {
@@ -107,4 +101,4 @@ mkApp {
         };
       };
     };
-} args
+}

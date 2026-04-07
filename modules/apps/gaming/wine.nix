@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "wine";
+  category = "gaming";
   # Use pkgs-stable for Wine gaming to avoid breaking changes
   packages =
     { pkgs, pkgs-stable, ... }:
@@ -21,4 +13,4 @@ mkApp {
       pkgs.protontricks # protontricks can stay on unstable
     ];
   description = "Wine Windows compatibility layer";
-} args
+}

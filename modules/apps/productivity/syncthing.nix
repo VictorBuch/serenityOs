@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ config, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "syncthing";
+  category = "productivity";
   linuxPackages =
     { pkgs, ... }:
     [
@@ -28,4 +20,4 @@ mkApp {
       openDefaultPorts = true;
     };
   };
-} args
+}

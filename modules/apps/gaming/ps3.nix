@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "ps3";
+  category = "gaming";
   packages = { pkgs, ... }: [ pkgs.rpcs3 ];
   description = "RPCS3 PS3 emulator";
-} args
+}

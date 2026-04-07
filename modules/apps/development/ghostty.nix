@@ -1,12 +1,4 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
 let
   ghosttySettings = {
@@ -19,9 +11,9 @@ let
   };
 in
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "ghostty";
+  category = "development";
   linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
   darwinExtraConfig = { homebrew.casks = [ "ghostty" ]; };
   description = "Ghostty terminal emulator";
@@ -41,4 +33,4 @@ mkApp {
         text = lib.generators.toKeyValue { } ghosttySettings;
       };
     };
-} args
+}

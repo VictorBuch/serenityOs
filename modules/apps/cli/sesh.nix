@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "sesh";
+  category = "cli";
   description = "Session manager for tmux";
   homeConfig =
     {
@@ -69,4 +63,4 @@ mkApp {
         };
       };
     };
-} args
+}

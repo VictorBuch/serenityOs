@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "nextcloud";
+  category = "productivity";
   packages =
     { pkgs, ... }:
     [
@@ -18,4 +10,4 @@ mkApp {
       pkgs.nextcloud-client
     ];
   description = "Nextcloud client";
-} args
+}

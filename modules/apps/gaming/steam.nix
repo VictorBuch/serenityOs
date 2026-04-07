@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "steam";
+  category = "gaming";
   linuxPackages = { pkgs, ... }: [ ]; # Steam is enabled via programs.steam
   description = "Steam gaming platform (Linux only)";
   linuxExtraConfig = {
@@ -21,4 +13,4 @@ mkApp {
       localNetworkGameTransfers.openFirewall = true; # Open ports for Steam Local Network Game Transfers
     };
   };
-} args
+}

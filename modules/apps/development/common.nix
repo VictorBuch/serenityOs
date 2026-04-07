@@ -1,17 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  system,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "common";
+  category = "development";
   packages =
     { pkgs, ... }:
     [
@@ -34,4 +25,4 @@ mkApp {
       pkgs.opencode
     ];
   description = "Common development tools";
-} args
+}

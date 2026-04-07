@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "localsend";
+  category = "utilities";
   linuxPackages = _: [ ];
   darwinPackages = { pkgs, ... }: [ pkgs.localsend ];
   linuxExtraConfig = {
@@ -20,4 +12,4 @@ mkApp {
     };
   };
   description = "LocalSend - share files locally";
-} args
+}

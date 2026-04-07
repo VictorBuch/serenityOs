@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "virtualbox";
+  category = "emulation";
   linuxPackages = { pkgs, ... }: [ pkgs.virtualbox ];
   description = "VirtualBox virtualization (Linux only)";
-} args
+}

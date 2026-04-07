@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "yabridge";
+  category = "audio";
   description = "Yabridge configuration for Windows VST plugins with copy protection support";
   linuxPackages = { pkgs-stable, ... }: [
     pkgs-stable.yabridge
@@ -170,4 +164,4 @@ mkApp {
         fi
       '';
     };
-} args
+}

@@ -1,18 +1,10 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "cli-tools";
+  category = "utilities";
   packages = { pkgs, ... }: [
     pkgs.pam-cli
   ];
   description = "Command-line development and management tools";
-} args
+}

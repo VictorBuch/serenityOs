@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "firefox";
+  category = "browsers";
   packages = { pkgs, ... }: [ pkgs.firefox ];
   description = "Mozilla Firefox web browser";
-} args
+}

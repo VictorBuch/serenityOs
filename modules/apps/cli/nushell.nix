@@ -1,11 +1,4 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  isLinux,
-  ...
-}:
+{ mkModule, ... }:
 
 let
   aliases = {
@@ -25,9 +18,9 @@ let
   };
 in
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "nushell";
+  category = "cli";
   description = "Nushell modern shell";
   homeConfig =
     {
@@ -98,4 +91,4 @@ mkApp {
         };
       };
     };
-} args
+}

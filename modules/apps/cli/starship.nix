@@ -1,14 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "starship";
+  category = "cli";
   description = "Starship prompt";
   homeConfig =
     {
@@ -151,4 +145,4 @@ mkApp {
         };
       };
     };
-} args
+}

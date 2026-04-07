@@ -1,10 +1,4 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkApp,
-  ...
-}:
+{ mkModule, ... }:
 
 let
   aliases = {
@@ -18,9 +12,9 @@ let
   };
 in
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "zsh";
+  category = "cli";
   description = "Z shell";
   homeConfig =
     {
@@ -44,4 +38,4 @@ mkApp {
         '';
       };
     };
-} args
+}

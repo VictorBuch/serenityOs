@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "heroic";
+  category = "gaming";
   packages = { pkgs, ... }: [ pkgs.heroic ];
   description = "Heroic Games Launcher";
-} args
+}

@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "floorp";
+  category = "browsers";
   packages = { pkgs, ... }: [ pkgs.floorp ];
   description = "Floorp web browser";
-} args
+}

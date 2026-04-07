@@ -20,7 +20,6 @@
   # Auto-imports all .nix files in directory and creates category-level enable options
   mkHomeCategory = import ./mkHomeCategory.nix { inherit lib; };
 
-  # Additional helpers can be added here as needed
-  # mkService = import ./mkService.nix { inherit lib; };
-  # mkHost = import ./mkHost.nix { inherit lib; };
+  # Simplified module helper (replaces mkApp for new modules)
+  mkModule = import ./mkModule.nix { inherit lib; };
 }

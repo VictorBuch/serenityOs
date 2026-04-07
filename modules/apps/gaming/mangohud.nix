@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "mangohud";
+  category = "gaming";
   packages = { pkgs, ... }: [ pkgs.mangohud ];
   description = "MangoHud performance overlay";
-} args
+}

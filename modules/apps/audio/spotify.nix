@@ -1,11 +1,11 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+{ mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "spotify";
+  category = "audio";
   packages = { pkgs, ... }: [ pkgs.spotify ];
   description = "Spotify music streaming";
   linuxExtraConfig = {
     networking.firewall.allowedUDPPorts = [ 5353 ];
   };
-} args
+}

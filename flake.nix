@@ -90,6 +90,9 @@
       # Custom library functions
       customLib = import ./lib { inherit (nixpkgs) lib; };
 
+      # Auto-import module directories (replaces manual import lists)
+      import-tree = import inputs.import-tree;
+
       # Import the overlay with inputs
       overlayWithInputs = import ./overlays { inherit inputs; };
 
@@ -123,45 +126,29 @@
       nixosHosts = [
         {
           name = "jayne";
-          # system defaults to x86_64-linux
-          extraModules = [
-            ./modules/nixos
-            # inputs.catppuccin.nixosModules.catppuccin
-          ];
+          extraModules = [ (import-tree ./modules/nixos) ];
         }
         {
           name = "kaylee";
-          # system defaults to x86_64-linux
-          extraModules = [
-            ./modules/nixos
-            # inputs.catppuccin.nixosModules.catppuccin
-          ];
+          extraModules = [ (import-tree ./modules/nixos) ];
         }
         {
           name = "serenity";
-          # system defaults to x86_64-linux
-          # Serenity is a homelab server with different modules
+          # Homelab server: uses homelab modules instead of desktop modules
           extraModules = [
-            ./modules/homelab
-            # inputs.catppuccin.nixosModules.catppuccin
+            (import-tree ./modules/homelab)
+            ./modules/homelab/_config.nix
           ];
         }
         {
           name = "shepherd";
-          # system defaults to x86_64-linux
-          extraModules = [
-            ./modules/nixos
-            # inputs.catppuccin.nixosModules.catppuccin
-          ];
+          extraModules = [ (import-tree ./modules/nixos) ];
         }
         {
           name = "shepherd-arm";
-          system = "aarch64-linux"; # Override default system
-          hostConfig = ./hosts/shepherd/configuration.nix; # Uses shepherd's config
-          extraModules = [
-            ./modules/nixos
-            # inputs.catppuccin.nixosModules.catppuccin
-          ];
+          system = "aarch64-linux";
+          hostConfig = ./hosts/shepherd/configuration.nix;
+          extraModules = [ (import-tree ./modules/nixos) ];
         }
       ];
 
@@ -209,19 +196,16 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib)
-                  mkApp
-                  mkCategory
-                  mkHomeModule
-                  mkHomeCategory
-                  ;
-                isLinux = true;
-                # Stable pkgs escape hatch - for packages that need stability (audio/wine)
+                inherit (customLib) mkModule;
                 pkgs-stable = stablePkgsFor system;
               };
               modules = [
-                # Common modules for all hosts (nix settings, caches, etc.)
-                ./modules/common
+                # Common modules (auto-discovered)
+                (import-tree ./modules/common)
+                ./modules/common/_defaults.nix
+                # App modules (auto-discovered)
+                (import-tree ./modules/apps)
+                ./modules/apps/_categories.nix
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
                 # Standard modules for all NixOS hosts
@@ -246,23 +230,20 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib)
-                  mkApp
-                  mkCategory
-                  mkHomeModule
-                  mkHomeCategory
-                  ;
-                isLinux = false;
-                # Stable pkgs escape hatch - for packages that need stability
+                inherit (customLib) mkModule;
                 pkgs-stable = stablePkgsFor system;
               };
               modules = [
-                # Common modules for all hosts (nix settings, caches, etc.)
-                ./modules/common
+                # Common modules (auto-discovered)
+                (import-tree ./modules/common)
+                ./modules/common/_defaults.nix
+                # App modules (auto-discovered)
+                (import-tree ./modules/apps)
+                ./modules/apps/_categories.nix
                 # Host-specific configuration
                 (host.hostConfig or ./hosts/${host.name}/configuration.nix)
-                # Standard modules for all Darwin hosts
-                ./modules/darwin
+                # Darwin-specific modules
+                (import-tree ./modules/darwin)
                 inputs.home-manager.darwinModules.default
                 inputs.sops-nix.darwinModules.sops
                 { home-manager.useGlobalPkgs = true; }

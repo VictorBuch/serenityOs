@@ -6,10 +6,6 @@
 }:
 {
 
-  imports = [
-    ./sddm.nix
-  ];
-
   options = {
     desktop-environments.hyprland.enable = lib.mkEnableOption "Enables Hyprland WM";
   };

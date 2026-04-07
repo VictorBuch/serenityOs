@@ -1,24 +1,20 @@
-args@{
+{
   config,
   pkgs,
   lib,
   osConfig ? { },
-  mkHomeModule,
   ...
 }:
+let
+  optPath = [ "home" "desktop-environments" "noctalia" ];
+  cfg = lib.attrByPath optPath { enable = false; } config;
+in
+{
+  options = lib.setAttrByPath (optPath ++ [ "enable" ]) (
+    lib.mkEnableOption "Noctalia shell - A modern Wayland shell for niri"
+  );
 
-mkHomeModule {
-  name = "noctalia";
-  optionPath = "home.desktop-environments.noctalia";
-  description = "Noctalia shell - A modern Wayland shell for niri";
-
-  homeConfig =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
+  config = lib.mkIf cfg.enable (
     let
       # Check if DaVinci Resolve is enabled at the system level
       davinciEnabled = (osConfig.apps.media.davinci-resolve.enable or false);
@@ -250,4 +246,5 @@ mkHomeModule {
         kdePackages.qtsvg
       ];
     };
-} args
+  );
+}

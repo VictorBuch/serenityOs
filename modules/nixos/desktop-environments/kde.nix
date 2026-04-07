@@ -6,10 +6,6 @@
 }:
 {
 
-  imports = [
-    ./sddm.nix
-  ];
-
   options = {
     desktop-environments.kde.enable = lib.mkEnableOption "Enables KDE";
   };

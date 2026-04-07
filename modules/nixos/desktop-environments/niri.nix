@@ -7,10 +7,6 @@
 }:
 {
 
-  imports = [
-    ./sddm.nix
-  ];
-
   options = {
     desktop-environments.niri.enable = lib.mkEnableOption "Enables Niri WM";
   };
@@ -18,7 +14,7 @@
   config = lib.mkIf config.desktop-environments.niri.enable {
 
     # Inject Home Manager config for niri (keybinds, window rules, noctalia, etc.)
-    home-manager.sharedModules = [ ./home/niri ];
+    home-manager.sharedModules = [ ./_home/niri ];
 
     # Disable IBus input method framework (pulled in by GNOME)
     # IBus is not needed for Latin-based layouts (US, Danish, Czech) - XKB handles those

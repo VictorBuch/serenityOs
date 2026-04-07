@@ -1,24 +1,20 @@
-args@{
+{
   config,
   pkgs,
   lib,
   osConfig ? { },
-  mkHomeModule,
   ...
 }:
+let
+  optPath = [ "home" "desktop-environments" "niri" "davinci-convert" ];
+  cfg = lib.attrByPath optPath { enable = false; } config;
+in
+{
+  options = lib.setAttrByPath (optPath ++ [ "enable" ]) (
+    lib.mkEnableOption "DaVinci Resolve video conversion script and Noctalia bar widget"
+  );
 
-mkHomeModule {
-  name = "davinci-convert";
-  optionPath = "home.desktop-environments.niri.davinci-convert";
-  description = "DaVinci Resolve video conversion script and Noctalia bar widget";
-
-  homeConfig =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
+  config = lib.mkIf cfg.enable (
     let
       convertDir = "${config.home.homeDirectory}/Videos/convert_queue";
       convertedDir = "${config.home.homeDirectory}/Videos/converted";
@@ -378,4 +374,5 @@ mkHomeModule {
       xdg.configFile."noctalia/plugins/davinci-convert/manifest.json".text = pluginManifest;
       xdg.configFile."noctalia/plugins/davinci-convert/BarWidget.qml".text = barWidgetQml;
     };
-} args
+  );
+}

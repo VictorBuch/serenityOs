@@ -2,10 +2,7 @@
 # Full workstation with audio production, video editing, gaming, etc.
 {
   inputs,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -30,10 +27,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users.${username} = import ../../home/default.nix;
@@ -89,7 +83,7 @@ in
     browsers = {
       enable = true;
       floorp.enable = false;
-      zen.enable = true; # Now unified: system package + HM config in one module
+      zen.enable = true;
     };
     communication.enable = true;
     development.enable = true;

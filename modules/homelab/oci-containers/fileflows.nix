@@ -15,10 +15,10 @@ in
 {
 
   options = {
-    fileflows.enable = lib.mkEnableOption "Enables FileFlows media processing with NVENC support";
+    homelab.fileflows.enable = lib.mkEnableOption "Enables FileFlows media processing with NVENC support";
   };
 
-  config = lib.mkIf config.fileflows.enable {
+  config = lib.mkIf config.homelab.fileflows.enable {
 
     # Firewall rules
     networking.firewall.allowedTCPPorts = [

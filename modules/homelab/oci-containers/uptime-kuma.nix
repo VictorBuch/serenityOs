@@ -13,9 +13,9 @@ let
 in
 
 {
-  options.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
+  options.homelab.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
 
-  config = lib.mkIf config.uptime-kuma.enable {
+  config = lib.mkIf config.homelab.uptime-kuma.enable {
     networking.firewall.allowedTCPPorts = [ 3001 ];
 
     systemd.tmpfiles.rules = [

@@ -3,10 +3,7 @@
   pkgs,
   inputs,
   lib,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -357,10 +354,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users = {
@@ -370,7 +364,7 @@ in
   };
 
   # Server: enable tmux
-  apps.development.terminals.tmux.enable = true;
+  apps.development.tmux.enable = true;
 
   # Server CLI tools (selective enables)
   apps.cli = {
@@ -386,7 +380,7 @@ in
   };
 
   # Networking and Auth
-  tailscale = {
+  homelab.tailscale = {
     enable = true;
     advertiseExitNode = true;
     useRoutingFeatures = "both"; # Act as both client and server
@@ -395,63 +389,62 @@ in
       "--advertise-routes=192.168.0.0/24" # Share your local network
     ];
   };
-  cloudflare-tunnel.enable = true;
-  caddy.enable = true;
-  nginx-reverse-proxy.enable = false;
-  tinyauth = {
+  homelab.cloudflare-tunnel.enable = true;
+  homelab.caddy.enable = true;
+  homelab.nginx-reverse-proxy.enable = false;
+  homelab.tinyauth = {
     enable = true;
     port = 3002;
   };
-  authelia.enable = false;
-  adguard.enable = true;
-  pocket-id = {
+  homelab.authelia.enable = false;
+  homelab.adguard.enable = true;
+  homelab.pocket-id = {
     enable = true;
   };
 
   # Smart home
-  hyperhdr.enable = true;
-  music-assistant.enable = true;
-  home-assistant.enable = true;
+  homelab.hyperhdr.enable = true;
+  homelab.music-assistant.enable = true;
+  homelab.home-assistant.enable = true;
 
   # Monitor and Dashboards
-  dashboard = {
+  homelab.dashboard = {
     homarr.enable = false;
     glance.enable = true;
   };
-  uptime-kuma.enable = true;
-  wallos.enable = true;
+  homelab.uptime-kuma.enable = true;
+  homelab.wallos.enable = true;
 
   # Media
-  fileflows.enable = true;
-  streaming.enable = true;
-  rreading-glasses.enable = true;
-  immich.enable = true;
-  deluge-vpn.enable = true;
-  filebrowser.enable = true;
-  nextcloud.enable = true;
+  homelab.fileflows.enable = true;
+  homelab.streaming.enable = true;
+  homelab.rreading-glasses.enable = true;
+  homelab.immich.enable = true;
+  homelab.deluge-vpn.enable = true;
+  homelab.filebrowser.enable = true;
+  homelab.nextcloud.enable = true;
 
   # Utils
-  mam-dynamic-seedbox.enable = true;
-  it-tools.enable = true;
-  ntfy-sh.enable = true;
+  homelab.mam-dynamic-seedbox.enable = true;
+  homelab.it-tools.enable = true;
+  homelab.ntfy-sh.enable = true;
 
   # Other
-  crafty.enable = true;
-  mealie.enable = true;
-  lab.enable = false;
-  lute.enable = true;
+  homelab.crafty.enable = true;
+  homelab.mealie.enable = true;
+  homelab.lab.enable = false;
+  homelab.lute.enable = true;
 
   # Development
-  gitea.enable = true;
+  homelab.gitea.enable = true;
 
   # Document Management
-  paperless.enable = true;
-  reactive-resume.enable = true;
-  invoice-ninja.enable = true;
+  homelab.paperless.enable = true;
+  homelab.reactive-resume.enable = true;
+  homelab.invoice-ninja.enable = true;
 
-  ####### Wanna share config ################
-
-  wannashare.enable = true;
+  # Sharing
+  homelab.wannashare.enable = true;
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

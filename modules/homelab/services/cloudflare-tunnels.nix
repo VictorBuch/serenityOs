@@ -14,10 +14,10 @@ in
 {
 
   options = {
-    cloudflare-tunnel.enable = lib.mkEnableOption "Enables the cloudflare tunnel service";
+    homelab.cloudflare-tunnel.enable = lib.mkEnableOption "Enables the cloudflare tunnel service";
   };
 
-  config = lib.mkIf config.cloudflare-tunnel.enable {
+  config = lib.mkIf config.homelab.cloudflare-tunnel.enable {
 
     services.cloudflared = {
       enable = true;

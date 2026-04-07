@@ -15,10 +15,10 @@ in
 {
 
   options = {
-    streaming.enable = lib.mkEnableOption "Enables streaming services";
+    homelab.streaming.enable = lib.mkEnableOption "Enables streaming services";
   };
 
-  config = lib.mkIf config.streaming.enable {
+  config = lib.mkIf config.homelab.streaming.enable {
     users = {
       groups.multimedia = {
         name = "multimedia";

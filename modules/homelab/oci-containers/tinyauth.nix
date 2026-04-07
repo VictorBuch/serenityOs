@@ -7,13 +7,13 @@
 }:
 
 let
-  cfg = config.tinyauth;
+  cfg = config.homelab.tinyauth;
   hl = config.homelab;
   domain = hl.domain;
 in
 
 {
-  options.tinyauth = {
+  options.homelab.tinyauth = {
     enable = lib.mkEnableOption "Enables TinyAuth authentication service";
 
     appUrl = lib.mkOption {

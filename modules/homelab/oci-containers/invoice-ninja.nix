@@ -67,9 +67,9 @@ let
 in
 
 {
-  options.invoice-ninja.enable = lib.mkEnableOption "Enables the Invoice Ninja invoicing application";
+  options.homelab.invoice-ninja.enable = lib.mkEnableOption "Enables the Invoice Ninja invoicing application";
 
-  config = lib.mkIf config.invoice-ninja.enable {
+  config = lib.mkIf config.homelab.invoice-ninja.enable {
     networking.firewall.allowedTCPPorts = [ 8380 ];
 
     systemd.tmpfiles.rules = [

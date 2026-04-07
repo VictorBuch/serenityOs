@@ -5,11 +5,11 @@
 }:
 
 let
-  cfg = config.ntfy-sh;
+  cfg = config.homelab.ntfy-sh;
   domain = config.homelab.domain;
 in
 {
-  options.ntfy-sh = {
+  options.homelab.ntfy-sh = {
     enable = lib.mkEnableOption "Enables ntfy-sh push notification service";
   };
 

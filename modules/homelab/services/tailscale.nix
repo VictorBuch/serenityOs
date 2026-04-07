@@ -7,10 +7,10 @@
 }:
 
 let
-  cfg = config.tailscale;
+  cfg = config.homelab.tailscale;
 in
 {
-  options.tailscale = {
+  options.homelab.tailscale = {
     enable = lib.mkEnableOption "Enables Tailscale VPN service";
 
     advertiseExitNode = lib.mkOption {

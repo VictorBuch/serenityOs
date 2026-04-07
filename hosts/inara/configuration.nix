@@ -2,10 +2,7 @@
   config,
   pkgs,
   inputs,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -21,10 +18,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users = {
@@ -92,13 +86,10 @@ in
 
     development = {
       enable = true;
-      terminals = {
-        ghostty.enable = false;
-        kitty.enable = false;
-      };
-      editors = {
-        zed.enable = false; # Use homebrew cask instead to avoid compilation
-      };
+      # Flattened paths (were under terminals/, editors/)
+      ghostty.enable = false;
+      kitty.enable = false;
+      zed.enable = false; # Use homebrew cask instead to avoid compilation
     };
 
     media = {

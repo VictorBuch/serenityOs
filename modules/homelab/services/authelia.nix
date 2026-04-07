@@ -12,10 +12,10 @@ in
 
 {
   options = {
-    authelia.enable = lib.mkEnableOption "Enables Authelia SSO authentication";
+    homelab.authelia.enable = lib.mkEnableOption "Enables Authelia SSO authentication";
   };
 
-  config = lib.mkIf config.authelia.enable {
+  config = lib.mkIf config.homelab.authelia.enable {
 
     # SOPS template for users database with admin password
     sops.templates."authelia-users.yml" = {

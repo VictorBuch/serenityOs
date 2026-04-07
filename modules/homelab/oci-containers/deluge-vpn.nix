@@ -8,9 +8,9 @@
 
 {
   options = {
-    deluge-vpn.enable = lib.mkEnableOption "Enables deluge with VPN through Gluetun container";
+    homelab.deluge-vpn.enable = lib.mkEnableOption "Enables deluge with VPN through Gluetun container";
 
-    mam-dynamic-seedbox = {
+    homelab.mam-dynamic-seedbox = {
       enable = lib.mkEnableOption "Enable MyAnonaMouse dynamic seedbox IP updates";
 
       interval = lib.mkOption {
@@ -22,7 +22,7 @@
   };
 
   config = lib.mkMerge [
-    (lib.mkIf config.deluge-vpn.enable {
+    (lib.mkIf config.homelab.deluge-vpn.enable {
 
       # Firewall rules - only allow web UI access
       networking.firewall = {
@@ -314,7 +314,7 @@ with open('/var/lib/deluge/config/core.conf', 'w') as f:
 
     })
 
-    (lib.mkIf config.mam-dynamic-seedbox.enable {
+    (lib.mkIf config.homelab.mam-dynamic-seedbox.enable {
 
       # SOPS template for MAM session cookie
       sops.templates."mam-cookie" = {
@@ -484,7 +484,7 @@ with open('/var/lib/deluge/config/core.conf', 'w') as f:
         wantedBy = [ "timers.target" ];
         timerConfig = {
           OnBootSec = "5min";
-          OnUnitActiveSec = config.mam-dynamic-seedbox.interval;
+          OnUnitActiveSec = config.homelab.mam-dynamic-seedbox.interval;
           Persistent = true;
         };
       };

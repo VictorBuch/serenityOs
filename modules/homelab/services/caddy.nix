@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.caddy;
+  cfg = config.homelab.caddy;
   hl = config.homelab;
   domain = hl.domain;
   smoothlessDomain = hl.smoothlessDomain;
@@ -237,7 +237,7 @@ let
         if service.isPhpFpm or false then
           let
             nextcloudPackage =
-              if config.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
+              if config.homelab.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
           in
           ''
             # Nextcloud-specific configuration
@@ -373,7 +373,7 @@ let
   };
 in
 {
-  options.caddy = {
+  options.homelab.caddy = {
     enable = lib.mkEnableOption "Enables Caddy reverse proxy";
   };
 

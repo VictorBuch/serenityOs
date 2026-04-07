@@ -14,10 +14,10 @@ in
 
 {
   options = {
-    nginx-reverse-proxy.enable = lib.mkEnableOption "Enables the nginx local reverse proxy";
+    homelab.nginx-reverse-proxy.enable = lib.mkEnableOption "Enables the nginx local reverse proxy";
   };
 
-  config = lib.mkIf config.nginx-reverse-proxy.enable {
+  config = lib.mkIf config.homelab.nginx-reverse-proxy.enable {
 
     # SOPS templates for SSL certificates
     sops.templates."ssl-cert.pem" = {

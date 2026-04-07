@@ -8,13 +8,13 @@
 with lib;
 
 let
-  cfg = config.filebrowser;
+  cfg = config.homelab.filebrowser;
   user = config.user;
   nixosIp = config.homelab.nixosIp;
 in
 {
 
-  options.filebrowser = {
+  options.homelab.filebrowser = {
     enable = mkOption {
       type = types.bool;
       default = false;
@@ -40,7 +40,7 @@ in
     };
   };
 
-  config = lib.mkIf config.filebrowser.enable {
+  config = lib.mkIf config.homelab.filebrowser.enable {
 
     users.users = {
       "${cfg.user}" = {
@@ -76,7 +76,7 @@ in
     };
 
     networking.firewall.allowedTCPPorts = [
-      config.filebrowser.port
+      config.homelab.filebrowser.port
     ];
   };
 }

@@ -44,6 +44,7 @@
     ./services/paperless.nix
     ./services/ntfy-sh.nix
     ./services/wannashare.nix
+    ./services/lute.nix
     ./lab.nix
   ];
 
@@ -75,4 +76,5 @@
   paperless.enable = lib.mkDefault false;
   ntfy-sh.enable = lib.mkDefault false;
   wannashare.enable = lib.mkDefault false;
+  lute.enable = lib.mkDefault false;
 }

@@ -4,9 +4,9 @@
   config = lib.mkIf config.home.cli.neovim.nvf.enable {
     programs.nvf.settings.vim.theme = {
       enable = true;
-      name = "catppuccin";
+      name = lib.mkForce "catppuccin";
       style = "mocha";
-      transparent = true;
+      transparent = lib.mkForce true;
     };
   };
 }

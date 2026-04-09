@@ -201,7 +201,7 @@ let
     };
     ntfy = {
       # ntfy-sh push notifications
-      url = "http://127.0.0.1:8090";
+      url = "http://127.0.0.1:8033";
       https = false;
       protected = false; # Needs to be accessible for push clients
     };

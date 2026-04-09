@@ -18,11 +18,11 @@ in
       enable = true;
       settings = {
         base-url = "https://ntfy.${domain}";
-        listen-http = ":8090";
+        listen-http = ":8033";
         behind-proxy = true;
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 8090 ];
+    networking.firewall.allowedTCPPorts = [ 8033 ];
   };
 }

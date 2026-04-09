@@ -63,6 +63,8 @@ in
         "/var/lib/fileflows/logs:/app/Logs"
         "/var/lib/fileflows/temp:/temp"
         "${mediaDir}:/media"
+        "${pkgs.ffmpeg}/bin/ffmpeg:/usr/local/bin/ffmpeg:ro"
+        "${pkgs.ffmpeg}/bin/ffprobe:/usr/local/bin/ffprobe:ro"
       ];
 
       extraOptions = [

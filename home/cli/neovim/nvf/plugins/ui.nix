@@ -190,7 +190,7 @@
       # Statusline
       statusline.lualine = {
         enable = true;
-        theme = "catppuccin";
+        theme = lib.mkForce "catppuccin";
       };
 
       # Bufferline (tabline)

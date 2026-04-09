@@ -338,7 +338,7 @@ in
     claude-code
     opencode
     # mcp-nixos
-    nodePackages_latest.nodejs
+    nodejs
 
     # NVIDIA VAAPI driver for hardware acceleration
     nvidia-vaapi-driver

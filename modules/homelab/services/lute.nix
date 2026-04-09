@@ -10,6 +10,11 @@ let
   user = "lute";
   group = "lute";
   port = 5001;
+  configFile = pkgs.writeText "lute-config.yml" ''
+    ENV: prod
+    DBNAME: lute.db
+    DATAPATH: ${dataDir}
+  '';
 in
 {
   options.lute.enable = lib.mkEnableOption "Enables Lute v3 language learning service";
@@ -43,7 +48,7 @@ in
         User = user;
         Group = group;
         WorkingDirectory = dataDir;
-        ExecStart = "${pkgs.lute-v3}/bin/lute";
+        ExecStart = "${pkgs.lute-v3}/bin/lute --config ${configFile} --port ${toString port}";
 
         # Hardening
         NoNewPrivileges = true;

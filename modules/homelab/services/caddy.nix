@@ -205,6 +205,12 @@ let
       https = false;
       protected = false; # Needs to be accessible for push clients
     };
+    lute = {
+      # Lute v3 language learning
+      url = "http://127.0.0.1:5001";
+      https = false;
+      protected = true;
+    };
   };
 
   # --- HELPER FUNCTIONS ---

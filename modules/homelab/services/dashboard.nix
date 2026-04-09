@@ -848,6 +848,18 @@ in
                           icon = "sh:reactive-resume";
                           check-url = "${local}:3200";
                         }
+                        {
+                          title = "Lute";
+                          url = "https://lute.${hl.domain}";
+                          icon = "sh:book-open";
+                          check-url = "${local}:5001";
+                        }
+                        {
+                          title = "Ntfy";
+                          url = "https://ntfy.${hl.domain}";
+                          icon = "sh:ntfy";
+                          check-url = "${local}:8033";
+                        }
                       ];
                     }
                     # Bookmarks

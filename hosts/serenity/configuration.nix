@@ -416,6 +416,7 @@ in
   crafty.enable = true;
   mealie.enable = true;
   lab.enable = false;
+  lute.enable = true;
 
   # Development
   gitea.enable = true;

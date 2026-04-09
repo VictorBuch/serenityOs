@@ -21,6 +21,7 @@ mkHomeModule {
       programs.git = {
         enable = true;
         package = pkgs.git;
+        signing.format = null;
 
         # Git settings (new format for HM 26.05)
         settings = {

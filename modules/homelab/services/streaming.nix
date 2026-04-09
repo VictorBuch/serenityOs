@@ -98,10 +98,10 @@ in
         user = "${user.userName}";
         group = "multimedia";
       };
-      jellyseerr = {
+      seerr = {
         # port 5055
         enable = true;
-        package = pkgs.jellyseerr;
+        package = pkgs.seerr;
         openFirewall = true;
       };
       sonarr = {

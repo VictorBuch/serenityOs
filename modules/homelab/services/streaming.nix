@@ -77,15 +77,15 @@ in
       after = [ "mnt-pool.mount" ];
       requires = [ "mnt-pool.mount" ];
     };
-    # systemd.services.plex = {
-    #   after = [ "mnt-pool.mount" ];
-    #   requires = [ "mnt-pool.mount" ];
-    # };
+    systemd.services.plex = {
+      after = [ "mnt-pool.mount" ];
+      requires = [ "mnt-pool.mount" ];
+    };
 
     # Streaming services
     services = {
       plex = {
-        enable = false;
+        enable = true;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";

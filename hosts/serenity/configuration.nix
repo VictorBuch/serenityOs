@@ -279,8 +279,8 @@ in
     # Use proprietary drivers (better performance for transcoding)
     open = false;
 
-    # Stable driver package
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # GTX 960 (Maxwell) requires legacy_580 - dropped from stable (595+)
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
 
     # Power management - keep GPU always on for server use
     powerManagement.enable = false;
@@ -297,6 +297,12 @@ in
   # Fix nvidia-persistenced race condition during nixos-rebuild switch
   # Device files may briefly disappear when kernel modules reload
   systemd.services.nvidia-persistenced.serviceConfig.RestartSec = 5;
+
+  # CDI generator must wait for nvidia-persistenced to have the driver loaded
+  systemd.services.nvidia-container-toolkit-cdi-generator = {
+    after = [ "nvidia-persistenced.service" ];
+    requires = [ "nvidia-persistenced.service" ];
+  };
 
   # Enable NVIDIA Container Toolkit for GPU passthrough to Docker containers (NVENC)
   hardware.nvidia-container-toolkit.enable = true;

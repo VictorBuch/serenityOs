@@ -94,10 +94,10 @@ in
       };
     };
 
-    # Wait for storage mount before starting
+    # Wait for storage mount and CDI spec before starting
     systemd.services.docker-fileflows = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
+      after = [ "mnt-pool.mount" "nvidia-container-toolkit-cdi-generator.service" ];
+      requires = [ "mnt-pool.mount" "nvidia-container-toolkit-cdi-generator.service" ];
     };
   };
 }

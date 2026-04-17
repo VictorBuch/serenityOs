@@ -25,6 +25,7 @@
       extraPackages = with pkgs; [
         rocmPackages.clr.icd
         clinfo
+        libva-utils # vainfo for VAAPI verification
       ];
     };
 

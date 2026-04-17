@@ -88,7 +88,10 @@ in
     communication.enable = true;
     development.enable = true;
     emacs.enable = false;
-    emulation.enable = false;
+    emulation = {
+      enable = false;
+      gpu-passthrough.enable = true;
+    };
     gaming = {
       enable = true;
       heroic.enable = false;

@@ -25,7 +25,10 @@
       "Bash(git add:*)",
       "Bash(lsmod)",
       "Bash(ls:*)",
-      "Skill(investigate)"
+      "Skill(investigate)",
+      "Bash(jj --version)",
+      "Bash(jj st *)",
+      "Bash(jj new -m 'feat: nixos-anywhere + disko onboarding for shepherd hosts *)"
     ],
     "deny": [],
     "ask": []

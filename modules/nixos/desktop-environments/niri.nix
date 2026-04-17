@@ -102,7 +102,7 @@
     environment.systemPackages =
       (with pkgs; [
         libnotify
-        swww # Wallpaper daemon
+        awww # Wallpaper daemon (swww renamed)
         hyprlock # Lock screen (compatible with niri)
         dunst # Notification manager
         pipewire

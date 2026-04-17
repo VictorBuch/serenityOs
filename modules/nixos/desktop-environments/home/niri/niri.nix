@@ -9,7 +9,7 @@ let
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
-  wallpaperDaemon = "swww";
+  wallpaperDaemon = "awww";
   shell = "noctalia-shell";
   applicationLauncher = "fuzzel";
   # Stylix colors for niri (no upstream Stylix target for niri)

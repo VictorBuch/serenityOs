@@ -29,7 +29,8 @@
       "Bash(jj --version)",
       "Bash(jj st *)",
       "Bash(jj new -m 'feat: nixos-anywhere + disko onboarding for shepherd hosts *)",
-      "Bash(jj file *)"
+      "Bash(jj file *)",
+      "Bash(nix build *)"
     ],
     "deny": [],
     "ask": []

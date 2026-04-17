@@ -234,6 +234,9 @@ in
         name = "Papirus-Dark";
       };
 
+      # Adopt new HM default (was `config.gtk.theme` prior to 26.05)
+      gtk.gtk4.theme = null;
+
       # Fallback icon theme environment variable
       home.sessionVariables = {
         QS_ICON_THEME = "Papirus-Dark";

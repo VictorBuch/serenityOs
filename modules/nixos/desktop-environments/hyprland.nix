@@ -90,7 +90,7 @@
     environment.systemPackages = with pkgs; [
       libnotify
       # hyprpaper #Wallpaper
-      swww
+      awww # swww renamed
       hypridle # Idle
       hyprlock # Lock screen
       #waybar # Bar

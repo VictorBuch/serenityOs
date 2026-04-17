@@ -16,6 +16,9 @@ mkModule {
         enable = true;
         package = pkgs.git;
 
+        # Signing handled via raw `settings.gpg.format` below; opt into new default
+        signing.format = null;
+
         # Git settings (new format for HM 26.05)
         settings = {
           # User configuration

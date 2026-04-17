@@ -9,7 +9,7 @@ let
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen";
-  wallpaperDaemon = "swww";
+  wallpaperDaemon = "awww";
   bar = "hyprpanel";
 in
 

@@ -14,6 +14,8 @@ mkModule {
           stylix = {
             enable = true;
             autoEnable = true;
+            # HM uses useGlobalPkgs; disable overlays to avoid nixpkgs.overlays conflict
+            overlays.enable = false;
             polarity = "dark";
             base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark.yaml";
             image = "${config.wallpaper}";

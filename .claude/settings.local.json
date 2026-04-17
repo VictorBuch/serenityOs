@@ -24,7 +24,8 @@
       "Bash(nix search:*)",
       "Bash(git add:*)",
       "Bash(lsmod)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Skill(investigate)"
     ],
     "deny": [],
     "ask": []

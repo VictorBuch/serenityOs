@@ -1,4 +1,10 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "common";
@@ -23,6 +29,7 @@ mkModule {
       pkgs.jjui
       pkgs.go
       pkgs.opencode
+      pkgs.bun
     ];
   description = "Common development tools";
 } args

@@ -156,6 +156,12 @@ in
       settings = {
         server.externalDomain = "https://immich.${domain}"; # Domain for publicly shared links, including http(s)://
         newVersionCheck.enabled = true; # Check for new versions. This feature relies on periodic communication with github.com.
+	ffmpeg = {
+          accel = "nvenc";
+          accelDecode = true;
+          targetVideoCodec = "h264";
+          acceptedVideoCodecs = [ "h264" "hevc" ];
+        };
       };
 
       database = {

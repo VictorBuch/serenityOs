@@ -17,9 +17,9 @@ let
   '';
 in
 {
-  options.lute.enable = lib.mkEnableOption "Enables Lute v3 language learning service";
+  options.homelab.lute.enable = lib.mkEnableOption "Enables Lute v3 language learning service";
 
-  config = lib.mkIf config.lute.enable {
+  config = lib.mkIf config.homelab.lute.enable {
 
     users.groups.${group} = { };
     users.users.${user} = {

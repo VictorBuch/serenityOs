@@ -1,4 +1,7 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "language-learning";
@@ -6,9 +9,7 @@ mkModule {
   packages =
     { pkgs, ... }:
     [
-      (pkgs.whisper-cpp.override { vulkanSupport = true; })
-      pkgs.yt-dlp
       pkgs.anki
     ];
-  description = "Language learning apps (Whisper, Anki, yt-dlp)";
+  description = "Language learning apps (Anki)";
 } args

@@ -14,10 +14,34 @@ let
   # VM name for which hooks fire
   vmName = "studio-vm";
 
+  # Wrapper scripts: user is in libvirtd group, virsh talks to qemu:///system
+  studioStart = pkgs.writeShellScriptBin "studio-start" ''
+    set -e
+    STATE=$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${vmName} 2>/dev/null || echo missing)
+    if [ "$STATE" != "running" ]; then
+      ${pkgs.libvirt}/bin/virsh -c qemu:///system start ${vmName}
+      sleep 3
+    fi
+    exec ${pkgs.looking-glass-client}/bin/looking-glass-client -F
+  '';
+
+  studioStop = pkgs.writeShellScriptBin "studio-stop" ''
+    # Graceful ACPI shutdown, force destroy after 20s
+    ${pkgs.libvirt}/bin/virsh -c qemu:///system shutdown ${vmName} 2>/dev/null || true
+    for i in $(seq 1 20); do
+      STATE=$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${vmName} 2>/dev/null || echo "shut off")
+      [ "$STATE" = "shut off" ] && echo "VM stopped cleanly" && exit 0
+      sleep 1
+    done
+    echo "VM did not respond to ACPI shutdown, forcing destroy"
+    ${pkgs.libvirt}/bin/virsh -c qemu:///system destroy ${vmName} 2>/dev/null || true
+  '';
+
   # libvirt qemu hook: dynamic GPU bind/unbind per VM lifecycle
   qemuHook = pkgs.writeShellScript "qemu-hook" ''
     #!/usr/bin/env bash
-    set -e
+    # Do NOT set -e: individual bind/unbind ops may legitimately fail
+    # (e.g. device already unbound). || true pattern handles each one.
 
     GUEST_NAME="$1"
     HOOK_NAME="$2"
@@ -45,17 +69,17 @@ let
     fi
 
     if [ "$HOOK_NAME" = "release" ] && [ "$STATE_NAME" = "end" ]; then
-      # Unbind from vfio-pci
-      echo "$GPU_PCI"   > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null || true
-      echo "$AUDIO_PCI" > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null || true
-
-      # Remove IDs so vfio-pci doesn't auto-reclaim
-      echo "$GPU_ID"   > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null || true
-      echo "$AUDIO_ID" > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null || true
-
-      # Rebind to host drivers
-      echo "$GPU_PCI"   > /sys/bus/pci/drivers/amdgpu/bind        2>/dev/null || true
-      echo "$AUDIO_PCI" > /sys/bus/pci/drivers/snd_hda_intel/bind 2>/dev/null || true
+      # Run rebind in background — libvirt sandbox enforces hook timeout (~30s)
+      # and amdgpu bind can block while GPU reinitializes. Detach via setsid+nohup.
+      setsid nohup sh -c "
+        echo '$GPU_PCI'   > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
+        echo '$AUDIO_PCI' > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
+        echo '$GPU_ID'    > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
+        echo '$AUDIO_ID'  > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
+        echo '$GPU_PCI'   > /sys/bus/pci/drivers/amdgpu/bind 2>/dev/null
+        echo '$AUDIO_PCI' > /sys/bus/pci/drivers/snd_hda_intel/bind 2>/dev/null
+      " </dev/null >/dev/null 2>&1 &
+      disown
     fi
   '';
 in
@@ -69,6 +93,9 @@ mkModule {
     pkgs.virt-manager
     pkgs.virt-viewer # standalone SPICE/VNC console
     pkgs.usbutils # lsusb for finding USB passthrough IDs
+    pkgs.e2fsprogs # chattr for btrfs nodatacow on VM images
+    studioStart
+    studioStop
   ];
 
   linuxExtraConfig = {
@@ -92,6 +119,7 @@ mkModule {
       qemu = {
         runAsRoot = false;
         swtpm.enable = true; # TPM 2.0 emulation for Windows 11
+        vhostUserPackages = [ pkgs.virtiofsd ];
       };
       onBoot = "ignore";
       onShutdown = "shutdown";
@@ -138,8 +166,17 @@ mkModule {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "${pkgs.libvirt}/bin/virsh start ${vmName}";
-        ExecStop  = "${pkgs.libvirt}/bin/virsh shutdown ${vmName}";
-        TimeoutStopSec = "120s";
+        # Try graceful shutdown, force destroy after 20s if VM still running
+        ExecStop = pkgs.writeShellScript "studio-vm-stop" ''
+          ${pkgs.libvirt}/bin/virsh shutdown ${vmName} 2>/dev/null || true
+          for i in $(seq 1 20); do
+            STATE=$(${pkgs.libvirt}/bin/virsh domstate ${vmName} 2>/dev/null || echo "shut off")
+            [ "$STATE" = "shut off" ] && exit 0
+            sleep 1
+          done
+          ${pkgs.libvirt}/bin/virsh destroy ${vmName} 2>/dev/null || true
+        '';
+        TimeoutStopSec = "30s";
       };
     };
   };

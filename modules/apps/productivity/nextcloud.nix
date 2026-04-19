@@ -1,4 +1,7 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "nextcloud";

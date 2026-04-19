@@ -82,7 +82,6 @@ in
     };
     browsers = {
       enable = true;
-      floorp.enable = false;
       zen.enable = true;
     };
     communication.enable = true;

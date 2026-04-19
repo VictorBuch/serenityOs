@@ -131,6 +131,7 @@ in
             Mod+3 { spawn "focus-or-run" "Slack" "slack"; }
             Mod+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
             Mod+D { spawn "focus-or-run" "discord" "discord"; }
+            Mod+W { spawn "studio-start"; } // Windows Studio VM + Looking Glass
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }

@@ -1,8 +1,12 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "syncthing";
-  category = "productivity";
+  category = "utilities";
   linuxPackages =
     { pkgs, ... }:
     [

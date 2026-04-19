@@ -1,19 +1,30 @@
 <domain type='kvm'>
   <name>studio-vm</name>
-  <memory unit='GiB'>32</memory>
-  <currentMemory unit='GiB'>32</currentMemory>
-  <vcpu placement='static'>8</vcpu>
+  <uuid>c79fad14-ccd5-41cb-9deb-8852d6947b6c</uuid>
+  <memory unit='GiB'>48</memory>
+  <currentMemory unit='GiB'>48</currentMemory>
+  <memoryBacking>
+    <source type='memfd'/>
+    <access mode='shared'/>
+  </memoryBacking>
+  <vcpu placement='static'>12</vcpu>
   <cputune>
-    <vcpupin vcpu='0' cpuset='4'/>
-    <vcpupin vcpu='1' cpuset='12'/>
-    <vcpupin vcpu='2' cpuset='5'/>
-    <vcpupin vcpu='3' cpuset='13'/>
-    <vcpupin vcpu='4' cpuset='6'/>
-    <vcpupin vcpu='5' cpuset='14'/>
-    <vcpupin vcpu='6' cpuset='7'/>
-    <vcpupin vcpu='7' cpuset='15'/>
-    <emulatorpin cpuset='0-3,8-11'/>
+    <vcpupin vcpu='0'  cpuset='2'/>
+    <vcpupin vcpu='1'  cpuset='10'/>
+    <vcpupin vcpu='2'  cpuset='3'/>
+    <vcpupin vcpu='3'  cpuset='11'/>
+    <vcpupin vcpu='4'  cpuset='4'/>
+    <vcpupin vcpu='5'  cpuset='12'/>
+    <vcpupin vcpu='6'  cpuset='5'/>
+    <vcpupin vcpu='7'  cpuset='13'/>
+    <vcpupin vcpu='8'  cpuset='6'/>
+    <vcpupin vcpu='9'  cpuset='14'/>
+    <vcpupin vcpu='10' cpuset='7'/>
+    <vcpupin vcpu='11' cpuset='15'/>
+    <emulatorpin cpuset='0-1,8-9'/>
+    <iothreadpin iothread='1' cpuset='0-1,8-9'/>
   </cputune>
+  <iothreads>1</iothreads>
   <os firmware='efi'>
     <type arch='x86_64' machine='q35'>hvm</type>
     <firmware>
@@ -46,7 +57,7 @@
     <ioapic driver='kvm'/>
   </features>
   <cpu mode='host-passthrough' check='none' migratable='on'>
-    <topology sockets='1' dies='1' cores='4' threads='2'/>
+    <topology sockets='1' dies='1' cores='6' threads='2'/>
     <cache mode='passthrough'/>
     <feature policy='require' name='topoext'/>
     <feature policy='require' name='invtsc'/>
@@ -71,10 +82,10 @@
 
     <!-- Fresh Windows install: qcow2 virtual disk (VirtIO SCSI for speed) -->
     <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2' cache='none' io='native' discard='unmap'/>
-      <source file='/var/lib/libvirt/images/studio-vm.qcow2'/>
+      <driver name='qemu' type='qcow2' cache='writeback' io='threads' discard='unmap' iothread='1'/>
+      <source file='/var/lib/libvirt/images-nocow/studio-vm.qcow2'/>
       <target dev='vda' bus='virtio'/>
-      <boot order='2'/>
+      <boot order='1'/>
     </disk>
 
     <!-- Windows installer ISO -->
@@ -83,7 +94,7 @@
       <source file='/var/lib/libvirt/images/Win11_25H2_EnglishInternational_x64_v2.iso'/>
       <target dev='sda' bus='sata'/>
       <readonly/>
-      <boot order='1'/>
+      <boot order='2'/>
     </disk>
 
     <!-- VirtIO drivers ISO (needed during install for VirtIO disk + network) -->
@@ -107,6 +118,18 @@
     <controller type='sata' index='0'/>
     <controller type='virtio-serial' index='0'/>
 
+    <!-- SPICE vdagent channel: clipboard sync, display resize -->
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0'/>
+    </channel>
+
+    <!-- virtiofs share: /home/jayne/studio-share -> Windows drive -->
+    <filesystem type='mount' accessmode='passthrough'>
+      <driver type='virtiofs' queue='1024'/>
+      <source dir='/home/jayne/studio-share'/>
+      <target dir='studio-share'/>
+    </filesystem>
+
     <!-- Network: virtio NIC -->
     <interface type='network'>
       <source network='default'/>
@@ -129,7 +152,7 @@
     </hostdev>
 
     <!-- USB: Focusrite Scarlett Solo (audio interface) -->
-    <hostdev mode='subsystem' type='usb' managed='yes'>
+    <hostdev mode='subsystem' type='usb' managed='yes' startupPolicy='optional'>
       <source>
         <vendor id='0x1235'/>
         <product id='0x8205'/>
@@ -137,7 +160,7 @@
     </hostdev>
 
     <!-- USB: AKAI MPK mini 3 (MIDI controller) -->
-    <hostdev mode='subsystem' type='usb' managed='yes'>
+    <hostdev mode='subsystem' type='usb' managed='yes' startupPolicy='optional'>
       <source>
         <vendor id='0x09e8'/>
         <product id='0x1049'/>

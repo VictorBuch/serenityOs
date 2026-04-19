@@ -270,6 +270,20 @@ in
             default-column-width { proportion 0.6; }
         }
 
+        // Looking Glass client - Windows VM viewer, always fullscreen
+        window-rule {
+            match app-id=r#"^looking-glass-client$"#
+            open-fullscreen true
+        }
+
+        // Nautilus - floating, centered, ~45% screen
+        window-rule {
+            match app-id=r#"^org\.gnome\.Nautilus$"#
+            open-floating true
+            default-column-width { proportion 0.45; }
+            default-window-height { proportion 0.65; }
+        }
+
         // DaVinci Convert - float the conversion script terminal
         window-rule {
             match app-id=r#"^davinci-convert$"#

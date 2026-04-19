@@ -96,6 +96,7 @@ in
     systemd.tmpfiles.rules = [
       "d ${dataDir} 0770 ${user} ${group}"
       "d ${dataDir}/pb_data 0750 ${user} ${group}"
+      "d ${dataDir}/site 0770 ${user} ${group}"
     ];
 
     systemd.services.wannashare = {

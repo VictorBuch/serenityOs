@@ -20,12 +20,12 @@ let
       isPocketBase = true;
     };
     wannashare = {
-      # WannaShare Flutter Web App
+      # WannaShare Nuxt Web App
       url = "";
       https = false;
       protected = false;
       isStaticFiles = true;
-      staticPath = "/var/lib/wannashare/web";
+      staticPath = "/var/lib/wannashare/site";
     };
     suboptimal = {
       url = "http://127.0.0.1:3232";
@@ -237,7 +237,7 @@ let
         if service.isPhpFpm or false then
           let
             nextcloudPackage =
-              if config.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud31;
+              if config.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
           in
           ''
             # Nextcloud-specific configuration
@@ -320,15 +320,9 @@ let
       ${
         if service.isStaticFiles or false then
           ''
-            	    # CORS headers for Flutter WASM multi-threading
-            	    header {
-            	     Cross-Origin-Embedder-Policy "credentialless"
-            	     Cross-Origin-Opener-Policy "same-origin"
-            	    }
-
-                        # Serve static files
-                        root * ${service.staticPath}
-                        file_server
+            root * ${service.staticPath}
+            try_files {path} /index.html
+            file_server
           ''
         else if service.isPocketBase or false then
           ''

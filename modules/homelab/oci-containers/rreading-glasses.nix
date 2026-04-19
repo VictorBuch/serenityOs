@@ -10,9 +10,9 @@ let
 in
 
 {
-  options.rreading-glasses.enable = lib.mkEnableOption "Enables rreading-glasses book metadata proxy for Readarr";
+  options.homelab.rreading-glasses.enable = lib.mkEnableOption "Enables rreading-glasses book metadata proxy for Readarr";
 
-  config = lib.mkIf config.rreading-glasses.enable {
+  config = lib.mkIf config.homelab.rreading-glasses.enable {
     networking.firewall.allowedTCPPorts = [ 8788 ];
 
     systemd.tmpfiles.rules = [

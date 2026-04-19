@@ -8,11 +8,11 @@
 with lib;
 
 let
-  cfg = config.hyperhdr;
+  cfg = config.homelab.hyperhdr;
 in
 {
 
-  options.hyperhdr = {
+  options.homelab.hyperhdr = {
     enable = mkOption {
       type = types.bool;
       default = false;

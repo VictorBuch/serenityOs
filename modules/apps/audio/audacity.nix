@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "audacity";
+  category = "audio";
   packages = { pkgs, ... }: [ pkgs.audacity ];
   description = "Audacity audio editor";
 } args

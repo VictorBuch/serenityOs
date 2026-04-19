@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "tidal";
+  category = "audio";
   packages = { pkgs, ... }: [ pkgs.tidal-hifi ];
   description = "Tidal music streaming";
 } args

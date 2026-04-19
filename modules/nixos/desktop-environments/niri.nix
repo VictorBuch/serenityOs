@@ -7,15 +7,14 @@
 }:
 {
 
-  imports = [
-    ./sddm.nix
-  ];
-
   options = {
     desktop-environments.niri.enable = lib.mkEnableOption "Enables Niri WM";
   };
 
   config = lib.mkIf config.desktop-environments.niri.enable {
+
+    # Inject Home Manager config for niri (keybinds, window rules, noctalia, etc.)
+    home-manager.sharedModules = [ ./_home/niri ];
 
     # Disable IBus input method framework (pulled in by GNOME)
     # IBus is not needed for Latin-based layouts (US, Danish, Czech) - XKB handles those
@@ -31,8 +30,10 @@
     services.displayManager.defaultSession = "niri";
 
     # GNOME Keyring: auto-unlock on login via PAM (secrets/passwords only)
+    # Enable on `login` because /etc/pam.d/sddm is `substack login` — setting
+    # this on `sddm` directly is a no-op.
     services.gnome.gnome-keyring.enable = true;
-    security.pam.services.sddm.enableGnomeKeyring = true;
+    security.pam.services.login.enableGnomeKeyring = true;
 
     # Disable GNOME's gcr SSH agent — it can't handle FIDO2/SK key signing
     # Use real OpenSSH agent instead
@@ -101,7 +102,7 @@
     environment.systemPackages =
       (with pkgs; [
         libnotify
-        swww # Wallpaper daemon
+        awww # Wallpaper daemon (swww renamed)
         hyprlock # Lock screen (compatible with niri)
         dunst # Notification manager
         pipewire

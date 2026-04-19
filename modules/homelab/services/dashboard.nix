@@ -450,14 +450,14 @@ let
 in
 {
   options = {
-    dashboard = {
+    homelab.dashboard = {
       homarr.enable = lib.mkEnableOption "Enables the homarr dashboard";
       glance.enable = lib.mkEnableOption "Enables the glance dashboard";
     };
   };
 
   config = lib.mkMerge [
-    (lib.mkIf config.dashboard.homarr.enable {
+    (lib.mkIf config.homelab.dashboard.homarr.enable {
       systemd.tmpfiles.rules = [
         "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
         "d /home/${user.userName}/dashboard/homarr 0770 ${toString user.uid} ${user.group} -"
@@ -472,7 +472,7 @@ in
         ports = [ "7575:7575" ];
       };
     })
-    (lib.mkIf config.dashboard.glance.enable {
+    (lib.mkIf config.homelab.dashboard.glance.enable {
       systemd.tmpfiles.rules = [
         "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
         "d /home/${user.userName}/dashboard/glance 0770 ${toString user.uid} ${user.group} -"

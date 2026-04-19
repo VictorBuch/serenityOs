@@ -12,9 +12,9 @@ let
   port = 8099;
 in
 {
-  options.wannashare.enable = lib.mkEnableOption "Enables WannaShare PocketBase backend";
+  options.homelab.wannashare.enable = lib.mkEnableOption "Enables WannaShare PocketBase backend";
 
-  config = lib.mkIf config.wannashare.enable {
+  config = lib.mkIf config.homelab.wannashare.enable {
 
     environment.systemPackages = with pkgs; [
       go

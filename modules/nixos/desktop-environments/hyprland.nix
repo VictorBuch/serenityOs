@@ -6,15 +6,14 @@
 }:
 {
 
-  imports = [
-    ./sddm.nix
-  ];
-
   options = {
     desktop-environments.hyprland.enable = lib.mkEnableOption "Enables Hyprland WM";
   };
 
   config = lib.mkIf config.desktop-environments.hyprland.enable {
+
+    # Inject Home Manager config for hyprland (keybinds, animations, etc.)
+    home-manager.sharedModules = [ ./home/hyprland ];
 
     # Enable the Hyprland Window Manager
     programs.hyprland = {
@@ -91,7 +90,7 @@
     environment.systemPackages = with pkgs; [
       libnotify
       # hyprpaper #Wallpaper
-      swww
+      awww # swww renamed
       hypridle # Idle
       hyprlock # Lock screen
       #waybar # Bar

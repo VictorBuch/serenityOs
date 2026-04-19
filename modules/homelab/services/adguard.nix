@@ -7,9 +7,9 @@
 }:
 
 {
-  options.adguard.enable = lib.mkEnableOption "Enables AdGuard Home DNS filtering service with Unbound";
+  options.homelab.adguard.enable = lib.mkEnableOption "Enables AdGuard Home DNS filtering service with Unbound";
 
-  config = lib.mkIf config.adguard.enable {
+  config = lib.mkIf config.homelab.adguard.enable {
 
     # Configure Unbound as the recursive DNS resolver
     services.unbound = {

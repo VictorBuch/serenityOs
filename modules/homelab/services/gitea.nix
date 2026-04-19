@@ -15,9 +15,9 @@ let
 in
 
 {
-  options.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
+  options.homelab.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
-  config = lib.mkIf config.gitea.enable {
+  config = lib.mkIf config.homelab.gitea.enable {
 
     #catppuccin.gitea.enable = true;
 

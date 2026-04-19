@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "minecraft";
+  category = "gaming";
   packages = { pkgs, ... }: [
     pkgs.zulu17
     pkgs.prismlauncher

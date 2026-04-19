@@ -9,7 +9,7 @@
 }:
 
 let
-  cfg = config.reactive-resume;
+  cfg = config.homelab.reactive-resume;
   hl = config.homelab;
   domain = hl.domain;
 
@@ -18,7 +18,7 @@ let
 in
 
 {
-  options.reactive-resume = {
+  options.homelab.reactive-resume = {
     enable = lib.mkEnableOption "Enables Reactive Resume - open-source resume builder";
 
     port = lib.mkOption {

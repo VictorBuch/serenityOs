@@ -3,11 +3,11 @@
   pkgs,
   lib,
   inputs,
-  isLinux ? pkgs.stdenv.isLinux,
   ...
 }:
 let
   cfg = config;
+  isLinux = pkgs.stdenv.isLinux;
 in
 {
 

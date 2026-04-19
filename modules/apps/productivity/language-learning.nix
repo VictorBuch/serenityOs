@@ -1,22 +1,15 @@
 args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
+  mkModule,
   ...
 }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "language-learning";
+  category = "productivity";
   packages =
     { pkgs, ... }:
     [
-      (pkgs.whisper-cpp.override { vulkanSupport = true; })
-      pkgs.yt-dlp
       pkgs.anki
     ];
-  description = "Language learning apps (Whisper, Anki, yt-dlp)";
+  description = "Language learning apps (Anki)";
 } args

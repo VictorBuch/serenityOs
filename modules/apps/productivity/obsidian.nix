@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{
+  mkModule,
+  ...
+}:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "obsidian";
+  category = "productivity";
   packages = { pkgs, ... }: [ pkgs.obsidian ];
   description = "Obsidian note-taking app";
 } args

@@ -8,11 +8,11 @@
 with lib;
 
 let
-  cfg = config.home-assistant;
+  cfg = config.homelab.home-assistant;
   domain = config.homelab.domain;
 in
 {
-  options.home-assistant = {
+  options.homelab.home-assistant = {
     enable = mkOption {
       type = types.bool;
       default = false;

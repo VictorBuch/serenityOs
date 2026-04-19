@@ -13,9 +13,9 @@ let
   gid = "immich"; # immich group
 in
 {
-  options.immich.enable = lib.mkEnableOption "Enables Immich photo backup service";
+  options.homelab.immich.enable = lib.mkEnableOption "Enables Immich photo backup service";
 
-  config = lib.mkIf config.immich.enable {
+  config = lib.mkIf config.homelab.immich.enable {
     users = {
       # Create dedicated immich group
       groups.immich = {

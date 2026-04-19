@@ -1,16 +1,8 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  inputs ? null,
-  isLinux,
-  mkApp,
-  ...
-}:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "signal";
+  category = "communication";
   packages = { pkgs, ... }: [ pkgs.signal-desktop ];
   description = "Private and secure messaging app";
 } args

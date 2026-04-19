@@ -15,10 +15,10 @@ in
 
 {
   options = {
-    nextcloud.enable = lib.mkEnableOption "Enables NextCloud with MySQL and Redis";
+    homelab.nextcloud.enable = lib.mkEnableOption "Enables NextCloud with MySQL and Redis";
   };
 
-  config = lib.mkIf config.nextcloud.enable {
+  config = lib.mkIf config.homelab.nextcloud.enable {
 
     services.nginx.enable = false;
 

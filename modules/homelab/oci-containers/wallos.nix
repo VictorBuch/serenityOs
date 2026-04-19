@@ -12,9 +12,9 @@ let
 in
 
 {
-  options.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
+  options.homelab.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
 
-  config = lib.mkIf config.wallos.enable {
+  config = lib.mkIf config.homelab.wallos.enable {
     networking.firewall.allowedTCPPorts = [ 8282 ];
 
     systemd.tmpfiles.rules = [

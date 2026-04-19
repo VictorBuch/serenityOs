@@ -9,14 +9,14 @@ with lib;
 
 {
 
-  options.lab = {
+  options.homelab.lab = {
     enable = mkOption {
-      type = types bool;
+      type = types.bool;
       default = false;
     };
   };
 
-  config = mkIf config.lab.enable {
+  config = mkIf config.homelab.lab.enable {
 
   };
 

@@ -8,11 +8,11 @@
 with lib;
 
 let
-  cfg = config.it-tools;
+  cfg = config.homelab.it-tools;
 in
 {
 
-  options.it-tools = {
+  options.homelab.it-tools = {
     enable = mkOption {
       type = types.bool;
       default = false;

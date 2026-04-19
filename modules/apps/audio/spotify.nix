@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "spotify";
+  category = "audio";
   packages = { pkgs, ... }: [ pkgs.spotify ];
   description = "Spotify music streaming";
   linuxExtraConfig = {

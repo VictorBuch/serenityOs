@@ -1,8 +1,8 @@
-args@{ config, pkgs, lib, inputs ? null, isLinux, mkApp, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
-  _file = toString ./.;
+mkModule {
   name = "vlc";
+  category = "audio";
   packages = { pkgs, ... }: [ pkgs.vlc ];
   description = "VLC media player";
 } args

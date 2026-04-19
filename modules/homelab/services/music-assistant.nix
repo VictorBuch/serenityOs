@@ -8,11 +8,11 @@
 with lib;
 
 let
-  cfg = config.music-assistant;
+  cfg = config.homelab.music-assistant;
 in
 {
 
-  options.music-assistant = {
+  options.homelab.music-assistant = {
     enable = mkOption {
       type = types.bool;
       default = false;

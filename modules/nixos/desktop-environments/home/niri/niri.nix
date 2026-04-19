@@ -9,7 +9,7 @@ let
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
-  wallpaperDaemon = "swww";
+  wallpaperDaemon = "awww";
   shell = "noctalia-shell";
   applicationLauncher = "fuzzel";
   # Stylix colors for niri (no upstream Stylix target for niri)
@@ -23,23 +23,25 @@ in
 
   config = lib.mkIf config.home.desktop-environments.niri.enable {
 
-    # Set Wayland environment variable
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
+    home-manager.sharedModules = [
+      {
+        # Set Wayland environment variable
+        home.sessionVariables.NIXOS_OZONE_WL = "1";
 
-    # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
-    # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
-    home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
-    xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
-      [Desktop Entry]
-      Type=Application
-      Hidden=true
-    '';
+        # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
+        # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
+        home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
+        xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
+          [Desktop Entry]
+          Type=Application
+          Hidden=true
+        '';
 
-    # Bluetooth applet (tray icon for managing bluetooth connections)
-    services.blueman-applet.enable = true;
+        # Bluetooth applet (tray icon for managing bluetooth connections)
+        services.blueman-applet.enable = true;
 
-    # Write niri config.kdl to ~/.config/niri/
-    xdg.configFile."niri/config.kdl".text = ''
+        # Write niri config.kdl to ~/.config/niri/
+        xdg.configFile."niri/config.kdl".text = ''
       // Input configuration
       input {
           // Focus windows automatically when moving the mouse into them.
@@ -129,6 +131,7 @@ in
             Mod+3 { spawn "focus-or-run" "Slack" "slack"; }
             Mod+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
             Mod+D { spawn "focus-or-run" "discord" "discord"; }
+            Mod+W { spawn "studio-start"; } // Windows Studio VM + Looking Glass
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
@@ -267,6 +270,20 @@ in
             default-column-width { proportion 0.6; }
         }
 
+        // Looking Glass client - Windows VM viewer, always fullscreen
+        window-rule {
+            match app-id=r#"^looking-glass-client$"#
+            open-fullscreen true
+        }
+
+        // Nautilus - floating, centered, ~45% screen
+        window-rule {
+            match app-id=r#"^org\.gnome\.Nautilus$"#
+            open-floating true
+            default-column-width { proportion 0.45; }
+            default-window-height { proportion 0.65; }
+        }
+
         // DaVinci Convert - float the conversion script terminal
         window-rule {
             match app-id=r#"^davinci-convert$"#
@@ -351,5 +368,7 @@ in
         }
 
     '';
+      }
+    ];
   };
 }

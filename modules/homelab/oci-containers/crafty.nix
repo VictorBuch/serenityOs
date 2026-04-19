@@ -15,10 +15,10 @@ in
 {
 
   options = {
-    crafty.enable = lib.mkEnableOption "Enables the crafty minecraft server controller";
+    homelab.crafty.enable = lib.mkEnableOption "Enables the crafty minecraft server controller";
   };
 
-  config = lib.mkIf config.crafty.enable {
+  config = lib.mkIf config.homelab.crafty.enable {
     networking.firewall.allowedTCPPorts = [
       8443
       8123

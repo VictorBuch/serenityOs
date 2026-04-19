@@ -2,10 +2,7 @@
 # Lighter setup - no audio production, video editing, or gaming
 {
   inputs,
-  isLinux,
   pkgs-stable,
-  mkHomeModule,
-  mkHomeCategory,
   ...
 }:
 let
@@ -30,10 +27,7 @@ in
       inherit
         username
         inputs
-        isLinux
         pkgs-stable
-        mkHomeModule
-        mkHomeCategory
         ;
     };
     users.${username} = import ../../home/default.nix;
@@ -56,7 +50,7 @@ in
   # Apps - lighter setup for laptop
   apps = {
     audio.enable = true;
-    browsers.zen.enable = false; # Managed by home-manager for Stylix theming
+    browsers.zen.enable = true;
     communication.enable = true;
     development.enable = true;
     utilities.enable = true;

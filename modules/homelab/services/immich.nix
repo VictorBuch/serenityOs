@@ -143,6 +143,14 @@ in
       openFirewall = true;
       machine-learning.enable = true;
 
+      accelerationDevices = [
+        "/dev/nvidia0"
+        "/dev/nvidiactl"
+        "/dev/nvidia-modeset"
+        "/dev/nvidia-uvm"
+        "/dev/nvidia-uvm-tools"
+      ];
+
       mediaLocation = immichDir;
 
       settings = {

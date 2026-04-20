@@ -98,6 +98,7 @@ in
 
     productivity = {
       obsidian.enable = true;
+      logseq.enable = true;
     };
 
     utilities = {
@@ -133,6 +134,7 @@ in
 
       persistent-apps = [
         "/Applications/Ghostty.app"
+        "/Applications/Nix Apps/Logseq.app"
         "/Applications/Nix Apps/Obsidian.app"
         "/Applications/TIDAL.app"
         "/Applications/Zen.app"

@@ -44,12 +44,6 @@ in
         devices = [ "nodev" ];
         efiSupport = true;
         useOSProber = true;
-        extraEntries = ''
-          menuentry "Windows" --class windows {
-            search --fs-uuid --no-floppy --set=root 79DF-17C2
-            chainloader /EFI/Microsoft/Boot/bootmgfw.efi
-          }
-        '';
       };
     };
     # Enable NTFS support for mounting Windows drives

@@ -30,7 +30,11 @@
       "Bash(jj st *)",
       "Bash(jj new -m 'feat: nixos-anywhere + disko onboarding for shepherd hosts *)",
       "Bash(jj file *)",
-      "Bash(nix build *)"
+      "Bash(nix build *)",
+      "Bash(jj log:*)",
+      "Bash(jj branch:*)",
+      "Bash(jj bookmark:*)",
+      "Bash(jj abandon:*)"
     ],
     "deny": [],
     "ask": []

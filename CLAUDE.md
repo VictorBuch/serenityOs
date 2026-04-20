@@ -14,41 +14,69 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 - **jayne**: Primary desktop system with full desktop environment (Hyprland)
 - **kaylee**: Lightweight desktop configuration
 - **serenity**: Homelab server with services and static IP (192.168.0.243)
-- **shepherd**: Base configuration template
+- **shepherd**: Base configuration template (x86_64)
+- **shepherd-arm**: Base configuration template (aarch64)
 
 **macOS Hosts:**
-- **inara**: macOS system using nix-darwin with Home Manager integration
+- **inara**: macOS system using nix-darwin with Home Manager integration (aarch64-darwin)
+
+### Module Auto-Discovery with import-tree
+
+Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`). This replaces manual import lists — just drop a `.nix` file in the right directory and it's automatically imported.
+
+**Key convention:** Files prefixed with `_` (e.g., `_categories.nix`, `_defaults.nix`, `_config.nix`) are **excluded** from import-tree auto-discovery. They are imported explicitly in `flake.nix` when needed.
 
 ### Module Structure
 
-The configuration uses a cross-platform module system:
+- `modules/common/` - Base cross-platform modules (auto-discovered via import-tree)
+- `modules/common/_defaults.nix` - Default enable values for common modules (imported explicitly)
+- `modules/nixos/` - NixOS-specific modules (desktop environments, system configs)
+- `modules/darwin/` - macOS-specific modules (homebrew config)
+- `modules/apps/` - Cross-platform application modules organized by category (auto-discovered)
+- `modules/apps/_categories.nix` - Auto-discovers categories and creates per-category enable options (imported explicitly)
+- `modules/homelab/` - Serenity host services (auto-discovered, plus `_config.nix` imported explicitly)
+- `home/` - Minimal Home Manager entry point (default.nix, home.nix, wallpapers)
+- `hosts/` - Host-specific configurations and hardware profiles
+- `hosts/profiles/` - Reusable host profiles (shepherd.nix, desktop.nix, desktop-home.nix, disko-btrfs.nix)
+- `lib/` - Custom helpers (only `mkModule`)
+- `overlays/` - Nixpkgs overlays (llm-agents, pam-cli, lute-v3, wine921)
+- `packages/` - Custom Nix packages (pam-cli, lute-v3)
 
-- `modules/common.nix`: Base module imported by platform-specific configs, loads `apps/` and `system-configs/`
-- `modules/nixos/`: NixOS-specific modules (imports common.nix + adds desktop-environments/)
-- `modules/darwin/`: nix-darwin-specific modules (imports common.nix + homebrew config)
-- `modules/apps/`: Cross-platform application modules organized by category (browsers, communication, development, media, productivity, utilities, gaming, audio, emulation, emacs)
-- `modules/system-configs/`: Cross-platform system-level configurations (fonts, nh, maintenance)
-- `modules/homelab/`: Server-specific services for serenity host (docker containers via systemd)
-- `home/`: Home Manager configurations for user-level dotfiles and CLI tools (terminal emulators, shell configs, git, neovim, tmux, etc.)
-- `hosts/`: Host-specific configurations and hardware profiles
+### How Modules Are Composed in flake.nix
 
-**Key Architecture Decision:**
-- Platform differences handled at the module import level (`modules/nixos/` vs `modules/darwin/`)
-- Application modules in `modules/apps/` are cross-platform and handle OS detection via the `isLinux` parameter
-- Home Manager is integrated into both NixOS and Darwin configurations via `home-manager.users.<username>`
+Each host gets these module layers:
+1. `modules/common/` (auto-discovered) + `_defaults.nix` (explicit)
+2. `modules/apps/` (auto-discovered) + `_categories.nix` (explicit)
+3. Host-specific config from `hosts/<name>/configuration.nix`
+4. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
+5. Home Manager + SOPS-nix integration modules
+
+Serenity is special — it gets `modules/homelab/` instead of `modules/nixos/` (no desktop modules).
+
+### Category System
+
+`modules/apps/_categories.nix` auto-discovers all subdirectories under `modules/apps/` and creates enable options:
+- `apps.browsers.enable = true` enables all browser modules (zen, firefox, etc.)
+- Individual modules can be overridden: `apps.browsers.zen.enable = false`
+- Per-category overrides in `_categories.nix` control which modules default to disabled (e.g., `gaming.ps3 = false`, `neovim.nixvim = false`)
 
 ### Key Dependencies
 
 - **nixpkgs**: NixOS packages (unstable channel)
-- **stable-nixpkgs**: Stable channel (25.05) available when needed
+- **nixpkgs-stable**: Stable channel (25.11) available as escape hatch via `pkgs-stable`
 - **home-manager**: User environment management
 - **nix-darwin**: macOS system configuration
 - **nix-homebrew**: Homebrew integration for macOS
-- **stylix**: System-wide theming (NixOS only)
-- **catppuccin**: Catppuccin theme integration
+- **import-tree**: Auto-import module directories
+- **disko**: Declarative disk partitioning (used with nixos-anywhere for onboarding)
+- **stylix**: System-wide theming
+- **nvf**: Neovim flake
 - **nixvim**: Neovim configuration
 - **sops-nix**: Secret management using SOPS
 - **zen-browser**: Custom browser package
+- **llm-agents**: AI coding agents (claude-code, etc.) from numtide
+- **nixpkgs-wine920**: Pinned nixpkgs for Wine 9.20 (yabridge audio compatibility)
+- **quickshell** / **noctalia**: Desktop shell components
 
 ## Development Commands
 
@@ -115,19 +143,6 @@ direnv allow
 # Custom scripts: dev, build, test, format
 ```
 
-**Prerequisites (for teammates):**
-```bash
-# Install Nix if not already installed
-sh <(curl -L https://nixos.org/nix/install)
-
-# Install devenv
-nix-env -iA nixpkgs.devenv
-
-# Install direnv (optional but recommended)
-nix-env -iA nixpkgs.direnv
-eval "$(direnv hook bash)"  # or zsh
-```
-
 See `devenvs/README.md` for detailed documentation.
 
 ### Homelab-Specific (serenity host)
@@ -146,20 +161,19 @@ The serenity host runs as a homelab server with the following characteristics:
 - Cloudflare tunnels for external access
 - Authentication: Tinyauth and pocket-id
 
-**Services Available:**
-- Dashboard: Homarr, Glance
-- Monitoring: Uptime Kuma, AdGuard Home
-- Media: Immich (photos), Mealie (recipes), Music Assistant, HyperHDR
-- File Management: Filebrowser, Nextcloud
-- Downloads: Deluge with VPN
-- Gaming: Crafty (Minecraft server management)
-- Authentication: Authelia, Tinyauth, Pocket-ID
-- Finance: Wallos (subscription tracking)
+**Storage Architecture:**
+- `/cache` (SSD): Hot storage for new writes
+- `/mnt/disk1`, `/mnt/disk2`: Cold storage HDDs
+- `/mnt/parity1`: SnapRAID parity disk
+- `/mnt/cold`: MergerFS union of disk1 + disk2
+- `/mnt/pool`: User-facing mount point (cache + cold)
+- Cache mover runs daily, SnapRAID syncs daily, scrub runs weekly
+- See `modules/homelab/STORAGE.md` for commands reference
 
 **Maintenance:**
 - Automatic updates enabled (daily at 02:00)
 - Automatic garbage collection runs weekly
-- SOPS for secret management (secrets in `secrets/secrets.yaml`, age key at `/home/serenity/.config/sops/age/keys.txt`)
+- SOPS for secret management (secrets in `secrets/secrets.yaml`)
 
 ### Testing and Validation
 
@@ -187,264 +201,148 @@ darwin-rebuild build --flake .#inara
 Uses SOPS-nix for secret management:
 
 - Secrets stored in `secrets/secrets.yaml`
-- Age key file: `/home/serenity/.config/sops/age/keys.txt`
+- Age key file location varies per host (check host config for `sops.age.keyFile`)
+- YubiKey support configured in `.sops.yaml` for jayne and inara hosts
 - Cloudflare, VPN, and service credentials managed via SOPS
 
 ## Installation
 
-New installations use the provided install scripts:
+**Primary method:** nixos-anywhere + disko (one command, no manual partitioning). See `docs/onboarding.md` for the full walkthrough.
 
-- `install.sh`: General NixOS installation
-- `install-serenity.sh`: Serenity host specific installation with homelab setup
+**Fallback:** `install.sh` for cases where nixos-anywhere isn't an option.
+
+### Host Profiles
+
+Reusable profiles in `hosts/profiles/`:
+- `shepherd.nix` - Base profile for all shepherd-derived hosts (locale, desktop env, base apps)
+- `desktop.nix` / `desktop-home.nix` - Desktop host configuration
+- `disko-btrfs.nix` - Shared btrfs partitioning layout with `@` / `@home` / `@nix` / `@log` subvolumes (parameterized by device path)
 
 ## Configuration Guidelines
 
-### Module vs Home Manager Placement
+### The mkModule Helper
 
-**Use `modules/` for:**
-- System-wide services (nginx, docker, databases, caddy)
-- Hardware configuration (bluetooth, printing, sound)
-- Desktop environments and window managers (Hyprland, niri, GNOME)
-- Services requiring system privileges
-- Multi-user applications
-- Boot and system-level settings
-- macOS system preferences (dock, finder, keyboard, etc.)
+All application and service modules use the single `mkModule` helper (`lib/mkModule.nix`). It replaces the older `mkApp`, `mkHomeModule`, and `mkCategory` helpers.
 
-**Use `home/` (Home Manager) for:**
-- User-specific dotfiles and configurations
-- Terminal emulators and shells (ghostty, kitty, nushell, zsh)
-- Editor configurations (neovim via nixvim)
-- CLI tools that don't need system privileges (fzf, starship, tmux, git)
-- User-specific theming and preferences
-- Per-user environment variables and shell hooks
+**CRITICAL: The `args` Pattern**
 
-**Module Organization:**
-- `modules/common.nix` - Base cross-platform module (imports apps/ and system-configs/)
-- `modules/nixos/` - NixOS-specific (imports common.nix + desktop-environments/ + system-configs/)
-- `modules/darwin/` - macOS-specific (imports common.nix + homebrew config)
-- `modules/apps/` - Cross-platform app modules by category:
-  - `audio/` - Audio production tools
-  - `browsers/` - Web browsers (zen-browser, firefox, chromium)
-  - `communication/` - Chat apps (discord, slack, telegram)
-  - `development/` - Dev tools, editors, terminals
-  - `emacs/` - Emacs configuration
-  - `emulation/` - Emulators and VMs
-  - `gaming/` - Games and gaming platforms
-  - `media/` - Media players and editors (vlc, ffmpeg, obs)
-  - `productivity/` - Office apps (obsidian, libreoffice)
-  - `utilities/` - System utilities
-- `modules/system-configs/` - Cross-platform system configuration:
-  - `fonts.nix` - Font configuration
-  - `nh.nix` - Nix Helper configuration
-  - `maintenance/` - Garbage collection, auto-updates
-- `modules/nixos/system-configs/` - NixOS-specific system configuration:
-  - `amd-gpu.nix` - AMD GPU driver support
-  - `nvidia-gpu.nix` - NVIDIA GPU driver support
-  - `user.nix` - User account management
-  - `networking/` - Network settings
-  - `maintenance/` - System maintenance
-- `modules/homelab/` - Serenity host services:
-  - `oci-containers/` - Docker containers as systemd services
-  - `services/` - Native NixOS services (caddy, nextcloud, etc.)
+All modules using `mkModule` **MUST** use the `args@{...}: ... } args` pattern:
 
-**Library Helpers (`lib/`):**
-- `lib/mkApp.nix` - Universal app module helper with cross-platform and stable/unstable support
-- `lib/mkCategory.nix` - Category module helper with auto-discovery of .nix files in directory (used in apps/*/default.nix)
-- `lib/mkHomeModule.nix` - Home Manager individual module helper (similar to mkApp but for home/ directory)
-- `lib/mkHomeCategory.nix` - Home Manager category helper (similar to mkCategory but for home/ directory)
-
-
-
-### Using the mkApp Helper
-
-The `mkApp` helper simplifies app module creation with automatic cross-platform support and stable/unstable package mixing.
-
-**Basic usage (cross-platform):**
 ```nix
-{ config, pkgs, lib, mkApp, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkApp {
+mkModule {
+  # configuration
+} args
+```
+
+**Without this pattern, you will get the error: "module does not look like a module"**
+
+**Basic app module** (system packages only):
+```nix
+args@{ config, pkgs, lib, mkModule, ... }:
+
+mkModule {
   name = "firefox";
-  optionPath = "apps.browsers.firefox";
-  packages = pkgs: [ pkgs.firefox ];
+  category = "browsers";
+  packages = { pkgs, ... }: [ pkgs.firefox ];
   description = "Mozilla Firefox web browser";
-}
+} args
+```
+
+This creates the option `apps.browsers.firefox.enable`.
+
+**With Home Manager config** (e.g., CLI tools):
+```nix
+args@{ config, pkgs, lib, mkModule, ... }:
+
+mkModule {
+  name = "fzf";
+  category = "cli";
+  description = "Fuzzy finder";
+  homeConfig = { config, pkgs, lib, ... }: {
+    programs.fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+  };
+} args
 ```
 
 **Platform-specific packages:**
 ```nix
-mkApp {
+mkModule {
   name = "ghostty";
-  optionPath = "apps.terminals.ghostty";
-  linuxPackages = pkgs: [ pkgs.ghostty ];
-  darwinPackages = pkgs: [ ];  # Installed via homebrew instead
+  category = "development";
+  linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
   darwinExtraConfig = {
     homebrew.casks = [ "ghostty" ];
   };
 }
 ```
 
-**Linux-only (auto-asserts on Darwin):**
-```nix
-mkApp {
-  name = "steam";
-  optionPath = "apps.gaming.steam";
-  linuxPackages = pkgs: [ pkgs.steam ];
-  description = "Steam gaming platform";
-}
-```
-
 **Mixing stable and unstable packages:**
 ```nix
-mkApp {
+mkModule {
   name = "myapp";
-  optionPath = "apps.myapp";
-  packages = { pkgs, stable-pkgs }: [
-    pkgs.firefox           # from unstable
-    stable-pkgs.libreoffice  # from stable (25.05)
+  category = "media";
+  packages = { pkgs, pkgs-stable, ... }: [
+    pkgs.something         # from unstable
+    pkgs-stable.something  # from stable (25.11)
   ];
 }
 ```
 
-**Benefits:**
-- Automatic platform detection and assertions
-- Single API for all use cases (cross-platform, platform-specific, Linux-only, Darwin-only)
-- Built-in stable/unstable package support via `inputs.stable-nixpkgs`
-- Reduced boilerplate compared to manual module creation
-- Auto-imported in all modules via `specialArgs` in flake.nix
-- Can auto-derive optionPath from file location using `_file` parameter (eliminates manual optionPath specification)
+**mkModule parameters:**
+- `name` (required) - Module name, used in option path
+- `category` (optional) - Subdirectory category, creates `apps.<category>.<name>.enable`
+- `namespace` (default: `"apps"`) - Top-level option namespace
+- `packages` / `linuxPackages` / `darwinPackages` - System packages (functions receiving `{ pkgs, pkgs-stable }`)
+- `extraConfig` / `linuxExtraConfig` / `darwinExtraConfig` - Additional NixOS/Darwin config
+- `homeConfig` / `linuxHomeConfig` / `darwinHomeConfig` - Home Manager config (injected via `home-manager.sharedModules`)
+- Linux-only modules (only `linuxPackages` set) are automatically skipped on Darwin
 
-**Note on mkCategory:**
-The `mkCategory` helper (in `lib/mkCategory.nix`) auto-discovers all `.nix` files in a category directory and creates a single enable option for the entire category (e.g., `apps.browsers.enable = true;` enables all browser modules). This is used in category `default.nix` files like `modules/apps/browsers/default.nix`. When the category is enabled, all discovered modules are automatically imported and enabled by default (overridable with `mkDefault`).
+### Adding a New Package
 
-### Using the mkHomeModule Helper
+1. Create `modules/apps/<category>/<name>.nix` using `mkModule`
+2. The file is auto-discovered by import-tree — no need to edit any imports
+3. Enable the category in host config: `apps.<category>.enable = true;` (enables all modules in category)
+4. Or enable individually: `apps.<category>.<name>.enable = true;`
+5. `git add` the new file (flakes only see Git-tracked files)
+6. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
 
-The `mkHomeModule` helper simplifies Home Manager module creation with automatic enable options and minimal boilerplate.
+### Enabling Homelab Services
 
-**CRITICAL: The `args` Pattern**
+Services are disabled by default. To enable:
 
-All modules using `mkHomeModule` or `mkHomeCategory` **MUST** use the `args@{...}: ... } args` pattern:
+1. Edit `hosts/serenity/configuration.nix`
+2. Set the service option to true (e.g., `immich.enable = true;`)
+3. Ensure secrets are configured in `secrets/secrets.yaml` if needed
+4. Rebuild: `sudo nixos-rebuild switch --flake .#serenity`
 
-```nix
-args@{                    # Capture all arguments at the start
-  config,
-  pkgs,
-  lib,
-  mkHomeModule,          # The helper function
-  ...
-}:
+### Working with Secrets (SOPS)
 
-mkHomeModule {
-  # ... configuration ...
-} args                    # Pass args at the end
+```bash
+# Edit secrets (requires age key)
+sops secrets/secrets.yaml
+
+# Add new age key
+sops updatekeys secrets/secrets.yaml
 ```
 
-**Without this pattern, you will get the error: "module does not look like a module"**
-
-**Basic usage (auto-derive optionPath from file location):**
-```nix
-args@{ config, pkgs, lib, mkHomeModule, ... }:
-
-mkHomeModule {
-  _file = toString ./.;  # Auto-derives path like "home.cli.git"
-  name = "git";
-  description = "Git version control";
-  homeConfig = { config, pkgs, lib, ... }: {
-    programs.git = {
-      enable = true;
-      userName = "...";
-    };
-  };
-} args
-```
-
-**Manual optionPath (when auto-derive doesn't work):**
-```nix
-args@{ config, pkgs, lib, mkHomeModule, ... }:
-
-mkHomeModule {
-  name = "noctalia";
-  optionPath = "home.desktop-environments.noctalia";
-  description = "Noctalia shell - A modern Wayland shell for niri";
-  homeConfig = { config, pkgs, lib, ... }: {
-    programs.noctalia-shell = {
-      enable = true;
-      # ... configuration ...
-    };
-  };
-} args
-```
-
-**Key differences from mkApp:**
-- Located in `home/` directory (not `modules/apps/`)
-- Creates options like `home.cli.git.enable` (not `apps.*.enable`)
-- No platform-specific package splitting (home manager handles that)
-- Always uses `homeConfig` parameter (not `packages` or `linuxPackages`)
-
-**Benefits:**
-- Automatic enable option creation
-- Auto-derives option path from file location
-- Consistent with mkApp pattern but for Home Manager
-- Reduces boilerplate in home configuration modules
-
-### Using the mkHomeCategory Helper
-
-The `mkHomeCategory` helper auto-discovers and enables all Home Manager modules in a category.
-
-**Usage in category default.nix:**
-```nix
-args@{ mkHomeCategory, ... }:
-
-mkHomeCategory {
-  _file = toString ./.;
-  name = "cli";
-} args
-```
-
-**With custom enable defaults:**
-```nix
-args@{ mkHomeCategory, ... }:
-
-mkHomeCategory {
-  _file = toString ./.;
-  name = "cli";
-  enableByDefault = {
-    zsh = false;      # Don't enable zsh by default
-    nushell = true;   # Enable nushell by default
-  };
-} args
-```
-
-**Features:**
-- Auto-discovers all `.nix` files in the directory (except `default.nix`)
-- Auto-imports discovered files and subdirectory `default.nix` files
-- Creates single enable option: `home.cli.enable = true;` enables all CLI modules
-- Supports nested categories (subdirectories with their own `default.nix`)
-- Optional manual control via `enableByDefault` parameter
-
-**Example directory structure:**
-```
-home/cli/
-├── default.nix       # Uses mkHomeCategory
-├── git.nix           # Auto-discovered
-├── tmux.nix          # Auto-discovered
-└── neovim/           # Subdirectory
-    └── default.nix   # Auto-imported
-```
-
-Enabling `home.cli.enable = true;` will automatically enable `home.cli.git`, `home.cli.tmux`, and `home.cli.neovim` (unless overridden).
+Secrets are automatically decrypted at runtime and made available to services via `config.sops.secrets.<name>.path`.
 
 ## Common Errors and Troubleshooting
 
 ### "module does not look like a module"
 
-**Cause:** Missing the `args@{...}: ... } args` pattern when using `mkHomeModule` or `mkHomeCategory`.
+**Cause:** Missing the `args@{...}: ... } args` pattern when using `mkModule`.
 
 **Solution:** Always use this pattern:
 ```nix
-args@{ config, pkgs, lib, mkHomeModule, ... }:
+args@{ config, pkgs, lib, mkModule, ... }:
 
-mkHomeModule {
+mkModule {
   # configuration
 } args
 ```
@@ -458,39 +356,17 @@ mkHomeModule {
 git add path/to/file.nix
 ```
 
-### mkApp vs mkHomeModule confusion
-
-**mkApp (for `modules/apps/`):**
-- Creates options like `apps.browsers.firefox.enable`
-- Uses `packages`, `linuxPackages`, `darwinPackages` parameters
-- For system-level applications
-
-**mkHomeModule (for `home/`):**
-- Creates options like `home.cli.git.enable`
-- Uses `homeConfig` parameter (function returning Home Manager config)
-- For user-level configurations
-
-### Missing app icons in Qt/QML applications (noctalia, etc.)
+### Missing app icons in Qt/QML applications
 
 **Cause:** Qt applications don't automatically detect GTK icon themes without proper environment variables.
 
-**Solution:** Add to your Home Manager module:
+**Solution:** Add to your module's `extraConfig` or `homeConfig`:
 ```nix
 home.sessionVariables = {
-  QT_QPA_PLATFORMTHEME = "gtk3";      # Use GTK theme
-  QS_ICON_THEME = "Papirus-Dark";     # Fallback icon theme
-};
-```
-
-Or system-wide via:
-```nix
-environment.variables = {
   QT_QPA_PLATFORMTHEME = "gtk3";
   QS_ICON_THEME = "Papirus-Dark";
 };
 ```
-
-**Note:** Requires reboot or re-login to take effect.
 
 ### Flake module naming inconsistencies
 
@@ -504,79 +380,24 @@ Different flakes use different naming conventions for their Home Manager modules
 nix flake show github:owner/repo
 ```
 
-Look for either `homeManagerModules` or `homeModules` in the output.
-
 ## Platform-Specific Notes
 
 ### NixOS (jayne, kaylee, serenity, shepherd)
 - All configurations use `nixos-unstable` channel
 - Home Manager integrated via `inputs.home-manager.nixosModules.default`
-- Desktop hosts (jayne, kaylee) use Catppuccin theming via `inputs.catppuccin.nixosModules.catppuccin`
-- Serenity host does NOT use Home Manager (server-only configuration)
+- Serenity host does NOT use desktop modules (homelab modules instead)
 - SOPS-nix enabled on all hosts for secret management
 
 ### macOS (inara)
 - Uses nix-darwin for system configuration
 - Home Manager integrated via `inputs.home-manager.darwinModules.default`
-- Homebrew managed via nix-homebrew (configured in `modules/darwin/homebrew.nix`)
-- macOS system defaults configured in host configuration (dock, finder, keyboard, trackpad, etc.)
+- Homebrew managed via nix-homebrew (configured in `modules/darwin/`)
 - `allowBroken = true` set to enable some Linux packages with broken dependencies on macOS
-- Shell registered: nushell available as login shell
 
 ### Cross-Platform Configuration
-- `isLinux` parameter passed to all modules for platform detection
+- Platform detection handled inside `mkModule` via `pkgs.stdenv.isLinux`
 - Application modules in `modules/apps/` handle platform differences internally
-- Home Manager configurations in `home/` work on both platforms
-- Core development tools: neovim (nixvim), git, fzf, starship, tmux, nh, zoxide, claude-code
-
-## Common Development Tasks
-
-### Adding a New Package
-
-**Using mkApp helper:**
-1. Determine placement: system (`modules/apps/<category>/`) vs user (`home/`)
-2. Create a new module file using `mkApp` helper (see "Using the mkApp Helper" section)
-3. Add the new file to the category's `default.nix` imports (or let add-package.sh do it)
-4. Enable the module in your host configuration (`hosts/<hostname>/configuration.nix`)
-5. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
-
-**Example module file:**
-```nix
-{ config, pkgs, lib, mkApp, ... }:
-
-mkApp {
-  name = "discord";
-  optionPath = "apps.communication.discord";
-  packages = pkgs: [ pkgs.discord ];
-}
-```
-
-**Then enable in host config:**
-```nix
-apps.communication.discord.enable = true;
-```
-
-### Enabling Homelab Services
-
-Services are disabled by default in `modules/homelab/default.nix`. To enable:
-
-1. Edit `hosts/serenity/configuration.nix`
-2. Set the service option to true (e.g., `immich.enable = true;`)
-3. Configure service-specific options in the service module
-4. Ensure secrets are configured in `secrets/secrets.yaml` if needed
-5. Rebuild: `sudo nixos-rebuild switch --flake .#serenity`
-
-### Working with Secrets (SOPS)
-
-```bash
-# Edit secrets (requires age key)
-sops secrets/secrets.yaml
-
-# Add new age key
-sops updatekeys secrets/secrets.yaml
-```
-
-Secrets are automatically decrypted at runtime and made available to services via `config.sops.secrets.<name>.path`.
+- `mkModule` available in all modules via `specialArgs` in flake.nix
 
 ## Maintenance
 
@@ -604,4 +425,3 @@ Key routing rules:
 - Architecture review → invoke plan-eng-review
 - Save progress, checkpoint, resume → invoke checkpoint
 - Code quality, health check → invoke health
-

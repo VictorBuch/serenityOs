@@ -4,37 +4,23 @@
   # Enable JavaScript/Node.js language support with LTS version
   languages.javascript = {
     enable = true;
-    package = pkgs.nodePackages_latest.nodejs;
+    package = pkgs.nodejs;
   };
 
   # Additional packages for Vue/Nuxt development
   packages = with pkgs; [
     # Package managers (prefer pnpm for Vue/Nuxt)
-    nodePackages.pnpm
-    nodePackages.npm
+    pnpm
 
     # Development tools
-    nodePackages.typescript
+    typescript
     vue-language-server
-    nodePackages.typescript-language-server
-    nodePackages.prettier
+    typescript-language-server
+    prettier
 
     # Utilities
     jq
   ];
-
-  # Git hooks for automatic formatting
-  git-hooks.hooks = {
-    prettier = {
-      enable = true;
-      excludes = [
-        "package-lock.json"
-        "pnpm-lock.yaml"
-        ".nuxt/*"
-        "dist/*"
-      ];
-    };
-  };
 
   # Custom scripts for common Vue/Nuxt tasks
   scripts = {

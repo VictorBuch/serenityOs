@@ -76,6 +76,18 @@ let
         echo '$AUDIO_PCI' > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
         echo '$GPU_ID'    > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
         echo '$AUDIO_ID'  > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
+
+        # Let PCI state settle before touching the GPU again. Navi 3x PSP/SMU
+        # need quiet time after vfio releases them; binding amdgpu immediately
+        # races the SMU and leaves it wedged.
+        sleep 2
+
+        # Function-level reset while no driver is bound — clears any half
+        # torn-down state before amdgpu takes over.
+        echo 1 > '/sys/bus/pci/devices/$GPU_PCI/reset'   2>/dev/null
+        echo 1 > '/sys/bus/pci/devices/$AUDIO_PCI/reset' 2>/dev/null
+        sleep 1
+
         echo '$GPU_PCI'   > /sys/bus/pci/drivers/amdgpu/bind 2>/dev/null
         echo '$AUDIO_PCI' > /sys/bus/pci/drivers/snd_hda_intel/bind 2>/dev/null
       " </dev/null >/dev/null 2>&1 &
@@ -100,10 +112,16 @@ mkModule {
 
   linuxExtraConfig = {
     # IOMMU + VFIO kernel setup. pcie_aspm=off prevents AER errors on AMD.
+    # amdgpu.runpm=0 disables dGPU runtime power management. Without this,
+    # amdgpu cycles the RX 7900 XT through PSP/SMU suspend+resume when idle;
+    # after enough cycles the SMU wedges ("SMU: I'm not done with your
+    # previous command") and the fan pins at 100% because PWM control is
+    # lost. Cost: ~15-25W extra idle draw. Benefit: GPU stays reachable.
     boot.kernelParams = [
       "amd_iommu=on"
       "iommu=pt"
       "pcie_aspm=off"
+      "amdgpu.runpm=0"
     ];
     boot.kernelModules = [
       "vfio"

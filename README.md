@@ -52,7 +52,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/VictorBuch/serenityOs/main/in
 
 - **jayne** - Primary desktop with Hyprland and full desktop environment
 - **kaylee** - Lightweight desktop configuration
-- **serenity** - Homelab server with services and static IP
+- **mal** - Homelab server with services and static IP
 - **shepherd** - Base configuration template for new systems
 
 ### macOS
@@ -145,7 +145,7 @@ If you get locked out or need to reset password:
 # Boot to a TTY (Ctrl+Alt+F2) or recovery mode
 sudo passwd <username>
 
-# Where <username> is: jayne, kaylee, serenity, or shepherd
+# Where <username> is: jayne, kaylee, mal, or shepherd
 ```
 
 ### First Build Takes Long
@@ -163,6 +163,6 @@ See [CLAUDE.md](./CLAUDE.md) for detailed documentation on:
 - System architecture and module structure
 - Development commands and workflows
 - Adding new packages and services
-- Homelab configuration (serenity host)
+- Homelab configuration (mal host)
 - Secret management with SOPS
 - Development shells for different project types

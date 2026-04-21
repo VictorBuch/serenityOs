@@ -46,7 +46,7 @@ in
       "1.1.1.1"
     ];
 
-    hostName = "serenity";
+    hostName = "mal";
 
     # Open ports in the firewall.
     firewall.allowedTCPPorts = [

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Transform your two YubiKey 5C Nanos into central security keys across your fleet: FIDO2 SSH authentication, touch-to-sudo, YubiKey-backed sops-nix secrets, git commit signing, screen locking, and more. Each YubiKey is dedicated to one machine -- one for `jayne` (desktop) and one for `inara` (laptop). Hosts without a physical YubiKey (like `serenity`) continue using the file-based age key for sops decryption.
+Transform your two YubiKey 5C Nanos into central security keys across your fleet: FIDO2 SSH authentication, touch-to-sudo, YubiKey-backed sops-nix secrets, git commit signing, screen locking, and more. Each YubiKey is dedicated to one machine -- one for `jayne` (desktop) and one for `inara` (laptop). Hosts without a physical YubiKey (like `mal`) continue using the file-based age key for sops decryption.
 
 ---
 
@@ -46,7 +46,7 @@ ssh-keygen -t ed25519-sk -O resident -O verify-required -C "inara@yubikey-5c-nan
 # The actual private key never leaves the YubiKey
 ```
 
-You now have **two** distinct FIDO2 SSH public keys. Both will be added to serenity's `authorized_keys`.
+You now have **two** distinct FIDO2 SSH public keys. Both will be added to mal's `authorized_keys`.
 
 ### 1c. Register each YubiKey for PAM U2F
 
@@ -105,7 +105,7 @@ age-plugin-yubikey  # Generates a new age identity tied to inara's YubiKey PIV s
 ### 1e. Cross-machine registration
 
 - **U2F mappings**: The combined `u2f_keys` file (with both keys) gets stored in sops and deployed to `/etc/u2f-mappings` on all NixOS hosts.
-- **SSH public keys**: Both `id_ed25519_sk.pub` keys go into `authorized_keys` on serenity.
+- **SSH public keys**: Both `id_ed25519_sk.pub` keys go into `authorized_keys` on mal.
 - **Resident key recovery**: On a fresh machine (or after reinstall), recover the resident SSH key with `ssh-keygen -K` while the YubiKey for that machine is plugged in.
 
 ---
@@ -154,7 +154,7 @@ security.pam.services = {
 
 The `/etc/u2f-mappings` file contains both YubiKey registrations (from step 1c) and is deployed via `environment.etc` with contents from sops. Either YubiKey can authenticate `sudo` on any NixOS machine.
 
-### 2c. SSH hardening on serenity: `hosts/serenity/configuration.nix`
+### 2c. SSH hardening on mal: `hosts/mal/configuration.nix`
 
 ```nix
 services.openssh = {
@@ -230,7 +230,7 @@ All three keys are encryption targets. Only **one** is needed to decrypt:
 
 | Host                | Decrypts with                                             |
 | ------------------- | --------------------------------------------------------- |
-| **serenity**        | `&primary` file-based age key                             |
+| **mal**             | `&primary` file-based age key                             |
 | **jayne**           | jayne's YubiKey touch OR `&primary` (if key file present) |
 | **inara**           | inara's YubiKey touch OR `&primary` (if key file present) |
 | **kaylee/shepherd** | `&primary` file-based age key                             |
@@ -385,7 +385,7 @@ You already have Touch ID for sudo on inara. The YubiKey can be an additional op
 | `modules/common/default.nix`        | Import `yubikey.nix`                                                 |
 | `modules/nixos/system/security.nix` | **New** - PAM U2F (both keys), sudo with YubiKey, screen lock        |
 | `modules/nixos/system/default.nix`  | Import `security.nix`                                                |
-| `hosts/serenity/configuration.nix`  | SSH hardening, both FIDO2 authorized keys                            |
+| `hosts/mal/configuration.nix`       | SSH hardening, both FIDO2 authorized keys                            |
 | `hosts/jayne/configuration.nix`     | sops config, Tailscale                                               |
 | `hosts/inara/configuration.nix`     | sops config                                                          |
 | `.sops.yaml`                        | Add both YubiKey age recipients (`&yubikey-jayne`, `&yubikey-inara`) |
@@ -402,12 +402,12 @@ You already have Touch ID for sudo on inara. The YubiKey can be an additional op
 3. **Manual**: Combine U2F registrations into a single mappings entry
 4. **Code**: Create `yubikey.nix` module with packages/udev/pcscd
 5. **Code**: Create security module with PAM U2F config (both keys in mappings)
-6. **Code**: Harden SSH on serenity + add both authorized keys
+6. **Code**: Harden SSH on mal + add both authorized keys
 7. **Code**: Expand sops-nix to jayne, inara, and flake.nix
 8. **Code**: Update `.sops.yaml` with both YubiKey recipients and re-encrypt secrets
 9. **Code**: Add git commit signing config + shared `allowed_signers`
 10. **Code**: Add screen lock udev rule
-11. **Test**: Build and switch on jayne first, then serenity, then inara
+11. **Test**: Build and switch on jayne first, then mal, then inara
 12. **Manual**: Register both YubiKeys for web services (GitHub passkeys, etc.)
 
 ---
@@ -417,7 +417,7 @@ You already have Touch ID for sudo on inara. The YubiKey can be an additional op
 | Risk                                      | Mitigation                                                                                            |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Locked out of sudo if YubiKey lost/broken | `control = "sufficient"` falls back to password                                                       |
-| Locked out of SSH to serenity             | Keep Tailscale SSH as backup path; both YubiKeys are authorized; keep password auth during transition |
+| Locked out of SSH to mal                  | Keep Tailscale SSH as backup path; both YubiKeys are authorized; keep password auth during transition |
 | Can't rebuild without YubiKey for sops    | `&primary` file-based age key is always a co-recipient on every host                                  |
 | One YubiKey lost or damaged               | The other YubiKey + `&primary` key still work; re-enroll a replacement key                            |
 | macOS OpenSSH doesn't support FIDO2       | Install Homebrew OpenSSH                                                                              |
@@ -432,7 +432,7 @@ You already have Touch ID for sudo on inara. The YubiKey can be an additional op
 - **SSH auth method**: FIDO2 `ed25519-sk` (modern, simple, hardware-bound) -- one key pair per YubiKey
 - **Sudo mode**: `sufficient` with password fallback (touch YubiKey OR type password)
 - **sops decryption**: Three recipients per secret -- `&primary` (file-based) + both YubiKeys
-- **serenity sops**: Continues using file-based `&primary` key only (no YubiKey plugged in)
-- **SSH daemon**: Only on serenity (hardened, both FIDO2 keys authorized); desktops use Tailscale SSH
+- **mal sops**: Continues using file-based `&primary` key only (no YubiKey plugged in)
+- **SSH daemon**: Only on mal (hardened, both FIDO2 keys authorized); desktops use Tailscale SSH
 - **Git signing**: Per-machine key with shared `allowed_signers` containing both public keys
 - **Secrets needed**: Both SSH authorized keys + Tailscale auth keys + combined U2F mappings

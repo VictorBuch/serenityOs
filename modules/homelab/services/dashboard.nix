@@ -908,7 +908,7 @@ in
                       servers = [
                         {
                           type = "local";
-                          name = "Serenity";
+                          name = "Mal";
                         }
                       ];
                     }

@@ -1,4 +1,4 @@
-# Serenity Baremetal Migration Guide
+# Mal Baremetal Migration Guide
 
 Migration from Proxmox VM with TrueNAS NFS to baremetal NixOS with mergerFS + SnapRAID.
 
@@ -105,7 +105,7 @@ Add minimal essentials:
   boot.loader.grub.device = "/dev/sda";
 
   # Networking
-  networking.hostName = "serenity";
+  networking.hostName = "mal";
   networking.networkmanager.enable = true;
 
   # Enable flakes
@@ -137,7 +137,7 @@ nixos-enter --root /mnt -c "passwd serenity"
 reboot
 ```
 
-## Phase 2: Deploy Serenity Configuration
+## Phase 2: Deploy Mal Configuration
 
 ### 1. Initial System Access
 Boot into the new system and login as serenity.
@@ -163,10 +163,10 @@ chmod 600 ~/.config/sops/age/keys.txt
 ### 4. Update Hardware Configuration
 ```bash
 # Copy the generated hardware-configuration.nix to repository
-sudo cp /etc/nixos/hardware-configuration.nix ~/serenityOs/hosts/serenity/
+sudo cp /etc/nixos/hardware-configuration.nix ~/serenityOs/hosts/mal/
 
 # Verify it has btrfs root filesystem
-cat ~/serenityOs/hosts/serenity/hardware-configuration.nix
+cat ~/serenityOs/hosts/mal/hardware-configuration.nix
 ```
 
 ### 5. Build and Switch Configuration
@@ -176,13 +176,13 @@ cat ~/serenityOs/hosts/serenity/hardware-configuration.nix
 cd ~/serenityOs
 
 # Run the install script - handles build, switch, and Phase 3 setup
-./install-serenity.sh
+./install-mal.sh
 ```
 
 This script will:
 - Validate storage labels and filesystems
 - Create the `/cache` directory
-- Run `nixos-rebuild switch --flake .#serenity`
+- Run `nixos-rebuild switch --flake .#mal`
 - Create service directories on mergerFS pool
 - Optionally run initial SnapRAID sync
 - Verify all mounts and services
@@ -195,13 +195,13 @@ cd ~/serenityOs
 nix flake check
 
 # Build (don't switch yet)
-sudo nixos-rebuild build --flake .#serenity
+sudo nixos-rebuild build --flake .#mal
 
 # Review what will change
 nix store diff-closures /run/current-system ./result
 
 # Switch to new configuration
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 
 # Create cache directory
 sudo mkdir -p /cache
@@ -219,7 +219,7 @@ If you used Option A, skip to Phase 4 (the script handles Phase 3).
 
 ## Phase 3: Initialize Storage
 
-_(Skip this phase if you used `install-serenity.sh`)_
+_(Skip this phase if you used `install-mal.sh`)_
 
 ### 1. Verify Mounts
 ```bash
@@ -477,7 +477,7 @@ dataDisks = {
 };
 
 # 4. Rebuild
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 
 # 5. Run SnapRAID sync
 sudo systemctl start snapraid-sync.service
@@ -499,10 +499,10 @@ git add modules/homelab/configs.nix
 git add modules/homelab/default.nix
 git add modules/homelab/oci-containers/deluge-vpn.nix
 git add modules/homelab/services/nextcloud.nix
-git add hosts/serenity/hardware-configuration.nix
-git add hosts/serenity/MIGRATION-GUIDE.md
+git add hosts/mal/hardware-configuration.nix
+git add hosts/mal/MIGRATION-GUIDE.md
 
-git commit -m "feat: migrate serenity to baremetal with mergerFS + SnapRAID"
+git commit -m "feat: migrate mal to baremetal with mergerFS + SnapRAID"
 git push
 ```
 

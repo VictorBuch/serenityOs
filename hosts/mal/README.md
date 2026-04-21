@@ -1,17 +1,17 @@
-# Serenity Server Documentation
+# Mal Server Documentation
 
-This document provides setup and maintenance instructions for the Serenity homelab server.
+This document provides setup and maintenance instructions for the Mal homelab server.
 
 ## Server Information
 
-- **Hostname**: serenity
+- **Hostname**: mal
 - **Static IP**: 192.168.0.243
 - **OS**: NixOS
 - **Role**: Homelab server with media services, development tools, and automation
 
 ## Services Overview
 
-The Serenity server runs various services managed through NixOS modules:
+The Mal server runs various services managed through NixOS modules:
 
 - **VPN/Networking**: Tailscale (secure mesh VPN, exit node)
 - **Reverse Proxy**: Caddy (HTTPS with Cloudflare certificates)
@@ -25,11 +25,11 @@ The Serenity server runs various services managed through NixOS modules:
 
 ## Tailscale Setup
 
-Tailscale provides secure, encrypted mesh VPN connectivity between all your devices. The Serenity server is configured as an exit node, allowing you to route all your internet traffic through your home network from anywhere.
+Tailscale provides secure, encrypted mesh VPN connectivity between all your devices. The Mal server is configured as an exit node, allowing you to route all your internet traffic through your home network from anywhere.
 
 ### Service Configuration
 
-- **Exit Node**: Enabled (routes internet traffic through Serenity)
+- **Exit Node**: Enabled (routes internet traffic through Mal)
 - **Subnet Routes**: Advertises 192.168.0.0/24 (entire home network accessible via Tailscale)
 - **Tailscale SSH**: Enabled (secure SSH access without exposing port 22)
 - **Routing Features**: "both" (client and server capabilities)
@@ -69,7 +69,7 @@ tailscale:
 The Tailscale service is already enabled in the configuration:
 
 ```bash
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 ```
 
 #### 4. Approve Exit Node (First Time Only)
@@ -77,7 +77,7 @@ sudo nixos-rebuild switch --flake .#serenity
 After the first deployment:
 
 1. Visit [Tailscale Admin Console](https://login.tailscale.com/admin/machines)
-2. Find the "serenity" machine
+2. Find the "mal" machine
 3. Click **Edit route settings**
 4. Approve the exit node and subnet routes
 
@@ -88,8 +88,8 @@ After the first deployment:
 From any device on your Tailnet:
 
 ```bash
-# Use Serenity as exit node (routes all traffic through Serenity)
-tailscale up --exit-node=serenity
+# Use Mal as exit node (routes all traffic through Mal)
+tailscale up --exit-node=mal
 
 # Stop using exit node
 tailscale up --exit-node=
@@ -98,7 +98,7 @@ tailscale up --exit-node=
 On mobile devices:
 1. Open Tailscale app
 2. Tap on your device name
-3. Select **Use exit node** → **serenity**
+3. Select **Use exit node** → **mal**
 
 #### Access Home Network Devices
 
@@ -111,7 +111,7 @@ ping 192.168.0.1
 # Access other devices by IP
 ssh user@192.168.0.x
 
-# Access Serenity directly via Tailscale IP
+# Access Mal directly via Tailscale IP
 ssh serenity@100.x.x.x  # Tailscale assigns 100.x.x.x addresses
 ```
 
@@ -121,13 +121,13 @@ Tailscale SSH is enabled, providing secure SSH access without exposing port 22:
 
 ```bash
 # SSH using Tailscale (no port forwarding needed)
-ssh serenity@serenity
+ssh serenity@mal
 
 # Or use the Tailscale IP
 ssh serenity@100.x.x.x
 ```
 
-Configure SSH ACLs in the [Tailscale Admin Console](https://login.tailscale.com/admin/acls) to control who can SSH into Serenity.
+Configure SSH ACLs in the [Tailscale Admin Console](https://login.tailscale.com/admin/acls) to control who can SSH into Mal.
 
 #### Check Tailscale Status
 
@@ -142,12 +142,12 @@ sudo tailscale status | grep exit
 sudo tailscale exit-node list
 
 # Check connection quality
-sudo tailscale ping serenity
+sudo tailscale ping mal
 ```
 
 ### Configuration Options
 
-The Tailscale module is highly configurable. Current settings in `hosts/serenity/configuration.nix`:
+The Tailscale module is highly configurable. Current settings in `hosts/mal/configuration.nix`:
 
 ```nix
 tailscale = {
@@ -197,7 +197,7 @@ sops secrets/secrets.yaml
 # Update tailscale.auth_key
 
 # Rebuild to apply
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 ```
 
 #### Network Performance
@@ -240,7 +240,7 @@ ip addr show tailscale0
 
 1. Verify SSH is enabled: `sudo tailscale status | grep ssh`
 2. Check Tailscale ACLs allow SSH access
-3. Test connection: `tailscale ssh serenity@serenity`
+3. Test connection: `tailscale ssh serenity@mal`
 4. Check logs: `journalctl -u tailscaled -f`
 
 ## Gitea Setup
@@ -274,7 +274,7 @@ gitea:
 #### 2. Deploy Configuration
 
 ```bash
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 ```
 
 #### 3. Complete Web Setup
@@ -299,7 +299,7 @@ To enable CI/CD runners:
    ```
 6. Rebuild to activate runners:
    ```bash
-   sudo nixos-rebuild switch --flake .#serenity
+   sudo nixos-rebuild switch --flake .#mal
    ```
 
 ### Usage
@@ -429,7 +429,7 @@ sudo tar -czf gitea-repos-backup.tar.gz /var/lib/gitea/repositories
 
 ### System Updates
 
-The Serenity server has automatic updates enabled:
+The Mal server has automatic updates enabled:
 - **Schedule**: Daily at 02:00
 - **Garbage Collection**: Weekly (keeps last 10 days)
 
@@ -437,7 +437,7 @@ The Serenity server has automatic updates enabled:
 
 ```bash
 # Rebuild configuration
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 
 # Update flake inputs
 nix flake update
@@ -520,8 +520,8 @@ ss -tulpn
 
 ## Configuration Files
 
-- **Host config**: `hosts/serenity/configuration.nix`
-- **Hardware config**: `hosts/serenity/hardware-configuration.nix`
+- **Host config**: `hosts/mal/configuration.nix`
+- **Hardware config**: `hosts/mal/hardware-configuration.nix`
 - **Homelab modules**: `modules/homelab/`
 - **Secrets**: `secrets/secrets.yaml` (encrypted)
 

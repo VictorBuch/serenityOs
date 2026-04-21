@@ -13,7 +13,7 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 **NixOS Hosts:**
 - **jayne**: Primary desktop system with full desktop environment (Hyprland)
 - **kaylee**: Lightweight desktop configuration
-- **serenity**: Homelab server with services and static IP (192.168.0.243)
+- **mal**: Homelab server with services and static IP (192.168.0.243)
 - **shepherd**: Base configuration template (x86_64)
 - **shepherd-arm**: Base configuration template (aarch64)
 
@@ -34,7 +34,7 @@ Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`).
 - `modules/darwin/` - macOS-specific modules (homebrew config)
 - `modules/apps/` - Cross-platform application modules organized by category (auto-discovered)
 - `modules/apps/_categories.nix` - Auto-discovers categories and creates per-category enable options (imported explicitly)
-- `modules/homelab/` - Serenity host services (auto-discovered, plus `_config.nix` imported explicitly)
+- `modules/homelab/` - Mal host services (auto-discovered, plus `_config.nix` imported explicitly)
 - `home/` - Minimal Home Manager entry point (default.nix, home.nix, wallpapers)
 - `hosts/` - Host-specific configurations and hardware profiles
 - `hosts/profiles/` - Reusable host profiles (shepherd.nix, desktop.nix, desktop-home.nix, disko-btrfs.nix)
@@ -51,7 +51,7 @@ Each host gets these module layers:
 4. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
 5. Home Manager + SOPS-nix integration modules
 
-Serenity is special — it gets `modules/homelab/` instead of `modules/nixos/` (no desktop modules).
+Mal is special — it gets `modules/homelab/` instead of `modules/nixos/` (no desktop modules).
 
 ### Category System
 
@@ -92,7 +92,7 @@ nh os switch
 
 # Build specific host
 sudo nixos-rebuild switch --flake .#jayne
-sudo nixos-rebuild switch --flake .#serenity
+sudo nixos-rebuild switch --flake .#mal
 ```
 
 **nix-darwin (macOS hosts):**
@@ -145,9 +145,9 @@ direnv allow
 
 See `devenvs/README.md` for detailed documentation.
 
-### Homelab-Specific (serenity host)
+### Homelab-Specific (mal host)
 
-The serenity host runs as a homelab server with the following characteristics:
+The mal host runs as a homelab server with the following characteristics:
 
 **Important Service Management:**
 - Docker services run as systemd services with naming: `docker-<serviceName>`
@@ -191,7 +191,7 @@ sudo nixos-rebuild build --flake .
 darwin-rebuild build --flake .
 
 # Test specific host configuration
-sudo nixos-rebuild build --flake .#serenity
+sudo nixos-rebuild build --flake .#mal
 sudo nixos-rebuild build --flake .#jayne
 darwin-rebuild build --flake .#inara
 ```
@@ -315,10 +315,10 @@ mkModule {
 
 Services are disabled by default. To enable:
 
-1. Edit `hosts/serenity/configuration.nix`
+1. Edit `hosts/mal/configuration.nix`
 2. Set the service option to true (e.g., `immich.enable = true;`)
 3. Ensure secrets are configured in `secrets/secrets.yaml` if needed
-4. Rebuild: `sudo nixos-rebuild switch --flake .#serenity`
+4. Rebuild: `sudo nixos-rebuild switch --flake .#mal`
 
 ### Working with Secrets (SOPS)
 
@@ -382,10 +382,10 @@ nix flake show github:owner/repo
 
 ## Platform-Specific Notes
 
-### NixOS (jayne, kaylee, serenity, shepherd)
+### NixOS (jayne, kaylee, mal, shepherd)
 - All configurations use `nixos-unstable` channel
 - Home Manager integrated via `inputs.home-manager.nixosModules.default`
-- Serenity host does NOT use desktop modules (homelab modules instead)
+- Mal host does NOT use desktop modules (homelab modules instead)
 - SOPS-nix enabled on all hosts for secret management
 
 ### macOS (inara)
@@ -402,7 +402,7 @@ nix flake show github:owner/repo
 ## Maintenance
 
 - **Automatic garbage collection**: Runs weekly on all systems
-- **Serenity host automatic updates**: Daily at 02:00
+- **Mal host automatic updates**: Daily at 02:00
 - **Manual garbage collection**: `nix-collect-garbage -d`
 - **Optimize Nix store**: `nix-store --optimize`
 

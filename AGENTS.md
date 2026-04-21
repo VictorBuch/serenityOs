@@ -21,11 +21,11 @@
 ## Module Placement
 - `modules/apps/`: System-wide applications (use mkApp helper)
 - `home/`: User configs & dotfiles (use mkHomeModule helper)  
-- `modules/homelab/`: Serenity server services ONLY
+- `modules/homelab/`: Mal server services ONLY
 
 ## Important Rules
 - Git add ALL new files before testing (flakes only see tracked files)
-- NEVER use docker commands on serenity - use `systemctl restart docker-<service>`
+- NEVER use docker commands on mal - use `systemctl restart docker-<service>`
 - Use helper scripts: `./scripts/add-package.sh` for new packages
 - Test with `nix flake check` before any commits
 

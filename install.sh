@@ -20,7 +20,7 @@ SSH_KEY="$HOME/.ssh/id_ed25519"
 EMAIL="victorbuch@protonmail.com"
 
 # Available hosts
-NIXOS_HOSTS=("jayne" "kaylee" "serenity" "shepherd" "shepherd-arm")
+NIXOS_HOSTS=("jayne" "kaylee" "mal" "shepherd" "shepherd-arm")
 DARWIN_HOSTS=("inara")
 
 # Helper functions
@@ -91,7 +91,7 @@ show_hosts() {
         print_info "Available NixOS hosts:"
         echo "  • jayne        - Primary desktop (Hyprland, full desktop environment)" >&2
         echo "  • kaylee       - Lightweight desktop configuration" >&2
-        echo "  • serenity     - Homelab server (services, static IP)" >&2
+        echo "  • mal          - Homelab server (services, static IP)" >&2
         echo "  • shepherd     - Base configuration template (x86_64)" >&2
         echo "  • shepherd-arm - Base configuration template (ARM/aarch64)" >&2
     else

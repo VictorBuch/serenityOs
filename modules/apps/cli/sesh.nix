@@ -40,10 +40,10 @@ mkModule {
               ];
             }
             {
-              name = "server serenity";
+              name = "server mal";
               path = "~";
-              startup_command = "ssh serenity@serenity";
-              preview_command = "figlet ssh serenity";
+              startup_command = "ssh serenity@mal";
+              preview_command = "figlet ssh mal";
             }
           ];
           window = [

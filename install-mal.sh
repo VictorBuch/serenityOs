@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# Serenity-specific NixOS installation script with storage setup
+# Mal-specific NixOS installation script with storage setup
 # Handles the baremetal migration with mergerFS + SnapRAID configuration
 #
 # Usage:
-#   ./install-serenity.sh           # Interactive mode
-#   ./install-serenity.sh --auto    # Automatic mode (skip partitioning)
+#   ./install-mal.sh           # Interactive mode
+#   ./install-mal.sh --auto    # Automatic mode (skip partitioning)
 
 set -euo pipefail
 
@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-HOSTNAME="serenity"
+HOSTNAME="mal"
 REPO_DIR="$HOME/serenityOs"
 REQUIRED_LABELS=("nixos" "data01" "data02" "parity01")
 
@@ -168,7 +168,7 @@ guide_storage_setup() {
     echo "# Repeat for data02 (sdc) and parity01 (sdd)" >&2
     echo "" >&2
 
-    print_info "For full instructions, see: hosts/serenity/MIGRATION-GUIDE.md"
+    print_info "For full instructions, see: hosts/mal/MIGRATION-GUIDE.md"
     echo "" >&2
 
     read -p "Press Enter to exit and set up storage, or Ctrl+C to cancel..." >&2
@@ -339,7 +339,7 @@ verify_installation() {
 show_next_steps() {
     print_header "Installation Complete! 🎉"
 
-    print_success "Serenity has been configured with mergerFS + SnapRAID storage"
+    print_success "Mal has been configured with mergerFS + SnapRAID storage"
     echo "" >&2
 
     print_info "Storage Architecture:"
@@ -364,7 +364,7 @@ show_next_steps() {
     echo "" >&2
 
     print_info "Documentation:"
-    echo "  • Migration guide: $REPO_DIR/hosts/serenity/MIGRATION-GUIDE.md" >&2
+    echo "  • Migration guide: $REPO_DIR/hosts/mal/MIGRATION-GUIDE.md" >&2
     echo "  • Storage config:  $REPO_DIR/modules/homelab/storage.nix" >&2
     echo "" >&2
 
@@ -388,7 +388,7 @@ main() {
         auto_mode=true
     fi
 
-    print_header "Serenity Storage Installation"
+    print_header "Mal Storage Installation"
     print_info "NixOS baremetal with mergerFS + SnapRAID"
     echo "" >&2
 
@@ -416,7 +416,7 @@ main() {
 
     # Check if already installed
     if check_existing_install && [ "$auto_mode" = false ]; then
-        print_warning "Serenity appears to be already installed"
+        print_warning "Mal appears to be already installed"
         read -p "Re-run installation? [y/N] " -n 1 -r >&2
         echo >&2
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then

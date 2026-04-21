@@ -77,6 +77,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # peon-ping: agent sound notifications
+    peon-ping.url = "github:PeonPing/peon-ping";
+
     # Auto-import module directories (replaces manual import lists)
     import-tree = {
       url = "github:vic/import-tree";
@@ -139,7 +142,7 @@
           extraModules = [ (import-tree ./modules/nixos) ];
         }
         {
-          name = "serenity";
+          name = "mal";
           # Homelab server: uses homelab modules instead of desktop modules
           extraModules = [
             (import-tree ./modules/homelab)

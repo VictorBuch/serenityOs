@@ -89,7 +89,7 @@ NVMe disk.
 
 ## Seed the sops age key (hosts that use sops-nix only)
 
-If the host will use `sops-nix` for secrets (e.g., the `serenity` homelab
+If the host will use `sops-nix` for secrets (e.g., the `mal` homelab
 profile), its age key must exist on disk before the first boot, otherwise
 activation fails when services try to decrypt secrets.
 

@@ -175,7 +175,7 @@ in
       };
     };
 
-    # Set redis package (serenity uses unstable nixpkgs by default)
+    # Set redis package (mal uses unstable nixpkgs by default)
     services.redis.package = pkgs.redis;
   };
 }

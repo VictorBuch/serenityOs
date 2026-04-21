@@ -8,7 +8,6 @@
   home-manager.sharedModules = [
     inputs.noctalia.homeModules.default
     inputs.zen-browser.homeModules.default
-    inputs.peon-ping.homeManagerModules.default
   ];
 
   # Enable app categories for desktop use

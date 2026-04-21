@@ -25,6 +25,9 @@
   homeConfig ? null,
   linuxHomeConfig ? null,
   darwinHomeConfig ? null,
+  # Homebrew shortcuts (Darwin only). Require `darwin.homebrew.enable = true`.
+  brews ? [ ],
+  casks ? [ ],
 }:
 
 # Inner module function -- receives the full NixOS module args via `args` passthrough
@@ -58,10 +61,18 @@ let
     else
       resolve packages;
 
+  # Homebrew shortcuts -> darwin homebrew config
+  hasHomebrew = brews != [ ] || casks != [ ];
+  homebrewConfig = lib.optionalAttrs (!isLinux && hasHomebrew) {
+    homebrew = {
+      inherit brews casks;
+    };
+  };
+
   # Platform-aware extra config
-  platformExtra = lib.recursiveUpdate extraConfig (
+  platformExtra = lib.recursiveUpdate (lib.recursiveUpdate extraConfig (
     if isLinux then linuxExtraConfig else darwinExtraConfig
-  );
+  )) homebrewConfig;
 
   # Platform-aware home config
   platformHome =
@@ -69,8 +80,8 @@ let
     else (if darwinHomeConfig != null then darwinHomeConfig else homeConfig);
 
   # Platform compatibility check
-  isLinuxOnly = linuxPackages != null && darwinPackages == null && packages == null;
-  isDarwinOnly = darwinPackages != null && linuxPackages == null && packages == null;
+  isLinuxOnly = linuxPackages != null && darwinPackages == null && packages == null && !hasHomebrew;
+  isDarwinOnly = (darwinPackages != null || hasHomebrew) && linuxPackages == null && packages == null;
   compatible = !(isLinuxOnly && !isLinux) && !(isDarwinOnly && isLinux);
 in
 {

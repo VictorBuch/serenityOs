@@ -8,8 +8,8 @@ mkModule {
   category = "productivity";
   description = "logseq note-taking app";
 
-  # macOS: nixpkgs build works fine.
-  darwinPackages = { pkgs, ... }: [ pkgs.logseq ];
+  # macOS: use homebrew cask (nixpkgs build has recurring breakage).
+  casks = [ "logseq" ];
 
   # Linux: nixpkgs logseq has broken plugin support
   # (Electron sandbox + /nix/store blocks plugin native modules / helpers).

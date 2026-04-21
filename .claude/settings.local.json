@@ -34,7 +34,8 @@
       "Bash(jj log:*)",
       "Bash(jj branch:*)",
       "Bash(jj bookmark:*)",
-      "Bash(jj abandon:*)"
+      "Bash(jj abandon:*)",
+      "Bash(nix flake *)"
     ],
     "deny": [],
     "ask": []

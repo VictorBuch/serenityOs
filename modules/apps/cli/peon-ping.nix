@@ -11,6 +11,9 @@ mkModule {
   name = "peon-ping";
   category = "cli";
   description = "Agent sound notifications (peon-ping)";
+  extraConfig = {
+    home-manager.sharedModules = [ inputs.peon-ping.homeManagerModules.default ];
+  };
   homeConfig =
     {
       config,

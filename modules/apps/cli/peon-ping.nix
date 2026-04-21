@@ -26,8 +26,14 @@ mkModule {
         package = inputs.peon-ping.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
         settings = {
-          default_pack = "peon";
-          active_pack = "jarvis";
+          default_pack = "jarvis";
+          pack_rotation_mode = "session_override";
+          pack_rotation = [
+            "peon"
+            "glados"
+            "sc_kerrigan"
+            "jarvis"
+          ];
           volume = 0.7;
           enabled = true;
           desktop_notifications = true;

@@ -35,7 +35,8 @@
       "Bash(jj branch:*)",
       "Bash(jj bookmark:*)",
       "Bash(jj abandon:*)",
-      "Bash(nix flake *)"
+      "Bash(nix flake *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['locks']['nodes']['nixvim']['locked']\\)\")"
     ],
     "deny": [],
     "ask": []

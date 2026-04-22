@@ -49,13 +49,17 @@ in
     hostName = "mal";
 
     # Open ports in the firewall.
-    firewall.allowedTCPPorts = [
-      2283
-    ];
-    firewall.allowedUDPPorts = [
-      2283
-    ];
+    firewall = {
+      allowedTCPPorts = [
+        2283
+      ];
+      allowedUDPPorts = [
+        2283
+      ];
+      trustedInterfaces = [ "docker0" ];
+    };
   }; # Define your hostname.
+
 
   # Enable all maintenance features
   # (GC with 10-day retention, auto-upgrade with lockfile commits, store optimization, boot cleanup)
@@ -305,16 +309,22 @@ in
   hardware.nvidia-container-toolkit.enable = true;
 
   virtualisation = {
+      docker.enable = true;
+      docker.daemon.settings = {
+        features = { cdi = true; };
+      };
+      docker.rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
+      oci-containers.backend = "docker";
+  };
 
-    # enable docker
-    docker.enable = true;
-    docker.rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-
-    # Virtualization containers
-    oci-containers.backend = "docker";
+   services.ollama = {
+    enable = true;
+    package = pkgs.ollama-cuda;
+    host = "0.0.0.0";
+    loadModels = [ "gemma3:1b" ];
   };
 
   # FIDO2 SSH authorized keys -- one per YubiKey

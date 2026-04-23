@@ -33,10 +33,15 @@ in
     };
     users.groups.wanna-share-releaser = { };
 
+    # All CI deploys run as `wanna-share-releaser` (see gitea.nix — the
+    # gitea-runner-nix/docker services force that as User=). That user is in
+    # the `wannashare` group, so file operations on /var/lib/wannashare need
+    # no sudo — only systemctl and privileged file installs do.
     security.sudo.extraRules = [
       {
         users = [ "wanna-share-releaser" ];
         commands = [
+          # Backend service
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare";
             options = [ "NOPASSWD" ];
@@ -45,44 +50,7 @@ in
             command = "/run/current-system/sw/bin/systemctl start wannashare";
             options = [ "NOPASSWD" ];
           }
-          {
-            command = "/run/current-system/sw/bin/install -m 640 -o wannashare -g wannashare /tmp/firebase-credentials.json /var/lib/wannashare/firebase-credentials.json";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "/run/current-system/sw/bin/rm -f /tmp/firebase-credentials.json";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
-      # Backend deploy (split into its own rule — sudoers has a per-line length limit)
-      {
-        users = [ "gitea-runner" ];
-        commands = [
-          {
-            command = "/run/current-system/sw/bin/systemctl stop wannashare";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "/run/current-system/sw/bin/systemctl start wannashare";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "/run/current-system/sw/bin/mv /tmp/wannashare-new /var/lib/wannashare/wannashare-backend";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "/run/current-system/sw/bin/chmod +x /var/lib/wannashare/wannashare-backend";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
-      # Site (Nuxt SSR) deploy. Ownership is fixed by the service's
-      # ExecStartPre, so gitea-runner doesn't need chown rights (a ':' in
-      # `wannashare:wannashare` breaks the sudoers line parser anyway).
-      {
-        users = [ "gitea-runner" ];
-        commands = [
+          # Site service
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare-site";
             options = [ "NOPASSWD" ];
@@ -91,12 +59,13 @@ in
             command = "/run/current-system/sw/bin/systemctl start wannashare-site";
             options = [ "NOPASSWD" ];
           }
+          # Firebase credentials install (root-only destination)
           {
-            command = "/run/current-system/sw/bin/rm -rf /var/lib/wannashare/site";
+            command = "/run/current-system/sw/bin/install -m 640 -o wannashare -g wannashare /tmp/firebase-credentials.json /var/lib/wannashare/firebase-credentials.json";
             options = [ "NOPASSWD" ];
           }
           {
-            command = "/run/current-system/sw/bin/mv /tmp/wannashare-site-new /var/lib/wannashare/site";
+            command = "/run/current-system/sw/bin/rm -f /tmp/firebase-credentials.json";
             options = [ "NOPASSWD" ];
           }
         ];

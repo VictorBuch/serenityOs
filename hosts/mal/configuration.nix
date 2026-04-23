@@ -324,7 +324,7 @@ in
     enable = true;
     package = pkgs.ollama-cuda;
     host = "0.0.0.0";
-    loadModels = [ "gemma3:1b" ];
+    loadModels = [ "gemma3:4b" ];
   };
 
   # FIDO2 SSH authorized keys -- one per YubiKey

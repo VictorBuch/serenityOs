@@ -22,7 +22,10 @@ mkModule {
       ...
     }:
     {
-      home.packages = [ pkgs.python3 ];
+      home.packages = [
+        pkgs.python3
+        inputs.peon-ping.packages.${pkgs.stdenv.hostPlatform.system}.default
+      ];
 
       programs.peon-ping = {
         enable = true;

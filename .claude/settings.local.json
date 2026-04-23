@@ -36,7 +36,11 @@
       "Bash(jj bookmark:*)",
       "Bash(jj abandon:*)",
       "Bash(nix flake *)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['locks']['nodes']['nixvim']['locked']\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['locks']['nodes']['nixvim']['locked']\\)\")",
+      "Bash(awk NR==745,NR==760; NR==1538,NR==1550; NR==1695,NR==1710; NR==1940,NR==1950; NR==2448,NR==2500; NR==2552,NR==2562; NR==2730,NR==2740; NR==2820,NR==2845 *)",
+      "Bash(NIXPKGS_ALLOW_BROKEN=1 nix eval --raw .#darwinConfigurations.inara.config.home-manager.users.victorbuch.programs.nixvim.extraPlugins)",
+      "Bash(python3 -m json.tool)",
+      "Bash(nix-instantiate --eval --strict --expr ' *)"
     ],
     "deny": [],
     "ask": []

@@ -80,6 +80,9 @@
     # peon-ping: agent sound notifications
     peon-ping.url = "github:PeonPing/peon-ping";
 
+    # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
+    wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
+
     # Auto-import module directories (replaces manual import lists)
     import-tree = {
       url = "github:vic/import-tree";
@@ -148,6 +151,7 @@
             (import-tree ./modules/homelab)
             ./modules/homelab/_config.nix
             ./modules/nixos/system/user.nix
+            inputs.wannashare.nixosModules.default
           ];
         }
         {

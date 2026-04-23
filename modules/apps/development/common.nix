@@ -30,6 +30,9 @@ mkModule {
       pkgs.go
       pkgs.opencode
       pkgs.bun
+      pkgs.pnpm
+      pkgs.gh
+      pkgs.tea
     ];
   description = "Common development tools";
 } args

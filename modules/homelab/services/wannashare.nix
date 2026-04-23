@@ -7,17 +7,21 @@
 
 let
   dataDir = "/var/lib/wannashare";
+  siteDir = "${dataDir}/site";
   user = "wannashare";
   group = "wannashare";
-  port = 8099;
+  backendPort = 8099;
+  sitePort = 3005;
+  nodejs = pkgs.nodejs_22;
 in
 {
-  options.homelab.wannashare.enable = lib.mkEnableOption "Enables WannaShare PocketBase backend";
+  options.homelab.wannashare.enable = lib.mkEnableOption "Enables WannaShare PocketBase backend + Nuxt SSR site";
 
   config = lib.mkIf config.homelab.wannashare.enable {
 
     environment.systemPackages = with pkgs; [
       go
+      nodejs
     ];
 
     users.users.wanna-share-releaser = {
@@ -33,7 +37,6 @@ in
       {
         users = [ "wanna-share-releaser" ];
         commands = [
-          # systemctl start stop wannashare - NOPASSWD
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare";
             options = [ "NOPASSWD" ];
@@ -42,7 +45,7 @@ in
             command = "/run/current-system/sw/bin/systemctl start wannashare";
             options = [ "NOPASSWD" ];
           }
-	  {
+          {
             command = "/run/current-system/sw/bin/install -m 640 -o wannashare -g wannashare /tmp/firebase-credentials.json /var/lib/wannashare/firebase-credentials.json";
             options = [ "NOPASSWD" ];
           }
@@ -51,11 +54,11 @@ in
             options = [ "NOPASSWD" ];
           }
         ];
-
       }
       {
         users = [ "gitea-runner" ];
         commands = [
+          # Backend deploy
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare";
             options = [ "NOPASSWD" ];
@@ -72,12 +75,25 @@ in
             command = "/run/current-system/sw/bin/chmod +x /var/lib/wannashare/wannashare-backend";
             options = [ "NOPASSWD" ];
           }
+          # Site (Nuxt SSR) deploy
           {
-            command = "/run/current-system/sw/bin/rm -rf /var/lib/wannashare/web";
+            command = "/run/current-system/sw/bin/systemctl stop wannashare-site";
             options = [ "NOPASSWD" ];
           }
           {
-            command = "/run/current-system/sw/bin/mv /tmp/wannashare-web-new /var/lib/wannashare/web";
+            command = "/run/current-system/sw/bin/systemctl start wannashare-site";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/rm -rf /var/lib/wannashare/site";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/mv /tmp/wannashare-site-new /var/lib/wannashare/site";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/chown -R wannashare:wannashare /var/lib/wannashare/site";
             options = [ "NOPASSWD" ];
           }
         ];
@@ -96,7 +112,7 @@ in
     systemd.tmpfiles.rules = [
       "d ${dataDir} 0770 ${user} ${group}"
       "d ${dataDir}/pb_data 0750 ${user} ${group}"
-      "d ${dataDir}/site 0770 ${user} ${group}"
+      "d ${siteDir} 0770 ${user} ${group}"
     ];
 
     systemd.services.wannashare = {
@@ -109,13 +125,46 @@ in
         User = user;
         Group = group;
         WorkingDirectory = dataDir;
-        ExecStart = "${dataDir}/wannashare-backend serve --http=127.0.0.1:${toString port}";
+        ExecStart = "${dataDir}/wannashare-backend serve --http=127.0.0.1:${toString backendPort}";
 
-        # Hardening
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ dataDir ];
+      };
+    };
+
+    systemd.services.wannashare-site = {
+      description = "WannaShare Nuxt SSR Site";
+      after = [ "network.target" "wannashare.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      environment = {
+        NODE_ENV = "production";
+        HOST = "127.0.0.1";
+        PORT = toString sitePort;
+        NUXT_PUBLIC_API_BASE = "https://db-wannashare.smoothless.org";
+      };
+
+      serviceConfig = {
+        Type = "simple";
+        User = user;
+        Group = group;
+        WorkingDirectory = siteDir;
+        ExecStart = "${nodejs}/bin/node ${siteDir}/server/index.mjs";
+        Restart = "on-failure";
+        RestartSec = 5;
+
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        ReadWritePaths = [ dataDir ];
+      };
+
+      unitConfig = {
+        # Bundle may be missing on first boot before CI runs. Don't spam logs.
+        ConditionPathExists = "${siteDir}/server/index.mjs";
       };
     };
   };

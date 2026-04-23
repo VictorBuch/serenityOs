@@ -20,12 +20,10 @@ let
       isPocketBase = true;
     };
     wannashare = {
-      # WannaShare Nuxt Web App
-      url = "";
+      # WannaShare Nuxt SSR Web App (node-server on port 3005)
+      url = "http://127.0.0.1:3005";
       https = false;
       protected = false;
-      isStaticFiles = true;
-      staticPath = "/var/lib/wannashare/site";
     };
     suboptimal = {
       url = "http://127.0.0.1:3232";

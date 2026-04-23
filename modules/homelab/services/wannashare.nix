@@ -77,7 +77,9 @@ in
           }
         ];
       }
-      # Site (Nuxt SSR) deploy
+      # Site (Nuxt SSR) deploy. Ownership is fixed by the service's
+      # ExecStartPre, so gitea-runner doesn't need chown rights (a ':' in
+      # `wannashare:wannashare` breaks the sudoers line parser anyway).
       {
         users = [ "gitea-runner" ];
         commands = [
@@ -95,10 +97,6 @@ in
           }
           {
             command = "/run/current-system/sw/bin/mv /tmp/wannashare-site-new /var/lib/wannashare/site";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "/run/current-system/sw/bin/chown -R wannashare:wannashare /var/lib/wannashare/site";
             options = [ "NOPASSWD" ];
           }
         ];
@@ -156,6 +154,9 @@ in
         User = user;
         Group = group;
         WorkingDirectory = siteDir;
+        # `+` prefix runs as root so we can reclaim ownership after CI's sudo mv
+        # leaves the dir owned by gitea-runner.
+        ExecStartPre = "+${pkgs.coreutils}/bin/chown -R ${user}:${group} ${siteDir}";
         ExecStart = "${nodejs}/bin/node ${siteDir}/server/index.mjs";
         Restart = "on-failure";
         RestartSec = 5;

@@ -55,10 +55,10 @@ in
           }
         ];
       }
+      # Backend deploy (split into its own rule — sudoers has a per-line length limit)
       {
         users = [ "gitea-runner" ];
         commands = [
-          # Backend deploy
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare";
             options = [ "NOPASSWD" ];
@@ -75,7 +75,12 @@ in
             command = "/run/current-system/sw/bin/chmod +x /var/lib/wannashare/wannashare-backend";
             options = [ "NOPASSWD" ];
           }
-          # Site (Nuxt SSR) deploy
+        ];
+      }
+      # Site (Nuxt SSR) deploy
+      {
+        users = [ "gitea-runner" ];
+        commands = [
           {
             command = "/run/current-system/sw/bin/systemctl stop wannashare-site";
             options = [ "NOPASSWD" ];

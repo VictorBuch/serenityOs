@@ -48,7 +48,8 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); pia=d.get\\('servers',{}\\).get\\('privateinternetaccess',{}\\); servers=pia.get\\('openvpn',[]\\); berlin=[s for s in servers if 'berlin' in s.get\\('region',''\\).lower\\(\\)]; print\\(f'Berlin servers: {len\\(berlin\\)}'\\); [print\\(s.get\\('hostname',''\\),s.get\\('ips',[]\\)\\) for s in berlin[:5]]\")",
       "Bash(timeout 5 bash -c 'echo >/dev/tcp/194.5.49.8/1197')",
       "mcp__nixos__nix",
-      "Bash(sudo systemctl *)"
+      "Bash(sudo systemctl *)",
+      "Bash(gh api *)"
     ],
     "deny": [],
     "ask": []

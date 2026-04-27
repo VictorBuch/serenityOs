@@ -83,7 +83,7 @@ in
       image = "blampe/rreading-glasses:latest";
       autoStart = true;
       dependsOn = [ "rreading-glasses-db" ];
-      cmd = [ "/main" "serve" ];
+      cmd = [ "/main" "serve" "--upstream=www.goodreads.com" ];
 
       ports = [ "8788:8788" ];
 

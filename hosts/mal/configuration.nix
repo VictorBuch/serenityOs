@@ -60,7 +60,6 @@ in
     };
   }; # Define your hostname.
 
-
   # Enable all maintenance features
   # (GC with 10-day retention, auto-upgrade with lockfile commits, store optimization, boot cleanup)
   maintenance.enable = true;
@@ -309,18 +308,20 @@ in
   hardware.nvidia-container-toolkit.enable = true;
 
   virtualisation = {
-      docker.enable = true;
-      docker.daemon.settings = {
-        features = { cdi = true; };
+    docker.enable = true;
+    docker.daemon.settings = {
+      features = {
+        cdi = true;
       };
-      docker.rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
-      oci-containers.backend = "docker";
+    };
+    docker.rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+    oci-containers.backend = "docker";
   };
 
-   services.ollama = {
+  services.ollama = {
     enable = true;
     package = pkgs.ollama-cuda;
     host = "0.0.0.0";
@@ -347,6 +348,7 @@ in
     nh
     zoxide
     sops
+    jq
 
     claude-code
     opencode

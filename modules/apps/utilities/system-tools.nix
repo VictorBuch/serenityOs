@@ -1,4 +1,10 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "system-tools";
@@ -15,6 +21,7 @@ mkModule {
       pkgs.pciutils
       pkgs.gparted
       pkgs.sops
+      pkgs.jq
     ];
   description = "System utility tools";
 } args

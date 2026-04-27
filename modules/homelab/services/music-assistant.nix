@@ -31,16 +31,11 @@ in
         "jellyfin"
         "podcastfeed"
         "radiobrowser"
-        "snapcast"
         "spotify"
         "spotify_connect"
+        "tidal"
       ];
+      openFirewall = true;
     };
-    # Open firewall ports
-    networking.firewall.allowedTCPPorts = [
-      8097
-      8095
-    ];
-
   };
 }

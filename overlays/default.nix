@@ -25,4 +25,12 @@ final: prev: {
       };
     in
     wine920Pkgs.wineWowPackages.stagingFull;
+
+  # music-assistant 2.8.4 airplay/chromecast providers import sendspin_bridge,
+  # which requires aiosendspin. Upstream nixpkgs provider deps map omits it.
+  music-assistant = prev.music-assistant.overridePythonAttrs (old: {
+    dependencies = (old.dependencies or [ ]) ++ [
+      final.python313Packages.aiosendspin
+    ];
+  });
 }

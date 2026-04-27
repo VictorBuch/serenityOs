@@ -720,6 +720,7 @@
         "quickshell": "quickshell",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
+        "wannashare": "wannashare",
         "zen-browser": "zen-browser"
       }
     },
@@ -971,6 +972,21 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "wannashare": {
+      "locked": {
+        "lastModified": 1777058118,
+        "narHash": "sha256-E4ULi4Z+85dzadS5fVYhwGBwsyi6kQgOq2vRVBl/reU=",
+        "ref": "refs/heads/main",
+        "rev": "4f433fa83d05ea821ead62d91c41bd31835d6aea",
+        "revCount": 451,
+        "type": "git",
+        "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       }
     },
     "zen-browser": {

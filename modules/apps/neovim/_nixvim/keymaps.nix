@@ -208,12 +208,13 @@
       key = "<leader>Fa";
       action.__raw = ''
         function()
-          vim.fn.jobstart("flutter emulators --launch Pixel_6_API_35", { detach = true })
-          vim.notify("Launching Pixel 6 emulator...", vim.log.levels.INFO)
+          local avd = vim.env.FLUTTER_DEFAULT_AVD or "pixel_6"
+          vim.fn.jobstart({ "flutter", "emulators", "--launch", avd }, { detach = true })
+          vim.notify("Launching " .. avd .. " emulator...", vim.log.levels.INFO)
         end
       '';
       options = {
-        desc = "Flutter: Launch Android Emulator";
+        desc = "Flutter: Launch default Android Emulator";
         silent = true;
       };
     }

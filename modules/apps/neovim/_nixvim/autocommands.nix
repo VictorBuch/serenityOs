@@ -31,10 +31,9 @@
       pattern = "*.dart";
       callback.__raw = ''
         function()
-          -- Check if Flutter is running
-          local flutter_running = vim.fn.system("pgrep -f 'flutter run'"):len() > 0
-          if flutter_running then
-            vim.cmd('FlutterReload')
+          local ok, commands = pcall(require, 'flutter-tools.commands')
+          if ok then
+            commands.reload(true)
           end
         end
       '';

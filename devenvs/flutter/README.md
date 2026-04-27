@@ -42,6 +42,27 @@ flutter run
 - **`run-android`** - Run on Android device
 - **`run-web`** - Run in Chrome browser
 - **`analyze`** - Analyze Dart code
+- **`emu [avd]`** - Manual emulator launcher with `LD_LIBRARY_PATH` fix scoped to the
+  emulator process. Use this if `ANDROID_EMULATOR_USE_SYSTEM_LIBS=1` (set
+  automatically in the shell) isn't enough on your Wayland session. Defaults to
+  `pixel_6` if no AVD is given.
+
+## Working with nixvim flutter-tools
+
+This devenv is designed to work with the system-wide nixvim's `flutter-tools.nvim`
+plugin. A few rules to make hot reload + emulator launch behave:
+
+- **Hot reload requires `:FlutterRun`.** flutter-tools only knows about apps it
+  started itself. If you run `flutter run` in a separate terminal, the
+  BufWritePost hot-reload autocmd is a silent no-op. Always `:FlutterRun` from
+  inside nvim if you want save-to-reload.
+- **Open nvim from the project shell.** direnv must have activated `.envrc`
+  before nvim launches, so flutter is on `PATH` for `fn.exepath("flutter")`.
+  Opening nvim from an app launcher / file manager skips the devenv shell and
+  flutter-tools won't find flutter.
+- **Per-project default AVD** — set `FLUTTER_DEFAULT_AVD` in your project's
+  `.envrc.local` (e.g. `export FLUTTER_DEFAULT_AVD=pixel_6_api_35`). The
+  `<leader>Fa` keymap reads it; falls back to `pixel_6`.
 
 ## Environment Variables
 

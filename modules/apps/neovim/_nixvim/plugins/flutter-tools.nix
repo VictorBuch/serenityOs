@@ -17,6 +17,13 @@
         },
         widget_guides = {
           enabled = true
+        },
+        dev_log = {
+          enabled = true,
+          open_cmd = "botright 15split"
+        },
+        debugger = {
+          enabled = false
         }
       })
 
@@ -203,18 +210,6 @@
             }},
           )
         ]], { i(1, "add"), i(2) })),
-      })
-
-      -- Auto hot reload Flutter on save
-      vim.api.nvim_create_autocmd("BufWritePost", {
-        pattern = "*.dart",
-        callback = function()
-          -- Check if Flutter is running
-          local flutter_running = vim.fn.system("pgrep -f 'flutter run'"):len() > 0
-          if flutter_running then
-            vim.cmd("FlutterReload")
-          end
-        end,
       })
     '';
   };

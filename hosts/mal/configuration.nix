@@ -389,6 +389,7 @@ in
     sesh.enable = true;
     jujutsu.enable = false;
     opencode.enable = false;
+    peon-ping.enable = false;
   };
 
   # Networking and Auth

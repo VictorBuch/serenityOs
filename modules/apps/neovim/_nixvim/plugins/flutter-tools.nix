@@ -27,6 +27,12 @@
         }
       })
 
+      -- flutter-tools registers user commands lazily on first BufEnter of *.dart
+      -- or pubspec.yaml. We want :FlutterEmulators / :FlutterRun / :FlutterDevices
+      -- available immediately so they work from any buffer. setup_project() calls
+      -- the same internal start() function that the BufEnter autocmd would.
+      pcall(function() require('flutter-tools').setup_project({}) end)
+
       -- Flutter snippets for luasnip
       local ls = require("luasnip")
       local s = ls.snippet

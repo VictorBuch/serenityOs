@@ -43,7 +43,6 @@ in
         enable = true;
         devices = [ "nodev" ];
         efiSupport = true;
-        useOSProber = true;
       };
     };
     # Enable NTFS support for mounting Windows drives
@@ -87,7 +86,6 @@ in
     };
     gaming = {
       enable = true;
-      heroic.enable = false;
     };
     media = {
       enable = true;

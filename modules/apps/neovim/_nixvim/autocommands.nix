@@ -25,22 +25,7 @@
       pattern = [ "qf" "help" "man" "notify" "lspinfo" "trouble" "checkhealth" ];
     }
 
-    # Flutter hot reload on save
-    {
-      event = "BufWritePost";
-      pattern = "*.dart";
-      callback.__raw = ''
-        function()
-          local ok, commands = pcall(require, 'flutter-tools.commands')
-          if ok then
-            commands.reload(true)
-          end
-        end
-      '';
-      desc = "Flutter hot reload on save";
-    }
-
-    # Close toggleterm with 'q' in normal mode
+# Close toggleterm with 'q' in normal mode
     {
       event = "TermOpen";
       pattern = "term://*toggleterm#*";

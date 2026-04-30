@@ -5,6 +5,7 @@
     mergerfs
     snapraid
     mergerfs-tools  # Useful utilities for pool management
+    smartmontools   # Provides smartctl, used by `snapraid smart`
   ];
 
   # Mount individual data drives with labels for stability

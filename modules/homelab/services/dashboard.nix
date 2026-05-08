@@ -737,7 +737,7 @@ in
                           title = "qBittorrent";
                           url = "https://qbittorrent.${hl.domain}";
                           icon = "sh:qbittorrent";
-                          check-url = "${local}:8080";
+                          check-url = "${local}:8081";
                         }
                         {
                           title = "qui";

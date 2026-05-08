@@ -25,8 +25,8 @@ in
     ports = {
       webui = lib.mkOption {
         type = lib.types.port;
-        default = 8080;
-        description = "Host port for qBittorrent WebUI (mapped from pia-tun container:8080)";
+        default = 8081;
+        description = "Host port for qBittorrent WebUI (mapped from pia-tun container:8080). Default 8081 because glance owns 8080.";
       };
       qui = lib.mkOption {
         type = lib.types.port;

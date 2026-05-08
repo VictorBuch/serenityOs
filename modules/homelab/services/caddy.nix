@@ -110,9 +110,15 @@ let
       https = false;
       protected = true;
     };
-    downloads = {
-      # Deluge
-      url = "http://127.0.0.1:8112";
+    qbittorrent = {
+      # qBittorrent WebUI (host port 8081 -> pia-tun -> qbittorrent:8080)
+      url = "http://127.0.0.1:8081";
+      https = false;
+      protected = true;
+    };
+    qui = {
+      # qui modern web UI for qBittorrent
+      url = "http://127.0.0.1:7476";
       https = false;
       protected = true;
     };

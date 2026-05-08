@@ -68,7 +68,10 @@ in
           PIA_LOCATIONS = cfg.pia.locations;
           PS_CLIENT = "qbittorrent";
           PS_URL = "http://localhost:8080";
-          LOCAL_NETWORKS = "192.168.0.0/24,10.0.0.0/24";
+          # 100.64.0.0/10 is Tailscale's CGNAT range — required so packets
+          # from tailnet peers (e.g. Inara → mal:8081) aren't dropped by
+          # pia-tun's killswitch after DNAT into the container netns.
+          LOCAL_NETWORKS = "192.168.0.0/24,10.0.0.0/24,100.64.0.0/10";
           PF_ENABLED = "true";
           DNS = "pia";
           LOG_LEVEL = "info";
@@ -87,7 +90,12 @@ in
       };
 
       virtualisation.oci-containers.containers.qbittorrent = {
-        image = "lscr.io/linuxserver/qbittorrent:5.2.0";
+        # NOTE: pinned to 5.1.x because v5.x is not yet whitelisted by major
+        # private trackers (FileList, HDB, PTP, etc.). They review and approve
+        # new client versions slowly. Bumping past this without checking each
+        # tracker's allowlist breaks announces with "client not on whitelist".
+        # Check tracker rules pages before raising this.
+        image = "lscr.io/linuxserver/qbittorrent:5.1.4";
         autoStart = true;
         dependsOn = [ "pia-tun" ];
 
@@ -112,6 +120,12 @@ in
       systemd.services.docker-qbittorrent = {
         after = [ "mnt-pool.mount" ];
         requires = [ "mnt-pool.mount" ];
+        # Bind lifecycle to pia-tun: qbittorrent shares its netns via
+        # --network=container:pia-tun, so any pia-tun restart strands
+        # qbittorrent's network. BindsTo stops qbittorrent when pia-tun
+        # stops; PartOf restarts it whenever pia-tun is restarted.
+        bindsTo = [ "docker-pia-tun.service" ];
+        partOf = [ "docker-pia-tun.service" ];
       };
     }
 
@@ -146,6 +160,9 @@ in
         after = [ "docker-qbittorrent.service" "mnt-pool.mount" ];
         wants = [ "docker-qbittorrent.service" ];
         requires = [ "mnt-pool.mount" ];
+        # Follow qbittorrent's lifecycle so a pia-tun restart cascades
+        # cleanly: pia-tun -> qbittorrent (BindsTo/PartOf) -> qui (PartOf).
+        partOf = [ "docker-qbittorrent.service" ];
       };
     })
   ]);

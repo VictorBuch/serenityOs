@@ -53,7 +53,14 @@
       "Skill(autoplan)",
       "Bash(claude mcp *)",
       "Bash(nix run *)",
-      "WebFetch(domain:getqui.com)"
+      "WebFetch(domain:getqui.com)",
+      "Bash(sudo find *)",
+      "Bash(sudo -n iptables -L nixos-fw -n -v)",
+      "Bash(sudo -n nft list chain inet nixos-fw nixos-fw)",
+      "Read(//etc/**)",
+      "Bash(systemctl show *)",
+      "Bash(nft list *)",
+      "Bash(systemctl is-active *)"
     ],
     "deny": [],
     "ask": []

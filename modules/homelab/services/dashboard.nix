@@ -734,10 +734,16 @@ in
                           check-url = "${local}:8095";
                         }
                         {
-                          title = "Deluge";
-                          url = "https://downloads.${hl.domain}";
-                          icon = "sh:deluge";
-                          check-url = "${local}:8112";
+                          title = "qBittorrent";
+                          url = "https://qbittorrent.${hl.domain}";
+                          icon = "sh:qbittorrent";
+                          check-url = "${local}:8080";
+                        }
+                        {
+                          title = "qui";
+                          url = "https://qui.${hl.domain}";
+                          icon = "sh:qbittorrent";
+                          check-url = "${local}:7476";
                         }
                       ];
                     }

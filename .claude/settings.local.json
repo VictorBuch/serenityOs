@@ -49,7 +49,11 @@
       "Bash(timeout 5 bash -c 'echo >/dev/tcp/194.5.49.8/1197')",
       "mcp__nixos__nix",
       "Bash(sudo systemctl *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Skill(autoplan)",
+      "Bash(claude mcp *)",
+      "Bash(nix run *)",
+      "WebFetch(domain:getqui.com)"
     ],
     "deny": [],
     "ask": []

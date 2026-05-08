@@ -433,7 +433,10 @@ in
   homelab.streaming.enable = true;
   homelab.rreading-glasses.enable = true;
   homelab.immich.enable = true;
-  homelab.deluge-vpn.enable = true;
+  homelab.qbittorrent-vpn = {
+    enable = true;
+    qui.enable = true;
+  };
   homelab.filebrowser.enable = true;
   homelab.nextcloud.enable = true;
 

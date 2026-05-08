@@ -68,7 +68,8 @@ in
                   "readarr.${domain}" "http://127.0.0.1:8787";
                   "prowlarr.${domain}" "http://127.0.0.1:9696";
                   "bazarr.${domain}" "http://127.0.0.1:6767";
-                  "deluge.${domain}" "http://127.0.0.1:8112";
+                  "qbittorrent.${domain}" "http://127.0.0.1:8080";
+                  "qui.${domain}" "http://127.0.0.1:7476";
         	        "filebrowser.${domain}" "http://127.0.0.1:3030";
                   "wallos.${domain}" "http://127.0.0.1:8282";
                   "music.${domain}" "http://127.0.0.1:8095";
@@ -192,7 +193,8 @@ in
           "readarr.${domain}" = protectedProxy;
           "prowlarr.${domain}" = protectedProxy;
           "bazarr.${domain}" = protectedProxy;
-          "deluge.${domain}" = protectedProxy;
+          "qbittorrent.${domain}" = protectedProxy;
+          "qui.${domain}" = protectedProxy;
           "wallos.${domain}" = protectedProxy;
         };
     };

@@ -37,8 +37,6 @@ in
       "d ${mediaDir}/books/audio 0770 ${uid} multimedia"
       "d ${mediaDir}/books/analog 0770 ${uid} multimedia"
       "d ${mediaDir}/music 0770 ${uid} multimedia"
-      "d /home/${user.userName}/gluetun 0770 ${uid} multimedia"
-      "d /home/${user.userName}/deluge 0770 ${uid} multimedia"
     ];
 
     environment.systemPackages = with pkgs; [

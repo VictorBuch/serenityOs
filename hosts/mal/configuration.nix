@@ -155,6 +155,16 @@ in
         owner = "root";
         group = "root";
       };
+      "qbittorrent/username" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
+      "qbittorrent/password" = {
+        mode = "0444";
+        owner = "root";
+        group = "root";
+      };
       "cloudflare/tunnel/account_tag" = {
         mode = "0444";
         owner = "root";

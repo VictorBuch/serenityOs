@@ -78,7 +78,10 @@ in
       zen.enable = true;
     };
     communication.enable = true;
-    development.enable = true;
+    development = {
+      enable = true;
+      neovim.enable = false; # vanilla pkgs.neovim collides with nixcats nvim; use apps.neovim.nixcats instead
+    };
     emacs.enable = false;
     emulation = {
       enable = false;
@@ -92,6 +95,11 @@ in
     };
     productivity.enable = true;
     utilities.enable = true;
+
+    neovim = {
+      nixcats.enable = true;
+      nixvim.enable = false;
+    };
   };
 
   # YubiKey: PAM U2F sudo + screen lock on removal

@@ -168,9 +168,14 @@ mkModule {
       # Staging is required for best plugin compatibility
       wineStaging
 
-      # Yabridge - bridge for Windows VST plugins (uses our staging Wine)
-      # Use pkgs-stable for yabridge to avoid breaking changes
-      (pkgs-stable.yabridge.override { wine = wineStaging; })
+      # Yabridge - bridge for Windows VST plugins
+      # Use stable's default wineWowPackages.yabridge (Wine 9.21 staging).
+      # Do NOT override `wine`: only the pinned 9.21 yabridge wine variant
+      # cross-builds yabridge cleanly. Any other variant (incl. wine 9.20
+      # stagingFull from nixpkgs-wine920) breaks meson's dbus-1 pkg-config
+      # lookup in the wineg++ cross-build. Wine 9.21 is below the 9.22+ GUI
+      # breakage threshold (yabridge#382), so this is safe.
+      pkgs-stable.yabridge
       pkgs-stable.yabridgectl
 
       # Winetricks for installing Windows dependencies

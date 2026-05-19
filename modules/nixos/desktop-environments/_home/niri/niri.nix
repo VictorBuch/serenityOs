@@ -35,8 +35,6 @@ in
       Hidden=true
     '';
 
-    # Bluetooth applet (tray icon for managing bluetooth connections)
-    services.blueman-applet.enable = true;
 
     # Write niri config.kdl to ~/.config/niri/
     xdg.configFile."niri/config.kdl".text = ''

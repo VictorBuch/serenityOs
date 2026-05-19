@@ -13,7 +13,7 @@
   # Enable app categories for desktop use
   apps = {
     cli.enable = true;
-    neovim.nixvim.enable = true;
+    neovim.nixvim.enable = false;
     theming.stylix.enable = true;
   };
 }

@@ -6,6 +6,14 @@ final: prev: {
   # AI coding agents from numtide/llm-agents.nix
   llm-agents = inputs.llm-agents.packages.${final.stdenv.hostPlatform.system};
 
+  # nixCats-style wrapped neovim. Module + lua live in modules/apps/neovim/_nixcats/.
+  nixcatsNeovim =
+    let
+      module = final.lib.modules.importApply ../modules/apps/neovim/_nixcats/module.nix inputs;
+      wrapper = inputs.nix-wrapper-modules.lib.evalModule module;
+    in
+    wrapper.config.wrap { pkgs = final; };
+
   # Add the pam package (renamed to avoid conflict with linux-pam)
   pam-cli = final.callPackage ../packages/pam { };
 

@@ -60,7 +60,17 @@
       "Read(//etc/**)",
       "Bash(systemctl show *)",
       "Bash(nft list *)",
-      "Bash(systemctl is-active *)"
+      "Bash(systemctl is-active *)",
+      "Bash(ssh mal *)",
+      "Bash(ip -4 addr show)",
+      "Bash(sudo -n docker ps)",
+      "Bash(sg docker *)",
+      "Bash(DOCKER_HOST=unix:///var/run/docker.sock sg docker -c 'docker ps')",
+      "Bash(export DOCKER_HOST=unix:///var/run/docker.sock)",
+      "Bash(timeout 8 nc -zv 194.5.49.85 58153)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); trackers=set\\(t.get\\('tracker',''\\) for t in d\\); [print\\(t\\) for t in trackers if t]\")",
+      "Bash(sudo -n ls -la /var/lib/mam-dynamic-seedbox/)",
+      "Bash(sops -d /home/serenity/serenityOs/secrets/secrets.yaml)"
     ],
     "deny": [],
     "ask": []

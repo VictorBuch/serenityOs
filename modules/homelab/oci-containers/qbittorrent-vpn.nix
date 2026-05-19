@@ -130,6 +130,27 @@ in
     }
 
     (lib.mkIf cfg.qui.enable {
+      sops.secrets = {
+        "qui/oidc_client_id" = {
+          owner = "root";
+          group = "root";
+        };
+        "qui/oidc_client_secret" = {
+          owner = "root";
+          group = "root";
+        };
+      };
+
+      sops.templates."qui-oidc-env" = {
+        content = ''
+          QUI__OIDC_CLIENT_ID=${config.sops.placeholder."qui/oidc_client_id"}
+          QUI__OIDC_CLIENT_SECRET=${config.sops.placeholder."qui/oidc_client_secret"}
+        '';
+        owner = "root";
+        group = "root";
+        mode = "0400";
+      };
+
       virtualisation.oci-containers.containers.qui = {
         # No semver tags published yet, only `latest`. Pin to digest once stable.
         image = "ghcr.io/autobrr/qui:latest";
@@ -148,7 +169,17 @@ in
         environment = {
           TZ = "Europe/Copenhagen";
           QUI__LOG_LEVEL = "info";
+
+          # OIDC via pocket-id. Client ID/secret come from sops via environmentFiles.
+          QUI__OIDC_ENABLED = "true";
+          QUI__OIDC_ISSUER = "https://id.${config.homelab.domain}";
+          QUI__OIDC_REDIRECT_URL = "https://qui.${config.homelab.domain}/api/auth/oidc/callback";
+          QUI__OIDC_DISABLE_BUILT_IN_LOGIN = "true";
         };
+
+        environmentFiles = [
+          config.sops.templates."qui-oidc-env".path
+        ];
 
         # qui reaches qBittorrent via host bridge -> host:cfg.ports.webui -> pia-tun -> qbittorrent
         extraOptions = [

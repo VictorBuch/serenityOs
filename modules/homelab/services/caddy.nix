@@ -120,7 +120,7 @@ let
       # qui modern web UI for qBittorrent
       url = "http://127.0.0.1:7476";
       https = false;
-      protected = true;
+      protected = false; # OIDC handled by qui itself via pocket-id
     };
     subscriptions = {
       # Wallos

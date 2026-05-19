@@ -18,12 +18,9 @@ inputs:
     default = config.nvim-lib.pluginsFromPrefix "plugins-" inputs;
   };
 
-  # LazyVim distro from flake input (locked, reproducible).
-  # Swap for hot-iteration on ~/.config/nvim:
-  #   config.settings.config_directory = lib.generators.mkLuaInline "vim.fn.stdpath('config')";
-  # Or vendor lua into this dir:
-  #   config.settings.config_directory = ./.;
-  config.settings.config_directory = inputs.lazyvim-config.outPath;
+  # Hot-iteration: read lua config from ~/.config/nvim at runtime.
+  # Clone your LazyVim repo there: git clone <repo> ~/.config/nvim
+  config.settings.config_directory = lib.generators.mkLuaInline "vim.fn.stdpath('config')";
 
   # lze + lzextras: lazy-loader. Required for the `for_cat` / `auto_enable`
   # handlers the init.lua wires up.

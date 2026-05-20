@@ -1,18 +1,23 @@
-{ lib, ... }:
+{
+  lib,
+  inputs,
+  ...
+}:
 
 {
   imports = [
-    ./hyprland.nix
+    inputs.mangowm.hmModules.mango
+    ./mango.nix
     ./focus-or-run.nix
+    ../common/dunst.nix
     ../common/wlogout
     ../common/hyprlock
-    ../common/dunst.nix
     ../common/fuzzel.nix
     ../common/noctalia.nix
   ];
 
   home.desktop-environments = {
-    hyprland = {
+    mango = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
     };

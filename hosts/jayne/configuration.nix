@@ -62,9 +62,10 @@ in
   # Desktop environments
   desktop-environments = {
     gnome.enable = true;
-    hyprland.enable = false;
+    hyprland.enable = true;
     kde.enable = false;
     niri.enable = true;
+    mango.enable = true;
   };
 
   # Apps - full workstation

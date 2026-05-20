@@ -13,7 +13,7 @@
   config = lib.mkIf config.desktop-environments.hyprland.enable {
 
     # Inject Home Manager config for hyprland (keybinds, animations, etc.)
-    home-manager.sharedModules = [ ./home/hyprland ];
+    home-manager.sharedModules = [ ./_home/hyprland ];
 
     # Enable the Hyprland Window Manager
     programs.hyprland = {
@@ -47,7 +47,7 @@
         xdg-desktop-portal-gtk
       ];
       config = {
-        common.default = "*";
+        common.default = lib.mkDefault "*";
         hyprland.default = [
           "hyprland"
           "gtk"
@@ -89,19 +89,17 @@
 
     environment.systemPackages = with pkgs; [
       libnotify
-      # hyprpaper #Wallpaper
       awww # swww renamed
       hypridle # Idle
       hyprlock # Lock screen
-      #waybar # Bar
-      hyprpanel # Bar
+      # Bar provided by noctalia via home-manager (../_home/common/noctalia.nix)
       hyprpolkitagent
       dunst # Notification manager
       pipewire
       wireplumber
       nautilus
       pavucontrol
-      blueberry # bluetooth manager
+      blueman # bluetooth manager (blueberry removed upstream)
       networkmanagerapplet # wifi manager
       hyprshot # Screenshot tool
       wlogout

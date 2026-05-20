@@ -53,12 +53,20 @@
         #!/bin/bash
         set -euo pipefail
 
+        # MAM session is ASN-locked (per setup instructions), so we only need
+        # to call dynamicSeedbox when the ASN we're egressing from changes.
+        # PIA cycles exit IPs per-connection within the same ASN, so IP-based
+        # change detection would trigger on every run for no reason.
+        # HEARTBEAT_INTERVAL forces a refresh even when ASN is stable, so the
+        # session keeps showing activity to MAM.
+
         STATE_DIR="/data"
-        CACHE_FILE="''${STATE_DIR}/last_ip"
+        ASN_CACHE_FILE="''${STATE_DIR}/last_asn"
         RATE_LIMIT_FILE="''${STATE_DIR}/last_update"
         COOKIE_FILE="''${STATE_DIR}/mam_cookie"
         MAM_API_URL="https://t.myanonamouse.net/json/dynamicSeedbox.php"
-        MAM_IP_URL="https://t.myanonamouse.net/json/jsonIp.php"
+        ASN_LOOKUP_URL="https://ipinfo.io/json"
+        HEARTBEAT_INTERVAL=604800  # 7 days
 
         if [[ ! -f "''${COOKIE_FILE}" ]]; then
           echo "ERROR: MAM cookie file not found at ''${COOKIE_FILE}"
@@ -71,47 +79,51 @@
           exit 1
         fi
 
-        echo "Checking current IP..."
-        CURRENT_IP_RESPONSE=$(curl -s --fail "''${MAM_IP_URL}" || echo "")
-        if [[ -z "''${CURRENT_IP_RESPONSE}" ]]; then
-          echo "ERROR: Failed to get current IP from MAM"
+        echo "Looking up current ASN..."
+        LOOKUP_RESPONSE=$(curl -s --fail "''${ASN_LOOKUP_URL}" || echo "")
+        if [[ -z "''${LOOKUP_RESPONSE}" ]]; then
+          echo "ERROR: Failed to look up current ASN"
           exit 1
         fi
 
-        CURRENT_IP=$(echo "''${CURRENT_IP_RESPONSE}" | jq -r '.ip' 2>/dev/null || echo "")
-        if [[ -z "''${CURRENT_IP}" || "''${CURRENT_IP}" == "null" ]]; then
-          echo "ERROR: Failed to parse IP from response: ''${CURRENT_IP_RESPONSE}"
+        CURRENT_ASN=$(echo "''${LOOKUP_RESPONSE}" | jq -r '.org' 2>/dev/null | grep -oE '^AS[0-9]+' || echo "")
+        if [[ -z "''${CURRENT_ASN}" ]]; then
+          echo "ERROR: Failed to parse ASN from response: ''${LOOKUP_RESPONSE}"
           exit 1
         fi
 
-        echo "Current IP: ''${CURRENT_IP}"
+        CURRENT_IP=$(echo "''${LOOKUP_RESPONSE}" | jq -r '.ip' 2>/dev/null || echo "unknown")
+        echo "Current egress: ''${CURRENT_IP} (''${CURRENT_ASN})"
 
-        CACHED_IP=""
-        if [[ -f "''${CACHE_FILE}" ]]; then
-          CACHED_IP=$(cat "''${CACHE_FILE}" 2>/dev/null || echo "")
+        CACHED_ASN=""
+        if [[ -f "''${ASN_CACHE_FILE}" ]]; then
+          CACHED_ASN=$(cat "''${ASN_CACHE_FILE}" 2>/dev/null || echo "")
         fi
 
-        echo "Cached IP: ''${CACHED_IP}"
+        NOW=$(date +%s)
+        LAST_UPDATE=0
+        if [[ -f "''${RATE_LIMIT_FILE}" ]]; then
+          LAST_UPDATE=$(cat "''${RATE_LIMIT_FILE}" 2>/dev/null || echo "0")
+        fi
+        TIME_SINCE_UPDATE=$((NOW - LAST_UPDATE))
 
-        if [[ "''${CURRENT_IP}" == "''${CACHED_IP}" ]]; then
-          echo "IP unchanged, no update needed"
+        if [[ "''${CURRENT_ASN}" == "''${CACHED_ASN}" && ''${TIME_SINCE_UPDATE} -lt ''${HEARTBEAT_INTERVAL} ]]; then
+          echo "ASN unchanged (''${CURRENT_ASN}), heartbeat not due (''${TIME_SINCE_UPDATE}s/''${HEARTBEAT_INTERVAL}s), skipping"
           exit 0
         fi
 
-        # MAM rate limit: 1 update per hour
-        if [[ -f "''${RATE_LIMIT_FILE}" ]]; then
-          LAST_UPDATE=$(cat "''${RATE_LIMIT_FILE}" 2>/dev/null || echo "0")
-          CURRENT_TIME=$(date +%s)
-          TIME_DIFF=$((CURRENT_TIME - LAST_UPDATE))
-
-          if [[ ''${TIME_DIFF} -lt 3600 ]]; then
-            WAIT_TIME=$((3600 - TIME_DIFF))
-            echo "Rate limit: Must wait ''${WAIT_TIME} seconds before next update"
-            exit 0
-          fi
+        if [[ ''${TIME_SINCE_UPDATE} -lt 3600 ]]; then
+          WAIT_TIME=$((3600 - TIME_SINCE_UPDATE))
+          echo "Rate limit: Must wait ''${WAIT_TIME} seconds before next update"
+          exit 0
         fi
 
-        echo "Updating MAM with new IP: ''${CURRENT_IP}"
+        if [[ "''${CURRENT_ASN}" != "''${CACHED_ASN}" ]]; then
+          echo "ASN changed: ''${CACHED_ASN:-<none>} -> ''${CURRENT_ASN}, updating MAM..."
+        else
+          echo "Heartbeat refresh (''${TIME_SINCE_UPDATE}s since last update), updating MAM..."
+        fi
+
         API_RESPONSE=$(curl -s -b "mam_id=''${MAM_COOKIE}" "''${MAM_API_URL}" || echo "")
 
         if [[ -z "''${API_RESPONSE}" ]]; then
@@ -123,23 +135,23 @@
 
         SUCCESS=$(echo "''${API_RESPONSE}" | jq -r '.Success' 2>/dev/null || echo "false")
         MESSAGE=$(echo "''${API_RESPONSE}" | jq -r '.msg' 2>/dev/null || echo "unknown")
+        RESPONSE_ASN=$(echo "''${API_RESPONSE}" | jq -r '.ASN' 2>/dev/null || echo "")
 
         if [[ "''${SUCCESS}" == "true" ]]; then
           case "''${MESSAGE}" in
-            "Completed")
-              echo "SUCCESS: IP updated to ''${CURRENT_IP}"
-              echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
-              date +%s > "''${RATE_LIMIT_FILE}"
-              ;;
-            "No Change")
-              echo "SUCCESS: IP already set to ''${CURRENT_IP}"
-              echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
+            "Completed"|"No Change")
+              echo "SUCCESS: ''${MESSAGE} (MAM ASN=AS''${RESPONSE_ASN})"
               ;;
             *)
               echo "SUCCESS: ''${MESSAGE}"
-              echo "''${CURRENT_IP}" > "''${CACHE_FILE}"
               ;;
           esac
+          if [[ -n "''${RESPONSE_ASN}" && "''${RESPONSE_ASN}" != "null" ]]; then
+            echo "AS''${RESPONSE_ASN}" > "''${ASN_CACHE_FILE}"
+          else
+            echo "''${CURRENT_ASN}" > "''${ASN_CACHE_FILE}"
+          fi
+          date +%s > "''${RATE_LIMIT_FILE}"
         else
           echo "ERROR: MAM API call failed - ''${MESSAGE}"
           case "''${MESSAGE}" in

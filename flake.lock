@@ -577,11 +577,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1779142999,
-        "narHash": "sha256-KcXaaS7489oPtzW51a7bKSsMeeF4yDjs9GWQ4qA9i4k=",
+        "lastModified": 1779199181,
+        "narHash": "sha256-8x/CeqkYNAAOY+Pa5Huyh0aiUmFcOUAyq3VdYxHb5K4=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "9b28a7e6e3e6f61b114a550941abfc9fce0645cc",
+        "rev": "13ba3f7ca9da3d49e959745f6d0d1e7a662c1984",
         "type": "github"
       },
       "original": {
@@ -1033,11 +1033,11 @@
     },
     "wannashare": {
       "locked": {
-        "lastModified": 1778429927,
-        "narHash": "sha256-YsbNDvDS0XVjVY8BRU2z5fTRo01/5V/kvmiYvoR1k1A=",
+        "lastModified": 1779201428,
+        "narHash": "sha256-qD3RM/+Nd2qUC2IEjt/32Xq9/IAaRQfcodoHkESihJo=",
         "ref": "refs/heads/main",
-        "rev": "7e8335d100724448a8443fccbea4e258afe83a82",
-        "revCount": 486,
+        "rev": "2adaa80e57cdb6f9c8c609481d10f9ed6352138f",
+        "revCount": 487,
         "type": "git",
         "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       },

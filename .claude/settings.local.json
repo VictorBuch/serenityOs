@@ -88,7 +88,8 @@
       "Bash(sudo -n grep -E \"^WebUI\\\\\\\\\\\\\\\\|HostHeaderValidation|CSRFProtection|ClickjackingProtection|AuthSubnetWhitelist|LocalHostAuth|Username|Password_PBKDF2|AlternativeUIEnabled\" /var/lib/qbittorrent/config/qBittorrent.conf)",
       "Read(//var/lib/qbittorrent/**)",
       "Read(//var/lib/qbittorrent/config/**)",
-      "Bash(gh repo *)"
+      "Bash(gh repo *)",
+      "WebFetch(domain:docs.noctalia.dev)"
     ],
     "deny": [],
     "ask": []

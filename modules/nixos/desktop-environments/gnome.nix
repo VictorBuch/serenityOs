@@ -17,6 +17,7 @@
         config.desktop-environments.kde.enable
         || config.desktop-environments.hyprland.enable
         || config.desktop-environments.niri.enable
+        || config.desktop-environments.mango.enable
       );
     services.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =

@@ -17,7 +17,7 @@ mkModule {
             # HM uses useGlobalPkgs; disable overlays to avoid nixpkgs.overlays conflict
             overlays.enable = false;
             polarity = "dark";
-            base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark.yaml";
+            base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-storm.yaml";
             image = "${config.wallpaper}";
 
             cursor = {
@@ -45,11 +45,15 @@ mkModule {
                 name = "DejaVu Serif";
               };
             };
-            opacity.terminal = 0.85;
+            opacity = {
+              terminal = 0.85;
+            };
 
             # Disable targets that set nixpkgs.overlays in HM context
             # (conflicts with home-manager.useGlobalPkgs)
             targets = {
+              qt.enable = true;
+              kde.enable = true;
               nixos-icons.enable = false;
               gtksourceview.enable = false;
               # Zen browser stylix integration

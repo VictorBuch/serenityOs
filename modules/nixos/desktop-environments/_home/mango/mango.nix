@@ -7,7 +7,7 @@
 
 let
   terminal = "ghostty";
-  fileManager = "nautilus";
+  fileManager = "thunar";
   browser = "zen-beta";
   shell = "noctalia-shell";
   applicationLauncher = "fuzzel";
@@ -28,6 +28,8 @@ in
     home.sessionVariables.NIXOS_OZONE_WL = "1";
 
     home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
+
+    home.sessionVariables.QT_QPA_PLATFORMTHEME = lib.mkForce "qt6ct";
     xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
       [Desktop Entry]
       Type=Application
@@ -72,6 +74,17 @@ in
         focused_opacity = 1.0;
         unfocused_opacity = 0.9;
 
+        # === Blur ===
+        # blur = 1;
+        # blur_layer = 1;
+        # blur_optimized = 1;
+        # blur_params_num_passes = 3;
+        # blur_params_radius = 6;
+        # blur_params_noise = 0.015;
+        # blur_params_brightness = 0.95;
+        # blur_params_contrast = 0.95;
+        # blur_params_saturation = 1.1;
+
         bordercolor = mangoColor colors.base03;
         focuscolor = mangoColor colors.base04;
         urgentcolor = mangoColor colors.base08;
@@ -100,12 +113,11 @@ in
         # === Environment ===
         env = [
           "XCURSOR_SIZE,16"
-          "QT_QPA_PLATFORMTHEME,gtk3"
         ];
 
         # === Monitors ===
         monitorrule = [
-          "name:^DP-1$,width:2560,height:1440,refresh:120,x:0,y:0,scale:1.0"
+          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.0"
           "name:^Virtual-1$,width:2560,height:1600,refresh:60,x:0,y:0,scale:1.1"
         ];
 
@@ -120,7 +132,7 @@ in
         windowrule = [
           # Browser / terminal default to tag 1
           "appid:^zen-beta$|^zen$|^firefox$,tags:1"
-          "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
+          "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:2"
 
           # Named scratchpads — chat & music
           "isnamedscratchpad:1,width:1.0,height:1.0,appid:^[Dd]iscord$"
@@ -139,27 +151,35 @@ in
           "appid:^davinci-convert$,isfloating:1,width:640,height:400"
 
           # Steam scratchpad-ish: just float, low priority
-          "appid:^steam$,tags:2"
+          "appid:^steam$,tags:3"
         ];
 
         # === Layer rules ===
         layerrule = [
           "noanim:1,noblur:1,layer_name:^selection$"
           "animation_type_open:fade,layer_name:^fuzzel$"
-          "noanim:1,layer_name:^noctalia-wallpaper.*$"
+          # "noanim:1,noblur:1,layer_name:^noctalia-wallpaper.*$"
+          # "noblur:1,layer_name:^noctalia-bar.*$"
         ];
 
         # === Animations ===
         animations = 1;
         animation_duration_open = 120;
-        animation_duration_close = 120;
-        animation_duration_move = 60;
+        animation_duration_close = 150;
+        animation_duration_move = 80;
         animation_duration_tag = 100;
         animation_type_open = "zoom";
         animation_type_close = "fade";
         # Aggressive ease-out — snap to target fast, settle quick.
         animation_curve_move = "0.05,0.9,0.1,1.0";
         animation_curve_tag = "0.1,0.9,0.2,1.0";
+
+        # === Mouse binds ===
+        mousebind = [
+          "SUPER,btn_left,moveresize,curmove"
+          "SUPER,btn_right,moveresize,curresize"
+          "NONE,btn_middle,togglemaximizescreen,0"
+        ];
 
         # === Keybinds ===
         bind = [
@@ -217,7 +237,7 @@ in
           "SUPER+ALT,SPACE,switch_keyboard_layout"
 
           # --- Lock / session ---
-          "SUPER,Escape,spawn,hyprlock"
+          "SUPER,Escape,spawn_shell,${shell} ipc call lockScreen lock"
           "SUPER+SHIFT,Escape,spawn_shell,${shell} ipc call sessionMenu lockAndSuspend"
 
           # --- Reload / quit ---

@@ -15,31 +15,26 @@
 
       settings = {
         main = {
-          # font = "JetBrainsMono Nerd Font:weight=bold:size=12"; # managed by stylix
-          line-height = 30;
-          width = 40;
+          # font managed by stylix
+          line-height = 28;
+          width = 42;
           fields = "name,generic,comment,categories,filename,keywords";
           terminal = "ghostty -e";
           prompt = ''"❯   "'';
           layer = "overlay";
-          lines = 10;
+          lines = 8;
+          horizontal-pad = 24;
+          vertical-pad = 20;
+          inner-pad = 14;
+          icon-theme = "WhiteSur-icon-theme-dark";
+          dpi-aware = "yes";
         };
 
-        # Colors managed by stylix - commented out manual overrides
-        # colors = {
-        #   # Catppuccin Mocha colors
-        #   background = "1e1e2eaa"; # base with transparency
-        #   text = "cdd6f4ff"; # text
-        #   match = "f38ba8ff"; # red
-        #   selection = "585b70ff"; # surface2
-        #   selection-match = "f38ba8ff"; # red
-        #   selection-text = "cdd6f4ff"; # text
-        #   border = "b4befeff"; # lavender
-        # };
+        # Colors + background opacity managed by stylix (opacity.popups)
 
         border = {
-          radius = 10;
-          width = 2;
+          radius = 14;
+          width = 1;
         };
       };
     };

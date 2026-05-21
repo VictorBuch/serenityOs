@@ -32,7 +32,6 @@ let
     };
     theming = {
       stylix = false;
-      catppuccin = false;
     };
   };
 in

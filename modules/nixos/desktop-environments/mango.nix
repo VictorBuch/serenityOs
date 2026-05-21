@@ -49,7 +49,6 @@
 
     xdg.portal = {
       enable = true;
-      xdgOpenUsePortal = true;
       extraPortals = with pkgs; [
         xdg-desktop-portal-wlr
         xdg-desktop-portal-gtk
@@ -73,6 +72,7 @@
     services = {
       blueman.enable = true;
       udisks2.enable = true;
+      tumbler.enable = true; # Thumbnail support for images Thunar
       gvfs.enable = true;
       pipewire = {
         enable = true;
@@ -86,21 +86,24 @@
     programs.nm-applet.enable = true;
     security.rtkit.enable = true;
 
+    # Thunar file manager
+    programs.thunar.enable = true;
+    programs.xfconf.enable = true;
+
     environment.systemPackages =
       (with pkgs; [
         libnotify
         awww
-        hyprlock
-        dunst
+        #hyprlock
+        #dunst
         pipewire
         wireplumber
-        nautilus
         pavucontrol
         blueman
         networkmanagerapplet
         polkit_gnome
-        waybar
-        wlogout
+        #waybar
+        #wlogout
 
         qt5.qtwayland
         qt6.qtwayland

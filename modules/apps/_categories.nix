@@ -10,16 +10,27 @@ let
     n: t: t == "directory" && !lib.hasPrefix "_" n
   ) dirContents;
 
-  # For each category, find module names from .nix files (excluding _-prefixed)
+  # For each category, find module names from .nix files (excluding _-prefixed).
+  # Recurses into subdirectories so modules can be organized in nested folders
+  # (e.g. development/editors/vscode.nix still registers as apps.development.vscode).
   discoverModules =
     catName:
     let
-      contents = builtins.readDir (appsDir + "/${catName}");
-      nixFiles = lib.filterAttrs (
-        n: t: t == "regular" && lib.hasSuffix ".nix" n && !lib.hasPrefix "_" n
-      ) contents;
+      walk =
+        path:
+        lib.concatLists (
+          lib.mapAttrsToList (
+            n: t:
+            if t == "directory" && !lib.hasPrefix "_" n then
+              walk (path + "/${n}")
+            else if t == "regular" && lib.hasSuffix ".nix" n && !lib.hasPrefix "_" n then
+              [ (lib.removeSuffix ".nix" n) ]
+            else
+              [ ]
+          ) (builtins.readDir path)
+        );
     in
-    map (n: lib.removeSuffix ".nix" n) (builtins.attrNames nixFiles);
+    walk (appsDir + "/${catName}");
 
   # Per-category overrides for which modules default to disabled
   overrides = {

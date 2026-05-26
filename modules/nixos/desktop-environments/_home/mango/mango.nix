@@ -178,7 +178,7 @@ in
         mousebind = [
           "SUPER,btn_left,moveresize,curmove"
           "SUPER,btn_right,moveresize,curresize"
-          "NONE,btn_middle,togglemaximizescreen,0"
+          "SUPER,btn_middle,togglemaximizescreen,0"
         ];
 
         # === Keybinds ===

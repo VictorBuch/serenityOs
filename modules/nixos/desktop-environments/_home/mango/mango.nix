@@ -48,6 +48,8 @@ in
         ${shell} &
         ${browser} &
         ${terminal} &
+        figma-linux &
+        com.logseq.Logseq &
         easyeffects --gapplication-service &
         wl-paste --watch cliphist store &
       '';
@@ -106,7 +108,12 @@ in
         single_scratchpad = 1;
 
         # Layout cycling — user-requested set
-        circle_layout = "tile,grid,monocle,center_tile";
+        circle_layout = "tile,scroller,monocle,center_tile";
+
+        # Scroller defaults — full-width new windows
+        scroller_default_proportion = 0.99;
+        scroller_structs = 20;
+        edge_scroller_pointer_focus = 0;
 
         # === Misc ===
         xwayland_persistence = 1;
@@ -126,22 +133,29 @@ in
         ];
 
         # === Tag rules: layouts per tag ===
+        # Tag 1 = scroller (zen/ghostty/figma side-by-side via SUPER+H/L)
+        # Tag 2 = tile (logseq + overflow)
+        # Tag 3 = tile (steam)
         tagrule = [
-          "id:1,layout_name:tile"
+          "id:1,layout_name:scroller"
           "id:2,layout_name:tile"
           "id:3,layout_name:tile"
         ];
 
         # === Window rules ===
         windowrule = [
-          # Browser / terminal default to tag 1
+          # Raycast-style slots: pin appid → tag so focus-or-run lands consistently
           "appid:^zen-beta$|^zen$|^firefox$,tags:1"
-          "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:2"
+          "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
+          "appid:^figma-linux$|^Figma$,tags:1"
+          "appid:^Logseq$|^logseq$,tags:2"
 
           # Named scratchpads — chat & music
-          "isnamedscratchpad:1,width:1.0,height:1.0,appid:^[Dd]iscord$"
-          "isnamedscratchpad:1,width:1.0,height:1.0,appid:^[Ss]lack$"
-          "isnamedscratchpad:1,width:1.0,height:1.0,appid:^tidal-hifi$"
+          # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
+          # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
+          "isnamedscratchpad:1,appid:^[Dd]iscord$"
+          "isnamedscratchpad:1,appid:^[Ss]lack$"
+          "isnamedscratchpad:1,appid:^tidal-hifi$"
 
           # Audio/Wine sizing
           "appid:^REAPER$|^reaper$,width:0.85"
@@ -162,8 +176,6 @@ in
         layerrule = [
           "noanim:1,noblur:1,layer_name:^selection$"
           "animation_type_open:fade,layer_name:^rofi$"
-          # "noanim:1,noblur:1,layer_name:^noctalia-wallpaper.*$"
-          # "noblur:1,layer_name:^noctalia-bar.*$"
         ];
 
         # === Animations ===
@@ -227,18 +239,32 @@ in
           "SUPER,V,setmfact,-0.05"
           "SUPER+SHIFT,V,setmfact,+0.05"
 
-          # --- Tag (workspace) switching ---
-          "SUPER,1,view,1"
-          "SUPER,2,view,2"
-          "SUPER,3,view,3"
-          "SUPER+SHIFT,1,tag,1"
-          "SUPER+SHIFT,2,tag,2"
-          "SUPER+SHIFT,3,tag,3"
+          # --- Scroller width preset cycle ---
+          "SUPER,W,switch_proportion_preset,next"
+          "SUPER+SHIFT,W,switch_proportion_preset,prev"
+
+          # --- Raycast-style focus-or-run (SUPER+1..5) ---
+          # Pinned tags via windowrule; helper launches if missing, then jumps to tag
+          # and cycles focusstack until appid matches.
+          "SUPER,1,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
+          "SUPER,2,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
+          "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
+          "SUPER,4,spawn_shell,mango-focus-or-run Logseq 2 com.logseq.Logseq"
+
+          # --- Move client to tag ---
+          "SUPER+CTRL,1,tag,1"
+          "SUPER+CTRL,2,tag,2"
+          "SUPER+CTRL,3,tag,3"
+
+          # --- Raw tag view (fallback when focus-or-run not enough) ---
+          "SUPER+SHIFT,1,view,1"
+          "SUPER+SHIFT,2,view,2"
+          "SUPER+SHIFT,3,view,3"
 
           # --- Named scratchpads (Tidal / Discord / Slack) ---
           "SUPER,T,toggle_named_scratchpad,tidal-hifi,none,tidal-hifi"
           "SUPER,D,toggle_named_scratchpad,discord,none,discord"
-          "SUPER,S,toggle_named_scratchpad,Slack,none,slack"
+          "SUPER,S,toggle_named_scratchpad,slack,none,slack"
 
           # --- Standard scratchpad pool ---
           "SUPER,I,minimized"

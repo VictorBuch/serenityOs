@@ -131,9 +131,8 @@ in
                 }
                 {
                   id = "Tray";
-                  blacklist = [ ];
+                  blacklist = [ "nm-applet" ];
                   colorizeIcons = false;
-                  favorites = [ ];
                 }
                 {
                   id = "Spacer";

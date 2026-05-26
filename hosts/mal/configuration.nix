@@ -446,12 +446,13 @@ in
   homelab.qbittorrent-vpn = {
     enable = true;
     qui.enable = true;
+    mousehole.enable = true;
   };
   homelab.filebrowser.enable = true;
   homelab.nextcloud.enable = true;
 
   # Utils
-  homelab.mam-dynamic-seedbox.enable = true;
+  # homelab.mam-dynamic-seedbox.enable = true;
   homelab.it-tools.enable = true;
   homelab.ntfy-sh.enable = true;
 

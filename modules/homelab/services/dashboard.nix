@@ -745,6 +745,12 @@ in
                           icon = "sh:qbittorrent";
                           check-url = "${local}:7476";
                         }
+                        {
+                          title = "Mousehole";
+                          url = "https://mousehole.${hl.domain}";
+                          icon = "sh:mousehole";
+                          check-url = "${local}:5010";
+                        }
                       ];
                     }
                     # Infrastructure Monitor Group

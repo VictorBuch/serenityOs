@@ -122,6 +122,12 @@ let
       https = false;
       protected = false; # OIDC handled by qui itself via pocket-id
     };
+    mousehole = {
+      # MAM dynamic seedbox IP updater (published via pia-tun on host:5010)
+      url = "http://127.0.0.1:5010";
+      https = false;
+      protected = true;
+    };
     subscriptions = {
       # Wallos
       url = "http://127.0.0.1:8282";

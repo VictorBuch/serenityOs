@@ -16,6 +16,8 @@ in
 
     qui.enable = lib.mkEnableOption "Enable qui modern web UI for qBittorrent";
 
+    mousehole.enable = lib.mkEnableOption "Enable mousehole MAM dynamic seedbox IP updater (shares pia-tun netns)";
+
     pia.locations = lib.mkOption {
       type = lib.types.str;
       default = "de_berlin";
@@ -33,6 +35,11 @@ in
         default = 7476;
         description = "Host port for qui WebUI";
       };
+      mousehole = lib.mkOption {
+        type = lib.types.port;
+        default = 5010;
+        description = "Host port for mousehole web UI (published via pia-tun since mousehole shares its netns).";
+      };
     };
   };
 
@@ -40,7 +47,8 @@ in
     {
       networking.firewall.allowedTCPPorts =
         [ cfg.ports.webui ]
-        ++ lib.optional cfg.qui.enable cfg.ports.qui;
+        ++ lib.optional cfg.qui.enable cfg.ports.qui
+        ++ lib.optional cfg.mousehole.enable cfg.ports.mousehole;
 
       sops.templates."pia-tun-env" = {
         content = ''
@@ -60,9 +68,10 @@ in
 
         # Internal port stays 8080 (matches pia-tun's PS_URL default).
         # Host port is configurable via cfg.ports.webui.
-        ports = [
-          "${toString cfg.ports.webui}:8080"
-        ];
+        # mousehole shares this netns, so its port is published here too.
+        ports =
+          [ "${toString cfg.ports.webui}:8080" ]
+          ++ lib.optional cfg.mousehole.enable "${toString cfg.ports.mousehole}:5010";
 
         environment = {
           PIA_LOCATIONS = cfg.pia.locations;
@@ -194,6 +203,37 @@ in
         # Follow qbittorrent's lifecycle so a pia-tun restart cascades
         # cleanly: pia-tun -> qbittorrent (BindsTo/PartOf) -> qui (PartOf).
         partOf = [ "docker-qbittorrent.service" ];
+      };
+    })
+
+    (lib.mkIf cfg.mousehole.enable {
+      # mousehole runs inside pia-tun's netns so it sees the PIA exit IP/ASN.
+      # Cookie is set via mousehole's own web UI on first boot (not via sops);
+      # state persists in /var/lib/mousehole across restarts.
+      virtualisation.oci-containers.containers.mousehole = {
+        image = "tmmrtn/mousehole:latest";
+        autoStart = true;
+        dependsOn = [ "pia-tun" ];
+
+        volumes = [
+          "/var/lib/mousehole:/srv/mousehole"
+        ];
+
+        environment = {
+          TZ = "Europe/Copenhagen";
+        };
+
+        extraOptions = [
+          "--network=container:pia-tun"
+        ];
+      };
+
+      systemd.services.docker-mousehole = {
+        after = [ "docker-pia-tun.service" ];
+        # Cascade with pia-tun like qbittorrent does — mousehole's network
+        # disappears whenever pia-tun restarts.
+        bindsTo = [ "docker-pia-tun.service" ];
+        partOf = [ "docker-pia-tun.service" ];
       };
     })
   ]);

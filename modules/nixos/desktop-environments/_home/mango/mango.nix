@@ -10,7 +10,11 @@ let
   fileManager = "thunar";
   browser = "zen-beta";
   shell = "noctalia-shell";
-  applicationLauncher = "fuzzel";
+  applicationLauncher = "rofi -show drun";
+  calcLauncher = "rofi -show calc -no-show-match -no-sort";
+  windowSwitcher = "rofi -show window";
+  emojiPicker = "rofi -show emoji";
+  powerMenu = "rofi -show power-menu";
   colors = config.lib.stylix.colors.withHashtag;
 
   # Strip leading '#' for mango color format (0xRRGGBBAA expected)
@@ -157,7 +161,7 @@ in
         # === Layer rules ===
         layerrule = [
           "noanim:1,noblur:1,layer_name:^selection$"
-          "animation_type_open:fade,layer_name:^fuzzel$"
+          "animation_type_open:fade,layer_name:^rofi$"
           # "noanim:1,noblur:1,layer_name:^noctalia-wallpaper.*$"
           # "noblur:1,layer_name:^noctalia-bar.*$"
         ];
@@ -187,7 +191,15 @@ in
           "SUPER,Return,spawn,${terminal}"
           "SUPER,B,spawn,${browser}"
           "SUPER,F,spawn,${fileManager}"
-          "SUPER,SPACE,spawn,${applicationLauncher}"
+          "SUPER,SPACE,spawn_shell,${applicationLauncher}"
+          "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
+          "SUPER,Z,spawn_shell,${windowSwitcher}"
+          "SUPER+SHIFT,E,spawn_shell,${emojiPicker}"
+          "SUPER+SHIFT,P,spawn_shell,${powerMenu}"
+          "SUPER,N,spawn,rofi-vpn"
+          "SUPER+SHIFT,N,spawn,rofi-network-manager"
+          "SUPER+SHIFT,B,spawn,rofi-bluetooth"
+          "SUPER+SHIFT,A,spawn,rofi-pulse-select"
 
           # --- Window management ---
           "SUPER,Q,killclient"

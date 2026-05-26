@@ -12,7 +12,7 @@
     ../common/dunst.nix
     ../common/wlogout
     ../common/hyprlock
-    ../common/fuzzel.nix
+    ../common/rofi.nix
     ../common/noctalia.nix
     ../common/noctalia-mango-layout-plugin.nix
   ];
@@ -26,7 +26,7 @@
       enable = lib.mkDefault true;
     };
     common = {
-      fuzzel.enable = lib.mkDefault true;
+      rofi.enable = lib.mkDefault true;
       dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;
       hyprlock.enable = lib.mkDefault true;

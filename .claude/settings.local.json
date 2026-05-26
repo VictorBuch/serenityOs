@@ -88,7 +88,17 @@
       "Bash(sudo -n grep -E \"^WebUI\\\\\\\\\\\\\\\\|HostHeaderValidation|CSRFProtection|ClickjackingProtection|AuthSubnetWhitelist|LocalHostAuth|Username|Password_PBKDF2|AlternativeUIEnabled\" /var/lib/qbittorrent/config/qBittorrent.conf)",
       "Read(//var/lib/qbittorrent/**)",
       "Read(//var/lib/qbittorrent/config/**)",
-      "Bash(gh repo *)"
+      "Bash(gh repo *)",
+      "WebFetch(domain:docs.noctalia.dev)",
+      "Bash(mmsg -O)",
+      "Bash(mmsg -g)",
+      "Bash(mmsg -g -c)",
+      "Bash(mmsg -d focusstack,next)",
+      "Bash(mmsg -d view,2)",
+      "Bash(ps -eo pid,comm,args)",
+      "Bash(flatpak list *)",
+      "Bash(awk '$2 == \"appid\" {print $3}')",
+      "Read(//nix/store/**)"
     ],
     "deny": [],
     "ask": []

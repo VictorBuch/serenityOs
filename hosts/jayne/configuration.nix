@@ -2,6 +2,7 @@
 # Full workstation with audio production, video editing, gaming, etc.
 {
   inputs,
+  pkgs,
   pkgs-stable,
   ...
 }:
@@ -59,28 +60,42 @@ in
   # AMD GPU
   amd-gpu.enable = true;
 
+  # VPN: Tailscale (mesh) + NetworkManager OpenVPN plugin (for PIA .ovpn imports)
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client";
+    extraUpFlags = [ "--operator=${username}" ];
+  };
+  networking.networkmanager.plugins = with pkgs; [
+    networkmanager-openvpn
+  ];
+  environment.systemPackages = with pkgs; [
+    networkmanager-openvpn
+    openvpn
+  ];
+
   # Desktop environments
   desktop-environments = {
     gnome.enable = true;
-    hyprland.enable = false;
     kde.enable = false;
-    niri.enable = true;
+    hyprland.enable = false;
+    niri.enable = false;
+    mango.enable = true;
   };
 
   # Apps - full workstation
   apps = {
     audio = {
       enable = true;
-      yabridge.enable = true;
     };
     browsers = {
       enable = true;
-      zen.enable = true;
     };
-    communication.enable = true;
+    communication = {
+      enable = true;
+    };
     development = {
       enable = true;
-      neovim.enable = false; # vanilla pkgs.neovim collides with nixcats nvim; use apps.neovim.nixcats instead
     };
     emacs.enable = false;
     emulation = {

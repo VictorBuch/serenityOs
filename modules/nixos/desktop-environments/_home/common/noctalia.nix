@@ -19,9 +19,17 @@ in
       # Check if DaVinci Resolve is enabled at the system level
       davinciEnabled = (osConfig.apps.media.davinci-resolve.enable or false);
 
+      # MangoWC layout switcher plugin
+      mangoLayoutPluginEnabled =
+        (config.home.desktop-environments.common.mango-layout-plugin.enable or false);
+
       # Conditionally include the DaVinci Convert widget in the right bar section
       davinciWidget = lib.optional davinciEnabled {
         id = "plugin:davinci-convert";
+      };
+
+      mangoLayoutWidget = lib.optional mangoLayoutPluginEnabled {
+        id = "plugin:mangowc-layout-switcher";
       };
     in
     {
@@ -46,13 +54,12 @@ in
 
           # Bar - heavily customized
           bar = {
-            floating = true;
-            position = "top";
-            # backgroundOpacity = 0.0; # managed by stylix
+            floating = false;
+            position = "bottom";
             density = "compact";
 
             widgets = {
-              left = [
+              left = mangoLayoutWidget ++ [
                 {
                   id = "Workspace";
                   hideUnoccupied = true;
@@ -68,9 +75,6 @@ in
                   showMemoryUsage = true;
                   showNetworkStats = false;
                 }
-              ];
-
-              center = [
                 {
                   id = "MediaMini";
                   hideMode = "transparent";
@@ -84,24 +88,20 @@ in
                 }
               ];
 
+              center = [
+                {
+                  id = "Clock";
+                  customFont = "";
+                  formatHorizontal = "HH:mm : dd MMM";
+                  formatVertical = "HH mm - dd MM";
+                  useCustomFont = false;
+                  usePrimaryColor = true;
+                }
+              ];
+
               right = davinciWidget ++ [
                 {
-                  id = "Tray";
-                  blacklist = [ ];
-                  colorizeIcons = false;
-                  favorites = [ ];
-                }
-                {
-                  id = "Spacer";
-                  width = 20;
-                }
-                {
-                  id = "NotificationHistory";
-                  hideWhenZero = true;
-                  showUnreadBadge = true;
-                }
-                {
-                  id = "Volume";
+                  id = "VPN";
                   displayMode = "onhover";
                 }
                 {
@@ -113,20 +113,30 @@ in
                   displayMode = "onhover";
                 }
                 {
-                  id = "KeyboardLayout";
-                  displayMode = "onhover";
-                }
-                {
                   id = "Spacer";
                   width = 20;
                 }
                 {
-                  id = "Clock";
-                  customFont = "";
-                  formatHorizontal = "HH:mm";
-                  formatVertical = "HH mm - dd MM";
-                  useCustomFont = false;
-                  usePrimaryColor = true;
+                  id = "Volume";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "NotificationHistory";
+                  hideWhenZero = true;
+                  showUnreadBadge = true;
+                }
+                {
+                  id = "KeyboardLayout";
+                  displayMode = "onhover";
+                }
+                {
+                  id = "Tray";
+                  blacklist = [ "nm-applet" ];
+                  colorizeIcons = false;
+                }
+                {
+                  id = "Spacer";
+                  width = 20;
                 }
                 {
                   id = "ControlCenter";
@@ -146,7 +156,10 @@ in
           };
 
           # Disable dock
-          dock.enabled = false;
+          dock = {
+            enabled = false;
+            backgroundOpacity = 1.0;
+          };
 
           # General UI tweaks
           general = {
@@ -158,16 +171,15 @@ in
           # Location
           location.name = "Brno";
 
-          # Notifications
-          # notifications.backgroundOpacity = 0.9; # managed by stylix
+          # Notifications + OSD opacity managed by stylix (opacity.popups)
 
           # Templates
           templates.fuzzel = true;
 
-          # Fonts - managed by stylix
+          # Fonts
           ui = {
-            # fontDefault = "JetBrainsMono Nerd Font Propo"; # managed by stylix
-            # fontFixed = "JetBrainsMono Nerd Font Propo"; # managed by stylix
+            fontDefault = "DejaVu Sans";
+            fontFixed = "JetBrainsMono Nerd Font Mono";
             panelsOverlayLayer = false;
           };
 
@@ -175,10 +187,10 @@ in
           wallpaper = {
             directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
             overviewEnabled = false;
-            randomEnabled = true;
+            randomEnabled = false;
             randomIntervalSec = 3600;
             recursiveSearch = true;
-            transitionDuration = 2500;
+            transitionDuration = 500;
 
             monitors = [
               {
@@ -195,51 +207,24 @@ in
           };
         };
 
-        # Enable the DaVinci Convert plugin when available
-        plugins = lib.mkIf davinciEnabled {
-          states = {
-            davinci-convert = {
-              enabled = true;
-            };
-          };
-        };
+        # Plugin states
+        plugins.states = lib.mkMerge [
+          (lib.mkIf davinciEnabled {
+            davinci-convert.enabled = true;
+          })
+          (lib.mkIf mangoLayoutPluginEnabled {
+            mangowc-layout-switcher.enabled = true;
+          })
+        ];
 
-        # Colors managed by stylix - commented out manual monochrome scheme
-        # colors = {
-        #   mError = "#dddddd";
-        #   mOnError = "#111111";
-        #   mOnPrimary = "#111111";
-        #   mOnSecondary = "#111111";
-        #   mOnSurface = "#828282";
-        #   mOnSurfaceVariant = "#5d5d5d";
-        #   mOnTertiary = "#111111";
-        #   mOutline = "#3c3c3c";
-        #   mPrimary = "#aaaaaa";
-        #   mSecondary = "#a7a7a7";
-        #   mShadow = "#000000";
-        #   mSurface = "#111111";
-        #   mSurfaceVariant = "#191919";
-        #   mTertiary = "#cccccc";
-        # };
-      };
-
-      # Fix missing app icons in Qt applications
-      # Override Kvantum theme with GTK3 for better icon detection
-      # This properly overrides catppuccin's Kvantum via systemd environment.d
-      # qt.platformTheme.name = lib.mkForce "gtk3";
-
-      # Configure GTK icon theme for better icon resolution
-      # Helps Qt's gtk3 platform theme find fallback icons
-      gtk.iconTheme = {
-        name = "Papirus-Dark";
       };
 
       # Adopt new HM default (was `config.gtk.theme` prior to 26.05)
       gtk.gtk4.theme = null;
 
-      # Fallback icon theme environment variable
+      # Quickshell icon hint — match stylix's WhiteSur
       home.sessionVariables = {
-        QS_ICON_THEME = "Papirus-Dark";
+        QS_ICON_THEME = "WhiteSur-icon-theme-dark";
       };
 
       # Install Qt SVG support packages

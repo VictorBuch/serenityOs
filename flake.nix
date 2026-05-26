@@ -30,6 +30,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mangowm = {
+      url = "github:mangowm/mango";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,11 +44,6 @@
     #   url = "github:catppuccin/nix"; # Main branch for unstable nixpkgs compatibility
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
-
-    nvf = {
-      url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     nixvim = {
       url = "github:nix-community/nixvim";
@@ -62,12 +62,6 @@
     };
     plugins-lzextras = {
       url = "github:BirdeeHub/lzextras";
-      flake = false;
-    };
-    # Your LazyVim distro — consumed as config_directory by nixcats wrapper.
-    # Repo is private — uses ssh creds. Pin branch/ref if you want a stable lock.
-    lazyvim-config = {
-      url = "git+ssh://git@github.com/VictorBuch/lazy-vim.git?ref=main";
       flake = false;
     };
 

@@ -68,12 +68,16 @@ in
   maintenance.enable = true;
   apps = {
 
-    # CLI tools and neovim (unified modules)
+    # CLI tools
     cli = {
       enable = true;
       zsh.enable = false;
     };
-    neovim.nixvim.enable = true;
+
+    neovim = {
+      nixcats.enable = true;
+      nixvim.enable = false;
+    };
 
     browsers = {
       # Zen is still too experimental on macOS with nix

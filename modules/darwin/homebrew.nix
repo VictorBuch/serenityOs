@@ -19,6 +19,9 @@
         autoUpdate = true;
         upgrade = true;
         cleanup = "zap"; # Uninstall packages not listed in config
+        # Homebrew 5.1+ requires --force/--force-cleanup/$HOMEBREW_ASK for
+        # `brew bundle --cleanup`; nix-darwin doesn't add it, so pass it here.
+        extraFlags = [ "--force" ];
       };
 
       # Global homebrew settings

@@ -105,6 +105,7 @@ in
     gaming = {
       enable = true;
     };
+    hardware.logitech.enable = true;
     media = {
       enable = true;
     };

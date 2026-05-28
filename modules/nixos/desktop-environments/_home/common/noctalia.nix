@@ -33,7 +33,12 @@ in
       };
     in
     {
-      programs.noctalia-shell = {
+      services.upower.enable;
+      networking.networkmanager.enable;
+      hardware.bluetooth.enable
+      services.power-profiles-daemon.enable
+
+      programs.noctalia = {
         enable = true;
 
         # Custom settings - translated from .config/noctalia/settings.json
@@ -185,7 +190,8 @@ in
 
           # Wallpaper management
           wallpaper = {
-            directory = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+            enabled = true;
+            default.path = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
             overviewEnabled = false;
             randomEnabled = false;
             randomIntervalSec = 3600;
@@ -207,20 +213,20 @@ in
           };
         };
 
-        # Plugin states
-        plugins.states = lib.mkMerge [
-          (lib.mkIf davinciEnabled {
-            davinci-convert.enabled = true;
-          })
-          (lib.mkIf mangoLayoutPluginEnabled {
-            mangowc-layout-switcher.enabled = true;
-          })
-        ];
+        # # Plugin states
+        # plugins.states = lib.mkMerge [
+        #   (lib.mkIf davinciEnabled {
+        #     davinci-convert.enabled = true;
+        #   })
+        #   (lib.mkIf mangoLayoutPluginEnabled {
+        #     mangowc-layout-switcher.enabled = true;
+        #   })
+        # ];
 
       };
 
       # Adopt new HM default (was `config.gtk.theme` prior to 26.05)
-      gtk.gtk4.theme = null;
+      gtk.gtk4.theme = lib.mkForce null;
 
       # Quickshell icon hint — match stylix's WhiteSur
       home.sessionVariables = {
@@ -230,7 +236,7 @@ in
       # Install Qt SVG support packages
       # Without these, Qt silently skips SVG icons (most modern icons are SVG)
       home.packages = with pkgs; [
-        libsForQt5.qt5.qtsvg
+        qt5.qtsvg
         kdePackages.qtsvg
       ];
     }

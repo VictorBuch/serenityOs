@@ -16,7 +16,6 @@ mkModule {
       pkgs.btop
       pkgs.filezilla
       pkgs.chromium
-      # pkgs.bottles  # disabled: pulls i686 openldap which fails test017-syncreplication-refresh (nixpkgs#516392)
       pkgs.lm_sensors
       pkgs.pciutils
       pkgs.gparted

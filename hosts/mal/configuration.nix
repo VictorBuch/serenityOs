@@ -402,76 +402,84 @@ in
     peon-ping.enable = false;
   };
 
-  # Networking and Auth
-  homelab.tailscale = {
-    enable = true;
-    advertiseExitNode = true;
-    useRoutingFeatures = "both"; # Act as both client and server
-    enableSsh = true; # Allow SSH via Tailscale
-    extraUpFlags = [
-      "--advertise-routes=192.168.0.0/24" # Share your local network
-    ];
+  homelab = {
+
+    # Networking and Auth
+    tailscale = {
+      enable = true;
+      advertiseExitNode = true;
+      useRoutingFeatures = "both"; # Act as both client and server
+      enableSsh = true; # Allow SSH via Tailscale
+      extraUpFlags = [
+        "--advertise-routes=192.168.0.0/24" # Share your local network
+      ];
+    };
+    cloudflare-tunnel.enable = true;
+    caddy.enable = true;
+    nginx-reverse-proxy.enable = false;
+    tinyauth = {
+      enable = true;
+      port = 3002;
+    };
+    authelia.enable = false;
+    adguard.enable = true;
+    pocket-id = {
+      enable = true;
+    };
+
+    # Smart home
+    hyperhdr.enable = true;
+    music-assistant.enable = true;
+    home-assistant.enable = true;
+
+    # Monitor and Dashboards
+    dashboard = {
+      homarr.enable = false;
+      glance.enable = true;
+    };
+    uptime-kuma.enable = true;
+    wallos.enable = true;
+
+    # Media
+    fileflows.enable = true;
+    streaming.enable = true;
+    rreading-glasses.enable = true;
+    immich.enable = true;
+    qbittorrent-vpn = {
+      enable = true;
+      qui.enable = true;
+      mousehole.enable = true;
+    };
+    filebrowser.enable = true;
+    nextcloud.enable = true;
+
+    # Utils
+    # homelab.mam-dynamic-seedbox.enable = true;
+    it-tools.enable = true;
+    ntfy-sh.enable = true;
+
+    # Other
+    crafty.enable = true;
+    mealie.enable = true;
+    lab.enable = false;
+    lute.enable = true;
+
+    # Development
+    gitea.enable = true;
+
+    # Document Management
+    paperless.enable = true;
+    reactive-resume.enable = true;
+    invoice-ninja.enable = true;
+    notes = {
+      enable = true;
+      devices = {inara = "<ID>"; pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM";};
+    };
+
+    # Sharing
+    wannashare.enable = true;
+
   };
-  homelab.cloudflare-tunnel.enable = true;
-  homelab.caddy.enable = true;
-  homelab.nginx-reverse-proxy.enable = false;
-  homelab.tinyauth = {
-    enable = true;
-    port = 3002;
-  };
-  homelab.authelia.enable = false;
-  homelab.adguard.enable = true;
-  homelab.pocket-id = {
-    enable = true;
-  };
-
-  # Smart home
-  homelab.hyperhdr.enable = true;
-  homelab.music-assistant.enable = true;
-  homelab.home-assistant.enable = true;
-
-  # Monitor and Dashboards
-  homelab.dashboard = {
-    homarr.enable = false;
-    glance.enable = true;
-  };
-  homelab.uptime-kuma.enable = true;
-  homelab.wallos.enable = true;
-
-  # Media
-  homelab.fileflows.enable = true;
-  homelab.streaming.enable = true;
-  homelab.rreading-glasses.enable = true;
-  homelab.immich.enable = true;
-  homelab.qbittorrent-vpn = {
-    enable = true;
-    qui.enable = true;
-    mousehole.enable = true;
-  };
-  homelab.filebrowser.enable = true;
-  homelab.nextcloud.enable = true;
-
-  # Utils
-  # homelab.mam-dynamic-seedbox.enable = true;
-  homelab.it-tools.enable = true;
-  homelab.ntfy-sh.enable = true;
-
-  # Other
-  homelab.crafty.enable = true;
-  homelab.mealie.enable = true;
-  homelab.lab.enable = false;
-  homelab.lute.enable = true;
-
-  # Development
-  homelab.gitea.enable = true;
-
-  # Document Management
-  homelab.paperless.enable = true;
-  homelab.reactive-resume.enable = true;
-  homelab.invoice-ninja.enable = true;
-
-  # Sharing
-  homelab.wannashare.enable = true;
 
   system.stateVersion = "25.05"; # Did you read the comment?
 

@@ -98,7 +98,8 @@
       "Bash(ps -eo pid,comm,args)",
       "Bash(flatpak list *)",
       "Bash(awk '$2 == \"appid\" {print $3}')",
-      "Read(//nix/store/**)"
+      "Read(//nix/store/**)",
+      "Read(//Users/victorbuch/Downloads/files/**)"
     ],
     "deny": [],
     "ask": []

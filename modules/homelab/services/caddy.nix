@@ -223,6 +223,18 @@ let
     };
   };
 
+  # Quartz wiki (homelab.notes) — static files built to /var/www/notes.
+  # Only mounted when the notes module is enabled.
+  notesService = lib.optionalAttrs (config.homelab.notes.enable && config.homelab.notes.publishWiki) {
+    notes = {
+      url = "";
+      https = false;
+      protected = false;
+      isStaticFiles = true;
+      staticPath = "/var/www/notes";
+    };
+  };
+
   # --- HELPER FUNCTIONS ---
   # Helper for main domain (victorbuch.com)
   mkHost = subdomain: service: {
@@ -441,7 +453,8 @@ in
       enable = true;
       email = "victorbuch@protonmail.com";
       virtualHosts =
-        (lib.mapAttrs' mkHost services) // (lib.mapAttrs' mkWannaShareHost wannashareServices);
+        (lib.mapAttrs' mkHost (services // notesService))
+        // (lib.mapAttrs' mkWannaShareHost wannashareServices);
     };
   };
 }

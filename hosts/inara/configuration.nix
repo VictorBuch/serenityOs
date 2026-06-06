@@ -96,6 +96,10 @@ in
       zed.enable = false; # Use homebrew cask instead to avoid compilation
     };
 
+    # Doom Emacs (light declarative) — emacs + deps + daemon via nix;
+    # config stays imperative in ~/.config/doom.
+    emacs.enable = true;
+
     media = {
       ffmpeg.enable = true;
     };

@@ -97,7 +97,7 @@ in
     development = {
       enable = true;
     };
-    emacs.enable = false;
+    emacs.enable = true;
     emulation = {
       enable = false;
       gpu-passthrough.enable = true;

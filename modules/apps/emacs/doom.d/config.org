@@ -227,73 +227,6 @@ backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
       "C-l" #'evil-window-right)
 #+end_src
 
-* Project launcher (sesh-style)
-Replaces the tmux+sesh flow. Each project = a *workspace* (persp-mode). Opening
-one switches/creates its workspace, drops you in dired at the root, and spawns
-the project's long-running servers as background =vterm= buffers (reached with
-~SPC ,~). Mirrors =modules/apps/cli/sesh.nix=; ~jjui~ left out on purpose.
-
-- ~SPC p O~  — open a project layout (fuzzy)
-- ~SPC TAB ]~ / ~SPC TAB [~ — flip between open project workspaces
-- ~SPC TAB 1..9~ — jump to workspace N (your ctrl+space+<n>)
-- ~SPC ,~ — switch buffer *within* this project (the editor + each =*vterm:…*=)
-
-To watch a server: ~SPC ,~ -> pick =*vterm:node*=. To keep it visible while you
-edit: ~SPC w v~ (split), then ~SPC ,~ in the new window.
-
-#+begin_src emacs-lisp
-(defvar +vb/projects
-  '(("web-builder"
-     :path "~/Documents/work/web-builder"
-     :servers (("node" . "pnpm run dev")))
-    ("serenityOs"
-     :path "~/serenityOs"
-     :servers nil)
-    ("server mal"
-     :path "~"
-     :shell ("ssh" . "ssh serenity@mal")))
-  "Project layouts for `+vb/open-project'. Each entry:
-NAME plist with :path, optional :servers (alist of NAME . SHELL-CMD run as
-background vterms), optional :shell (NAME . CMD for a foreground-only shell
-workspace with no editor).")
-
-(defun +vb/vterm-ensure (name dir cmd)
-  "Ensure a vterm buffer named *vterm:NAME* exists in DIR running CMD.
-Return the buffer. Never steals the selected window."
-  (let ((bufname (format "*vterm:%s*" name)))
-    (or (get-buffer bufname)
-        (save-window-excursion
-          (let ((default-directory (file-name-as-directory (expand-file-name dir)))
-                (vterm-buffer-name bufname))
-            (vterm)
-            (when (and cmd (not (string-empty-p cmd)))
-              (vterm-send-string cmd)
-              (vterm-send-return))
-            (current-buffer))))))
-
-(defun +vb/open-project (name)
-  "Open the project NAME layout: switch to its workspace, then dired + servers."
-  (interactive
-   (list (completing-read "Open project: " (mapcar #'car +vb/projects) nil t)))
-  (let* ((spec    (cdr (assoc name +vb/projects)))
-         (path    (expand-file-name (plist-get spec :path)))
-         (servers (plist-get spec :servers))
-         (shell   (plist-get spec :shell)))
-    (+workspace-switch name t)
-    (if shell
-        ;; bare shell workspace (e.g. ssh to mal) — no editor, just the terminal
-        (switch-to-buffer (+vb/vterm-ensure (car shell) path (cdr shell)))
-      (progn
-        (dired path)
-        (delete-other-windows)
-        (dolist (s servers)
-          (+vb/vterm-ensure (car s) path (cdr s)))))
-    (message "Project %s ready (SPC , to reach its buffers)" name)))
-
-(map! :leader
-      :desc "Open project layout" "p O" #'+vb/open-project)
-#+end_src
-
 * LSP / eglot
 Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
 
@@ -312,4 +245,164 @@ Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
 #+begin_src emacs-lisp
 ;; Tailwind CSS LSP support
 (use-package! lsp-tailwindcss)
+#+end_src
+
+* Custom
+** Session launcher (sesh replacement)
+The real replacement for the tmux+sesh flow. ~SPC o s~ pops one fuzzy picker
+over *everything you might want to open*:
+
+- ~●~ workspaces already open — switch instantly (your live tmux sessions)
+- ~★~ declared projects from =+vb/projects= — switch/create + spawn its servers
+- ~z~ zoxide frecency dirs — open any dir you've ~cd~'d into lately
+- plain projectile repos — every git project Doom knows about
+
+…and you can just *type a path* that's in none of them. Picking a session
+switches/creates its *workspace* (persp-mode), drops you in dired at the root,
+and spawns declared servers as background =vterm= buffers (reached with ~SPC ,~).
+
+- ~SPC o s~  — the fuzzy session picker (also on ~SPC p O~)
+- ~SPC TAB ]~ / ~SPC TAB [~ — flip between open sessions
+- ~SPC TAB 1..9~ — jump to session N (your ctrl+space+<n>)
+- ~SPC ,~ — switch buffer *within* this session (the editor + each =*vterm:…*=)
+
+To watch a server: ~SPC ,~ -> pick =*vterm:node*=. To keep it visible while you
+edit: ~SPC w v~ (split), then ~SPC ,~ in the new window.
+
+#+begin_src emacs-lisp
+(defvar +vb/projects
+  '(("web-builder"
+     :path "~/Documents/work/web-builder"
+     :servers (("docker" . "docker compose up")
+               ("node"   . "pnpm run dev")))
+    ("serenityOs"
+     :path "~/serenityOs"
+     :servers nil)
+    ("server mal"
+     :path "~"
+     :shell ("ssh" . "ssh serenity@mal")))
+  "Declared session layouts for `+vb/open-session'. Each entry:
+NAME plist with :path, optional :servers (alist of NAME . SHELL-CMD run as
+background vterms), optional :shell (NAME . CMD for a foreground-only shell
+workspace with no editor).")
+
+(defun +vb/vterm-ensure (name dir cmd)
+  "Ensure a vterm buffer named *vterm:NAME* exists in DIR running CMD.
+CMD is run as the shell's startup command (via `vterm-shell') rather than
+typed in afterwards — this avoids the send-string race where input is dropped
+before the PTY is ready, leaving an empty buffer. When CMD exits you drop into
+a shell so the buffer stays usable. Returns the buffer; never steals the
+selected window.
+
+Uses a *login* bash (`bash -lc'): the Emacs daemon is launched by launchd/
+systemd with a stripped PATH (only /usr/bin:/bin plus the nix `extraBinPackages'
+from doom.nix), so a non-login shell can't find docker, pnpm, etc. A login
+shell rebuilds PATH from /etc/profile + path_helper + nix. Bash (not the user's
+nushell) is used for reliable POSIX `;'/`exec' semantics."
+  (require 'vterm)
+  (let ((bufname (format "*vterm:%s*" name)))
+    (or (get-buffer bufname)
+        (save-window-excursion
+          (let* ((default-directory (file-name-as-directory (expand-file-name dir)))
+                 (vterm-buffer-name bufname)
+                 (sh (or (executable-find "bash") "/bin/bash"))
+                 (vterm-shell
+                  (if (and cmd (not (string-empty-p cmd)))
+                      (format "%s -lc %s" sh
+                              (shell-quote-argument (format "%s; exec %s -l" cmd sh)))
+                    vterm-shell)))
+            (vterm)
+            (current-buffer))))))
+
+(defun +vb/--open-dir (name path &optional servers)
+  "Switch/create workspace NAME, open dired at PATH, spawn SERVERS as vterms.
+The vterms run in the background. They are added to this workspace explicitly
+via `persp-add-buffer' — buffers created off-screen (inside
+`save-window-excursion') are never displayed in a workspace window, so
+persp-mode never adopts them, and `SPC ,' wouldn't list them otherwise.
+Reach a running server with `SPC ,'."
+  (+workspace-switch name t)
+  (dired path)
+  (delete-other-windows)
+  (dolist (s servers)
+    (let ((buf (+vb/vterm-ensure (car s) path (cdr s))))
+      (when (and (buffer-live-p buf) (fboundp 'persp-add-buffer))
+        (persp-add-buffer buf))))
+  (message "Session %s ready%s" name
+           (if servers
+               (format " — %d server(s) running; SPC , to view" (length servers))
+             " — SPC , for its buffers")))
+
+(defun +vb/--session-candidates ()
+  "Build DISPLAY -> spec alist from open workspaces, `+vb/projects',
+zoxide, and projectile. Deduped by workspace name and by absolute path."
+  (let ((seen-name (make-hash-table :test 'equal))
+        (seen-path (make-hash-table :test 'equal))
+        (out '()))
+    (cl-flet ((norm (p) (and p (directory-file-name (expand-file-name p))))
+              (add  (display spec)
+                (let ((n (plist-get spec :name))
+                      (p (and (plist-get spec :path)
+                              (directory-file-name
+                               (expand-file-name (plist-get spec :path))))))
+                  (unless (or (and n (gethash n seen-name))
+                              (and p (gethash p seen-path)))
+                    (when n (puthash n t seen-name))
+                    (when p (puthash p t seen-path))
+                    (push (cons display spec) out)))))
+      ;; 1. open workspaces — instant switch (running sessions)
+      (dolist (w (+workspace-list-names))
+        (add (format "● %s" w) (list :name w :kind 'workspace)))
+      ;; 2. declared projects
+      (dolist (proj +vb/projects)
+        (add (format "★ %-14s %s" (car proj) (or (plist-get (cdr proj) :path) ""))
+             (append (list :name (car proj) :kind 'config) (cdr proj))))
+      ;; 3. zoxide frecency dirs
+      (when (executable-find "zoxide")
+        (dolist (d (split-string
+                    (shell-command-to-string "zoxide query -l") "\n" t))
+          (add (format "z %s" (abbreviate-file-name d))
+               (list :name (file-name-nondirectory (directory-file-name d))
+                     :path d :kind 'dir))))
+      ;; 4. projectile known projects
+      (dolist (root (and (boundp 'projectile-known-projects)
+                         projectile-known-projects))
+        (add (format "  %s" (abbreviate-file-name root))
+             (list :name (file-name-nondirectory (directory-file-name root))
+                   :path root :kind 'dir))))
+    (nreverse out)))
+
+(defun +vb/open-session ()
+  "Fuzzy session switcher — the sesh replacement. Pick a running workspace,
+a declared project, a zoxide dir, a projectile repo, or type any path."
+  (interactive)
+  (let* ((cands  (+vb/--session-candidates))
+         (choice (completing-read "Session: " (mapcar #'car cands) nil nil))
+         (spec   (cdr (assoc choice cands))))
+    (cond
+     ;; free-typed path not in any list
+     ((null spec)
+      (let ((dir (expand-file-name (string-trim choice))))
+        (if (file-directory-p dir)
+            (+vb/--open-dir (file-name-nondirectory (directory-file-name dir)) dir)
+          (user-error "No session or directory: %s" choice))))
+     ;; already-open workspace
+     ((eq (plist-get spec :kind) 'workspace)
+      (+workspace-switch (plist-get spec :name)))
+     ;; declared shell-only session (e.g. ssh mal)
+     ((plist-get spec :shell)
+      (+workspace-switch (plist-get spec :name) t)
+      (switch-to-buffer (+vb/vterm-ensure (car (plist-get spec :shell))
+                                          (plist-get spec :path)
+                                          (cdr (plist-get spec :shell)))))
+     ;; declared project or plain dir
+     (t
+      (+vb/--open-dir (plist-get spec :name)
+                      (expand-file-name (plist-get spec :path))
+                      (plist-get spec :servers))))))
+
+(defalias '+vb/open-project #'+vb/open-session)
+
+(map! :leader
+      :desc "Open session (sesh)" "p o" #'+vb/open-session)
 #+end_src

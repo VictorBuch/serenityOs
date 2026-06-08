@@ -44,6 +44,26 @@ Left cmd = Meta, option = Super, right cmd stays for system shortcuts.
         mac-right-command-modifier 'none
         mac-option-modifier 'super))
 #+end_src
+
+** Clipboard
+Yank/kill already sync with the macOS clipboard (=select-enable-clipboard= is
+~t~ in Doom), so evil ~y~/~p~ talk to it. Cmd is bound to Meta above, so we
+can't steal ~M-c/v/x~ without clobbering ~capitalize-word~ / ~M-x~ etc. Instead
+use Super, which Option maps to (=mac-option-modifier 'super=): ~Option+c/v/x/a~
+become ~s-c/v/x/a~ — free keys, no Meta conflicts. Works in normal, insert, and
+visual state plus the minibuffer.
+
+#+begin_src emacs-lisp
+(when (eq system-type 'darwin)
+  (setq select-enable-clipboard t
+        select-enable-primary t)
+  ;; Option(=Super)-c/v/x/a copy, paste, cut, select-all.
+  (map! :nvi "s-c" #'kill-ring-save     ; Option-c  copy
+        :nvi "s-v" #'yank               ; Option-v  paste
+        :nvi "s-x" #'kill-region        ; Option-x  cut
+        :nvi "s-a" #'mark-whole-buffer) ; Option-a  select all
+  (define-key minibuffer-local-map (kbd "s-v") #'yank))
+#+end_src
 * Org
 =org-directory= must be set before org loads, so it lives outside the =after!=.
 
@@ -148,7 +168,7 @@ Flat note store — backlinks structure it, no folders to think about.
         (concat "${title:*} " (propertize "${tags:30}" 'face 'org-tag))
         org-roam-capture-templates
         '(("d" "default" plain "%?"
-           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+           :target (file+head "${slug}.org"
                               "#+title: ${title}\n#+date: %U\n")
            :unnarrowed t))
         org-roam-dailies-capture-templates

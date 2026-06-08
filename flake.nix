@@ -92,6 +92,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Doom Emacs built declaratively (no straight.el, no `doom sync`).
+    # Don't `follows` nixpkgs: the module uses its own pinned emacs-overlay,
+    # and upstream warns against updating its inputs. follows="" just avoids
+    # downloading a second nixpkgs (the module reads pkgs from our config).
+    nix-doom-emacs-unstraightened = {
+      url = "github:marienz/nix-doom-emacs-unstraightened";
+      inputs.nixpkgs.follows = "";
+    };
+
     # peon-ping: agent sound notifications
     peon-ping.url = "github:PeonPing/peon-ping";
 

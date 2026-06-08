@@ -1,0 +1,295 @@
+#+title: Doom Emacs Config
+#+author: Victor Buch
+#+property: header-args:emacs-lisp :tangle config.el :results none
+#+startup: overview
+#+auto_tangle: t
+
+This is a *literate* Doom config. The =:config literate= module tangles every
+=emacs-lisp= block below into =config.el= on ~doom sync~. Edit this file, not
+=config.el= (that one is generated — don't touch it).
+
+To re-tangle without a full sync: ~SPC h r r~ (reload) re-tangles + reloads, or
+~C-c C-v t~ (org-babel-tangle) here.
+
+* Identity
+Used by GPG, file templates, snippets, email.
+
+#+begin_src emacs-lisp
+(setq user-full-name "Victor Buch"
+      user-mail-address "victor.buch@ventrata.com")
+#+end_src
+
+* Look & feel
+** Fonts and theme
+JetBrainsMono Nerd Font for code;
+
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 14)
+      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 15)
+      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 22))
+
+(setq doom-theme 'doom-badger)
+(setq display-line-numbers-type 'relative)
+
+;; A little breathing room between lines (nicer for reading notes).
+(setq-default line-spacing 0.10)
+#+end_src
+
+** macOS modifiers
+Left cmd = Meta, option = Super, right cmd stays for system shortcuts.
+
+#+begin_src emacs-lisp
+(when (eq system-type 'darwin)
+  (setq mac-command-modifier 'meta
+        mac-right-command-modifier 'none
+        mac-option-modifier 'super))
+#+end_src
+* Org
+=org-directory= must be set before org loads, so it lives outside the =after!=.
+
+#+begin_src emacs-lisp
+(setq org-directory "~/org/")
+#+end_src
+
+** Core: task states, appearance, agenda, capture
+
+#+begin_src emacs-lisp
+(after! org
+  (setq org-directory "~/org/"
+        ;; --- task states ---
+        org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "DONE(d!)"))
+        org-todo-keyword-faces
+        '(("NEXT" . +org-todo-active))
+        org-log-done 'time
+        org-log-into-drawer t
+        ;; --- appearance ---
+        org-startup-indented t
+        org-startup-folded 'content
+        org-hide-emphasis-markers t
+        org-pretty-entities t
+        org-ellipsis " ▾"
+        org-fontify-quote-and-verse-blocks t
+        ;; --- agenda sources: simple. inbox = capture, todo.org = organized ---
+        org-agenda-files (list (expand-file-name "inbox.org" org-directory)
+                               (expand-file-name "todo.org" org-directory))
+        org-default-notes-file (expand-file-name "inbox.org" org-directory)
+        org-refile-targets '((nil :maxlevel . 3)
+                             (org-agenda-files :maxlevel . 3))
+        org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil
+        ;; --- capture: fast, opinionated ---
+        org-capture-templates
+        `(("t" "Todo → inbox" entry
+           (file ,(expand-file-name "inbox.org" org-directory))
+           "* TODO %?\n%U" :empty-lines 1)
+          ("c" "Todo w/ context" entry
+           (file ,(expand-file-name "inbox.org" org-directory))
+           "* TODO %? :@%^{context|computer|phone|home|work|errands}:\n%U"
+           :empty-lines 1)
+          ("n" "Note → inbox" entry
+           (file ,(expand-file-name "inbox.org" org-directory))
+           "* %?\n%U" :empty-lines 1)
+          ("m" "Meeting" entry
+           (file ,(expand-file-name "inbox.org" org-directory))
+           "* MEETING %? :meeting:\n%U" :empty-lines 1))))
+#+end_src
+
+** Agenda behaviour
+
+#+begin_src emacs-lisp
+(after! org-agenda
+  (setq org-agenda-start-with-log-mode t
+        org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-window-setup 'current-window))
+#+end_src
+
+* Org styling
+org-modern (headings/tables/tags), mixed-pitch (prose vs code), org-appear
+(reveal markers under cursor).
+
+#+begin_src emacs-lisp
+(use-package! org-modern
+  :hook (org-mode . org-modern-mode)
+  :hook (org-agenda-finalize . org-modern-agenda)
+  :config
+  (setq org-modern-star 'replace
+        org-modern-hide-stars nil
+        org-modern-table t
+        org-modern-list '((?- . "•") (?+ . "‣") (?* . "–"))
+        org-modern-block-name '("⌄ " . "")
+        org-modern-label-border 0.3))
+
+(use-package! mixed-pitch
+  :hook (org-mode . mixed-pitch-mode)
+  :config
+  (dolist (f '(org-code org-block org-table org-block-begin-line
+               org-block-end-line org-meta-line org-document-info-keyword))
+    (add-to-list 'mixed-pitch-fixed-pitch-faces f)))
+
+(use-package! org-appear
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq org-appear-autoemphasis t
+        org-appear-autolinks t
+        org-appear-autosubmarkers t))
+#+end_src
+
+* Org-roam (zettelkasten)
+Flat note store — backlinks structure it, no folders to think about.
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (setq org-roam-directory (file-truename "~/org/roam/")
+        org-roam-dailies-directory "daily/"
+        org-roam-completion-everywhere t
+        org-roam-node-display-template
+        (concat "${title:*} " (propertize "${tags:30}" 'face 'org-tag))
+        org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+date: %U\n")
+           :unnarrowed t))
+        org-roam-dailies-capture-templates
+        '(("d" "default" entry "* %?\n%U"
+           :target (file+head "%<%Y-%m-%d>.org"
+                             "#+title: %<%Y-%m-%d>\n"))))
+  (org-roam-db-autosync-mode))
+
+(use-package! org-roam-ui
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start nil))
+#+end_src
+
+* Org-excalidraw (drawings)
+Embed Excalidraw drawings as ~excalidraw:~ org links. The =excalidraw_export=
+CLI (from Nix, see =doom.nix=) renders each =.excalidraw= file to SVG on save.
+=org-excalidraw-initialize= registers the link type + export hook.
+
+- ~M-x org-excalidraw-create-drawing~ — new drawing, insert link at point
+
+#+begin_src emacs-lisp
+(use-package! org-excalidraw
+  :after org
+  :config
+  (setq org-excalidraw-directory (expand-file-name "excalidraw" org-directory))
+  (unless (file-directory-p org-excalidraw-directory)
+    (make-directory org-excalidraw-directory t))
+  (org-excalidraw-initialize))
+#+end_src
+
+* Keybindings
+Doom already gives: ~SPC n r f~ find, ~SPC n r i~ insert link, ~SPC n r b~
+backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
+
+#+begin_src emacs-lisp
+(map! :leader
+      (:prefix ("n" . "notes")
+       (:prefix ("r" . "roam")
+        :desc "Open roam graph (UI)" "g" #'org-roam-ui-open
+        :desc "Today's daily"        "t" #'org-roam-dailies-goto-today
+        :desc "Goto date"            "D" #'org-roam-dailies-goto-date
+        :desc "Yesterday"            "y" #'org-roam-dailies-goto-yesterday)))
+#+end_src
+
+** Window and Buffer navigation
+#+begin_src emacs-lisp
+;; Better window movement with Ctrl-h/j/k/l
+(map! :n
+      "C-h" #'evil-window-left
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right)
+#+end_src
+
+* Project launcher (sesh-style)
+Replaces the tmux+sesh flow. Each project = a *workspace* (persp-mode). Opening
+one switches/creates its workspace, drops you in dired at the root, and spawns
+the project's long-running servers as background =vterm= buffers (reached with
+~SPC ,~). Mirrors =modules/apps/cli/sesh.nix=; ~jjui~ left out on purpose.
+
+- ~SPC p O~  — open a project layout (fuzzy)
+- ~SPC TAB ]~ / ~SPC TAB [~ — flip between open project workspaces
+- ~SPC TAB 1..9~ — jump to workspace N (your ctrl+space+<n>)
+- ~SPC ,~ — switch buffer *within* this project (the editor + each =*vterm:…*=)
+
+To watch a server: ~SPC ,~ -> pick =*vterm:node*=. To keep it visible while you
+edit: ~SPC w v~ (split), then ~SPC ,~ in the new window.
+
+#+begin_src emacs-lisp
+(defvar +vb/projects
+  '(("web-builder"
+     :path "~/Documents/work/web-builder"
+     :servers (("node" . "pnpm run dev")))
+    ("serenityOs"
+     :path "~/serenityOs"
+     :servers nil)
+    ("server mal"
+     :path "~"
+     :shell ("ssh" . "ssh serenity@mal")))
+  "Project layouts for `+vb/open-project'. Each entry:
+NAME plist with :path, optional :servers (alist of NAME . SHELL-CMD run as
+background vterms), optional :shell (NAME . CMD for a foreground-only shell
+workspace with no editor).")
+
+(defun +vb/vterm-ensure (name dir cmd)
+  "Ensure a vterm buffer named *vterm:NAME* exists in DIR running CMD.
+Return the buffer. Never steals the selected window."
+  (let ((bufname (format "*vterm:%s*" name)))
+    (or (get-buffer bufname)
+        (save-window-excursion
+          (let ((default-directory (file-name-as-directory (expand-file-name dir)))
+                (vterm-buffer-name bufname))
+            (vterm)
+            (when (and cmd (not (string-empty-p cmd)))
+              (vterm-send-string cmd)
+              (vterm-send-return))
+            (current-buffer))))))
+
+(defun +vb/open-project (name)
+  "Open the project NAME layout: switch to its workspace, then dired + servers."
+  (interactive
+   (list (completing-read "Open project: " (mapcar #'car +vb/projects) nil t)))
+  (let* ((spec    (cdr (assoc name +vb/projects)))
+         (path    (expand-file-name (plist-get spec :path)))
+         (servers (plist-get spec :servers))
+         (shell   (plist-get spec :shell)))
+    (+workspace-switch name t)
+    (if shell
+        ;; bare shell workspace (e.g. ssh to mal) — no editor, just the terminal
+        (switch-to-buffer (+vb/vterm-ensure (car shell) path (cdr shell)))
+      (progn
+        (dired path)
+        (delete-other-windows)
+        (dolist (s servers)
+          (+vb/vterm-ensure (car s) path (cdr s)))))
+    (message "Project %s ready (SPC , to reach its buffers)" name)))
+
+(map! :leader
+      :desc "Open project layout" "p O" #'+vb/open-project)
+#+end_src
+
+* LSP / eglot
+Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
+
+#+begin_src emacs-lisp
+(after! eglot
+  (setq eglot-autoshutdown t
+        eglot-sync-connect 1))
+#+end_src
+
+** JSX / TSX -> web-mode
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+#+end_src
+** Tailwind
+#+begin_src emacs-lisp
+;; Tailwind CSS LSP support
+(use-package! lsp-tailwindcss)
+#+end_src

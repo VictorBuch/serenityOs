@@ -142,8 +142,6 @@ in
 
       persistent-apps = [
         "/Applications/Ghostty.app"
-        "/Applications/Nix Apps/Obsidian.app"
-        "/Applications/Logseq.app"
         "/Applications/TIDAL.app"
         "/Applications/Zen.app"
         "/Applications/Linear.app"

@@ -38,7 +38,7 @@
        (whitespace +guess +trim) ; whitespace hygiene
 
        :emacs
-       dired             ; file manager
+       (dired +icons)    ; file manager
        electric          ; smart indent
        ibuffer           ; buffer list
        (undo +tree)      ; persistent undo tree

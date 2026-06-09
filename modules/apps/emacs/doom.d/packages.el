@@ -13,6 +13,9 @@
 ;; --- Org-roam (zettelkasten) --------------------------------------------
 (package! org-roam-ui)   ; live graph view of your notes in the browser
 
+;; --- Web / markup -------------------------------------------------------
+(package! emmet-mode)    ; Emmet abbreviation expansion (HTML/JSX/TSX/Vue/CSS)
+
 ;; --- Excalidraw drawings in org -----------------------------------------
 (package! org-excalidraw
   :recipe (:host github :repo "wdavew/org-excalidraw")

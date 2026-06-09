@@ -236,15 +236,35 @@ Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
         eglot-sync-connect 1))
 #+end_src
 
-** JSX / TSX -> web-mode
+** JSX / TSX / Vue -> web-mode
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
 #+end_src
-** Tailwind
+
+** Emmet (HTML/JSX/TSX/Vue/CSS abbreviations)
+Type an abbreviation like ~div.card>ul>li*3~ then expand it. Works in
+=web-mode= (so .tsx/.jsx/.vue/.html from the mapping above), plain HTML/SGML,
+and CSS-family buffers. =emmet-expand-jsx-className?= makes JSX expand to
+~className~ instead of ~class~ — web-mode reports the right content type per
+region, so this is safe inside .vue =<template>= too.
+
+Expand with ~C-j~ in insert state (=emmet-expand-line=). After expanding a
+template with fields, ~C-j~ / ~C-S-j~ jump between the next/prev edit points.
+
 #+begin_src emacs-lisp
-;; Tailwind CSS LSP support
-(use-package! lsp-tailwindcss)
+(use-package! emmet-mode
+  :hook ((web-mode sgml-mode html-mode mhtml-mode nxml-mode
+          css-mode scss-mode less-css-mode) . emmet-mode)
+  :config
+  (setq emmet-expand-jsx-className? t   ; class -> className in JSX regions
+        emmet-self-closing-tag-style " /" ; <br /> not <br/>
+        emmet-move-cursor-between-quotes t)
+  ;; C-j already maps to emmet-expand-line via emmet-mode-keymap; make it work
+  ;; in evil insert state too.
+  (map! :map emmet-mode-keymap
+        :i "C-j" #'emmet-expand-line))
 #+end_src
 
 * Custom

@@ -58,7 +58,7 @@
        (eval +overlay)   ; run code inline
        (lookup +dictionary +docsets) ; jump to defs/docs
        (lsp +eglot)      ; language server support (built-in eglot)
-       magit             ; the best git porcelain
+       (magit +forge)    ; the best git porcelain (+forge: PRs/issues)
        tree-sitter       ; fast, accurate syntax highlighting
 
        :os

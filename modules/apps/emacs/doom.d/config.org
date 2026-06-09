@@ -227,13 +227,46 @@ backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
       "C-l" #'evil-window-right)
 #+end_src
 
+* Forge (PRs / issues in magit)
+Enabled via the =+forge= flag on the =magit= module (=init.el=). Forge pulls
+PRs/issues into magit: ~SPC g '~ (forge dispatch), or ='= inside a magit status
+buffer; the *Pull Requests* / *Issues* sections appear after ~f f~ to fetch.
+
+*Auth:* forge reads a token from =~/.authinfo.gpg= (or =~/.authinfo=). One line
+per host, e.g.:
+#+begin_example
+machine api.github.com login <user>^forge password <token>
+machine git.victorbuch.com/api/v1 login <user>^forge password <token>
+#+end_example
+
+github.com works with no extra config. The self-hosted *gitea* at
+=git.victorbuch.com= is registered in =forge-alist= below; create the gitea
+token under /Settings → Applications/ and add the matching =authinfo= line above.
+
+#+begin_src emacs-lisp
+(after! forge
+  ;; host  api-host  id  class
+  (add-to-list 'forge-alist
+               '("git.victorbuch.com" "git.victorbuch.com/api/v1"
+                 "git.victorbuch.com" forge-gitea-repository)))
+#+end_src
+
 * LSP / eglot
 Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
 
 #+begin_src emacs-lisp
 (after! eglot
   (setq eglot-autoshutdown t
-        eglot-sync-connect 1))
+        eglot-sync-connect 1)
+  ;; tailwindcss-language-server is built on the vscode css/html services, so
+  ;; pointing web-mode + css-family buffers at it gives normal css/html LSP
+  ;; *plus* Tailwind class completion/diagnostics. eglot is one-server-per-mode;
+  ;; prepending here makes it win over Doom's vscode css/html server. It only
+  ;; lights up fully in projects with a tailwind config (tailwind.config.* or
+  ;; @tailwind in css) — inert elsewhere, so it's safe as the default.
+  (add-to-list 'eglot-server-programs
+               '((web-mode css-mode scss-mode less-css-mode)
+                 . ("tailwindcss-language-server" "--stdio"))))
 #+end_src
 
 ** JSX / TSX / Vue -> web-mode
@@ -265,6 +298,38 @@ template with fields, ~C-j~ / ~C-S-j~ jump between the next/prev edit points.
   ;; in evil insert state too.
   (map! :map emmet-mode-keymap
         :i "C-j" #'emmet-expand-line))
+#+end_src
+
+* Checkers
+** oxlint (JS/TS lint)
+eglot diagnostics ride flymake here (=:checkers syntax= has no =-flymake=, so
+=flycheck-eglot= never loads). flycheck stays free for standalone linters —
+oxlint slots in there. The =oxlint= binary comes from Nix (=doom.nix=).
+
+Gated on a =.oxlintrc.json= up the tree, so it stays silent in projects that
+don't opt in. Prepended to =flycheck-checkers= so it's the auto-picked checker
+in JS/TS buffers when the gate passes. Default-format output is
+~file:line:col: message [Warning/rule]~.
+
+#+begin_src emacs-lisp
+(after! flycheck
+  (flycheck-define-checker javascript-oxlint
+    "JS/TS linter using oxlint (the oxc linter). See URL `https://oxc.rs'."
+    :command ("oxlint" "--format" "default" source)
+    :error-patterns
+    ((warning line-start (file-name) ":" line ":" column ": "
+              (message (minimal-match (one-or-more not-newline)))
+              " [Warning/" (id (one-or-more (not (any "]")))) "]" line-end)
+     (error   line-start (file-name) ":" line ":" column ": "
+              (message (minimal-match (one-or-more not-newline)))
+              " [Error/" (id (one-or-more (not (any "]")))) "]" line-end))
+    :modes (web-mode js-mode js2-mode js3-mode rjsx-mode typescript-mode
+            typescript-ts-mode tsx-ts-mode js-ts-mode)
+    :predicate
+    (lambda ()
+      (locate-dominating-file (or buffer-file-name default-directory)
+                              ".oxlintrc.json")))
+  (add-to-list 'flycheck-checkers 'javascript-oxlint))
 #+end_src
 
 * Custom

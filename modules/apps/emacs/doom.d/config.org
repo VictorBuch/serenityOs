@@ -426,3 +426,174 @@ a declared project, a zoxide dir, a projectile repo, or type any path."
 (map! :leader
       :desc "Open session (sesh)" "p o" #'+vb/open-session)
 #+end_src
+
+* Android / Kotlin (Compose Multiplatform)
+The closest-to-Android-Studio dev loop without the IDE. Two reload paths:
+
+- *Fast loop (desktop):* ~SPC a h~ launches the Compose Multiplatform *desktop*
+  target with JetBrains [[https://github.com/JetBrains/compose-hot-reload][Compose Hot Reload]] (~--auto~). Save any =.kt= ->
+  recompile -> hot-swap into the running window, sub-second, state preserved.
+  This is genuine hot reload; iterate UI here, deploy to the emulator only to
+  verify the Android target. *Android Studio's Live Edit on the emulator itself
+  is IDE-exclusive (JDWP code injection) and cannot be replicated in Emacs* —
+  the desktop target is the supported fast path.
+- *Slow loop (emulator):* ~SPC a w~ runs ~gradlew -t installDebug~ — continuous
+  build that rebuilds + reinstalls the APK on every save (seconds per cycle).
+
+Plus full emulator/device management: list & boot AVDs, list devices, logcat,
+install+launch — all from Emacs, in PATH-safe vterm buffers (reused via
+=+vb/vterm-ensure=; reach them with ~SPC ,~).
+
+** Project-side prerequisites
+The Emacs commands drive Gradle; the project must provide the tasks:
+
+- *Compose Hot Reload:* apply ~org.jetbrains.compose.hot-reload~ in the desktop
+  module and register a hot-run task (commonly ~hotRunJvm~). See the plugin
+  README. ~SPC a h~ runs =+android-hot-run-task= (default ~:composeApp:hotRunJvm~).
+- *Module/task names vary per template.* Override per-project in a
+  =.dir-locals.el= at the repo root, e.g.:
+  #+begin_example
+  ((nil . ((+android-gradle-module . "composeApp")
+           (+android-hot-run-task  . ":composeApp:hotRunJvm")
+           (+android-app-id        . "com.example.app"))))
+  #+end_example
+
+** Config
+SDK tools (=adb=, =emulator=) are resolved from the Android Studio SDK by
+absolute path — important because the Emacs daemon runs with a stripped PATH,
+and to avoid a nix-=adb= / SDK-=adb= server version clash. Override
+=+android-sdk-path= if your SDK lives elsewhere.
+
+#+begin_src emacs-lisp
+(defgroup +android nil
+  "Android / Compose Multiplatform development."
+  :group 'tools :prefix "+android-")
+
+(defcustom +android-sdk-path
+  (or (getenv "ANDROID_HOME")
+      (getenv "ANDROID_SDK_ROOT")
+      (expand-file-name "~/Library/Android/sdk"))
+  "Root of the Android SDK (adb under platform-tools/, emulator under emulator/)."
+  :type 'directory :group '+android)
+
+(defcustom +android-gradle-module "composeApp"
+  "Gradle module holding the Android application + Compose desktop target.
+Override per-project in .dir-locals.el."
+  :type 'string :group '+android)
+
+(defcustom +android-hot-run-task ":composeApp:hotRunJvm"
+  "Gradle task launching the Compose *desktop* target with Compose Hot Reload.
+Override per-project in .dir-locals.el. Examples: \":composeApp:hotRunJvm\",
+\":desktopApp:hotRun\"."
+  :type 'string :group '+android)
+
+(defcustom +android-app-id nil
+  "Application id (package) used to launch/filter the app. nil = don't auto-launch."
+  :type '(choice (const nil) string) :group '+android)
+
+;; --- SDK / project resolution ------------------------------------------
+(defun +android--tool (subdir name)
+  "Absolute path to SDK tool NAME under SUBDIR of `+android-sdk-path'.
+Falls back to PATH; errors with a clear hint if neither resolves."
+  (let ((p (expand-file-name (format "%s/%s" subdir name) +android-sdk-path)))
+    (cond ((file-executable-p p) p)
+          ((executable-find name))
+          (t (user-error "Can't find %s — set `+android-sdk-path' (now %s)"
+                         name +android-sdk-path)))))
+
+(defun +android--adb () (+android--tool "platform-tools" "adb"))
+(defun +android--emulator () (+android--tool "emulator" "emulator"))
+
+(defun +android--root ()
+  "Project root via Doom/projectile, else `default-directory'."
+  (or (and (fboundp 'doom-project-root) (doom-project-root))
+      (and (fboundp 'projectile-project-root) (projectile-project-root))
+      default-directory))
+
+(defun +android--gradlew ()
+  "Absolute path to ./gradlew at the project root."
+  (let ((gw (expand-file-name "gradlew" (+android--root))))
+    (if (file-executable-p gw) gw
+      (user-error "No executable ./gradlew at %s" (+android--root)))))
+
+;; --- Emulator / device management --------------------------------------
+(defun +android/start-emulator (avd)
+  "Pick an AVD and boot it in a background vterm. adb sees it once booted."
+  (interactive
+   (list (completing-read
+          "AVD: "
+          (ignore-errors (process-lines (+android--emulator) "-list-avds"))
+          nil t)))
+  (+vb/vterm-ensure (format "emulator:%s" avd) (+android--root)
+                    (format "%s -avd %s"
+                            (shell-quote-argument (+android--emulator))
+                            (shell-quote-argument avd)))
+  (message "Booting AVD %s …" avd))
+
+(defun +android/devices ()
+  "Show attached devices/emulators (adb devices -l)."
+  (interactive)
+  (let ((out (shell-command-to-string
+              (format "%s devices -l" (shell-quote-argument (+android--adb))))))
+    (with-current-buffer (get-buffer-create "*android-devices*")
+      (erase-buffer) (insert out) (goto-char (point-min))
+      (display-buffer (current-buffer)))))
+
+(defun +android/logcat ()
+  "Tail colorized logcat in a vterm. Filters to `+android-app-id' if set."
+  (interactive)
+  (+vb/vterm-ensure "logcat" (+android--root)
+                    (format "%s logcat -v color%s"
+                            (shell-quote-argument (+android--adb))
+                            (if +android-app-id
+                                (format " | grep -F %s"
+                                        (shell-quote-argument +android-app-id))
+                              ""))))
+
+;; --- Build / run loops -------------------------------------------------
+(defun +android/hot-run ()
+  "Launch the Compose *desktop* target with Compose Hot Reload (the fast loop).
+Save .kt files -> recompile -> hot-swap into the running window. Keep it
+running while you code. Requires the project's hot-run task (see
+`+android-hot-run-task') and the compose-hot-reload Gradle plugin."
+  (interactive)
+  (+vb/vterm-ensure "compose-hot" (+android--root)
+                    (format "%s %s --auto"
+                            (shell-quote-argument (+android--gradlew))
+                            +android-hot-run-task)))
+
+(defun +android/install-run ()
+  "Build + install the debug APK to the running device, then launch it.
+Uses `compile' so Gradle/Kotlin errors are clickable. Launches via monkey when
+`+android-app-id' is set."
+  (interactive)
+  (let ((default-directory (+android--root)))
+    (compile
+     (format "%s :%s:installDebug%s"
+             (shell-quote-argument (+android--gradlew))
+             +android-gradle-module
+             (if +android-app-id
+                 (format " && %s shell monkey -p %s -c android.intent.category.LAUNCHER 1"
+                         (shell-quote-argument (+android--adb))
+                         (shell-quote-argument +android-app-id))
+               "")))))
+
+(defun +android/watch-install ()
+  "Continuous build: rebuild + reinstall to the emulator on every save (gradle -t).
+The slower Android-target equivalent of hot reload. Prefer `+android/hot-run'
+for fast Compose iteration."
+  (interactive)
+  (+vb/vterm-ensure "gradle-watch" (+android--root)
+                    (format "%s -t :%s:installDebug"
+                            (shell-quote-argument (+android--gradlew))
+                            +android-gradle-module)))
+
+(map! :leader
+      (:prefix ("a" . "android")
+       :desc "Compose hot run (desktop)"  "h" #'+android/hot-run
+       :desc "Start emulator (pick AVD)"  "e" #'+android/start-emulator
+       :desc "Devices (adb)"              "d" #'+android/devices
+       :desc "Logcat"                     "l" #'+android/logcat
+       :desc "Install + run (emulator)"   "r" #'+android/install-run
+       :desc "Watch install (continuous)" "w" #'+android/watch-install))
+#+end_src

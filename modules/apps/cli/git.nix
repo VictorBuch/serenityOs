@@ -78,7 +78,7 @@ mkModule {
 
           # SSH commit signing via FIDO2 YubiKey
           commit = {
-            gpgsign = true;
+            gpgsign = false;
           };
           gpg = {
             format = "ssh";

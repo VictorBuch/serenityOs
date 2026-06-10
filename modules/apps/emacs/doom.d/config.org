@@ -4,12 +4,7 @@
 #+startup: overview
 #+auto_tangle: t
 
-This is a *literate* Doom config. The =:config literate= module tangles every
-=emacs-lisp= block below into =config.el= on ~doom sync~. Edit this file, not
-=config.el= (that one is generated — don't touch it).
-
-To re-tangle without a full sync: ~SPC h r r~ (reload) re-tangles + reloads, or
-~C-c C-v t~ (org-babel-tangle) here.
+Edit this file, not =config.el= (that one is generated — don't touch it).
 
 * Identity
 Used by GPG, file templates, snippets, email.
@@ -64,6 +59,31 @@ visual state plus the minibuffer.
         :nvi "s-a" #'mark-whole-buffer) ; Option-a  select all
   (define-key minibuffer-local-map (kbd "s-v") #'yank))
 #+end_src
+* Keybindings
+** Window and Buffer navigation
+#+begin_src emacs-lisp
+;; Better window movement with Ctrl-h/j/k/l
+(map! :n
+      "C-h" #'evil-window-left
+      "C-j" #'evil-window-down
+      "C-k" #'evil-window-up
+      "C-l" #'evil-window-right)
+#+end_src
+
+** Org roam
+Doom already gives: ~SPC n r f~ find, ~SPC n r i~ insert link, ~SPC n r b~
+backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
+
+#+begin_src emacs-lisp
+(map! :leader
+      (:prefix ("n" . "notes")
+       (:prefix ("r" . "roam")
+        :desc "Open roam graph (UI)" "g" #'org-roam-ui-open
+        :desc "Today's daily"        "t" #'org-roam-dailies-goto-today
+        :desc "Goto date"            "D" #'org-roam-dailies-goto-date
+        :desc "Yesterday"            "y" #'org-roam-dailies-goto-yesterday)))
+#+end_src
+
 * Org
 =org-directory= must be set before org loads, so it lives outside the =after!=.
 
@@ -156,6 +176,15 @@ org-modern (headings/tables/tags), mixed-pitch (prose vs code), org-appear
         org-appear-autosubmarkers t))
 #+end_src
 
+Set variable font sizes for the levels
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  ;; Set specific sizes for levels 1 and 2
+  (set-face-attribute 'org-level-1 nil :height 1.3 :weight 'bold)
+  (set-face-attribute 'org-level-2 nil :height 1.2 :weight 'bold)
+  (set-face-attribute 'org-level-3 nil :height 1.1 :weight 'bold))
+#+end_src
+
 * Org-roam (zettelkasten)
 Flat note store — backlinks structure it, no folders to think about.
 
@@ -203,30 +232,6 @@ CLI (from Nix, see =doom.nix=) renders each =.excalidraw= file to SVG on save.
   (org-excalidraw-initialize))
 #+end_src
 
-* Keybindings
-Doom already gives: ~SPC n r f~ find, ~SPC n r i~ insert link, ~SPC n r b~
-backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
-
-#+begin_src emacs-lisp
-(map! :leader
-      (:prefix ("n" . "notes")
-       (:prefix ("r" . "roam")
-        :desc "Open roam graph (UI)" "g" #'org-roam-ui-open
-        :desc "Today's daily"        "t" #'org-roam-dailies-goto-today
-        :desc "Goto date"            "D" #'org-roam-dailies-goto-date
-        :desc "Yesterday"            "y" #'org-roam-dailies-goto-yesterday)))
-#+end_src
-
-** Window and Buffer navigation
-#+begin_src emacs-lisp
-;; Better window movement with Ctrl-h/j/k/l
-(map! :n
-      "C-h" #'evil-window-left
-      "C-j" #'evil-window-down
-      "C-k" #'evil-window-up
-      "C-l" #'evil-window-right)
-#+end_src
-
 * Forge (PRs / issues in magit)
 Enabled via the =+forge= flag on the =magit= module (=init.el=). Forge pulls
 PRs/issues into magit: ~SPC g '~ (forge dispatch), or ='= inside a magit status
@@ -249,6 +254,44 @@ token under /Settings → Applications/ and add the matching =authinfo= line abo
   (add-to-list 'forge-alist
                '("git.victorbuch.com" "git.victorbuch.com/api/v1"
                  "git.victorbuch.com" forge-gitea-repository)))
+#+end_src
+
+* Jujutsu (majutsu)
+jj is the primary VCS here; magit stays for git-specific work. =majutsu= is a
+magit-style *native* jj porcelain — no vterm, so it works where the =jjui= TUI
+doesn't. ~SPC g j~ opens the interactive log: ~C-j~/~C-k~ (evil) or ~n~/~p~ move
+between revisions, ~[~/~]~ jump to parents/children, ~?~ opens the transient
+dispatch (new, squash, rebase, describe, edit, absorb, abandon, bookmark,
+split, undo/redo, …). Reuses magit/transient/with-editor (already loaded).
+
+#+begin_src emacs-lisp
+(use-package! majutsu
+  :commands (majutsu majutsu-log majutsu-dispatch)
+  :init
+  (map! :leader :desc "Jujutsu log (jj)" "g j" #'majutsu-log))
+#+end_src
+
+* Dired (dirvish)
+=dirvish= supercharges dired — file preview, image/pdf thumbnails, a rich header
+and =vc= state in the gutter, à la =yazi=. =dirvish-override-dired-mode= routes
+all dired (e.g. ~-~ dired-jump) through it.
+
+- ~SPC .~ opens the full dirvish file manager at the current dir. This rebinds
+  Doom's ~SPC .~ (find-file) — the minibuffer file picker is still ~SPC f f~.
+- ~SPC o p~ pops the dirvish *sidebar* file tree, rebound from treemacs (which
+  you found redundant). treemacs is still loadable via ~M-x treemacs~.
+
+#+begin_src emacs-lisp
+(use-package! dirvish
+  :after dired
+  :init (dirvish-override-dired-mode)
+  :config
+  (setq dirvish-attributes
+        '(nerd-icons file-time file-size collapse subtree-state vc-state)
+        dirvish-side-attributes '(nerd-icons vc-state collapse))
+  (map! :leader
+        :desc "Dirvish (file manager)" "."   #'dirvish
+        :desc "Dirvish sidebar"        "o p" #'dirvish-side))
 #+end_src
 
 * LSP / eglot
@@ -500,7 +543,7 @@ a declared project, a zoxide dir, a projectile repo, or type any path."
       :desc "Open session (sesh)" "p o" #'+vb/open-session)
 #+end_src
 
-* Android / Kotlin (Compose Multiplatform)
+** Android / Kotlin (Compose Multiplatform)
 The closest-to-Android-Studio dev loop without the IDE. Two reload paths:
 
 - *Fast loop (desktop):* ~SPC a h~ launches the Compose Multiplatform *desktop*
@@ -517,7 +560,7 @@ Plus full emulator/device management: list & boot AVDs, list devices, logcat,
 install+launch — all from Emacs, in PATH-safe vterm buffers (reused via
 =+vb/vterm-ensure=; reach them with ~SPC ,~).
 
-** Project-side prerequisites
+*** Project-side prerequisites
 The Emacs commands drive Gradle; the project must provide the tasks:
 
 - *Compose Hot Reload:* apply ~org.jetbrains.compose.hot-reload~ in the desktop
@@ -531,7 +574,7 @@ The Emacs commands drive Gradle; the project must provide the tasks:
            (+android-app-id        . "com.example.app"))))
   #+end_example
 
-** Config
+*** Config
 SDK tools (=adb=, =emulator=) are resolved from the Android Studio SDK by
 absolute path — important because the Emacs daemon runs with a stripped PATH,
 and to avoid a nix-=adb= / SDK-=adb= server version clash. Override

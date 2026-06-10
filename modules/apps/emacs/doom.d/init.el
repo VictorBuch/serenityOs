@@ -21,7 +21,7 @@
        ophints             ; highlight operation regions
        (popup +defaults)   ; tame temporary windows
        (smooth-scroll)     ; buttery scrolling
-       treemacs            ; project file tree (SPC o p)
+       ;;treemacs            ; project file tree (SPC o p)
        (vc-gutter +pretty) ; git diff in the fringe
        vi-tilde-fringe     ; ~ past end of buffer
        workspaces          ; per-project workspaces

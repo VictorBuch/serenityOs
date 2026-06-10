@@ -39,6 +39,10 @@ mkModule {
           coreutils
           findutils
 
+          # majutsu (jj porcelain) runs `jj` via process-file, not a login shell,
+          # so the stripped daemon PATH must include it.
+          jujutsu
+
           # spell (checkers (spell +aspell))
           (aspellWithDicts (d: [ d.en ]))
 

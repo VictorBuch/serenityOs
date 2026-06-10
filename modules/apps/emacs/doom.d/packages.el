@@ -20,6 +20,17 @@
   :recipe (:host github :repo "jdtsmith/eglot-booster")
   :pin "cab7803c4f0adc7fff9da6680f90110674bb7a22")
 
+;; --- Jujutsu (jj) porcelain ---------------------------------------------
+;; majutsu: magit-style interactive jj log/status (native buffer, not a vterm
+;; TUI). Reuses magit/transient/with-editor (from :tools magit). Not on MELPA.
+(package! majutsu
+  :recipe (:host github :repo "0WD0/majutsu")
+  :pin "5d1de143c22b494797cce92176f0068c819137e4")
+
+
+;; --- Dired --------------------------------------------------------------
+(package! dirvish :pin "d877433f957a363ad78b228e13a8e5215f2d6593") ; yazi-like dired
+
 ;; --- Web / markup -------------------------------------------------------
 (package! emmet-mode)    ; Emmet abbreviation expansion (HTML/JSX/TSX/Vue/CSS)
 

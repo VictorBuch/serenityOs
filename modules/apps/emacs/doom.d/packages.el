@@ -13,6 +13,13 @@
 ;; --- Org-roam (zettelkasten) --------------------------------------------
 (package! org-roam-ui)   ; live graph view of your notes in the browser
 
+;; --- LSP / eglot --------------------------------------------------------
+;; Speeds up eglot by routing LSP json-rpc through the `emacs-lsp-booster'
+;; binary (provided on PATH from doom.nix). Not on MELPA -> github recipe.
+(package! eglot-booster
+  :recipe (:host github :repo "jdtsmith/eglot-booster")
+  :pin "cab7803c4f0adc7fff9da6680f90110674bb7a22")
+
 ;; --- Web / markup -------------------------------------------------------
 (package! emmet-mode)    ; Emmet abbreviation expansion (HTML/JSX/TSX/Vue/CSS)
 

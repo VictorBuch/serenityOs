@@ -50,6 +50,11 @@ mkModule {
             buildNpmPackage = buildNpmPackage.override { nodejs = nodejs_22; };
           })
 
+          # eglot-booster: rust shim that speeds up eglot's LSP JSON-RPC IO.
+          # eglot-booster.el (packages.el) wraps every server command with this
+          # binary; it must be on PATH as `emacs-lsp-booster`.
+          emacs-lsp-booster
+
           # language servers (lsp +eglot)
           typescript-language-server # js/ts/jsx/tsx (React)
           vscode-langservers-extracted # html, css, json, eslint

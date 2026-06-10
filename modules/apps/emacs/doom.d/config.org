@@ -267,6 +267,14 @@ Servers come from Nix (=modules/apps/emacs/doom.nix=); eglot finds them on PATH.
   (add-to-list 'eglot-server-programs
                '((web-mode css-mode scss-mode less-css-mode)
                  . ("tailwindcss-language-server" "--stdio"))))
+
+;; eglot-booster: wraps each LSP server in the `emacs-lsp-booster' binary (from
+;; doom.nix) so json-rpc IO is parsed in rust, not elisp. Big latency cut on
+;; completion/diagnostics for TS, Kotlin, nix. Must load *after* eglot so it can
+;; advise `eglot--connect'; the binary must be on PATH (it is, via doom.nix).
+(use-package! eglot-booster
+  :after eglot
+  :config (eglot-booster-mode))
 #+end_src
 
 ** JSX / TSX / Vue -> web-mode

@@ -12,7 +12,7 @@ args@{
 mkModule {
   name = "doom";
   category = "emacs";
-  
+
   description = "Doom Emacs (declarative) via nix-doom-emacs-unstraightened: nix builds Doom + all packages, config in repo ./doom.d";
 
   extraConfig = {
@@ -82,7 +82,7 @@ mkModule {
 
       services.emacs = {
         enable = true;
-        defaultEditor = true; 
+        defaultEditor = true;
       };
     };
 } args

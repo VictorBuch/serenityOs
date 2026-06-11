@@ -41,7 +41,7 @@
 
           # General
           FormPosition = "center";
-          Font = "JetBrainsMono Nerd Font Mono";
+          Font = config.fonts.mono.familyMono;
           FontSize = "13";
           RoundCorners = "16";
           HourFormat = "HH:mm";

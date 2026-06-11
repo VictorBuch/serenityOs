@@ -16,12 +16,12 @@ Used by GPG, file templates, snippets, email.
 
 * Look & feel
 ** Fonts and theme
-JetBrainsMono Nerd Font for code;
+Maple Mono NF for code;
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 14)
-      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 15)
-      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 22))
+(setq doom-font (font-spec :family "Maple Mono NF" :size 14)
+      doom-variable-pitch-font (font-spec :family "Maple Mono NF" :size 15)
+      doom-big-font (font-spec :family "Maple Mono NF" :size 22))
 
 (setq doom-theme 'doom-badger)
 (setq display-line-numbers-type 'relative)

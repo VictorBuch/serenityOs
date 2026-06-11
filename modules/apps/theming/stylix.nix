@@ -9,7 +9,7 @@ mkModule {
     home-manager.sharedModules = [
       inputs.stylix.homeModules.stylix
       (
-        { config, pkgs, lib, ... }:
+        { config, pkgs, lib, osConfig ? { }, ... }:
         {
           stylix = {
             enable = true;
@@ -33,8 +33,8 @@ mkModule {
 
             fonts = {
               monospace = {
-                package = pkgs.nerd-fonts.jetbrains-mono;
-                name = "JetBrainsMono Nerd Font Mono";
+                package = osConfig.fonts.mono.package;
+                name = osConfig.fonts.mono.familyMono;
               };
               sansSerif = {
                 package = pkgs.dejavu_fonts;

@@ -184,7 +184,7 @@ in
           # Fonts
           ui = {
             fontDefault = "DejaVu Sans";
-            fontFixed = "JetBrainsMono Nerd Font Mono";
+            fontFixed = osConfig.fonts.mono.familyMono;
             panelsOverlayLayer = false;
           };
 

@@ -107,6 +107,12 @@
     # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
     wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
 
+    # Hermes Agent (self-hosted personal AI agent) — ships its own nixosModule.
+    # Deliberately NOT following our nixpkgs: the package is built with uv2nix
+    # against its own pinned nixpkgs, and overriding it breaks the sealed venv
+    # (and any upstream binary cache hits).
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+
     # Auto-import module directories (replaces manual import lists)
     import-tree = {
       url = "github:vic/import-tree";
@@ -176,6 +182,7 @@
             ./modules/homelab/_config.nix
             ./modules/nixos/system/user.nix
             inputs.wannashare.nixosModules.default
+            inputs.hermes-agent.nixosModules.default
           ];
         }
         {

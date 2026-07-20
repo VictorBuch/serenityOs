@@ -35,12 +35,15 @@ in
     environmentFile = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      example = "config.sops.secrets.\"hermes/env\".path";
+      example = "/run/secrets/some-env";
       description = ''
         Path to a KEY=VALUE file holding secrets (ANTHROPIC_API_KEY).
         Contents are appended to $HERMES_HOME/.env by the activation script
         and read by hermes at startup — see notes in this file about why this
         is not a systemd EnvironmentFile.
+
+        Leave null to use the sops template built from the
+        `hermes/anthropic_api_key` secret in secrets/secrets.yaml.
       '';
     };
 
@@ -73,6 +76,20 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # ANTHROPIC_API_KEY. Stored as a bare key in secrets.yaml and rendered into
+    # a KEY=VALUE env file by sops-nix; the hermes activation script appends it
+    # to $HERMES_HOME/.env. Only used when environmentFile is left at null.
+    sops.secrets."hermes/anthropic_api_key" = lib.mkIf (cfg.environmentFile == null) {
+      restartUnits = [ "hermes-agent.service" ];
+    };
+
+    sops.templates."hermes-env" = lib.mkIf (cfg.environmentFile == null) {
+      content = ''
+        ANTHROPIC_API_KEY=${config.sops.placeholder."hermes/anthropic_api_key"}
+      '';
+      restartUnits = [ "hermes-agent.service" ];
+    };
+
     assertions = [
       {
         assertion = !cfg.signal.enable || cfg.signal.account != "";
@@ -96,7 +113,9 @@ in
         };
       };
 
-      environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
+      environmentFiles = [
+        (if cfg.environmentFile != null then cfg.environmentFile else config.sops.templates."hermes-env".path)
+      ];
 
       environment = lib.optionalAttrs cfg.signal.enable {
         SIGNAL_HTTP_URL = "http://127.0.0.1:${toString signalPort}";

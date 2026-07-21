@@ -81,6 +81,15 @@ in
       };
     };
 
+    discord = {
+      enable = lib.mkEnableOption ''
+        the Discord platform. Enabled by the bot token in the sops secret
+        `hermes/discord_bot_token`; the DM allowlist (comma-separated Discord
+        user IDs) comes from `hermes/discord_allowed_users`. The bot connects
+        outbound over Discord's gateway — no daemon, webhook or linking needed
+      '';
+    };
+
     web = {
       enable = lib.mkEnableOption ''
         the Hermes web dashboard (browser chat UI). Runs `hermes dashboard`
@@ -138,6 +147,16 @@ in
       restartUnits = [ "hermes-agent.service" ];
     };
 
+    # Discord bot token (secret) + DM allowlist (comma-separated Discord user
+    # IDs). Both feed the hermes-env file below; the adapter reads
+    # DISCORD_BOT_TOKEN / DISCORD_ALLOWED_USERS from the environment.
+    sops.secrets."hermes/discord_bot_token" = lib.mkIf cfg.discord.enable {
+      restartUnits = [ "hermes-agent.service" ];
+    };
+    sops.secrets."hermes/discord_allowed_users" = lib.mkIf cfg.discord.enable {
+      restartUnits = [ "hermes-agent.service" ];
+    };
+
     sops.templates."hermes-env" = lib.mkIf (cfg.environmentFile == null) {
       content = ''
         ANTHROPIC_API_KEY=${config.sops.placeholder."hermes/anthropic_api_key"}
@@ -145,6 +164,10 @@ in
       + lib.optionalString cfg.signal.enable ''
         SIGNAL_ACCOUNT=${config.sops.placeholder."hermes/signal_phone"}
         SIGNAL_ALLOWED_USERS=${config.sops.placeholder."hermes/signal_allowed_users"}
+      ''
+      + lib.optionalString cfg.discord.enable ''
+        DISCORD_BOT_TOKEN=${config.sops.placeholder."hermes/discord_bot_token"}
+        DISCORD_ALLOWED_USERS=${config.sops.placeholder."hermes/discord_allowed_users"}
       '';
       restartUnits = [
         "hermes-agent.service"

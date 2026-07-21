@@ -466,10 +466,10 @@ in
 
     hermes = {
       enable = true;
-      signal.enable = true;
-      # Signal number comes from the sops secret `hermes/signal_phone`.
-      # 8080 is already taken on mal, so move the signal-cli HTTP daemon.
-      signal.port = 8420;
+      # Discord instead of Signal: bot token + allowlist from sops
+      # (hermes/discord_bot_token, hermes/discord_allowed_users).
+      signal.enable = false;
+      discord.enable = true;
       # Web chat UI at agent.victorbuch.com (behind pocket-id via Caddy).
       web.enable = true;
     };

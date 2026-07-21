@@ -59,6 +59,8 @@ let
     };
     build-system = [ pythonPackages.poetry-core ];
     dependencies = [ pythonPackages.chardet ];
+    # nixpkgs chardet is 6.x but subtitle_parser pins <6 — works fine
+    pythonRelaxDeps = [ "chardet" ];
     doCheck = false;
     meta = {
       description = "Parse SRT and WebVTT subtitle files";

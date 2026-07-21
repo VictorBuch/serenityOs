@@ -61,11 +61,10 @@ in
         default = true;
       };
 
-      account = lib.mkOption {
-        type = lib.types.str;
-        example = "+4512345678";
-        description = "Signal account (E.164 phone number) the linked device belongs to.";
-      };
+      # The account (E.164 phone number) is NOT a Nix option — it is read at
+      # runtime from the sops secret `hermes/signal_phone` so the real number
+      # never lands in the world-readable Nix store. Both signal-cli (daemon
+      # `-a`) and hermes-agent (SIGNAL_ACCOUNT) consume it from there.
 
       port = lib.mkOption {
         type = lib.types.port;
@@ -83,19 +82,36 @@ in
       restartUnits = [ "hermes-agent.service" ];
     };
 
-    sops.templates."hermes-env" = lib.mkIf (cfg.environmentFile == null) {
-      content = ''
-        ANTHROPIC_API_KEY=${config.sops.placeholder."hermes/anthropic_api_key"}
-      '';
+    # Signal phone number (E.164). Read at runtime by signal-cli's daemon
+    # (`-a`) and by hermes-agent (SIGNAL_ACCOUNT via the env file below).
+    # Owned by the hermes user so signal-cli, which runs as that user, can
+    # `cat` it from /run/secrets.
+    sops.secrets."hermes/signal_phone" = lib.mkIf cfg.signal.enable {
+      owner = config.services.hermes-agent.user;
+      restartUnits = [
+        "signal-cli.service"
+        "hermes-agent.service"
+      ];
+    };
+
+    # Signal DM allowlist (SIGNAL_ALLOWED_USERS): comma-separated E.164
+    # numbers permitted to talk to the agent. Kept in sops (separate from the
+    # account number) so the roster can grow without touching the account.
+    # Consumed only by hermes-agent, so it restarts just that unit.
+    sops.secrets."hermes/signal_allowed_users" = lib.mkIf cfg.signal.enable {
       restartUnits = [ "hermes-agent.service" ];
     };
 
-    assertions = [
-      {
-        assertion = !cfg.signal.enable || cfg.signal.account != "";
-        message = "homelab.hermes.signal.account must be set when signal.enable = true";
-      }
-    ];
+    sops.templates."hermes-env" = lib.mkIf (cfg.environmentFile == null) {
+      content = ''
+        ANTHROPIC_API_KEY=${config.sops.placeholder."hermes/anthropic_api_key"}
+      ''
+      + lib.optionalString cfg.signal.enable ''
+        SIGNAL_ACCOUNT=${config.sops.placeholder."hermes/signal_phone"}
+        SIGNAL_ALLOWED_USERS=${config.sops.placeholder."hermes/signal_allowed_users"}
+      '';
+      restartUnits = [ "hermes-agent.service" ];
+    };
 
     services.hermes-agent = {
       enable = true;
@@ -117,9 +133,10 @@ in
         (if cfg.environmentFile != null then cfg.environmentFile else config.sops.templates."hermes-env".path)
       ];
 
+      # SIGNAL_ACCOUNT is intentionally NOT set here — it comes from the sops
+      # env file (see hermes-env template) so the number stays out of the store.
       environment = lib.optionalAttrs cfg.signal.enable {
         SIGNAL_HTTP_URL = "http://127.0.0.1:${toString signalPort}";
-        SIGNAL_ACCOUNT = cfg.signal.account;
       }
       // cfg.extraEnvironment;
 
@@ -177,13 +194,17 @@ in
         WorkingDirectory = signalConfigDir;
         Environment = [ "HOME=${signalConfigDir}" ];
 
-        ExecStart = lib.concatStringsSep " " [
-          "${pkgs.signal-cli}/bin/signal-cli"
-          "--config ${signalConfigDir}"
-          "-a ${cfg.signal.account}"
-          "daemon"
-          "--http 127.0.0.1:${toString signalPort}"
-        ];
+        # Account number is read at runtime from the sops secret (command
+        # substitution strips the trailing newline) so it never enters the
+        # store. A wrapper script is needed because $(...) can't be used in a
+        # bare systemd ExecStart= line.
+        ExecStart = pkgs.writeShellScript "signal-cli-daemon" ''
+          exec ${pkgs.signal-cli}/bin/signal-cli \
+            --config ${signalConfigDir} \
+            -a "$(cat ${config.sops.secrets."hermes/signal_phone".path})" \
+            daemon \
+            --http 127.0.0.1:${toString signalPort}
+        '';
 
         Restart = "always";
         RestartSec = 5;

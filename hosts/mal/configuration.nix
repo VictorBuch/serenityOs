@@ -332,7 +332,7 @@ in
   };
 
   services.ollama = {
-    enable = true;
+    enable = false;
     package = pkgs.ollama-cuda;
     host = "0.0.0.0";
     loadModels = [ "gemma3:4b" ];
@@ -429,7 +429,7 @@ in
 
     # Smart home
     hyperhdr.enable = true;
-    music-assistant.enable = true;
+    music-assistant.enable = false; # temporarily disabled: upstream nixpkgs music-assistant-2.9.9 build broken (missing setuptools in pypaBuildPhase)
     home-assistant.enable = true;
 
     # Monitor and Dashboards
@@ -464,6 +464,14 @@ in
     lab.enable = false;
     lute.enable = true;
 
+    hermes = {
+      enable = true;
+      signal.enable = true;
+      # Signal number comes from the sops secret `hermes/signal_phone`.
+      # 8080 is already taken on mal, so move the signal-cli HTTP daemon.
+      signal.port = 8420;
+    };
+
     # Development
     gitea.enable = true;
 
@@ -473,7 +481,7 @@ in
     invoice-ninja.enable = true;
     notes = {
       enable = true;
-      devices = {inara = "<ID>"; pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM";};
+      devices = {inara = "<ID>"; pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM"; terra = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";};
     };
 
     # Sharing

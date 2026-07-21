@@ -33,11 +33,6 @@ in
       };
     in
     {
-      services.upower.enable;
-      networking.networkmanager.enable;
-      hardware.bluetooth.enable
-      services.power-profiles-daemon.enable
-
       programs.noctalia = {
         enable = true;
 
@@ -191,7 +186,7 @@ in
           # Wallpaper management
           wallpaper = {
             enabled = true;
-            default.path = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+            default.path = lib.mkForce "${config.home.homeDirectory}/serenityOs/home/wallpapers";
             overviewEnabled = false;
             randomEnabled = false;
             randomIntervalSec = 3600;

@@ -9,7 +9,7 @@ let
   terminal = "ghostty";
   fileManager = "thunar";
   browser = "zen-beta";
-  shell = "noctalia-shell";
+  shell = "noctalia";
   applicationLauncher = "rofi -show drun";
   calcLauncher = "rofi -show calc -no-show-match -no-sort";
   windowSwitcher = "rofi -show window";
@@ -49,7 +49,6 @@ in
         ${browser} &
         ${terminal} &
         figma-linux &
-        com.logseq.Logseq &
         easyeffects --gapplication-service &
         wl-paste --watch cliphist store &
       '';
@@ -203,7 +202,7 @@ in
           "SUPER,Return,spawn,${terminal}"
           "SUPER,B,spawn,${browser}"
           "SUPER,F,spawn,${fileManager}"
-          "SUPER,SPACE,spawn_shell,${applicationLauncher}"
+          "SUPER,space,spawn,noctalia msg panel-toggle launcher"
           "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
           "SUPER,Z,spawn_shell,${windowSwitcher}"
           "SUPER+SHIFT,E,spawn_shell,${emojiPicker}"
@@ -221,7 +220,7 @@ in
           "SUPER,Period,zoom"
 
           # --- Layout cycling (user request) ---
-          "SUPER+SHIFT,SPACE,switch_layout"
+          "SUPER+SHIFT,Return,switch_layout"
 
           # --- Vim focus (focus windows) ---
           "SUPER,H,focusdir,left"

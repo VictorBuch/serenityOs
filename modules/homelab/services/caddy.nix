@@ -235,6 +235,25 @@ let
     };
   };
 
+  # Hermes web dashboard (agent.<domain>) — only mounted when the hermes web
+  # dashboard is enabled. The dashboard binds loopback with its own auth off,
+  # so it sits behind pocket-id (protected = true). Its DNS-rebind guard
+  # rejects any non-loopback Host header, hence upstreamHost = "localhost".
+  hermesWebService = lib.optionalAttrs (config.homelab.hermes.enable && config.homelab.hermes.web.enable) {
+    agent = {
+      url = "http://127.0.0.1:${toString config.homelab.hermes.web.port}";
+      https = false;
+      protected = true;
+      # The dashboard's loopback bind accepts only loopback Host AND Origin
+      # (no allowlist hook). Caddy rewrites both to a loopback value so its
+      # HTTP Host guard and its WebSocket Origin guard (chat + PTY streams)
+      # both pass. Browser CORS isn't involved — the SPA and its API share
+      # this origin.
+      upstreamHost = "localhost";
+      upstreamOrigin = "https://localhost";
+    };
+  };
+
   # --- HELPER FUNCTIONS ---
   # Helper for main domain (victorbuch.com)
   mkHost = subdomain: service: {
@@ -307,7 +326,7 @@ let
         else if service.https then
           ''
             reverse_proxy ${service.url} {
-              header_up Host {host}
+              header_up Host ${service.upstreamHost or "{host}"}
               header_up X-Real-IP {remote}
               header_up X-Forwarded-For {remote}
               header_up X-Forwarded-Proto {scheme}
@@ -319,7 +338,8 @@ let
         else
           ''
             reverse_proxy ${service.url} {
-              header_up Host {host}
+              header_up Host ${service.upstreamHost or "{host}"}
+              ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
               header_up X-Real-IP {remote}
               header_up X-Forwarded-For {remote}
               header_up X-Forwarded-Proto {scheme}
@@ -355,7 +375,7 @@ let
             # Route /api/* directly to backend
             handle /api/* {
               reverse_proxy ${service.url} {
-                header_up Host {host}
+                header_up Host ${service.upstreamHost or "{host}"}
                 header_up X-Real-IP {remote}
                 header_up X-Forwarded-For {remote}
                 header_up X-Forwarded-Proto {scheme}
@@ -368,7 +388,7 @@ let
             # Route /_/* directly to backend (PocketBase admin UI)
             handle /_/* {
               reverse_proxy ${service.url} {
-                header_up Host {host}
+                header_up Host ${service.upstreamHost or "{host}"}
                 header_up X-Real-IP {remote}
                 header_up X-Forwarded-For {remote}
                 header_up X-Forwarded-Proto {scheme}
@@ -384,7 +404,7 @@ let
         else
           ''
             reverse_proxy ${service.url} {
-              header_up Host {host}
+              header_up Host ${service.upstreamHost or "{host}"}
               header_up X-Real-IP {remote}
               header_up X-Forwarded-For {remote}
               header_up X-Forwarded-Proto {scheme}
@@ -453,7 +473,7 @@ in
       enable = true;
       email = "victorbuch@protonmail.com";
       virtualHosts =
-        (lib.mapAttrs' mkHost (services // notesService))
+        (lib.mapAttrs' mkHost (services // notesService // hermesWebService))
         // (lib.mapAttrs' mkWannaShareHost wannashareServices);
     };
   };

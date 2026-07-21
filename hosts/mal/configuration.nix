@@ -470,6 +470,8 @@ in
       # Signal number comes from the sops secret `hermes/signal_phone`.
       # 8080 is already taken on mal, so move the signal-cli HTTP daemon.
       signal.port = 8420;
+      # Web chat UI at agent.victorbuch.com (behind pocket-id via Caddy).
+      web.enable = true;
     };
 
     # Development

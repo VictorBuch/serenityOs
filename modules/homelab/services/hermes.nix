@@ -2,6 +2,8 @@
   lib,
   config,
   pkgs,
+  inputs,
+  system,
   ...
 }:
 
@@ -9,6 +11,12 @@ let
   cfg = config.homelab.hermes;
   signalPort = cfg.signal.port;
   signalConfigDir = "/var/lib/signal-cli";
+
+  # KEY=VALUE env file holding ANTHROPIC_API_KEY (+ SIGNAL_* when enabled).
+  # Either the user-provided file or the sops-rendered template. Shared by the
+  # gateway and the dashboard unit.
+  hermesEnvFile =
+    if cfg.environmentFile != null then cfg.environmentFile else config.sops.templates."hermes-env".path;
 in
 {
   options.homelab.hermes = {
@@ -72,6 +80,31 @@ in
         description = "Loopback port for the signal-cli HTTP/JSON-RPC daemon.";
       };
     };
+
+    web = {
+      enable = lib.mkEnableOption ''
+        the Hermes web dashboard (browser chat UI). Runs `hermes dashboard`
+        as a separate systemd unit bound to loopback, so its own auth gate
+        stays off — front it with a reverse proxy that provides auth
+        (e.g. Caddy + pocket-id). Shares the gateway's config/state
+      '';
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 9119;
+        description = "Loopback port for the dashboard HTTP/WebSocket server.";
+      };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = inputs.hermes-agent.packages.${system}.web;
+        defaultText = lib.literalExpression "inputs.hermes-agent.packages.\${system}.web";
+        description = ''
+          Pre-built hermes-web SPA (static dist), served via HERMES_WEB_DIST.
+          Must match the hermes-agent input the gateway runs.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -79,7 +112,10 @@ in
     # a KEY=VALUE env file by sops-nix; the hermes activation script appends it
     # to $HERMES_HOME/.env. Only used when environmentFile is left at null.
     sops.secrets."hermes/anthropic_api_key" = lib.mkIf (cfg.environmentFile == null) {
-      restartUnits = [ "hermes-agent.service" ];
+      restartUnits = [
+        "hermes-agent.service"
+      ]
+      ++ lib.optional cfg.web.enable "hermes-dashboard.service";
     };
 
     # Signal phone number (E.164). Read at runtime by signal-cli's daemon
@@ -110,7 +146,10 @@ in
         SIGNAL_ACCOUNT=${config.sops.placeholder."hermes/signal_phone"}
         SIGNAL_ALLOWED_USERS=${config.sops.placeholder."hermes/signal_allowed_users"}
       '';
-      restartUnits = [ "hermes-agent.service" ];
+      restartUnits = [
+        "hermes-agent.service"
+      ]
+      ++ lib.optional cfg.web.enable "hermes-dashboard.service";
     };
 
     services.hermes-agent = {
@@ -129,9 +168,7 @@ in
         };
       };
 
-      environmentFiles = [
-        (if cfg.environmentFile != null then cfg.environmentFile else config.sops.templates."hermes-env".path)
-      ];
+      environmentFiles = [ hermesEnvFile ];
 
       # SIGNAL_ACCOUNT is intentionally NOT set here — it comes from the sops
       # env file (see hermes-env template) so the number stays out of the store.
@@ -219,6 +256,78 @@ in
         ProtectControlGroups = true;
         RestrictSUIDSGID = true;
         LockPersonality = true;
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+          "AF_UNIX"
+        ];
+      };
+    };
+
+    # Hermes web dashboard (browser chat UI). A separate `hermes dashboard`
+    # process from the gateway, bound to loopback so its built-in auth gate
+    # stays OFF (trusted mode) — the reverse proxy in front (Caddy +
+    # tinyauth/pocket-id) is the only auth layer. Binding non-loopback would
+    # force Hermes' own mandatory OAuth, so keep it on 127.0.0.1.
+    #
+    # It shares the gateway's user, HOME and HERMES_HOME (/var/lib/hermes),
+    # so it reads the same config.yaml, .env, sessions and memories. Same
+    # lenient hardening as hermes-agent: it runs the agent (PTY/console), so
+    # no MemoryDenyWriteExecute or strict SystemCallFilter.
+    systemd.services.hermes-dashboard = lib.mkIf cfg.web.enable {
+      description = "Hermes web dashboard (browser UI)";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "network-online.target"
+        "hermes-agent.service"
+      ];
+      wants = [ "network-online.target" ];
+
+      environment = {
+        HOME = "/var/lib/hermes";
+        HERMES_HOME = "/var/lib/hermes/.hermes";
+        HERMES_MANAGED = "true";
+        # Serve the pre-built SPA from the Nix store; never build at runtime.
+        HERMES_WEB_DIST = "${cfg.web.package}";
+      };
+
+      serviceConfig = {
+        User = config.services.hermes-agent.user;
+        Group = config.services.hermes-agent.group;
+        StateDirectory = "hermes";
+        StateDirectoryMode = "2770";
+        WorkingDirectory = "/var/lib/hermes";
+
+        # ANTHROPIC_API_KEY (+ SIGNAL_* — harmless here). Same file the gateway
+        # feeds, so the dashboard's agent has the API key without relying on
+        # the gateway having written $HERMES_HOME/.env first.
+        EnvironmentFile = [ hermesEnvFile ];
+
+        ExecStart = lib.concatStringsSep " " [
+          "${config.services.hermes-agent.package}/bin/hermes"
+          "dashboard"
+          "--no-open"
+          "--skip-build"
+          "--host 127.0.0.1"
+          "--port ${toString cfg.web.port}"
+        ];
+
+        Restart = "always";
+        RestartSec = 5;
+
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        PrivateTmp = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        ProtectClock = true;
+        ProtectHostname = true;
+        RestrictSUIDSGID = true;
+        RestrictRealtime = true;
+        LockPersonality = true;
+        RemoveIPC = true;
+        # Loopback bind + Anthropic API egress.
         RestrictAddressFamilies = [
           "AF_INET"
           "AF_INET6"

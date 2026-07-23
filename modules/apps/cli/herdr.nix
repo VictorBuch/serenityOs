@@ -4,20 +4,14 @@ mkModule {
   name = "herdr";
   category = "cli";
   description = "Mouse-first terminal multiplexer (tmux/zellij alternative)";
-  # jujutsu: runtime dep of the jj-workspace plugin (needs `jj` on PATH).
-  # cargo/rustc: herdr builds plugins with cargo at `plugin install` time.
-  # jq: optional Vim-detection helper for vim-herdr-navigation plugin.
   linuxPackages = { pkgs, ... }: [ pkgs.herdr pkgs.jujutsu pkgs.cargo pkgs.rustc pkgs.jq ];
 
-  # Herdr reads ~/.config/herdr/config.toml (TOML). Own it declaratively.
-  # Run `herdr --default-config` to see every available default to add here.
-  #
-  # Plugin binaries are NOT declarative — install once (imperative):
-  #   herdr plugin install NathanFlurry/herdr-plugin-jj-workspace
-  # Only its keybindings live here.
   linuxHomeConfig = { pkgs, lib, ... }: {
     xdg.configFile."herdr/config.toml".source =
       (pkgs.formats.toml { }).generate "herdr-config.toml" {
+        theme = {
+          name = "terminal";
+        };
         keys = {
           prefix = "ctrl+space";
           command = [

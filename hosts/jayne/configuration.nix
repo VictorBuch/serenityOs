@@ -39,11 +39,33 @@ in
   # Jayne-specific boot configuration
   boot = {
     loader = {
+      # Wait for a manual selection instead of auto-booting after a countdown.
+      # Set to a number (e.g. 5) if you'd rather it auto-boot the default entry
+      # after N seconds.
+      timeout = null;
       efi.canTouchEfiVariables = true;
       grub = {
         enable = true;
         devices = [ "nodev" ];
         efiSupport = true;
+
+        # Graphical selection menu (Catppuccin theme, matches the Tokyo Night
+        # dark palette used elsewhere). NixOS generations appear under the
+        # "NixOS - All configurations" submenu, so they stay selectable.
+        theme = pkgs.catppuccin-grub;
+        gfxmodeEfi = "auto";
+
+        # Dual-boot: chainload the Windows Boot Manager living on the Windows
+        # SSD's own EFI System Partition (vfat UUID 79DF-17C2, i.e. /mnt/winefi).
+        extraEntries = ''
+          menuentry "Windows 11" --class windows --class os {
+            insmod part_gpt
+            insmod fat
+            insmod chain
+            search --no-floppy --fs-uuid --set=root 79DF-17C2
+            chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+          }
+        '';
       };
     };
     # Enable NTFS support for mounting Windows drives

@@ -674,12 +674,6 @@ in
                           check-url = "${local}:8096";
                         }
                         {
-                          title = "Plex";
-                          url = "https://plex.${hl.domain}/web/index.html";
-                          icon = "sh:plex";
-                          check-url = "${local}:32400";
-                        }
-                        {
                           title = "Jellyseerr";
                           url = "https://request.${hl.domain}";
                           icon = "sh:jellyseerr";
@@ -761,9 +755,9 @@ in
                       sites = [
                         {
                           title = "Home Assistant";
-                          url = "http://192.168.0.16:8123/";
+                          url = "https://home.${hl.domain}";
                           icon = "sh:home-assistant";
-                          "allow-insecure" = true;
+                          check-url = "http://192.168.0.243:8124/";
                         }
                         {
                           title = "Uptime Kuma";
@@ -794,6 +788,11 @@ in
                           icon = "sh:hyperhdr";
                           check-url = "${local}:8090";
                         }
+                        {
+                          title = "Agent";
+                          url = "https://agent.${hl.domain}";
+                          icon = "sh:hermes-agent";
+                        }
                       ];
                     }
                     # Productivity & Tools Monitor Group
@@ -818,12 +817,6 @@ in
                           title = "Paperless";
                           url = "https://paperless.${hl.domain}/";
                           icon = "sh:paperless-ngx";
-                        }
-                        {
-                          title = "Filebrowser";
-                          url = "https://files.${hl.domain}";
-                          icon = "sh:file-browser";
-                          check-url = "${local}:3030";
                         }
                         {
                           title = "Wallos";
@@ -892,10 +885,6 @@ in
                             {
                               title = "Github";
                               url = "https://github.com/";
-                            }
-                            {
-                              title = "ChatGPT";
-                              url = "https://chatgpt.com";
                             }
                           ];
                         }

@@ -221,6 +221,12 @@ let
       https = false;
       protected = true;
     };
+    home = {
+      # Home Assistant (port 8124; 8123 is taken by crafty)
+      url = "http://127.0.0.1:8124";
+      https = false;
+      protected = false; # HA has its own auth; companion app/API need direct access
+    };
   };
 
   # Quartz wiki (homelab.notes) — static files built to /var/www/notes.

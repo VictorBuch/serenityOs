@@ -450,7 +450,7 @@ in
       qui.enable = true;
       mousehole.enable = true;
     };
-    filebrowser.enable = true;
+    filebrowser.enable = false;
     nextcloud.enable = true;
 
     # Utils

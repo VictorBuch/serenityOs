@@ -52,11 +52,28 @@ in
         "zha" # Zigbee Home Automation
         "hue" # Philips Hue
         # Useful extras
+	"adguard"
         "esphome"
         "cast" # Chromecast
         "spotify"
         "tuya"
         "mobile_app" # For HA companion app
+	"onvif"
+	"denon"
+	"mcp"
+	"mcp_server"
+	"mealie"
+	"sonarr"
+	"radarr"
+	"qbittorrent"
+	"jellyfin"
+	"music_assistant"
+	"hyperion"
+	"immich"
+	"nextcloud"
+	"ntfy"
+	"paperless_ngx"
+	"overseerr"
       ];
 
       customComponents = [

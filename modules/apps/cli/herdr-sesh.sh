@@ -50,6 +50,48 @@ get_space() {
   jq -c --arg n "$1" '.spaces[] | select(.name == $n)' "$CONFIG"
 }
 
+# True if $1 (or any ancestor dir) has a .envrc, i.e. direnv will activate a
+# (possibly slow) environment when a shell starts there.
+has_direnv() {
+  local d
+  d=$(expand_tilde "$1")
+  while [ -n "$d" ] && [ "$d" != "/" ]; do
+    [ -e "$d/.envrc" ] && return 0
+    d="${d%/*}"
+  done
+  return 1
+}
+
+# Block until the pane's shell is at an idle prompt accepting clean input.
+#
+# We can't just sleep before typing a startup command: with direnv + a nix
+# devshell the shell needs a few seconds to activate, and its loading output
+# has quiet stretches that fool a "wait until output stops changing" heuristic —
+# so keystrokes sent too early get swallowed by the loader and never run.
+# Instead we round-trip a unique marker: once the shell echoes it back as its
+# own output line, it is provably ready. Dirs with a .envrc get a longer
+# deadline (override with HERDR_SESH_READY_TIMEOUT_MS).
+wait_ready() {
+  local pane="$1" cwd="$2" token="__herdr_sesh_rdy_$$__" max_ms
+  if has_direnv "$cwd"; then
+    max_ms="${HERDR_SESH_READY_TIMEOUT_MS:-30000}"
+  else
+    max_ms="${HERDR_SESH_READY_TIMEOUT_MS:-8000}"
+  fi
+  local deadline_polls=$(( max_ms / 200 )) i=0 j out
+  sleep 0.3
+  while (( i < deadline_polls )); do
+    herdr pane run "$pane" "echo $token" >/dev/null 2>&1 || true
+    for (( j = 0; j < 6; j++ )); do   # ~1.2s to observe the echo before resending
+      sleep 0.2
+      i=$(( i + 1 ))
+      out=$(herdr pane read "$pane" --source recent 2>/dev/null || true)
+      grep -qE "^${token}[[:space:]]*$" <<<"$out" && return 0
+    done
+  done
+  return 0   # deadline hit: send anyway rather than hang
+}
+
 # The picker list: configured spaces first, then top zoxide dirs (deduped
 # against the spaces' own paths, existing dirs only, home-shortened).
 list_items() {
@@ -144,8 +186,9 @@ build_space() {
       fi
       cmd=$(jq -r '.command // empty' <<<"$pane")
       if [ -n "$cmd" ]; then
-        # Give the freshly spawned shell a moment before typing into it.
-        sleep 0.15
+        # Wait until the pane's shell is actually ready (direnv/devshell may take
+        # seconds) before typing, or the command gets swallowed during load.
+        wait_ready "$target" "$tabcwd"
         herdr pane run "$target" "$cmd" >/dev/null 2>&1 || true
       fi
       prev="$target"

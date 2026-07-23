@@ -4,7 +4,7 @@ let
   # herdr-sesh: a sesh-style space picker for herdr (see ./herdr-sesh.sh).
   herdr-sesh = pkgs.writeShellApplication {
     name = "herdr-sesh";
-    runtimeInputs = [ pkgs.herdr pkgs.jq pkgs.fzf pkgs.figlet pkgs.bash pkgs.zoxide ];
+    runtimeInputs = [ pkgs.herdr pkgs.jq pkgs.fzf pkgs.figlet pkgs.bash pkgs.zoxide pkgs.coreutils pkgs.gnugrep ];
     text = builtins.readFile ./herdr-sesh.sh;
   };
 

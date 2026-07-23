@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
 # herdr-sesh — a sesh-style space picker for the herdr multiplexer.
 #
-# `herdr-sesh` (no args) shows an fzf list of predefined "spaces". Selecting one
-# either focuses the matching workspace if it already exists, or builds it from
-# scratch: a named workspace with named tabs, split panes, and startup commands
-# already running — the herdr equivalent of `sesh connect`.
+# `herdr-sesh` (no args) shows an fzf list of predefined "spaces", followed by
+# your top zoxide directories. Selecting an entry either focuses the matching
+# workspace if it already exists, or builds it:
+#   - a configured space  -> named workspace with tabs, split panes, and startup
+#     commands already running (the herdr equivalent of `sesh connect`),
+#   - a zoxide directory   -> a bare workspace at that path, named after the dir.
 #
 # Spaces are read from $HERDR_SESH_CONFIG (default: ~/.config/herdr/sesh-spaces.json),
 # which is generated declaratively by the Nix module.
 set -euo pipefail
 
 CONFIG="${HERDR_SESH_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/sesh-spaces.json}"
+ZOXIDE_LIMIT="${HERDR_SESH_ZOXIDE_LIMIT:-20}"
+STAR="★ "  # marks configured spaces in the picker, vs. plain zoxide paths
+TILDE='~'  # kept in a var so shellcheck doesn't mistake it for an expansion
 
 die() { printf 'herdr-sesh: %s\n' "$*" >&2; exit 1; }
+
+# Strip the leading star marker a configured space carries in the picker list.
+strip_star() { printf '%s' "${1#"$STAR"}"; }
 
 expand_tilde() {
   local p="$1"
@@ -25,12 +33,49 @@ expand_tilde() {
   fi
 }
 
+# Display absolute paths under $HOME as ~/... for a tidier picker.
+shorten_home() {
+  local p="$1"
+  if [ "$p" = "$HOME" ]; then
+    printf '%s' "$TILDE"
+  elif [ "${p#"$HOME"/}" != "$p" ]; then
+    printf '%s/%s' "$TILDE" "${p#"$HOME"/}"
+  else
+    printf '%s' "$p"
+  fi
+}
+
 # Extract a single space object by name.
 get_space() {
   jq -c --arg n "$1" '.spaces[] | select(.name == $n)' "$CONFIG"
 }
 
-# Build a space from scratch: workspace -> tabs -> panes -> startup commands.
+# The picker list: configured spaces first, then top zoxide dirs (deduped
+# against the spaces' own paths, existing dirs only, home-shortened).
+list_items() {
+  jq -r --arg star "$STAR" '.spaces[] | $star + .name' "$CONFIG"
+
+  command -v zoxide >/dev/null 2>&1 || return 0
+
+  # Absolute paths already covered by a configured space.
+  local cfg expanded="" cp
+  cfg=$(jq -r '.spaces[].path // empty' "$CONFIG")
+  while IFS= read -r cp; do
+    [ -n "$cp" ] && expanded+="$(expand_tilde "$cp")"$'\n'
+  done <<<"$cfg"
+
+  local dir shown=0
+  while IFS= read -r dir; do
+    [ -n "$dir" ] || continue
+    [ -d "$dir" ] || continue
+    printf '%s\n' "$expanded" | grep -qxF "$dir" && continue
+    shorten_home "$dir"; printf '\n'
+    shown=$((shown + 1))
+    [ "$shown" -ge "$ZOXIDE_LIMIT" ] && break
+  done < <(zoxide query --list 2>/dev/null)
+}
+
+# Build a configured space from scratch: workspace -> tabs -> panes -> commands.
 build_space() {
   local name="$1" space
   space=$(get_space "$name")
@@ -110,56 +155,90 @@ build_space() {
   herdr workspace focus "$ws" >/dev/null 2>&1 || true
 }
 
-# Focus an existing workspace with this label, else build it.
-connect() {
+# Focus the workspace with this label if one exists. 0 = focused, 1 = none.
+focus_existing() {
   local name="$1" existing
   existing=$(herdr workspace list 2>/dev/null \
     | jq -r --arg n "$name" 'first(.result.workspaces[] | select(.label == $n) | .workspace_id) // empty')
-  if [ -n "$existing" ]; then
-    herdr workspace focus "$existing" >/dev/null 2>&1 || true
-    return 0
-  fi
-  build_space "$name"
+  [ -n "$existing" ] || return 1
+  herdr workspace focus "$existing" >/dev/null 2>&1 || true
+  return 0
 }
 
-# fzf preview: run the space's optional preview command, then a layout summary.
-preview() {
-  local space pcmd
-  space=$(get_space "$1")
-  [ -n "$space" ] || return 0
-  pcmd=$(jq -r '.preview // empty' <<<"$space")
-  if [ -n "$pcmd" ]; then
-    bash -c "$pcmd" 2>/dev/null || true
-    echo
+# Open a bare workspace at a directory, named after its basename (zoxide entry).
+open_dir() {
+  local dir name
+  dir=$(expand_tilde "$1")
+  [ -d "$dir" ] || die "not a directory: $dir"
+  name=$(basename "$dir")
+  if command -v zoxide >/dev/null 2>&1; then zoxide add "$dir" 2>/dev/null || true; fi
+  focus_existing "$name" && return 0
+  herdr workspace create --cwd "$dir" --label "$name" --focus >/dev/null
+}
+
+# Route a picked item: a configured space, otherwise a directory path.
+dispatch() {
+  local item="$1"
+  if [ -n "$(get_space "$item")" ]; then
+    focus_existing "$item" && return 0
+    build_space "$item"
+  else
+    open_dir "$item"
   fi
-  jq -r '
-    "path: \(.path // "~")",
-    "",
-    ( .tabs // (if .command then [{panes:[{command:.command}]}] else [{}] end)
-      | to_entries[]
-      | " \(.value.name // "tab \(.key + 1)")"
-        + ( (.value.panes // [])
-            | map(.command // "shell")
-            | if length > 0 then "  →  " + join("  |  ") else "" end )
-    )' <<<"$space"
+}
+
+# fzf preview: space layout summary, or a directory listing for zoxide entries.
+preview() {
+  local item space
+  item=$(strip_star "$1")
+  space=$(get_space "$item")
+  if [ -n "$space" ]; then
+    local pcmd
+    pcmd=$(jq -r '.preview // empty' <<<"$space")
+    if [ -n "$pcmd" ]; then
+      bash -c "$pcmd" 2>/dev/null || true
+      echo
+    fi
+    jq -r '
+      "path: \(.path // "~")",
+      "",
+      ( .tabs // (if .command then [{panes:[{command:.command}]}] else [{}] end)
+        | to_entries[]
+        | " \(.value.name // "tab \(.key + 1)")"
+          + ( (.value.panes // [])
+              | map(.command // "shell")
+              | if length > 0 then "  →  " + join("  |  ") else "" end )
+      )' <<<"$space"
+    return 0
+  fi
+
+  # Not a configured space: treat as a directory path.
+  local dir
+  dir=$(expand_tilde "$item")
+  if [ -d "$dir" ]; then
+    printf ' %s\n\n' "$item"
+    # shellcheck disable=SC2012  # a simple listing for preview; filenames are trusted
+    ls -A --group-directories-first "$dir" 2>/dev/null | head -n 60
+  fi
 }
 
 main() {
   [ -f "$CONFIG" ] || die "no config at $CONFIG"
   case "${1:-}" in
+    --list)    list_items; exit 0 ;;
     --preview) preview "${2:-}"; exit 0 ;;
-    connect)   connect "${2:?usage: herdr-sesh connect <name>}"; exit 0 ;;
+    connect)   dispatch "${2:?usage: herdr-sesh connect <name|dir>}"; exit 0 ;;
   esac
 
   local sel
-  sel=$(jq -r '.spaces[].name' "$CONFIG" | fzf \
+  sel=$(list_items | fzf \
     --prompt="herdr ⚡ " \
     --height=100% \
     --border=rounded \
     --preview="$0 --preview {}" \
     --preview-window=right:55%) || exit 0
   [ -n "$sel" ] || exit 0
-  connect "$sel"
+  dispatch "$(strip_star "$sel")"
 }
 
 main "$@"

@@ -46,11 +46,11 @@ in
       autostart_sh = ''
         ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
         ${shell} &
+        easyeffects --gapplication-service &
+        wl-paste --watch cliphist store &
         ${browser} &
         ${terminal} &
         figma-linux &
-        easyeffects --gapplication-service &
-        wl-paste --watch cliphist store &
       '';
 
       settings = {
@@ -127,13 +127,13 @@ in
 
         # === Monitors ===
         monitorrule = [
-          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.0"
+          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.2"
           "name:^Virtual-1$,width:2560,height:1600,refresh:60,x:0,y:0,scale:1.1"
         ];
 
         # === Tag rules: layouts per tag ===
         # Tag 1 = scroller (zen/ghostty/figma side-by-side via SUPER+H/L)
-        # Tag 2 = tile (logseq + overflow)
+        # Tag 2 = tile (obsidian + overflow)
         # Tag 3 = tile (steam)
         tagrule = [
           "id:1,layout_name:scroller"
@@ -147,7 +147,7 @@ in
           "appid:^zen-beta$|^zen$|^firefox$,tags:1"
           "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
           "appid:^figma-linux$|^Figma$,tags:1"
-          "appid:^Logseq$|^logseq$,tags:2"
+          "appid:^Obsidian$|^obsidian$,tags:2"
 
           # Named scratchpads — chat & music
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
@@ -248,7 +248,7 @@ in
           "SUPER,1,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
           "SUPER,2,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
           "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
-          "SUPER,4,spawn_shell,mango-focus-or-run Logseq 2 com.logseq.Logseq"
+          "SUPER,4,spawn_shell,mango-focus-or-run Obsidian 2 com.obsidian.Obsidian"
 
           # --- Move client to tag ---
           "SUPER+CTRL,1,tag,1"

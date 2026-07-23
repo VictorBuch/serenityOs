@@ -74,6 +74,20 @@ mkModule {
           };
           extraConfig = ''
             figlet -tk ${config.home.username} | lolcat -p 3
+
+            # Two Claude Code instances with separate accounts/config dirs.
+            # CLAUDE_CONFIG_DIR isolates auth + settings per instance.
+            # claudep = personal account, claudew = work account.
+            def --wrapped claudep [...args] {
+              with-env { CLAUDE_CONFIG_DIR: ($env.HOME | path join ".claude-personal") } {
+                claude ...$args
+              }
+            }
+            def --wrapped claudew [...args] {
+              with-env { CLAUDE_CONFIG_DIR: ($env.HOME | path join ".claude-work") } {
+                claude ...$args
+              }
+            }
           '';
         };
 

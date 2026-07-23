@@ -14,6 +14,9 @@ final: prev: {
     in
     wrapper.config.wrap { pkgs = final; };
 
+  # Herdr: mouse-first terminal multiplexer (flake ships only a package)
+  herdr = inputs.herdr.packages.${final.stdenv.hostPlatform.system}.default;
+
   # Add the pam package (renamed to avoid conflict with linux-pam)
   pam-cli = final.callPackage ../packages/pam { };
 

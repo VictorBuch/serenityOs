@@ -76,6 +76,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Herdr: mouse-first terminal multiplexer (tmux/zellij alternative).
+    herdr = {
+      url = "github:ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Declarative disk partitioning (used for nixos-anywhere onboarding)
     disko = {
       url = "github:nix-community/disko";

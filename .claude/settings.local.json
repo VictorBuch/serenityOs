@@ -99,7 +99,9 @@
       "Bash(flatpak list *)",
       "Bash(awk '$2 == \"appid\" {print $3}')",
       "Read(//nix/store/**)",
-      "Read(//Users/victorbuch/Downloads/files/**)"
+      "Read(//Users/victorbuch/Downloads/files/**)",
+      "Read(//home/jayne/**)",
+      "Read(//home/jayne/.config/nvim/**)"
     ],
     "deny": [],
     "ask": []

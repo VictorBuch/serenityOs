@@ -123,6 +123,12 @@
       <target type='virtio' name='com.redhat.spice.0'/>
     </channel>
 
+    <!-- QEMU guest agent channel: lets the host talk to qemu-ga in Windows
+         (reliable `virsh shutdown --mode agent`, avoids force-destroy) -->
+    <channel type='unix'>
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+    </channel>
+
     <!-- virtiofs share: /home/jayne/studio-share -> Windows drive -->
     <filesystem type='mount' accessmode='passthrough'>
       <driver type='virtiofs' queue='1024'/>
@@ -137,7 +143,7 @@
     </interface>
 
     <!-- GPU passthrough: RX 7900 XT -->
-    <hostdev mode='subsystem' type='pci' managed='yes'>
+    <hostdev mode='subsystem' type='pci' managed='no'>
       <source>
         <address domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
       </source>
@@ -145,23 +151,23 @@
     </hostdev>
 
     <!-- GPU HDMI/DP Audio -->
-    <hostdev mode='subsystem' type='pci' managed='yes'>
+    <hostdev mode='subsystem' type='pci' managed='no'>
       <source>
         <address domain='0x0000' bus='0x03' slot='0x00' function='0x1'/>
       </source>
     </hostdev>
 
     <!-- USB: Focusrite Scarlett Solo (audio interface) -->
-    <hostdev mode='subsystem' type='usb' managed='yes' startupPolicy='optional'>
-      <source>
+    <hostdev mode='subsystem' type='usb' managed='yes'>
+      <source startupPolicy='optional'>
         <vendor id='0x1235'/>
         <product id='0x8205'/>
       </source>
     </hostdev>
 
     <!-- USB: AKAI MPK mini 3 (MIDI controller) -->
-    <hostdev mode='subsystem' type='usb' managed='yes' startupPolicy='optional'>
-      <source>
+    <hostdev mode='subsystem' type='usb' managed='yes'>
+      <source startupPolicy='optional'>
         <vendor id='0x09e8'/>
         <product id='0x1049'/>
       </source>

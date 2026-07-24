@@ -124,6 +124,28 @@
       url = "github:vic/import-tree";
       flake = false;
     };
+
+    # Obsidian community-plugin release assets (see
+    # modules/apps/productivity/obsidian.nix). Pinned to each plugin's *latest*
+    # GitHub release via the stable `releases/latest/download/<asset>` URLs, so
+    # `nix flake update` bumps every plugin — the hashes live in flake.lock, not
+    # in the module. `type = "file"` keeps each asset a raw file (no unpacking);
+    # `flake = false` because they're plain assets, not flakes.
+    obsidian-tasks-main = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/main.js"; };
+    obsidian-tasks-manifest = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/manifest.json"; };
+    obsidian-tasks-styles = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/styles.css"; };
+
+    obsidian-task-genius-main = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/main.js"; };
+    obsidian-task-genius-manifest = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/manifest.json"; };
+    obsidian-task-genius-styles = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/styles.css"; };
+
+    obsidian-omnisearch-main = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/main.js"; };
+    obsidian-omnisearch-manifest = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/manifest.json"; };
+    obsidian-omnisearch-styles = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/styles.css"; };
+
+    obsidian-templater-main = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/main.js"; };
+    obsidian-templater-manifest = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/manifest.json"; };
+    obsidian-templater-styles = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/styles.css"; };
   };
 
   outputs =

@@ -203,6 +203,8 @@ in
           "SUPER,B,spawn,${browser}"
           "SUPER,F,spawn,${fileManager}"
           "SUPER,space,spawn,noctalia msg panel-toggle launcher"
+          # Friction-free note capture: rofi one-liner -> today's daily note.
+          "SUPER,C,spawn,notes-capture"
           "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
           "SUPER,Z,spawn_shell,${windowSwitcher}"
           "SUPER+SHIFT,E,spawn_shell,${emojiPicker}"

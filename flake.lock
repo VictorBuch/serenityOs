@@ -793,6 +793,150 @@
         "type": "github"
       }
     },
+    "obsidian-omnisearch-main": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-xDHUYEqENyPNthsy4LL4pQWwUvS2Z1TUTqnuyFdJDiw=",
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/main.js"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/main.js"
+      }
+    },
+    "obsidian-omnisearch-manifest": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-4zIis4rPhYVebF4vJcZGUWMMZHL8O7oOsByqO5eUjnw=",
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/manifest.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/manifest.json"
+      }
+    },
+    "obsidian-omnisearch-styles": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-is+01X41AI3QEHpsq5nSkbC/WV9RVogMWWesbDmmk5E=",
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/styles.css"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/styles.css"
+      }
+    },
+    "obsidian-task-genius-main": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-8A0C1kAp+nXliQj9BBdil2hdu32tGHgAaNADDWsFt6U=",
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/main.js"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/main.js"
+      }
+    },
+    "obsidian-task-genius-manifest": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-MCtaahWJzSofoQXNIE5+d3oAK8DqXWUHrXs04DRz1rY=",
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/manifest.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/manifest.json"
+      }
+    },
+    "obsidian-task-genius-styles": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-COjEWvkelceFb+lI8kXbOoRrM5AZpWEc6SjbLgnIu4g=",
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/styles.css"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/styles.css"
+      }
+    },
+    "obsidian-tasks-main": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-5KvnwWs1q3wPzf7BsRdM6UwwpeAmLPai6yhKsTZfejM=",
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/main.js"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/main.js"
+      }
+    },
+    "obsidian-tasks-manifest": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-vzca/RUXGRYebO8kKkZE0dQzuk2yMTHM+V+7uLZs550=",
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/manifest.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/manifest.json"
+      }
+    },
+    "obsidian-tasks-styles": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-GMFbrFZUimRe7lqF3oW3hqsT83zOBP/baaXX0UZosxg=",
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/styles.css"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/styles.css"
+      }
+    },
+    "obsidian-templater-main": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-sdo0PyB+ii024nfSG2bXG+WlUZs6VCFBv1Rqc+VHY/4=",
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/main.js"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/main.js"
+      }
+    },
+    "obsidian-templater-manifest": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-cebnFJve8dV7YOY8N/h0UPoBs7iMFoB+OJoaM98pEIM=",
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/manifest.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/manifest.json"
+      }
+    },
+    "obsidian-templater-styles": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-4durciuU1adT9k0RZQUDGQk0fGYn1nKNfD4U2glVizk=",
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/styles.css"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/SilentVoid13/Templater/releases/latest/download/styles.css"
+      }
+    },
     "peon-ping": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -932,6 +1076,18 @@
         "nixpkgs-wine920": "nixpkgs-wine920",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
+        "obsidian-omnisearch-main": "obsidian-omnisearch-main",
+        "obsidian-omnisearch-manifest": "obsidian-omnisearch-manifest",
+        "obsidian-omnisearch-styles": "obsidian-omnisearch-styles",
+        "obsidian-task-genius-main": "obsidian-task-genius-main",
+        "obsidian-task-genius-manifest": "obsidian-task-genius-manifest",
+        "obsidian-task-genius-styles": "obsidian-task-genius-styles",
+        "obsidian-tasks-main": "obsidian-tasks-main",
+        "obsidian-tasks-manifest": "obsidian-tasks-manifest",
+        "obsidian-tasks-styles": "obsidian-tasks-styles",
+        "obsidian-templater-main": "obsidian-templater-main",
+        "obsidian-templater-manifest": "obsidian-templater-manifest",
+        "obsidian-templater-styles": "obsidian-templater-styles",
         "peon-ping": "peon-ping",
         "plugins-lze": "plugins-lze",
         "plugins-lzextras": "plugins-lzextras",

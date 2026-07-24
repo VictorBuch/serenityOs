@@ -52,8 +52,8 @@ mkModule {
             # Disable targets that set nixpkgs.overlays in HM context
             # (conflicts with home-manager.useGlobalPkgs)
             targets = {
-              qt.enable = true;
-              kde.enable = true;
+              # qt.enable = true;
+              # kde.enable = true;
               nixos-icons.enable = false;
               gtksourceview.enable = false;
               # Zen browser stylix integration

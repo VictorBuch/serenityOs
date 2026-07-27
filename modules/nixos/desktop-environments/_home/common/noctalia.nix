@@ -30,99 +30,75 @@ in
         # stylix's noctalia target is disabled so noctalia owns the palette and
         # regenerates app templates live. See modules/apps/theming/stylix.nix.
         settings = {
-          # === Bar (v5) — migrated from the old v4 bar.widgets schema ===
-          # v5 references widgets by NAME in start/center/end; per-instance
-          # settings live in [widget.<name>] (the `widget` attr below). Seeded
-          # names (cpu/temp/ram/media/clock/output_volume/spacer/...) map to a
-          # type + preset; bare type names (workspaces/network/tray/...) resolve
-          # directly; custom instances set a `type`.
-          #
-          # NOT included: the mangowc-layout-switcher and davinci-convert
-          # plugins. Both ship pre-5.0 QML "entryPoints" manifests, which the
-          # noctalia 5 (C++) engine cannot load (it needs an "entries" array).
-          # They must be ported to the v5 plugin format before they can return.
+          # === Bar (v5) — declarative source of truth ===
+          # This mirrors the bar you built in the GUI so nix owns it. v5 refs
+          # widgets by NAME in start/center/end; per-instance settings live in
+          # [widget.<name>]. `status` and `nix-monitor` are plugin widgets
+          # (avivbintangaringga/nix-monitor, pozzoo/hassio) — their PLUGIN
+          # settings (incl. the HA token) intentionally stay in settings.toml,
+          # never in the world-readable nix store.
+          bar.order = [ "main" ]; # one bar named "main"
           bar.main = {
             position = "bottom";
-            thickness = 30; # compact (was bar.density = "compact")
-            widget_spacing = 6;
-            padding = 10;
-            background_opacity = 1.0;
-            reserve_space = true;
+            thickness = 24;
+            background_opacity = 0.95;
 
             start = [
               "workspaces"
-              "cpu" # sysmon stat=cpu_usage (seeded)
-              "temp" # sysmon stat=cpu_temp (seeded)
-              "ram" # sysmon stat=ram_used (seeded)
-              "disk" # custom sysmon, see widget.disk below
-              "media"
+              "wallpaper"
+              "launcher"
+              "status" # pozzoo/hassio widget
+              "nix-monitor" # avivbintangaringga/nix-monitor widget
             ];
             center = [ "clock" ];
             end = [
-              "network" # single widget covers WiFi + VPN (was VPN + WiFi)
-              "bluetooth"
-              "spacer_a"
-              "volume"
-              "notifications"
-              "keyboard_layout"
               "tray"
-              "spacer_b"
+              "notifications"
+              "network"
+              "bluetooth"
+              "volume"
+              "brightness"
+              "spacer_2"
               "control-center"
+              "session"
             ];
           };
 
-          # Per-instance widget settings (v5 [widget.<name>]). Only settings that
-          # exist in noctalia 5 are set; several v4 options (SystemMonitor multi-
-          # metric toggles, Tray blacklist/colorizeIcons, ControlCenter distro
-          # logo, per-widget onhover) have no v5 TOML equivalent — they are now
-          # managed in the Settings panel (state), not config.toml.
+          # Per-instance widget settings (v5 [widget.<name>]).
           widget = {
-            workspaces = {
-              hide_when_empty = true; # was hideUnoccupied
-              max_label_chars = 10; # was characterCount = 10
-            };
+            clock.format = "{:%H:%M %d/%m}";
+            control-center.glyph = "snowflake";
+            media.hide_when_no_media = true;
+            network.show_label = false;
+            tray.hidden = [ "nmapplet" ];
 
-            # sysmon renders ONE stat per instance. cpu/temp/ram are seeded;
-            # add a disk instance (was SystemMonitor showDiskUsage).
-            disk = {
-              type = "sysmon";
-              stat = "disk_used_pct";
+            # Plugin widgets — reference the installed community plugins.
+            nix-monitor = {
+              type = "avivbintangaringga/nix-monitor:nix-monitor";
+              show_text = false;
             };
-
-            media = {
-              max_length = 145; # was maxWidth = 145
-              hide_album_art = false; # was showAlbumArt = true
-              title_scroll = "on_hover"; # was scrollingMode = "hover"
-            };
-
-            clock = {
-              format = "{:%H:%M · %d %b}"; # was "HH:mm : dd MMM"
-              tooltip_format = "{:%A, %d %B %Y}";
-            };
-
-            network.vpn_status = "replace";
-            keyboard_layout.display = "short";
-            notifications.hide_when_no_unread = true; # was hideWhenZero = true
-
-            spacer_a = {
-              type = "spacer";
-              length = 20;
-            };
-            spacer_b = {
-              type = "spacer";
-              length = 20;
-            };
+            status.type = "pozzoo/hassio:status";
+            spacer_2.type = "spacer";
           };
 
-          # Shell (v5) — was v4 appLauncher / ui / general.
+          # Shell (v5) — was v4 appLauncher / ui / general, plus GUI panel prefs.
           shell = {
             font_family = "DejaVu Sans"; # was ui.fontDefault
             clipboard_enabled = true; # was appLauncher.enableClipboardHistory
+            lang = "en";
             launcher = {
               show_icons = true;
               sort_by_usage = true;
             };
+            panel = {
+              transparency_mode = "glass";
+              wallpaper_placement = "floating";
+              wallpaper_position = "center";
+            };
           };
+
+          # Accessibility (ported from GUI state)
+          accessibility.ui_scale = 1.05;
 
           # === Dynamic theming (Material You from wallpaper) ===
           # Colors are derived live from the active wallpaper. Noctalia
@@ -165,16 +141,20 @@ in
           };
 
           # Disable dock (v5)
-          dock.enabled = false;
+          # Dock stays hidden, but keep the pin declarative for when it's on.
+          dock = {
+            enabled = false;
+            pinned = [ "emacs" ];
+          };
 
           # Location — feeds weather AND the theme "auto" day/night schedule.
           # Coordinates are used directly (no network geocoding needed) so the
-          # sunrise/sunset light<->dark switch works reliably. Brno, CZ.
+          # sunrise/sunset light<->dark switch works reliably. Prague, CZ.
           location = {
             auto_locate = false;
-            address = "Brno";
-            latitude = 49.1951;
-            longitude = 16.6068;
+            address = "Prague, Czech";
+            latitude = 50.0755;
+            longitude = 14.4378;
             # To pin exact switch times instead of astronomical sunset/sunrise:
             # custom_schedule = true;
             # sunset = "20:30";
@@ -201,11 +181,21 @@ in
               transition = [ "fade" ];
               transition_duration = 900;
               transition_on_startup = true;
-              directory = "${wallDir}/night"; # fallback directory
+              directory = "${wallDir}"; # fallback directory
               directory_light = "${wallDir}/day";
               directory_dark = "${wallDir}/night";
               default.path = lib.mkForce "${wallDir}/night/cloudsnight.jpg";
-              automation.enabled = false; # day/night handled by theme auto, not random cycling
+              # Automation must be ON for the day/night *image* swap: noctalia
+              # only re-picks the wallpaper from directory_light/directory_dark
+              # inside its automation tick. With exactly one image per directory
+              # this never "cycles" — it just switches day<->night when the
+              # theme mode flips on the sunrise/sunset schedule (checked ~15min).
+              automation = {
+                enabled = true;
+                interval_seconds = 900;
+                order = "alphabetical";
+                recursive = false;
+              };
             };
         };
 
@@ -232,6 +222,19 @@ in
         kdePackages.qt6ct
         libsForQt5.qt5ct
       ];
+
+      # qt6ct base config: a static pointer to the color scheme noctalia's `qt`
+      # template writes at runtime (~/.config/qt6ct/colors/noctalia.conf). HM
+      # owns this file; noctalia only writes the separate colors file, so there
+      # is no read-only conflict. This is what makes Qt apps pick up the palette.
+      xdg.configFile."qt6ct/qt6ct.conf".text = ''
+        [Appearance]
+        color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
+        custom_palette=true
+        style=Fusion
+        icon_theme=WhiteSur-icon-theme-dark
+        standard_dialogs=default
+      '';
     }
   );
 }

@@ -39,11 +39,33 @@ in
   # Jayne-specific boot configuration
   boot = {
     loader = {
+      # Wait for a manual selection instead of auto-booting after a countdown.
+      # Set to a number (e.g. 5) if you'd rather it auto-boot the default entry
+      # after N seconds.
+      timeout = null;
+
       efi.canTouchEfiVariables = true;
+
       grub = {
         enable = true;
         devices = [ "nodev" ];
         efiSupport = true;
+
+        # Graphical selection menu (Catppuccin theme, matches the Tokyo Night
+        # dark palette used elsewhere).
+        theme = pkgs.catppuccin-grub;
+        gfxmodeEfi = "auto";
+
+        # Dual-boot: chainload the Windows Boot Manager living on the Windows
+        extraEntries = ''
+          menuentry "Windows 11" --class windows --class os {
+            insmod part_gpt
+            insmod fat
+            insmod chain
+            search --no-floppy --fs-uuid --set=root 79DF-17C2
+            chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+          }
+        '';
       };
     };
     # Enable NTFS support for mounting Windows drives
@@ -66,9 +88,11 @@ in
     useRoutingFeatures = "client";
     extraUpFlags = [ "--operator=${username}" ];
   };
+
   networking.networkmanager.plugins = with pkgs; [
     networkmanager-openvpn
   ];
+
   environment.systemPackages = with pkgs; [
     networkmanager-openvpn
     openvpn
@@ -88,28 +112,41 @@ in
     audio = {
       enable = true;
     };
+
     browsers = {
       enable = true;
     };
+
     communication = {
       enable = true;
     };
+
     development = {
       enable = true;
     };
-    emacs.enable = true;
+
+    emacs.enable = false;
+
     emulation = {
       enable = false;
-      gpu-passthrough.enable = true;
+      gpu-passthrough.enable = false;
     };
+
     gaming = {
       enable = true;
     };
+
     hardware.logitech.enable = true;
+
     media = {
       enable = true;
     };
-    productivity.enable = true;
+
+    productivity= {
+      enable = true;
+      logseq.enable = false;
+    };
+
     utilities.enable = true;
 
     neovim = {

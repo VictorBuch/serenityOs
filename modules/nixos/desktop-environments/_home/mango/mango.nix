@@ -9,17 +9,16 @@ let
   terminal = "ghostty";
   fileManager = "thunar";
   browser = "zen-beta";
-  shell = "noctalia-shell";
+  shell = "noctalia";
   applicationLauncher = "rofi -show drun";
   calcLauncher = "rofi -show calc -no-show-match -no-sort";
   windowSwitcher = "rofi -show window";
   emojiPicker = "rofi -show emoji";
   powerMenu = "rofi -show power-menu";
-  colors = config.lib.stylix.colors.withHashtag;
-
-  # Strip leading '#' for mango color format (0xRRGGBBAA expected)
-  hexNoHash = c: lib.removePrefix "#" c;
-  mangoColor = c: "0x${hexNoHash c}ff";
+  # Window-decoration colors are no longer set here: noctalia's `mango`
+  # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
+  # palette and reloads mango live. See the `source=` include in extraConfig
+  # below and modules/nixos/desktop-environments/_home/common/noctalia.nix.
 in
 
 {
@@ -43,15 +42,23 @@ in
     wayland.windowManager.mango = {
       enable = true;
 
+      # Pull in noctalia's live-generated color file. noctalia writes
+      # ~/.config/mango/noctalia.conf (writable, not HM-managed) from the
+      # wallpaper palette and runs `mmsg dispatch reload_config`, so window
+      # colors update in real time. mango tolerates the file being absent at
+      # build/first-run (parse warns but succeeds).
+      extraConfig = ''
+        source=~/.config/mango/noctalia.conf
+      '';
+
       autostart_sh = ''
         ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
         ${shell} &
+        easyeffects --gapplication-service &
+        wl-paste --watch cliphist store &
         ${browser} &
         ${terminal} &
         figma-linux &
-        com.logseq.Logseq &
-        easyeffects --gapplication-service &
-        wl-paste --watch cliphist store &
       '';
 
       settings = {
@@ -91,10 +98,8 @@ in
         # blur_params_contrast = 0.95;
         # blur_params_saturation = 1.1;
 
-        bordercolor = mangoColor colors.base03;
-        focuscolor = mangoColor colors.base04;
-        urgentcolor = mangoColor colors.base08;
-        scratchpadcolor = mangoColor colors.base0D;
+        # Colors (bordercolor/focuscolor/urgentcolor/scratchpadcolor/...) are
+        # provided live by noctalia via the sourced noctalia.conf (extraConfig).
 
         # Master-stack defaults (applies to tile/center_tile)
         new_is_master = 1;
@@ -128,13 +133,13 @@ in
 
         # === Monitors ===
         monitorrule = [
-          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.0"
+          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.2"
           "name:^Virtual-1$,width:2560,height:1600,refresh:60,x:0,y:0,scale:1.1"
         ];
 
         # === Tag rules: layouts per tag ===
         # Tag 1 = scroller (zen/ghostty/figma side-by-side via SUPER+H/L)
-        # Tag 2 = tile (logseq + overflow)
+        # Tag 2 = tile (obsidian + overflow)
         # Tag 3 = tile (steam)
         tagrule = [
           "id:1,layout_name:scroller"
@@ -148,7 +153,7 @@ in
           "appid:^zen-beta$|^zen$|^firefox$,tags:1"
           "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
           "appid:^figma-linux$|^Figma$,tags:1"
-          "appid:^Logseq$|^logseq$,tags:2"
+          "appid:^Obsidian$|^obsidian$,tags:2"
 
           # Named scratchpads — chat & music
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
@@ -203,7 +208,9 @@ in
           "SUPER,Return,spawn,${terminal}"
           "SUPER,B,spawn,${browser}"
           "SUPER,F,spawn,${fileManager}"
-          "SUPER,SPACE,spawn_shell,${applicationLauncher}"
+          "SUPER,space,spawn,noctalia msg panel-toggle launcher"
+          # Friction-free note capture: rofi one-liner -> today's daily note.
+          "SUPER,C,spawn,notes-capture"
           "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
           "SUPER,Z,spawn_shell,${windowSwitcher}"
           "SUPER+SHIFT,E,spawn_shell,${emojiPicker}"
@@ -221,7 +228,7 @@ in
           "SUPER,Period,zoom"
 
           # --- Layout cycling (user request) ---
-          "SUPER+SHIFT,SPACE,switch_layout"
+          "SUPER+SHIFT,Return,switch_layout"
 
           # --- Vim focus (focus windows) ---
           "SUPER,H,focusdir,left"
@@ -249,7 +256,7 @@ in
           "SUPER,1,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
           "SUPER,2,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
           "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
-          "SUPER,4,spawn_shell,mango-focus-or-run Logseq 2 com.logseq.Logseq"
+          "SUPER,4,spawn_shell,mango-focus-or-run obsidian 1 obsidian"
 
           # --- Move client to tag ---
           "SUPER+CTRL,1,tag,1"

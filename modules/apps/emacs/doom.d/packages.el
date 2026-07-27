@@ -10,6 +10,9 @@
 (package! org-appear)    ; reveal emphasis markers only under cursor
 (package! mixed-pitch)   ; variable-pitch prose, fixed-pitch code in org
 
+;; --- Org agenda dashboard -----------------------------------------------
+(package! org-super-agenda) ; grouped, boxed sections in the agenda dashboard
+
 ;; --- Org-roam (zettelkasten) --------------------------------------------
 (package! org-roam-ui)   ; live graph view of your notes in the browser
 

@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, osConfig ? { }, ... }:
 {
 
   options = {
@@ -26,7 +26,7 @@
             text = "cmd[update:1000] echo '$TIME'";
             color = "rgba(200, 200, 200, 1.0)";
             font_size = 55;
-            font_family = "JetBrainsMono Nerd Font";
+            font_family = osConfig.fonts.mono.family;
             position = "-100, 70";
             halign = "right";
             valign = "bottom";
@@ -37,7 +37,7 @@
             text = "$USER";
             color = "rgba(200, 200, 200, 1.0)";
             font_size = 20;
-            font_family = "JetBrainsMono Nerd Font";
+            font_family = osConfig.fonts.mono.family;
             position = "-100, 160";
             halign = "right";
             valign = "bottom";

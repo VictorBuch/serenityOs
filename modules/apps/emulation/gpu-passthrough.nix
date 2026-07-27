@@ -14,9 +14,17 @@ let
   # VM name for which hooks fire
   vmName = "studio-vm";
 
-  # Wrapper scripts: user is in libvirtd group, virsh talks to qemu:///system
+  # Wrapper scripts: user is in libvirtd group, virsh talks to qemu:///system.
+  # Run inside the user's Wayland session, so wlr-randr can drive the outputs.
+  #   DP-1     = RX 7900 XT  → handed to the VM (vanishes from the compositor)
+  #   HDMI-A-4 = iGPU HDMI    → the display we fall back to during Studio Mode
+  wlrRandr = "${pkgs.wlr-randr}/bin/wlr-randr";
   studioStart = pkgs.writeShellScriptBin "studio-start" ''
     set -e
+    # Bring the iGPU HDMI output up BEFORE the RX 7900 is yanked, so there is a
+    # live display the moment DP-1 disappears. (Switch the monitor's physical
+    # input to HDMI now — see docs/windows_VM.md "Daily Workflow".)
+    ${wlrRandr} --output HDMI-A-4 --on --mode 2560x1440@59.951 --pos 0,0 || true
     STATE=$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${vmName} 2>/dev/null || echo missing)
     if [ "$STATE" != "running" ]; then
       ${pkgs.libvirt}/bin/virsh -c qemu:///system start ${vmName}
@@ -26,15 +34,38 @@ let
   '';
 
   studioStop = pkgs.writeShellScriptBin "studio-stop" ''
-    # Graceful ACPI shutdown, force destroy after 20s
-    ${pkgs.libvirt}/bin/virsh -c qemu:///system shutdown ${vmName} 2>/dev/null || true
+    virsh() { ${pkgs.coreutils}/bin/timeout 20 ${pkgs.libvirt}/bin/virsh -c qemu:///system "$@"; }
+
+    # Graceful ACPI shutdown, force destroy after 20s.
+    # NOTE: a clean guest shutdown (Windows releases the GPU itself) is what lets
+    # the RX 7900 rebind to amdgpu. A force-destroy of a *running* Windows can
+    # trip the Navi 31 reset bug and wedge the vfio teardown in the kernel — an
+    # unrecoverable hang that needs a reboot. Prefer shutting Windows down from
+    # inside the guest, or via a working qemu guest agent, before running this.
+    virsh shutdown ${vmName} 2>/dev/null || true
     for i in $(seq 1 20); do
-      STATE=$(${pkgs.libvirt}/bin/virsh -c qemu:///system domstate ${vmName} 2>/dev/null || echo "shut off")
-      [ "$STATE" = "shut off" ] && echo "VM stopped cleanly" && exit 0
+      STATE=$(virsh domstate ${vmName} 2>/dev/null || echo "shut off")
+      [ "$STATE" = "shut off" ] && break
       sleep 1
     done
-    echo "VM did not respond to ACPI shutdown, forcing destroy"
-    ${pkgs.libvirt}/bin/virsh -c qemu:///system destroy ${vmName} 2>/dev/null || true
+    STATE=$(virsh domstate ${vmName} 2>/dev/null || echo "shut off")
+    if [ "$STATE" != "shut off" ]; then
+      echo "VM did not respond to ACPI shutdown, forcing destroy (reset-bug risk)"
+      # timeout wraps virsh so a wedged libvirtd can't freeze this terminal;
+      # it will NOT un-wedge a stuck GPU (that still needs a reboot).
+      virsh destroy ${vmName} 2>/dev/null || true
+    fi
+
+    # The qemu release hook rebinds the RX 7900 to amdgpu in the background
+    # (setsid + sleeps, ~5-8s). Wait for DP-1 to reappear, then restore the
+    # normal-mode layout: DP-1 at 1440p@144, HDMI-A-4 off. (Switch the monitor's
+    # physical input back to DP.)
+    for i in $(seq 1 25); do
+      ${wlrRandr} 2>/dev/null | grep -q '^DP-1' && break
+      sleep 1
+    done
+    ${wlrRandr} --output DP-1 --on --mode 2560x1440@143.912 --pos 0,0 --output HDMI-A-4 --off || true
+    echo "Studio Mode ended — restored DP-1 @ 1440p144"
   '';
 
   # libvirt qemu hook: dynamic GPU bind/unbind per VM lifecycle
@@ -66,27 +97,33 @@ let
       modprobe vfio-pci
       echo "$GPU_ID"   > /sys/bus/pci/drivers/vfio-pci/new_id 2>/dev/null || true
       echo "$AUDIO_ID" > /sys/bus/pci/drivers/vfio-pci/new_id 2>/dev/null || true
+
+      # Forbid D3cold on both functions — pairs with vfio-pci.disable_idle_d3=1.
+      # Prevents the "power state D3(hot|cold) to D0, device inaccessible" hang
+      # on reclaim by keeping the card powered.
+      echo 0 > "/sys/bus/pci/devices/$GPU_PCI/d3cold_allowed"   2>/dev/null || true
+      echo 0 > "/sys/bus/pci/devices/$AUDIO_PCI/d3cold_allowed" 2>/dev/null || true
     fi
 
     if [ "$HOOK_NAME" = "release" ] && [ "$STATE_NAME" = "end" ]; then
       # Run rebind in background — libvirt sandbox enforces hook timeout (~30s)
       # and amdgpu bind can block while GPU reinitializes. Detach via setsid+nohup.
+      #
+      # IMPORTANT: do NOT issue a manual PCI function-level reset here
+      # (`echo 1 > .../reset`). On this Navi 31 card that raw FLR reliably HANGS
+      # a kernel worker in D-state (unrecoverable without a reboot) — verified
+      # 2026-07. amdgpu performs its own reset/init on bind, which is robust;
+      # let it handle the reset. Also NOTE hostdevs are managed='no' so libvirt
+      # does not also try to rebind (no race with this hook).
       setsid nohup sh -c "
         echo '$GPU_PCI'   > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
         echo '$AUDIO_PCI' > /sys/bus/pci/drivers/vfio-pci/unbind 2>/dev/null
         echo '$GPU_ID'    > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
         echo '$AUDIO_ID'  > /sys/bus/pci/drivers/vfio-pci/remove_id 2>/dev/null
 
-        # Let PCI state settle before touching the GPU again. Navi 3x PSP/SMU
-        # need quiet time after vfio releases them; binding amdgpu immediately
-        # races the SMU and leaves it wedged.
+        # Let PCI state settle before binding amdgpu. Navi 3x PSP/SMU need a
+        # brief quiet window after vfio releases them.
         sleep 2
-
-        # Function-level reset while no driver is bound — clears any half
-        # torn-down state before amdgpu takes over.
-        echo 1 > '/sys/bus/pci/devices/$GPU_PCI/reset'   2>/dev/null
-        echo 1 > '/sys/bus/pci/devices/$AUDIO_PCI/reset' 2>/dev/null
-        sleep 1
 
         echo '$GPU_PCI'   > /sys/bus/pci/drivers/amdgpu/bind 2>/dev/null
         echo '$AUDIO_PCI' > /sys/bus/pci/drivers/snd_hda_intel/bind 2>/dev/null
@@ -106,6 +143,7 @@ mkModule {
     pkgs.virt-viewer # standalone SPICE/VNC console
     pkgs.usbutils # lsusb for finding USB passthrough IDs
     pkgs.e2fsprogs # chattr for btrfs nodatacow on VM images
+    pkgs.wlr-randr # display switching in studio-start/studio-stop
     studioStart
     studioStop
   ];
@@ -122,6 +160,13 @@ mkModule {
       "iommu=pt"
       "pcie_aspm=off"
       "amdgpu.runpm=0"
+      # Stop vfio-pci idling the card into D3 when no VM holds it. The reclaim
+      # crash on this RX 7900 is a power-state failure ("Unable to change power
+      # state from D3hot to D0, device inaccessible") + wedged SMU, NOT the FLR
+      # silicon reset bug (resets complete) and NOT the kfd-disconnect kernel
+      # regression (already fixed in 6.18.39 via pci_dev_is_disconnected).
+      # disable_idle_d3 keeps the device in D0 so there is no failing D3->D0.
+      "vfio-pci.disable_idle_d3=1"
     ];
     boot.kernelModules = [
       "vfio"

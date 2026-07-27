@@ -16,12 +16,12 @@ Used by GPG, file templates, snippets, email.
 
 * Look & feel
 ** Fonts and theme
-JetBrainsMono Nerd Font for code;
+Maple Mono NF for code;
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 14)
-      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 15)
-      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 22))
+(setq doom-font (font-spec :family "Maple Mono NF" :size 14)
+      doom-variable-pitch-font (font-spec :family "Maple Mono NF" :size 15)
+      doom-big-font (font-spec :family "Maple Mono NF" :size 22))
 
 (setq doom-theme 'doom-badger)
 (setq display-line-numbers-type 'relative)
@@ -110,9 +110,12 @@ backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
         org-pretty-entities t
         org-ellipsis " ▾"
         org-fontify-quote-and-verse-blocks t
-        ;; --- agenda sources: simple. inbox = capture, todo.org = organized ---
+        ;; --- agenda sources: inbox (capture) + every roam note ---
+        ;; directory entries auto-include new files, no restart needed.
+        ;; they are NOT recursive, so daily/ is listed explicitly.
         org-agenda-files (list (expand-file-name "inbox.org" org-directory)
-                               (expand-file-name "todo.org" org-directory))
+                               (expand-file-name "roam/" org-directory)
+                               (expand-file-name "roam/daily/" org-directory))
         org-default-notes-file (expand-file-name "inbox.org" org-directory)
         org-refile-targets '((nil :maxlevel . 3)
                              (org-agenda-files :maxlevel . 3))
@@ -125,7 +128,7 @@ backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
            "* TODO %?\n%U" :empty-lines 1)
           ("c" "Todo w/ context" entry
            (file ,(expand-file-name "inbox.org" org-directory))
-           "* TODO %? :@%^{context|computer|phone|home|work|errands}:\n%U"
+           "* TODO %? :@%^{context|work|personal}:\n%U"
            :empty-lines 1)
           ("n" "Note → inbox" entry
            (file ,(expand-file-name "inbox.org" org-directory))
@@ -142,7 +145,68 @@ backlinks, ~SPC X~ capture, ~SPC o a~ agenda. Extras for the daily/graph flow:
   (setq org-agenda-start-with-log-mode t
         org-agenda-skip-scheduled-if-done t
         org-agenda-skip-deadline-if-done t
-        org-agenda-window-setup 'current-window))
+        org-agenda-window-setup 'current-window
+        org-agenda-block-separator ?─))
+#+end_src
+
+*** Dashboard: weekly calendar + grouped task list
+=org-super-agenda= draws labelled, boxed groups. The dashboard =d= stacks two
+blocks: a normal 7-day calendar (day-by-day, dated items only) on top, then a
+task list grouped into Next / Inbox / Areas / Backlog. The task list *discards*
+anything scheduled or deadlined — those live in the calendar block above, so
+nothing shows twice.
+
+#+begin_src emacs-lisp
+(use-package! org-super-agenda
+  :after org-agenda
+  :config
+  (org-super-agenda-mode)
+  (setq org-agenda-custom-commands
+        '(("d" "Dashboard (all)"
+           ((agenda "" ((org-agenda-span 7)
+                        (org-agenda-start-day "0d")
+                        (org-deadline-warning-days 7)))
+            (alltodo "" ((org-agenda-overriding-header "\n Tasks")
+                         (org-super-agenda-groups
+                          '((:discard (:scheduled t :deadline t))
+                            (:name "⭐ Next"     :todo "NEXT")
+                            (:name "💼 Work"     :tag "@work")
+                            (:name "🏡 Personal" :tag "@personal")
+                            (:name "🏠 Areas"    :tag "area")
+                            (:name "📥 Inbox"    :file-path "inbox\\.org")
+                            (:name "📋 Backlog"  :todo "TODO")
+                            (:discard (:anything t))))))))
+          ;; "when working" — only @work tasks, and the calendar is
+          ;; filtered to @work too. tag-filter-preset filters BOTH blocks.
+          ("w" "Work only"
+           ((agenda "" ((org-agenda-span 3)
+                        (org-agenda-start-day "0d")))
+            (alltodo "" ((org-agenda-overriding-header "\n Work tasks")
+                         (org-super-agenda-groups
+                          '((:discard (:scheduled t :deadline t))
+                            (:name "⭐ Next" :todo "NEXT")
+                            (:name "💼 Work" :anything t))))))
+           ((org-agenda-tag-filter-preset '("+@work"))))
+          ;; "off the clock" — everything EXCEPT @work.
+          ("p" "Personal (work hidden)"
+           ((agenda "" ((org-agenda-span 7)
+                        (org-agenda-start-day "0d")))
+            (alltodo "" ((org-agenda-overriding-header "\n Personal tasks")
+                         (org-super-agenda-groups
+                          '((:discard (:scheduled t :deadline t))
+                            (:name "⭐ Next"     :todo "NEXT")
+                            (:name "🏡 Personal" :tag "@personal")
+                            (:name "🏠 Areas"    :tag "area")
+                            (:name "📥 Inbox"    :file-path "inbox\\.org")
+                            (:name "📋 Backlog"  :todo "TODO")
+                            (:discard (:anything t)))))))
+           ((org-agenda-tag-filter-preset '("-@work")))))))
+
+(map! :leader
+      :desc "Agenda dashboard"  "o a" (cmd! (org-agenda nil "d"))
+      :desc "Work agenda"       "o w" (cmd! (org-agenda nil "w"))
+      :desc "Personal agenda"   "o P" (cmd! (org-agenda nil "p"))
+      :desc "Agenda dispatcher" "o A" #'org-agenda)
 #+end_src
 
 * Org styling

@@ -23,10 +23,14 @@ mkModule {
           window_padding_width = 8;
           confirm_os_window_close = 0;
           term = "xterm-256color";
-          foreground = "#CAD3F5";
-          background = "#24273A";
+          # Colors come from noctalia's `kitty` template (themes/noctalia.conf).
           linux_display_server = "wayland";
         };
+        # noctalia writes ~/.config/kitty/themes/noctalia.conf from the wallpaper
+        # palette; this include makes those colors take effect (kitty live-reloads).
+        extraConfig = ''
+          include themes/noctalia.conf
+        '';
       };
     };
 } args

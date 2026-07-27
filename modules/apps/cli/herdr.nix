@@ -8,6 +8,22 @@ let
     text = builtins.readFile ./herdr-sesh.sh;
   };
 
+  # jjws: create a jj workspace and register it as a native herdr workspace, so
+  # it shows up in the sidebar instead of being invisible (see ./jjws.sh).
+  jjws = pkgs.writeShellApplication {
+    name = "jjws";
+    runtimeInputs = [ pkgs.jujutsu pkgs.git pkgs.herdr pkgs.coreutils ];
+    text = builtins.readFile ./jjws.sh;
+  };
+
+  # adopt-jj-workspaces: sweep orphan jj workspaces (e.g. created by agents via
+  # raw `jj workspace add`) into herdr. Bound to prefix+shift+j below.
+  adopt-jj-workspaces = pkgs.writeShellApplication {
+    name = "adopt-jj-workspaces";
+    runtimeInputs = [ pkgs.herdr pkgs.coreutils ];
+    text = builtins.readFile ./adopt-jj-workspaces.sh;
+  };
+
   # Predefined spaces. Each becomes a fzf entry; selecting it focuses the
   # existing workspace or builds a fresh one with named tabs, split panes, and
   # startup commands already running. Mirrors modules/apps/cli/sesh.nix.
@@ -85,6 +101,8 @@ mkModule {
       pkgs.rustc
       pkgs.jq
       herdr-sesh
+      jjws
+      adopt-jj-workspaces
     ];
 
   linuxHomeConfig = { pkgs, lib, ... }: {
@@ -125,6 +143,16 @@ mkModule {
               type = "plugin_action";
               command = "nathanflurry.jj-workspace.remove";
               description = "remove jj workspace";
+            }
+            # prefix+shift+j: adopt orphan jj workspaces (raw `jj workspace add`,
+            # e.g. from agents) into herdr's sidebar (fzf-less popup).
+            {
+              key = "prefix+shift+j";
+              type = "popup";
+              command = "${adopt-jj-workspaces}/bin/adopt-jj-workspaces";
+              description = "adopt orphan jj workspaces into herdr";
+              width = "60%";
+              height = "40%";
             }
             # vim-herdr-navigation: vim-tmux-navigator equivalent (ctrl+hjkl).
             {

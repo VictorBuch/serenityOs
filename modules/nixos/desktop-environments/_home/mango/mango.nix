@@ -250,7 +250,7 @@ in
           "SUPER,1,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
           "SUPER,2,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
           "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
-          "SUPER,4,spawn_shell,mango-focus-or-run Obsidian 2 com.obsidian.Obsidian"
+          "SUPER,4,spawn_shell,mango-focus-or-run obsidian 2 obsidian"
 
           # --- Move client to tag ---
           "SUPER+CTRL,1,tag,1"

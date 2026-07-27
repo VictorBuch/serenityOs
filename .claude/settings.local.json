@@ -113,7 +113,13 @@
       "Bash(print \"roam extensions:\")",
       "Bash(get name *)",
       "Bash(path parse *)",
-      "Bash(get extension *)"
+      "Bash(get extension *)",
+      "Bash(mmsg get *)",
+      "Bash(print \"---THEMING DIR---\")",
+      "Bash(print \"---MANGO---\")",
+      "Bash(lines)",
+      "Bash(first 60)",
+      "Bash(mmsg dispatch *)"
     ],
     "deny": [],
     "ask": []

@@ -6,10 +6,6 @@
   ...
 }:
 {
-  imports = [
-    inputs.mangowm.nixosModules.mango
-  ];
-
   options = {
     desktop-environments.mango.enable = lib.mkEnableOption "Enables Mango WM (dwl-based wlroots compositor)";
   };
@@ -20,9 +16,13 @@
 
     i18n.inputMethod.enable = false;
 
+    # nixpkgs upstreamed this module (programs/wayland/mango.nix); the login
+    # session entry is wired automatically via services.displayManager.sessionPackages.
+    # nixpkgs only packages 0.14.4 (~6 releases behind), so point it at the flake's
+    # nightly build to match the config the mango hm module generates.
     programs.mango = {
       enable = true;
-      addLoginEntry = true;
+      package = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
     sddm.enable = true;

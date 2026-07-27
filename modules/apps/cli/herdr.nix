@@ -41,7 +41,14 @@ let
       tabs = [
         {
           name = "edit";
-          panes = [ { command = "nvim"; } ];
+          panes = [ 
+            { command = "nvim"; } 
+            {
+              command = "claudew";
+              direction = "right";
+              ratio = 0.6;
+            } 
+          ];
         }
         {
           name = "jj";

@@ -15,11 +15,10 @@ let
   windowSwitcher = "rofi -show window";
   emojiPicker = "rofi -show emoji";
   powerMenu = "rofi -show power-menu";
-  colors = config.lib.stylix.colors.withHashtag;
-
-  # Strip leading '#' for mango color format (0xRRGGBBAA expected)
-  hexNoHash = c: lib.removePrefix "#" c;
-  mangoColor = c: "0x${hexNoHash c}ff";
+  # Window-decoration colors are no longer set here: noctalia's `mango`
+  # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
+  # palette and reloads mango live. See the `source=` include in extraConfig
+  # below and modules/nixos/desktop-environments/_home/common/noctalia.nix.
 in
 
 {
@@ -42,6 +41,15 @@ in
 
     wayland.windowManager.mango = {
       enable = true;
+
+      # Pull in noctalia's live-generated color file. noctalia writes
+      # ~/.config/mango/noctalia.conf (writable, not HM-managed) from the
+      # wallpaper palette and runs `mmsg dispatch reload_config`, so window
+      # colors update in real time. mango tolerates the file being absent at
+      # build/first-run (parse warns but succeeds).
+      extraConfig = ''
+        source=~/.config/mango/noctalia.conf
+      '';
 
       autostart_sh = ''
         ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
@@ -90,10 +98,8 @@ in
         # blur_params_contrast = 0.95;
         # blur_params_saturation = 1.1;
 
-        bordercolor = mangoColor colors.base03;
-        focuscolor = mangoColor colors.base04;
-        urgentcolor = mangoColor colors.base08;
-        scratchpadcolor = mangoColor colors.base0D;
+        # Colors (bordercolor/focuscolor/urgentcolor/scratchpadcolor/...) are
+        # provided live by noctalia via the sourced noctalia.conf (extraConfig).
 
         # Master-stack defaults (applies to tile/center_tile)
         new_is_master = 1;

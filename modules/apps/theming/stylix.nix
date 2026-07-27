@@ -56,6 +56,22 @@ mkModule {
               # kde.enable = true;
               nixos-icons.enable = false;
               gtksourceview.enable = false;
+
+              # === Cede color authority to noctalia ===
+              # noctalia derives colors from the wallpaper (Material You) and
+              # regenerates these apps' configs live. Stylix must NOT also write
+              # their colors at build time, or the two fight (read-only symlinks
+              # vs runtime writes, and mismatched palettes). Stylix still owns
+              # fonts, cursor, icons, zen-browser, and the base16 fallback.
+              noctalia.enable = false; # stop stylix feeding noctalia a custom palette
+              "noctalia-shell".enable = false;
+              ghostty.enable = false;
+              kitty.enable = false;
+              btop.enable = false;
+              starship.enable = false;
+              gtk.enable = false; # noctalia's gtk template owns gtk3/gtk4 colors
+              qt.enable = false; # noctalia's qt template owns qt6ct/qt5ct colors
+
               # Zen browser stylix integration
               zen-browser.profileNames =
                 lib.mkIf (config.programs.zen-browser.enable or false) [ config.home.username ];

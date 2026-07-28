@@ -22,20 +22,30 @@ in
 
       # The main conversion script
       davinciConvertScript = pkgs.writeShellScriptBin "davinci-convert" ''
-        #!/bin/bash
+        #!/usr/bin/env bash
 
-        # DaVinci Resolve video conversion script
-        # Re-encodes videos to/from codecs compatible with DaVinci Resolve
-        # Supports VAAPI GPU acceleration on AMD GPUs
+        # DaVinci Resolve Studio (Linux) media conditioner.
+        #
+        # Studio decodes H.264/H.265 natively, so the video stream is copied
+        # untouched whenever possible. What Resolve on Linux still cannot read is
+        # compressed audio (AAC, MP3, AC3, Opus, Vorbis, ...) — those tracks are
+        # re-encoded to PCM and the result is written to a .mov container.
+        #
+        # Usage: davinci-convert [file ...]
+        #   With no arguments it processes everything in the queue directory.
 
-        # Media folders
+        set -o pipefail
+
         media_in="${convertDir}"
         media_out="${convertedDir}"
 
-        # Progress state
         PROGRESS_DIR="${progressDir}"
         PROGRESS_FILE="$PROGRESS_DIR/progress.json"
         mkdir -p "$media_in" "$media_out" "$PROGRESS_DIR"
+
+        ffmpeg="${pkgs.ffmpeg}/bin/ffmpeg"
+        ffprobe="${pkgs.ffmpeg}/bin/ffprobe"
+        notify_send="${pkgs.libnotify}/bin/notify-send"
 
         # Clean up progress file on exit
         cleanup() {
@@ -43,41 +53,42 @@ in
         }
         trap cleanup EXIT
 
-        # Desktop notifications
-        icons_dir="/usr/share/icons/Papirus/64x64/places"
-        icon_success="folder-cat-mocha-blue-video.svg"
-        icon_error="folder-cat-mocha-peach-video.svg"
+        notify_success () { "$notify_send" -i video-x-generic "$1" "$2"; }
+        notify_error   () { "$notify_send" -u critical -i dialog-error "$1" "$2"; }
 
-        notify_success () {
-          notify-send -i "$icons_dir/$icon_success" "$1" "$2"
+        # Video codecs DaVinci Resolve Studio decodes natively on Linux.
+        # Anything else (AV1, VP8/VP9, ...) gets transcoded to DNxHR.
+        supported_video="h264 hevc prores dnxhd mjpeg mpeg4 cfhd"
+        # Containers Resolve will open. Matroska/WebM/AVI always need a remux.
+        supported_container="mov mp4"
+        # Audio: Resolve on Linux only reads uncompressed PCM, so every
+        # compressed audio codec is re-encoded.
+
+        in_list () {
+          local needle="$1" item
+          for item in $2; do
+            [ "$item" = "$needle" ] && return 0
+          done
+          return 1
         }
 
-        notify_error () {
-          notify-send -u critical -i "$icons_dir/$icon_error" "$1" "$2"
+        probe () {
+          local file="$1"
+          shift
+          "$ffprobe" -v error "$@" -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null
         }
 
-        # Detect VAAPI encode support per codec
-        VAAPI_INFO="$(${pkgs.libva-utils}/bin/vainfo 2>/dev/null || echo "")"
-        HAS_H264_VAAPI=false
-        HAS_HEVC_VAAPI=false
-        HAS_AV1_VAAPI=false
+        # Escape a string for embedding in the progress JSON
+        json_escape () {
+          printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+        }
 
-        if echo "$VAAPI_INFO" | grep -q "VAProfileH264.*VAEntrypointEncSlice"; then
-          HAS_H264_VAAPI=true
-        fi
-        if echo "$VAAPI_INFO" | grep -q "VAProfileHEVC.*VAEntrypointEncSlice"; then
-          HAS_HEVC_VAAPI=true
-        fi
-        if echo "$VAAPI_INFO" | grep -q "VAProfileAV1.*VAEntrypointEncSlice"; then
-          HAS_AV1_VAAPI=true
-        fi
-
-        # Progress writer — parses ffmpeg -progress output into JSON state file
-        # Depends on outer scope: $current_file, $file_index, $total, $codec_name, $using_gpu
+        # Progress writer — parses ffmpeg -progress output into a JSON state file.
+        # Depends on outer scope: $current_file, $file_index, $total, $codec_name
         write_progress() {
-          local total_duration_us percent=0 speed="N/A"
-          total_duration_us=$(ffprobe -v error -show_entries format=duration \
-            -of default=noprint_wrappers=1:nokey=1 "$current_file" | \
+          local total_duration_us percent=0 speed="N/A" json_name
+          json_name="$(json_escape "$current_file_name")"
+          total_duration_us=$(probe "$current_file" -show_entries format=duration | \
             awk '{printf "%.0f", $1 * 1000000}')
 
           while IFS='=' read -r key value; do
@@ -97,249 +108,176 @@ in
                 if [ "$value" = "end" ]; then
                   percent=100
                 fi
-                printf '{"file":"%s","percent":%d,"speed":"%s","index":%d,"total":%d,"codec":"%s","gpu":%s}\n' \
-                  "$current_file_name" "$percent" "$speed" "$file_index" "$total" "$codec_name" "$using_gpu" \
+                printf '{"file":"%s","percent":%d,"speed":"%s","index":%d,"total":%d,"codec":"%s","gpu":false}\n' \
+                  "$json_name" "$percent" "$speed" "$file_index" "$total" "$codec_name" \
                   > "$PROGRESS_FILE.tmp" && mv "$PROGRESS_FILE.tmp" "$PROGRESS_FILE"
                 ;;
             esac
           done
         }
 
-        # The number of videos in the input folder
-        total="$( ls -A "$media_in" | wc -l )"
+        # ---------------------------------------------------------------
+        # Build the work list
+        # ---------------------------------------------------------------
 
-        # Display the main menu
-        echo "--------------------------"
-        echo "What would you like to do?"
-        echo "--------------------------"
-        echo "1) Import an incompatible video"
-        echo "2) Render the final video"
-        echo "3) Exit the script"
-
-        read main_choice
-
-        case $main_choice in
-          1)  # Set input codecs that will be converted
-              input_codecs=("h264" "hevc")
-              using_gpu=false
-
-              echo "-----------------------------------------"
-              echo "Select the output codec for queued videos"
-              echo "-----------------------------------------"
-              echo "1) DNxHR HQX (CPU encode, GPU decode)"
-              if [ "$HAS_AV1_VAAPI" = true ]; then
-                echo "2) AV1 (GPU accelerated - VAAPI)"
-                echo "3) AV1 (CPU - libsvtav1)"
-              else
-                echo "2) AV1 (CPU - libsvtav1)"
-              fi
-              echo "4) MPEG-4 part 2 (CPU)"
-              echo "5) Exit"
-
-              read encoder_choice
-
-              if [ "$HAS_AV1_VAAPI" = true ]; then
-                case $encoder_choice in
-                  1)  video_enc="-hwaccel vaapi -hwaccel_device /dev/dri/renderD128"
-                      video_enc_out="-c:v dnxhd -profile:v 4 -pix_fmt yuv422p10le"
-                      out_format="mov"
-                      codec_name="DNxHR"
-                      ;;
-                  2)  video_enc="-vaapi_device /dev/dri/renderD128"
-                      video_enc_out="-vf format=nv12,hwupload -c:v av1_vaapi -qp 23"
-                      out_format="mp4"
-                      codec_name="AV1"
-                      using_gpu=true
-                      ;;
-                  3)  video_enc=""
-                      video_enc_out="-c:v libsvtav1 -preset 6 -crf 23 -pix_fmt yuv420p10le"
-                      out_format="mp4"
-                      codec_name="AV1"
-                      ;;
-                  4)  video_enc=""
-                      video_enc_out="-c:v mpeg4 -q:v 2"
-                      out_format="mov"
-                      codec_name="MPEG4"
-                      ;;
-                  5) echo "Exiting..." ; exit 0;;
-                  *) notify_error "You entered an invalid value" "Try running the script again." ; exit 1;;
-                esac
-              else
-                case $encoder_choice in
-                  1)  video_enc="-hwaccel vaapi -hwaccel_device /dev/dri/renderD128"
-                      video_enc_out="-c:v dnxhd -profile:v 4 -pix_fmt yuv422p10le"
-                      out_format="mov"
-                      codec_name="DNxHR"
-                      ;;
-                  2)  video_enc=""
-                      video_enc_out="-c:v libsvtav1 -preset 6 -crf 23 -pix_fmt yuv420p10le"
-                      out_format="mp4"
-                      codec_name="AV1"
-                      ;;
-                  4)  video_enc=""
-                      video_enc_out="-c:v mpeg4 -q:v 2"
-                      out_format="mov"
-                      codec_name="MPEG4"
-                      ;;
-                  5) echo "Exiting..." ; exit 0;;
-                  *) notify_error "You entered an invalid value" "Try running the script again." ; exit 1;;
-                esac
-              fi
-              ;;
-          2)  input_codecs=("dnxhd" "prores")
-              using_gpu=false
-
-              echo "-----------------------------------------"
-              echo "Select the output codec for queued videos"
-              echo "-----------------------------------------"
-
-              opt=1
-              declare -A menu_map
-
-              if [ "$HAS_H264_VAAPI" = true ]; then
-                echo "$opt) H.264 (GPU - VAAPI)"
-                menu_map[$opt]="h264_gpu"
-                opt=$((opt + 1))
-              fi
-              echo "$opt) H.264 (CPU - libx264)"
-              menu_map[$opt]="h264_cpu"
-              opt=$((opt + 1))
-
-              if [ "$HAS_HEVC_VAAPI" = true ]; then
-                echo "$opt) H.265 (GPU - VAAPI)"
-                menu_map[$opt]="hevc_gpu"
-                opt=$((opt + 1))
-              fi
-              echo "$opt) H.265 (CPU - libx265)"
-              menu_map[$opt]="hevc_cpu"
-              opt=$((opt + 1))
-
-              if [ "$HAS_AV1_VAAPI" = true ]; then
-                echo "$opt) AV1 (GPU - VAAPI)"
-                menu_map[$opt]="av1_gpu"
-                opt=$((opt + 1))
-              fi
-              echo "$opt) AV1 (CPU - libsvtav1)"
-              menu_map[$opt]="av1_cpu"
-              opt=$((opt + 1))
-
-              echo "$opt) Exit"
-              menu_map[$opt]="exit"
-
-              read encoder_choice
-
-              selected="''${menu_map[$encoder_choice]:-invalid}"
-
-              case "$selected" in
-                h264_gpu)
-                  video_enc="-vaapi_device /dev/dri/renderD128"
-                  video_enc_out="-vf format=nv12,hwupload -c:v h264_vaapi -qp 20 -movflags +faststart"
-                  out_format="mp4"
-                  codec_name="H264"
-                  using_gpu=true
-                  ;;
-                h264_cpu)
-                  video_enc=""
-                  video_enc_out="-c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -movflags +faststart"
-                  out_format="mp4"
-                  codec_name="H264"
-                  ;;
-                hevc_gpu)
-                  video_enc="-vaapi_device /dev/dri/renderD128"
-                  video_enc_out="-vf format=nv12,hwupload -c:v hevc_vaapi -qp 22 -movflags +faststart"
-                  out_format="mp4"
-                  codec_name="H265"
-                  using_gpu=true
-                  ;;
-                hevc_cpu)
-                  video_enc=""
-                  video_enc_out="-c:v libx265 -preset slow -crf 20 -movflags +faststart"
-                  out_format="mov"
-                  codec_name="H265"
-                  ;;
-                av1_gpu)
-                  video_enc="-vaapi_device /dev/dri/renderD128"
-                  video_enc_out="-vf format=nv12,hwupload -c:v av1_vaapi -qp 23 -movflags +faststart"
-                  out_format="mp4"
-                  codec_name="AV1"
-                  using_gpu=true
-                  ;;
-                av1_cpu)
-                  video_enc=""
-                  video_enc_out="-c:v libsvtav1 -preset 3 -crf 25 -pix_fmt yuv420p10le -svtav1-params tune=0:fast-decode=1 -movflags +faststart"
-                  out_format="mp4"
-                  codec_name="AV1"
-                  ;;
-                exit)
-                  echo "Exiting..." ; exit 0
-                  ;;
-                *)
-                  notify_error "You entered an invalid value" "Try running the script again." ; exit 1
-                  ;;
-              esac
-              ;;
-          3) echo "Exiting..." ; exit 0;;
-          *) notify_error "You entered an invalid value" "Try running the script again." ; exit 1;;
-        esac
-
-        # Check if ffmpeg is installed
-        if ! command -v ffmpeg &> /dev/null; then
-          notify_error "FFmpeg not found" "You need to install ffmpeg to use this script."
-          exit 2
+        queue=()
+        if [ "$#" -gt 0 ]; then
+          queue=("$@")
+        else
+          shopt -s nullglob
+          queue=("$media_in"/*)
+          shopt -u nullglob
         fi
 
-        # Check if input directory is empty
-        if [[ -z $(ls -A "$media_in") ]]; then
-          notify_error "The queue is empty" "There are currently no videos in the queue."
+        if [ "''${#queue[@]}" -eq 0 ]; then
+          notify_error "The queue is empty" "Drop files into $media_in first."
+          echo "Nothing to do — $media_in is empty."
           exit 3
         fi
 
-        # Encoding
-        file_index=0
+        todo_files=()
+        todo_vmode=()
+        todo_amode=()
+        todo_label=()
 
-        for file in "$media_in"/*; do
-          current_file="$file"
-          current_file_name="$(basename "$file")"
-          # Use ffprobe to detect container format
-          container_format="$(ffprobe -v error -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1 "$file" | head -1)"
-          video_codec="$(ffprobe -v error -show_entries stream=codec_name -select_streams v:0 -of default=noprint_wrappers=1:nokey=1 "$file")"
-          audio_codec="$(ffprobe -v error -show_entries stream=codec_name -select_streams a:0 -of default=noprint_wrappers=1:nokey=1 "$file")"
+        echo "-----------------------------"
+        echo "Inspecting ''${#queue[@]} file(s)"
+        echo "-----------------------------"
 
-          # Detect file extension from ffprobe format name
-          case "$container_format" in
-            *mp4*|*m4a*) file_ext=".mp4";;
-            *mov*|*quicktime*) file_ext=".mov";;
-            *matroska*) file_ext=".mkv";;
-            *webm*) file_ext=".webm";;
-            *) file_ext=".''${current_file_name##*.}"
-               file_ext="$(echo "$file_ext" | tr '[:upper:]' '[:lower:]')"
-               ;;
+        for file in "''${queue[@]}"; do
+          [ -f "$file" ] || continue
+          name="$(basename "$file")"
+
+          container="$(probe "$file" -show_entries format=format_name | head -1)"
+          if [ -z "$container" ]; then
+            echo "  skip     $name (not a media file)"
+            continue
+          fi
+
+          vcodec="$(probe "$file" -select_streams v:0 -show_entries stream=codec_name | head -1)"
+          acodec="$(probe "$file" -select_streams a:0 -show_entries stream=codec_name | head -1)"
+
+          # ffprobe reports comma-separated container lists, e.g. "mov,mp4,m4a,..."
+          container_ok=false
+          for c in ''${container//,/ }; do
+            if in_list "$c" "$supported_container"; then
+              container_ok=true
+              break
+            fi
+          done
+
+          vmode="copy"
+          if [ -n "$vcodec" ] && ! in_list "$vcodec" "$supported_video"; then
+            vmode="dnxhr"
+          fi
+
+          amode="copy"
+          case "$acodec" in
+            "" ) ;;                  # no audio track
+            pcm_* ) ;;               # already uncompressed
+            * ) amode="pcm" ;;
           esac
 
-          if [[ $audio_codec == "aac" ]]; then
-            audio_enc="-c:a pcm_s16le"
+          if [ "$vmode" = "copy" ] && [ "$amode" = "copy" ] && [ "$container_ok" = true ]; then
+            echo "  ok       $name ($vcodec / ''${acodec:-no audio}) — already Resolve-ready"
+            continue
+          fi
+
+          if [ "$vmode" = "dnxhr" ]; then
+            label="DNxHR"
+            [ "$amode" = "pcm" ] && label="DNxHR+PCM"
+          elif [ "$amode" = "pcm" ]; then
+            label="PCM"
           else
-            audio_enc="-c:a copy"
+            label="Remux"
           fi
 
-          if [[ "''${input_codecs[*]}" =~ "$video_codec" ]]; then
-            file_index=$(( file_index + 1 ))
-            output_file="$media_out/$(basename "$current_file_name" "$file_ext").$out_format"
-
-            notify_success "Converting $file_index/$total" "$current_file_name → $codec_name"
-
-            # Run ffmpeg with progress output (no inner terminal wrapper)
-            ffmpeg $video_enc -i "$file" $video_enc_out $audio_enc \
-              -progress pipe:1 \
-              "$output_file" 2>/dev/null | write_progress
-
-            if [ $? -ne 0 ]; then
-              notify_error "Encode failed" "$current_file_name failed with $codec_name. Try CPU fallback."
-            fi
-          fi
+          echo "  convert  $name ($vcodec / ''${acodec:-no audio}) → $label"
+          todo_files+=("$file")
+          todo_vmode+=("$vmode")
+          todo_amode+=("$amode")
+          todo_label+=("$label")
         done
 
-        notify_success "Converting finished" "The videos have been successfully converted."
+        total="''${#todo_files[@]}"
+
+        if [ "$total" -eq 0 ]; then
+          notify_success "Nothing to convert" "Every file is already compatible with Resolve."
+          echo ""
+          echo "Everything is already compatible — nothing to do."
+          exit 0
+        fi
+
+        # ---------------------------------------------------------------
+        # Convert
+        # ---------------------------------------------------------------
+
+        echo ""
+        failures=0
+        file_index=0
+
+        for i in "''${!todo_files[@]}"; do
+          current_file="''${todo_files[$i]}"
+          current_file_name="$(basename "$current_file")"
+          vmode="''${todo_vmode[$i]}"
+          amode="''${todo_amode[$i]}"
+          codec_name="''${todo_label[$i]}"
+          file_index=$(( i + 1 ))
+
+          # Always land in a .mov container — it is the only one that carries
+          # PCM audio alongside H.264/H.265 or DNxHR without complaints.
+          output_file="$media_out/''${current_file_name%.*}.mov"
+
+          vargs=()
+          if [ "$vmode" = "copy" ]; then
+            vargs=( -c:v copy )
+          else
+            vargs=( -vf format=yuv422p -c:v dnxhd -profile:v dnxhr_hq )
+          fi
+
+          aargs=()
+          if [ "$amode" = "copy" ]; then
+            aargs=( -c:a copy )
+          else
+            aargs=( -c:a pcm_s16le )
+          fi
+
+          notify_success "Converting $file_index/$total" "$current_file_name → $codec_name"
+          echo "[$file_index/$total] $current_file_name → $(basename "$output_file") ($codec_name)"
+
+          err_log="$(mktemp)"
+          "$ffmpeg" -hide_banner -nostdin -y -i "$current_file" \
+            -map 0:V? -map 0:a? -map_metadata 0 \
+            "''${vargs[@]}" "''${aargs[@]}" \
+            -progress pipe:1 \
+            "$output_file" 2>"$err_log" | write_progress
+
+          status="''${PIPESTATUS[0]}"
+          if [ "$status" -ne 0 ]; then
+            failures=$(( failures + 1 ))
+            echo "  failed:"
+            tail -n 10 "$err_log" | sed 's/^/    /'
+            notify_error "Encode failed" "$current_file_name ($codec_name)"
+            rm -f "$output_file"
+          fi
+          rm -f "$err_log"
+        done
+
+        echo ""
+        if [ "$failures" -gt 0 ]; then
+          notify_error "Finished with errors" "$failures of $total file(s) failed."
+          echo "Finished with $failures failure(s) out of $total."
+        else
+          notify_success "Converting finished" "$total file(s) are ready for Resolve."
+          echo "Done — $total file(s) written to $media_out."
+        fi
+
+        # Keep the floating terminal around long enough to read the summary
+        if [ -t 0 ]; then
+          read -r -p "Press Enter to close..." _
+        fi
+
+        [ "$failures" -eq 0 ]
       '';
 
       # Status check script for the bar widget
@@ -373,10 +311,10 @@ in
       pluginManifest = builtins.toJSON {
         id = "davinci-convert";
         name = "DaVinci Convert";
-        version = "2.0.0";
+        version = "3.0.0";
         author = "serenityOs";
         license = "MIT";
-        description = "Video conversion queue status with GPU acceleration for DaVinci Resolve";
+        description = "Conditions media for DaVinci Resolve Studio — PCM audio conversion with queue status";
         entryPoints = {
           barWidget = "BarWidget.qml";
         };
@@ -459,7 +397,7 @@ in
                   if (root.isEncoding) {
                     root.nullPollCount = 0;
                     root.statusText = root.encodingData.codec + " " + root.encodePercent + "%";
-                    root.statusIcon = root.encodingData.gpu ? "gpu" : "cpu";
+                    root.statusIcon = "video-plus";
                   } else {
                     root.nullPollCount++;
                     if (result.queue > 0) {
@@ -559,7 +497,7 @@ in
           }
 
           Component.onCompleted: {
-            Logger.i("DaVinciConvert", "Bar widget loaded (v2.0 with GPU acceleration)");
+            Logger.i("DaVinciConvert", "Bar widget loaded (v3.0 — Resolve Studio audio conditioning)");
           }
         }
       '';
@@ -572,7 +510,6 @@ in
         pkgs.ffmpeg
         pkgs.foot
         pkgs.libnotify
-        pkgs.libva-utils
       ];
 
       # Create the required video directories

@@ -124,7 +124,8 @@
       "WebFetch(domain:en.thedavestack.com)",
       "WebFetch(domain:herdr.dev)",
       "Bash(nixos-rebuild dry-build *)",
-      "Bash(bash -lc ' *)"
+      "Bash(bash -lc ' *)",
+      "Bash(lspci -nn)"
     ],
     "deny": [],
     "ask": []

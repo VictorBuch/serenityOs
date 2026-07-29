@@ -13,7 +13,7 @@ in
   imports = [
     ./niri.nix
     ./focus-or-run.nix
-    ./davinci-convert.nix
+    ../common/davinci-convert.nix
     ../common/dunst.nix
     ../common/wlogout
     ../common/hyprlock
@@ -25,12 +25,12 @@ in
     niri = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
-      davinci-convert.enable = lib.mkDefault davinciEnabled;
     };
     noctalia = {
       enable = lib.mkDefault true;
     };
     common = {
+      davinci-convert.enable = lib.mkDefault davinciEnabled;
       fuzzel.enable = lib.mkDefault true;
       dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;

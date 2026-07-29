@@ -134,6 +134,10 @@ in
             Mod+Escape { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
             Mod+Shift+Escape { spawn "noctalia-shell" "ipc" "call" "sessionMenu" "lockAndSuspend";}
 
+            // Handy's own global hotkey uses the Tauri plugin, which is X11-only —
+            // the compositor has to drive it over the CLI instead.
+            Mod+Shift+D { spawn "handy" "--toggle-transcription"; }
+
             // Window management
             Mod+Tab { toggle-overview; }
             Mod+G {toggle-window-floating;}

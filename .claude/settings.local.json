@@ -125,7 +125,17 @@
       "WebFetch(domain:herdr.dev)",
       "Bash(nixos-rebuild dry-build *)",
       "Bash(bash -lc ' *)",
-      "Bash(lspci -nn)"
+      "Bash(lspci -nn)",
+      "Bash(busctl --user list)",
+      "Bash(busctl --user get-property org.kde.StatusNotifierWatcher /StatusNotifierWatcher org.kde.StatusNotifierWatcher RegisteredStatusNotifierItems)",
+      "Bash(rg -nx \"hidden_items|hiddenItems|hidden|hidden_apps|blacklist\")",
+      "Bash(/nix/store/jndiic738hsjwj3i2hfis35d3pdlla3y-noctalia-5.0.0/bin/noctalia --help)",
+      "Bash(/nix/store/jndiic738hsjwj3i2hfis35d3pdlla3y-noctalia-5.0.0/bin/noctalia msg *)",
+      "Bash(/nix/store/jndiic738hsjwj3i2hfis35d3pdlla3y-noctalia-5.0.0/bin/noctalia config *)",
+      "Bash(busctl *)",
+      "Bash(grep -iE \"^\\(Tauri|Rdev|Evdev|CGEventTap\\)$\")",
+      "Bash(command -v strings)",
+      "Bash(grep -iE \"^\\(wtype|ydotool|xdotool|wl-copy|dotool\\)$\")"
     ],
     "deny": [],
     "ask": []

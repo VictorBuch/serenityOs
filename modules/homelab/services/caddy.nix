@@ -333,8 +333,8 @@ let
           ''
             reverse_proxy ${service.url} {
               header_up Host ${service.upstreamHost or "{host}"}
-              header_up X-Real-IP {remote}
-              header_up X-Forwarded-For {remote}
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}
               transport http {
                 tls_insecure_skip_verify
@@ -346,8 +346,8 @@ let
             reverse_proxy ${service.url} {
               header_up Host ${service.upstreamHost or "{host}"}
               ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
-              header_up X-Real-IP {remote}
-              header_up X-Forwarded-For {remote}
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}
             }
           ''
@@ -382,8 +382,8 @@ let
             handle /api/* {
               reverse_proxy ${service.url} {
                 header_up Host ${service.upstreamHost or "{host}"}
-                header_up X-Real-IP {remote}
-                header_up X-Forwarded-For {remote}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
                 transport http {
                   read_timeout 360s
@@ -395,8 +395,8 @@ let
             handle /_/* {
               reverse_proxy ${service.url} {
                 header_up Host ${service.upstreamHost or "{host}"}
-                header_up X-Real-IP {remote}
-                header_up X-Forwarded-For {remote}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
                 transport http {
                   read_timeout 360s
@@ -411,8 +411,8 @@ let
           ''
             reverse_proxy ${service.url} {
               header_up Host ${service.upstreamHost or "{host}"}
-              header_up X-Real-IP {remote}
-              header_up X-Forwarded-For {remote}
+              header_up X-Real-IP {remote_host}
+              header_up X-Forwarded-For {remote_host}
               header_up X-Forwarded-Proto {scheme}
             }
           ''

@@ -35,6 +35,16 @@ in
     # can reach files HA creates from now on.
     systemd.services.home-assistant.serviceConfig.UMask = mkForce "0007";
 
+    # HA re-locks its config dir to 0700 on every startup, which resets the ACL
+    # mask to --- and nullifies serenity's access. Re-grant it right after
+    # start-up (runs as the `hass` user, which owns the dir, so setfacl is
+    # allowed). The `-` prefix means a failure here never blocks HA from
+    # starting. This makes serenity's access survive HA restarts, not just
+    # nixos-rebuilds.
+    systemd.services.home-assistant.serviceConfig.ExecStartPost = [
+      "-${pkgs.acl}/bin/setfacl -R -m u:serenity:rwX -m d:u:serenity:rwX ${config.services.home-assistant.configDir}"
+    ];
+
     # Create empty yaml files for UI-managed configs if they don't exist
     systemd.tmpfiles.rules = [
       "f ${config.services.home-assistant.configDir}/automations.yaml 0644 hass hass"
@@ -96,7 +106,8 @@ in
 	"homekit_controller"
       ];
 
-      customComponents = [
+      customComponents = with pkgs.home-assistant-custom-components; [
+        adaptive_lighting
       ];
 
       customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
@@ -125,6 +136,8 @@ in
           name = "Home";
           unit_system = "metric";
           time_zone = "Europe/Prague";
+          latitude = 50.022414337137704;
+          longitude = 14.402442466652143;
         };
 
         # UI-managed automations, scenes, and scripts

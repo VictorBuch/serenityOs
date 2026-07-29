@@ -123,7 +123,8 @@
       "Bash(find /nix/store/laiw9zc3rgrhs146h04kisnhmgaw7sza-source -name *.nix)",
       "WebFetch(domain:en.thedavestack.com)",
       "WebFetch(domain:herdr.dev)",
-      "Bash(nixos-rebuild dry-build *)"
+      "Bash(nixos-rebuild dry-build *)",
+      "Bash(bash -lc ' *)"
     ],
     "deny": [],
     "ask": []

@@ -15,28 +15,11 @@ in
   );
 
   config = lib.mkIf cfg.enable (
-    let
-      # NOTE: the davinci-convert and mangowc-layout-switcher bar plugins used
-      # to be injected here. They ship pre-5.0 QML "entryPoints" manifests that
-      # noctalia 5 (C++) cannot load, so they are omitted from the v5 bar until
-      # ported to the v5 "entries" plugin format.
-    in
     {
       programs.noctalia = {
         enable = true;
 
-        # Custom settings - translated from .config/noctalia/settings.json
-        # Colors now come from the wallpaper (theme.source = "wallpaper");
-        # stylix's noctalia target is disabled so noctalia owns the palette and
-        # regenerates app templates live. See modules/apps/theming/stylix.nix.
         settings = {
-          # === Bar (v5) — declarative source of truth ===
-          # This mirrors the bar you built in the GUI so nix owns it. v5 refs
-          # widgets by NAME in start/center/end; per-instance settings live in
-          # [widget.<name>]. `status` and `nix-monitor` are plugin widgets
-          # (avivbintangaringga/nix-monitor, pozzoo/hassio) — their PLUGIN
-          # settings (incl. the HA token) intentionally stay in settings.toml,
-          # never in the world-readable nix store.
           bar.order = [ "main" ]; # one bar named "main"
           bar.main = {
             position = "bottom";
@@ -81,7 +64,7 @@ in
             spacer_2.type = "spacer";
           };
 
-          # Shell (v5) — was v4 appLauncher / ui / general, plus GUI panel prefs.
+          # Shell (v5)
           shell = {
             font_family = "DejaVu Sans"; # was ui.fontDefault
             clipboard_enabled = true; # was appLauncher.enableClipboardHistory
@@ -115,8 +98,8 @@ in
             # dysfunctional | muted. "vibrant" gives a rich, cohesive tinted
             # desktop (catppuccin/tokyo-night vibe); switch to m3-tonal-spot for
             # a softer, more neutral Material You look.
-            wallpaper_scheme = "vibrant";
-            pure_black_dark = false;
+            wallpaper_scheme = "faithful";
+            pure_black_dark = true;
 
             # Push the wallpaper-derived colors into real apps so every surface
             # matches the shell in real time. Each app also needs its stylix
@@ -156,9 +139,9 @@ in
             latitude = 50.0755;
             longitude = 14.4378;
             # To pin exact switch times instead of astronomical sunset/sunrise:
-            # custom_schedule = true;
-            # sunset = "20:30";
-            # sunrise = "07:30";
+            custom_schedule = true;
+            sunset = "20:30";
+            sunrise = "07:30";
           };
 
           # Panel/notification/OSD opacity (previously from stylix opacity.popups)
@@ -181,18 +164,30 @@ in
               transition = [ "fade" ];
               transition_duration = 900;
               transition_on_startup = true;
-              directory = "${wallDir}"; # fallback directory
+              directory = "${wallDir}/night"; # fallback directory
               directory_light = "${wallDir}/day";
               directory_dark = "${wallDir}/night";
               default.path = lib.mkForce "${wallDir}/night/cloudsnight.jpg";
               # Automation must be ON for the day/night *image* swap: noctalia
               # only re-picks the wallpaper from directory_light/directory_dark
-              # inside its automation tick. With exactly one image per directory
-              # this never "cycles" — it just switches day<->night when the
-              # theme mode flips on the sunrise/sunset schedule (checked ~15min).
+              # inside its automation tick (Wallpaper::runAutomation). With
+              # exactly one image per directory this does not "cycle" — it just
+              # switches day<->night when the theme mode flips on the
+              # sunrise/sunset schedule. interval_seconds is therefore the
+              # granularity of that switch, not a rotation speed.
+              #
+              # TRAP: do NOT star these two wallpapers as "favorites" in the
+              # wallpaper panel. A favorite records the theme mode + palette
+              # scheme that were active when you starred it, and every
+              # automation pick re-applies them (applyWallpaperSelection writes
+              # theme.mode into ~/.local/state/noctalia/settings.toml, which
+              # beats this file). Two favorites with different theme_mode values
+              # make each tick flip the mode, which flips the light/dark
+              # directory, which picks the other image — a self-sustaining
+              # day<->night ping-pong every interval_seconds.
               automation = {
                 enabled = true;
-                interval_seconds = 900;
+                interval_seconds = 1500;
                 order = "alphabetical";
                 recursive = false;
               };

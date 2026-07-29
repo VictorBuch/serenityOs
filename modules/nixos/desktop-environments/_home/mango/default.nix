@@ -14,7 +14,6 @@
     ../common/hyprlock
     ../common/rofi.nix
     ../common/noctalia.nix
-    ../common/noctalia-mango-layout-plugin.nix
   ];
 
   home.desktop-environments = {
@@ -30,7 +29,6 @@
       dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;
       hyprlock.enable = lib.mkDefault true;
-      mango-layout-plugin.enable = lib.mkDefault true;
     };
   };
 }

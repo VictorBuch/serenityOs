@@ -135,7 +135,14 @@
       "Bash(busctl *)",
       "Bash(grep -iE \"^\\(Tauri|Rdev|Evdev|CGEventTap\\)$\")",
       "Bash(command -v strings)",
-      "Bash(grep -iE \"^\\(wtype|ydotool|xdotool|wl-copy|dotool\\)$\")"
+      "Bash(grep -iE \"^\\(wtype|ydotool|xdotool|wl-copy|dotool\\)$\")",
+      "Bash(lscpu)",
+      "Bash(lspci)",
+      "Bash(lspci -k -s 03:00.0)",
+      "Read(//sys/class/drm/**)",
+      "Bash(glxinfo -B)",
+      "Read(//sys/devices/pci0000:00/0000:00:01.1/0000:01:00.0/0000:02:00.0/0000:03:00.0/**)",
+      "Bash(fd -t f 'ollama.nix' /nix/store/*/nixos/modules/services/misc/)"
     ],
     "deny": [],
     "ask": []

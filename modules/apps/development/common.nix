@@ -33,6 +33,7 @@ mkModule {
       pkgs.pnpm
       pkgs.gh
       pkgs.tea
+      pkgs.bat
     ];
   description = "Common development tools";
 } args

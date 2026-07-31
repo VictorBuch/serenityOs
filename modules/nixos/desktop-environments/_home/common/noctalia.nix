@@ -146,8 +146,16 @@ in
             # dysfunctional | muted. "vibrant" gives a rich, cohesive tinted
             # desktop (catppuccin/tokyo-night vibe); switch to m3-tonal-spot for
             # a softer, more neutral Material You look.
-            wallpaper_scheme = "faithful";
-            pure_black_dark = true;
+            wallpaper_scheme = "soft";
+            # Keep this OFF. It runs applyPureBlackDark() over the generated
+            # palette and re-anchors the whole dark surface ramp to #000000
+            # (an OLED option), which throws away the wallpaper-derived surface
+            # before any template renders. With cloudsnight.jpg + faithful that
+            # is the difference between terminal_background #091034 (the deep
+            # blue of the wallpaper) and a flat #000000 — verified with
+            # `noctalia theme <img> --scheme faithful --dark [--pure-black]`.
+            # It applies desktop-wide: bar, panels, ghostty, kitty, btop, gtk, qt.
+            pure_black_dark = false;
 
             # Push the wallpaper-derived colors into real apps so every surface
             # matches the shell in real time. Each app also needs its stylix

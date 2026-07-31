@@ -26,6 +26,7 @@
     };
 
     sddm.enable = true;
+    services.displayManager.defaultSession = "mango";
 
     services.gnome.gnome-keyring.enable = true;
     security.pam.services.login.enableGnomeKeyring = true;

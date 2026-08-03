@@ -113,7 +113,7 @@ in
         single_scratchpad = 1;
 
         # Layout cycling — user-requested set
-        circle_layout = "tile,scroller,monocle,center_tile";
+        circle_layout = "fair,scroller,monocle";
 
         # Scroller defaults — full-width new windows
         scroller_default_proportion = 0.99;
@@ -142,9 +142,9 @@ in
         # Tag 2 = tile (obsidian + overflow)
         # Tag 3 = tile (steam)
         tagrule = [
-          "id:1,layout_name:scroller"
-          "id:2,layout_name:tile"
-          "id:3,layout_name:tile"
+          "id:1,layout_name:monocle"
+          "id:2,layout_name:scroller"
+          "id:3,layout_name:scroller"
         ];
 
         # === Window rules ===
@@ -153,7 +153,7 @@ in
           "appid:^zen-beta$|^zen$|^firefox$,tags:1"
           "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
           "appid:^figma-linux$|^Figma$,tags:1"
-          "appid:^Obsidian$|^obsidian$,tags:2"
+          "appid:^Obsidian$|^obsidian$,tags:1"
 
           # Named scratchpads — chat & music
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
@@ -173,8 +173,10 @@ in
           # DaVinci convert helper terminal
           "appid:^davinci-convert$,isfloating:1,width:640,height:400"
 
-          # Steam scratchpad-ish: just float, low priority
-          "appid:^steam$,tags:3"
+          # Catch-all: anything not explicitly pinned above lands on tag 2.
+          # negative lookahead — otherwise zen/ghostty/figma/obsidian would end
+          # up on tags 1 AND 2. Keep this list in sync with the rules above.
+          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|tidal-hifi|steam)$),tags:2"
         ];
 
         # === Layer rules ===

@@ -34,16 +34,17 @@ in
             background_opacity = 0.95;
 
             start = [
-              "workspaces"
+              "clock"
+              "spacer_2"
+              "control-center"
               "wallpaper"
               "status" # pozzoo/hassio widget
               "nix-monitor" # avivbintangaringga/nix-monitor widget
             ]
             ++ lib.optional davinci.enable "davinci-convert"; # local plugin widget
-            center = [ "control-center" ];
+            center = [ "workspaces" ];
+              
             end = [
-              "clock"
-              "spacer_2"
               "tray"
               "spacer_2"
               "notifications"

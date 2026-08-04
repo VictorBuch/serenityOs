@@ -8,6 +8,13 @@
 let
   optPath = [ "home" "desktop-environments" "noctalia" ];
   cfg = lib.attrByPath optPath { enable = false; } config;
+
+  # The DaVinci Convert bar widget ships as a local noctalia plugin from
+  # ../common/davinci-convert.nix. That module is only imported by the DEs
+  # that want it, so everything below stays optional.
+  davinci = lib.attrByPath [ "home" "desktop-environments" "common" "davinci-convert" ] {
+    enable = false;
+  } config;
 in
 {
   options = lib.setAttrByPath (optPath ++ [ "enable" ]) (
@@ -29,31 +36,69 @@ in
             start = [
               "workspaces"
               "wallpaper"
-              "launcher"
               "status" # pozzoo/hassio widget
               "nix-monitor" # avivbintangaringga/nix-monitor widget
-            ];
-            center = [ "clock" ];
+            ]
+            ++ lib.optional davinci.enable "davinci-convert"; # local plugin widget
+            center = [ "control-center" ];
             end = [
+              "clock"
+              "spacer_2"
               "tray"
+              "spacer_2"
               "notifications"
               "network"
               "bluetooth"
               "volume"
               "brightness"
               "spacer_2"
-              "control-center"
               "session"
             ];
+          };
+
+          # Plugin distribution (v5). Declaring [[plugins.source]] at all
+          # replaces noctalia's built-in defaults wholesale, so the two
+          # upstream git sources are repeated here alongside the local one.
+          #
+          # NOTE: plugins.enabled is also written by the plugin GUI into
+          # ~/.local/state/noctalia/settings.toml, and that file wins over
+          # this one (arrays are replaced, not merged). Delete the [plugins]
+          # block there for this list to take effect.
+          plugins = {
+            source = [
+              {
+                name = "official";
+                kind = "git";
+                location = "https://github.com/noctalia-dev/official-plugins";
+                enabled = true;
+              }
+              {
+                name = "community";
+                kind = "git";
+                location = "https://github.com/noctalia-dev/community-plugins";
+                enabled = true;
+              }
+            ]
+            ++ lib.optional davinci.enable {
+              name = "serenityos";
+              kind = "path";
+              location = "${davinci.pluginPackage}";
+              enabled = true;
+            };
+
+            enabled = [
+              "avivbintangaringga/nix-monitor"
+            ]
+            ++ lib.optional davinci.enable davinci.pluginId;
           };
 
           # Per-instance widget settings (v5 [widget.<name>]).
           widget = {
             clock.format = "{:%H:%M %d/%m}";
-            control-center.glyph = "snowflake";
+            control-center.glyph = "󱄅";
             media.hide_when_no_media = true;
             network.show_label = false;
-            tray.hidden = [ "nmapplet" ];
+            tray.hidden = [ "nm-applet" ];
 
             # Plugin widgets — reference the installed community plugins.
             nix-monitor = {
@@ -62,11 +107,14 @@ in
             };
             status.type = "pozzoo/hassio:status";
             spacer_2.type = "spacer";
+          }
+          // lib.optionalAttrs davinci.enable {
+            davinci-convert.type = davinci.widgetType;
           };
 
           # Shell (v5)
           shell = {
-            font_family = "DejaVu Sans"; # was ui.fontDefault
+            font_family = "Maple Mono NF"; # was ui.fontDefault
             clipboard_enabled = true; # was appLauncher.enableClipboardHistory
             lang = "en";
             launcher = {
@@ -127,7 +175,7 @@ in
           # Dock stays hidden, but keep the pin declarative for when it's on.
           dock = {
             enabled = false;
-            pinned = [ "emacs" ];
+            pinned = [ ];
           };
 
           # Location — feeds weather AND the theme "auto" day/night schedule.

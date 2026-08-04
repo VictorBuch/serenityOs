@@ -219,6 +219,7 @@ in
           "SUPER+SHIFT,N,spawn,rofi-network-manager"
           "SUPER+SHIFT,B,spawn,rofi-bluetooth"
           "SUPER+SHIFT,A,spawn,rofi-pulse-select"
+          "SUPER,y,spawn_shell,handy --toggle-transcription"
 
           # --- Window management ---
           "SUPER,Q,killclient"

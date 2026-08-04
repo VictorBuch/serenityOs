@@ -49,10 +49,29 @@
 
     xdg.portal = {
       enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-        xdg-desktop-portal-gtk
-      ];
+
+      # No extraPortals here: nixpkgs' programs.mango module already contributes
+      # xdg-desktop-portal-{wlr,gtk}, and xdg.portal.wlr below contributes wlr again.
+      # Listing them a third time just duplicated entries in the portals env.
+      #
+      # xdg.portal.wlr is what we actually need over a bare extraPortals entry: it also
+      # passes --config to the service. Without a config xdpw guesses a source picker at
+      # runtime — it spawns wmenu, then wofi (neither is installed here), and only then
+      # rofi, whichever rofi the systemd user unit happened to inherit on PATH. That
+      # fallback has already failed outright once, logging "rofi: command not found"
+      # followed by "wlroots: no output found", which aborts the share.
+      wlr = {
+        enable = true;
+        settings.screencast = {
+          # dmenu hands xdpw's own list (monitors *and* windows) to the chooser on
+          # stdin, so window sharing stays available — "simple" + slurp would only
+          # ever let you pick a monitor. Absolute store path so the picker no longer
+          # depends on what the service inherited in PATH.
+          chooser_type = "dmenu";
+          chooser_cmd = "${pkgs.rofi}/bin/rofi -dmenu -i -p 'Select a source to share'";
+        };
+      };
+
       config = {
         common.default = [ "gtk" ];
         mango = {

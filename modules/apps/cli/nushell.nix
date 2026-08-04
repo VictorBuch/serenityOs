@@ -15,6 +15,9 @@ let
     dcd = "docker compose down";
     nfu = "nix flake update";
     oc = "opencode";
+    # Condition ~/Videos/convert_queue for DaVinci Resolve Studio. Takes
+    # optional file arguments; with none it drains the queue folder.
+    dvc = "davinci-convert";
   };
 in
 

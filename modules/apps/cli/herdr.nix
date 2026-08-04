@@ -40,11 +40,8 @@ let
         {
           name = "jj";
           panes = [
-            { command = "jj log"; }
             {
               command = "jjui";
-              direction = "down";
-              ratio = 0.35;
             }
           ];
         }
@@ -60,9 +57,9 @@ let
           panes = [ 
             { command = "nvim"; } 
             {
-              command = "claudew";
+              command = "ccw";
               direction = "right";
-              ratio = 0.6;
+              ratio = 0.5;
             } 
           ];
         }

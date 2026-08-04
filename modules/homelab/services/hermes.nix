@@ -90,6 +90,24 @@ in
       '';
     };
 
+    homeAssistant = {
+      enable = lib.mkEnableOption ''
+        the Home Assistant MCP server (SSE). Authenticates with a long-lived
+        access token from the sops secret `hermes/hass_token`, injected into
+        the hermes env file and referenced from config.yaml as ''${HASS_TOKEN}
+        so the token never enters the Nix store
+      '';
+
+      url = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:8124/mcp_server/sse";
+        description = ''
+          SSE endpoint of Home Assistant's MCP Server integration.
+          Default matches the local HA instance (http.server_port = 8124).
+        '';
+      };
+    };
+
     web = {
       enable = lib.mkEnableOption ''
         the Hermes web dashboard (browser chat UI). Runs `hermes dashboard`
@@ -157,6 +175,14 @@ in
       restartUnits = [ "hermes-agent.service" ];
     };
 
+    # Home Assistant long-lived access token. Only ever surfaces as HASS_TOKEN
+    # in the hermes env file; config.yaml carries the literal placeholder
+    # ${HASS_TOKEN}, which hermes resolves from its environment at MCP connect
+    # time — so the token stays out of the world-readable store.
+    sops.secrets."hermes/hass_token" = lib.mkIf cfg.homeAssistant.enable {
+      restartUnits = [ "hermes-agent.service" ];
+    };
+
     sops.templates."hermes-env" = lib.mkIf (cfg.environmentFile == null) {
       content = ''
         ANTHROPIC_API_KEY=${config.sops.placeholder."hermes/anthropic_api_key"}
@@ -168,6 +194,9 @@ in
       + lib.optionalString cfg.discord.enable ''
         DISCORD_BOT_TOKEN=${config.sops.placeholder."hermes/discord_bot_token"}
         DISCORD_ALLOWED_USERS=${config.sops.placeholder."hermes/discord_allowed_users"}
+      ''
+      + lib.optionalString cfg.homeAssistant.enable ''
+        HASS_TOKEN=${config.sops.placeholder."hermes/hass_token"}
       '';
       restartUnits = [
         "hermes-agent.service"
@@ -188,6 +217,17 @@ in
         model = {
           default = cfg.model;
           provider = "anthropic";
+        };
+      }
+      # Raw settings rather than the typed mcpServers option: HA's MCP endpoint
+      # speaks SSE, and only the freeform config path can set `transport`.
+      # "\${HASS_TOKEN}" is a literal placeholder in config.yaml, resolved by
+      # hermes from the env file at connect time (never rendered by Nix).
+      // lib.optionalAttrs cfg.homeAssistant.enable {
+        mcp_servers.home-assistant = {
+          url = cfg.homeAssistant.url;
+          transport = "sse";
+          headers.Authorization = "Bearer \${HASS_TOKEN}";
         };
       };
 

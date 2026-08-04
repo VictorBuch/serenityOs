@@ -429,7 +429,7 @@ in
 
     # Smart home
     hyperhdr.enable = true;
-    music-assistant.enable = false; # temporarily disabled: upstream nixpkgs music-assistant-2.9.9 build broken (missing setuptools in pypaBuildPhase)
+    music-assistant.enable = true; 
     home-assistant.enable = true;
 
     # Monitor and Dashboards
@@ -472,6 +472,8 @@ in
       discord.enable = true;
       # Web chat UI at agent.victorbuch.com (behind pocket-id via Caddy).
       web.enable = true;
+      # Home Assistant MCP over SSE; token from sops (hermes/hass_token).
+      homeAssistant.enable = true;
     };
 
     # Development

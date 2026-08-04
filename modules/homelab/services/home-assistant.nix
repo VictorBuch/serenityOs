@@ -10,6 +10,29 @@ with lib;
 let
   cfg = config.homelab.home-assistant;
   domain = config.homelab.domain;
+  haConfigDir = config.services.home-assistant.configDir;
+
+  # Idempotent repair of serenity's ACL on the HA state dir. Something (still
+  # unidentified — not found in HA core or its python deps) chmods the dir
+  # back to 0700, which zeroes the ACL mask and nullifies serenity's entry.
+  # Cheap no-op while the mask is intact, so it's safe to run frequently.
+  aclRepair = pkgs.writeShellScript "hass-acl-repair" ''
+    if ${pkgs.acl}/bin/getfacl --omit-header --absolute-names ${haConfigDir} 2>/dev/null \
+        | ${pkgs.gnugrep}/bin/grep -qx 'mask::rwx'; then
+      exit 0
+    fi
+    # -R can fail on stray root-owned entries; never fatal.
+    ${pkgs.acl}/bin/setfacl -R -m u:serenity:rwX -m d:u:serenity:rwX -m m::rwx ${haConfigDir} || true
+  '';
+
+  # ExecStartPost fires the moment systemd considers HA "started", which races
+  # HA's own init (the likely re-locker). Wait until HA actually serves HTTP
+  # before repairing, so a startup-time chmod has already happened.
+  aclStartPost = pkgs.writeShellScript "hass-acl-startpost" ''
+    ${pkgs.coreutils}/bin/timeout 120 ${pkgs.bash}/bin/bash -c \
+      'until ${pkgs.curl}/bin/curl -sf -o /dev/null http://127.0.0.1:8124/manifest.json; do ${pkgs.coreutils}/bin/sleep 2; done' || true
+    exec ${aclRepair}
+  '';
 in
 {
   options.homelab.home-assistant = {
@@ -35,27 +58,46 @@ in
     # can reach files HA creates from now on.
     systemd.services.home-assistant.serviceConfig.UMask = mkForce "0007";
 
-    # HA re-locks its config dir to 0700 on every startup, which resets the ACL
-    # mask to --- and nullifies serenity's access. Re-grant it right after
-    # start-up (runs as the `hass` user, which owns the dir, so setfacl is
-    # allowed). The `-` prefix means a failure here never blocks HA from
-    # starting. This makes serenity's access survive HA restarts, not just
-    # nixos-rebuilds.
+    # Re-grant serenity's ACL after HA has fully started (see aclStartPost —
+    # a plain ExecStartPost setfacl loses the race against whatever re-locks
+    # the dir to 0700 during startup). Runs as the `hass` user, which owns the
+    # dir, so setfacl is allowed. The `-` prefix means a failure here never
+    # blocks HA from starting.
     systemd.services.home-assistant.serviceConfig.ExecStartPost = [
-      "-${pkgs.acl}/bin/setfacl -R -m u:serenity:rwX -m d:u:serenity:rwX ${config.services.home-assistant.configDir}"
+      "-${aclStartPost}"
     ];
+
+    # Safety net: the re-locker is unidentified and has struck at runtime
+    # without an HA restart, so reassert the ACL mask every few minutes.
+    # aclRepair exits early when the mask is intact, so this is ~free.
+    systemd.services.hass-acl-watchdog = {
+      description = "Repair serenity ACL mask on Home Assistant config dir";
+      unitConfig.ConditionPathIsDirectory = haConfigDir;
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${aclRepair}";
+      };
+    };
+    systemd.timers.hass-acl-watchdog = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "5min";
+      };
+    };
 
     # Create empty yaml files for UI-managed configs if they don't exist
     systemd.tmpfiles.rules = [
-      "f ${config.services.home-assistant.configDir}/automations.yaml 0644 hass hass"
-      "f ${config.services.home-assistant.configDir}/scenes.yaml 0644 hass hass"
-      "f ${config.services.home-assistant.configDir}/scripts.yaml 0644 hass hass"
+      "f ${haConfigDir}/automations.yaml 0644 hass hass"
+      "f ${haConfigDir}/scenes.yaml 0644 hass hass"
+      "f ${haConfigDir}/scripts.yaml 0644 hass hass"
       # Make the state dir group-traversable + writable for the hass group...
-      "z ${config.services.home-assistant.configDir} 0770 hass hass - -"
+      "z ${haConfigDir} 0770 hass hass - -"
       # ...and grant serenity a recursive rw ACL so even files HA wrote with a
       # restrictive mode (e.g. .storage/*) stay accessible. Re-applied on every
-      # rebuild/boot; the default (d:) entry covers newly-created files.
-      "A+ ${config.services.home-assistant.configDir} - - - - u:serenity:rwX,d:u:serenity:rwX"
+      # rebuild/boot; the default (d:) entry covers newly-created files, and
+      # the explicit m: entry restores the mask a chmod 0700 zeroes out.
+      "A+ ${haConfigDir} - - - - u:serenity:rwX,m::rwx,d:u:serenity:rwX,d:m::rwx"
     ];
 
     services.home-assistant = {

@@ -124,7 +124,11 @@
       "WebFetch(domain:en.thedavestack.com)",
       "WebFetch(domain:herdr.dev)",
       "Bash(nixos-rebuild dry-build *)",
-      "Bash(bash -lc ' *)"
+      "Bash(bash -lc ' *)",
+      "Bash(git -C /home/serenity/serenityOs diff -- overlays/default.nix modules/homelab/services/home-assistant.nix modules/homelab/services/hermes.nix hosts/mal/configuration.nix)",
+      "Bash(git *)",
+      "Bash(sudo -n nix-env --list-generations -p /nix/var/nix/profiles/system)",
+      "Bash(nixos-rebuild build *)"
     ],
     "deny": [],
     "ask": []

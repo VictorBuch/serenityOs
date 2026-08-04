@@ -36,21 +36,4 @@ final: prev: {
       };
     in
     wine920Pkgs.wineWowPackages.stagingFull;
-
-  # music-assistant 2.8.4 airplay/chromecast providers import sendspin_bridge,
-  # which requires aiosendspin. Upstream nixpkgs provider deps map omits it.
-  # Preserve .override interface (NixOS module calls cfg.package.override { providers = ... }),
-  # and inject aiosendspin after each override.
-  music-assistant =
-    let
-      base = prev.music-assistant;
-      injectDep = drv: drv.overrideAttrs (old: {
-        propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [
-          final.python313Packages.aiosendspin
-        ];
-      });
-    in
-    (injectDep base) // {
-      override = args: injectDep (base.override args);
-    };
 }

@@ -141,7 +141,11 @@
       "Bash(print \"=== jj ===\")",
       "Bash(print \"=== inputs: wine920 / musnix ===\")",
       "Bash(print \"=== gaming/wine.nix ===\")",
-      "Bash(print \"=== _categories audio override ===\")"
+      "Bash(print \"=== _categories audio override ===\")",
+      "Bash(nix-instantiate --eval --expr 'let f = import ./modules/apps/cli/git.nix; in \"ok\"')",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('path'\\)\\)\")",
+      "Bash(col -b)",
+      "Bash(awk '/^ALLOWED SIGNERS/,/^ENVIRONMENT/')"
     ],
     "deny": [],
     "ask": []

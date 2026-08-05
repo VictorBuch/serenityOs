@@ -113,6 +113,8 @@ in
     hyprland.enable = false;
     niri.enable = false;
     mango.enable = true;
+    # Escape hatch for plugin GUIs that misbehave under Wayland: pick "Xfce" at SDDM.
+    xorg-audio.enable = true;
   };
 
   # Apps - full workstation

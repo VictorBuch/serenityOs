@@ -2,6 +2,7 @@
 # Full workstation with audio production, video editing, gaming, etc.
 {
   inputs,
+  lib,
   pkgs,
   pkgs-stable,
   ...
@@ -72,7 +73,10 @@ in
     supportedFilesystems = [ "ntfs" ];
     # Kernel performance optimizations
     kernel.sysctl = {
-      "vm.swappiness" = 10;
+      # mkForce because musnix (audio-performance.enable) also defines this key -- with
+      # the same value, but boot.kernel.sysctl entries must be uniquely defined, so equal
+      # values still collide.
+      "vm.swappiness" = lib.mkForce 10;
       "vm.vfs_cache_pressure" = 50;
       "vm.dirty_ratio" = 10;
       "vm.dirty_background_ratio" = 5;
@@ -81,6 +85,10 @@ in
 
   # AMD GPU
   amd-gpu.enable = true;
+
+  # Realtime audio tuning for REAPER (musnix on the stock kernel).
+  # Note: this also switches the CPU governor to "performance" system-wide.
+  audio-performance.enable = true;
 
   # VPN: Tailscale (mesh) + NetworkManager OpenVPN plugin (for PIA .ovpn imports)
   services.tailscale = {
@@ -111,7 +119,7 @@ in
   apps = {
 
     ai = {
-        enable = true;
+      enable = true;
     };
 
     audio = {
@@ -147,7 +155,7 @@ in
       enable = true;
     };
 
-    productivity= {
+    productivity = {
       enable = true;
       logseq.enable = false;
     };

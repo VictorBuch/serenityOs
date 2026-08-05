@@ -92,6 +92,14 @@
     # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
     nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
 
+    # Realtime audio tuning (threadirqs, IRQ priorities, rlimits).
+    # Used by modules/nixos/system/audio-performance.nix WITHOUT its realtime kernel --
+    # the stock kernel plus threadirqs is enough for REAPER at a 128-frame quantum.
+    musnix = {
+      url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # AI coding agents (claude-code, etc.)
     llm-agents = {
       url = "github:numtide/llm-agents.nix";

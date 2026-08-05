@@ -23,6 +23,17 @@ final: prev: {
   # Lute v3 - language learning web application
   lute-v3 = final.callPackage ../packages/lute-v3 { };
 
+  # rtirq: raises the priority of the audio interface's IRQ threads. Used by
+  # modules/nixos/system/audio-performance.nix via musnix.rtirq.
+  #
+  # musnix ships this package through its own `nixpkgs.overlays` declaration, which this
+  # flake never applies -- flake.nix passes `pkgs` explicitly via specialArgs, so
+  # module-level overlays are ignored (nix says so at every eval). It is not in nixpkgs
+  # under any name, so without this line musnix.rtirq.enable fails with
+  # "attribute 'rtirq' missing". Only the package is pulled across; the rest of musnix's
+  # overlay is its PREEMPT_RT kernel set, which audio-performance.nix deliberately avoids.
+  rtirq = final.callPackage "${inputs.musnix}/pkgs/os-specific/linux/rtirq" { };
+
   # === Audio wine tracks (see modules/apps/audio/reaper.nix, apps.audio.reaper.wineTrack) ===
   #
   # "pinned" track. Wine 9.20 stagingFull from the nixpkgs-wine920 input. This is the

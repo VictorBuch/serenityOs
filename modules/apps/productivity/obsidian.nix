@@ -18,8 +18,9 @@
 # Note: because .obsidian/* files become read-only symlinks into the Nix store,
 # toggling a declared plugin/setting from Obsidian's UI won't persist — change it
 # here and rebuild. Plugins left with `settings = null` keep a writable data.json,
-# so their in-app settings behave normally. Existing .obsidian files are preserved
-# via home-manager's `backupFileExtension = "hm-backup"` on first switch.
+# so their in-app settings behave normally. The declared .obsidian files are
+# force-linked (see `home.file` below), so a rebuild always wins over whatever
+# Obsidian wrote to them at runtime.
 
 args@{
   config,
@@ -186,5 +187,18 @@ mkModule {
           target = "notes";
         };
       };
+
+      # Obsidian rewrites these at runtime (unlink + recreate), replacing the
+      # store symlink with a plain file. Without `force` the next activation
+      # tries to back that file up, hits the .hm-backup left by the previous
+      # switch, and aborts the whole home-manager generation.
+      home.file = lib.genAttrs [
+        "notes/.obsidian/app.json"
+        "notes/.obsidian/appearance.json"
+        "notes/.obsidian/core-plugins.json"
+        "notes/.obsidian/community-plugins.json"
+        "notes/.obsidian/daily-notes.json"
+        "notes/.obsidian/templates.json"
+      ] (_: { force = true; });
     };
 } args

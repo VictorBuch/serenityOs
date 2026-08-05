@@ -23,10 +23,19 @@ final: prev: {
   # Lute v3 - language learning web application
   lute-v3 = final.callPackage ../packages/lute-v3 { };
 
-  # Wine 9.20 pinned for audio/yabridge compatibility
-  # Wine 9.22+ has GUI issues with yabridge: https://github.com/robbert-vdh/yabridge/issues/382
-  # Uses the nixpkgs-wine920 flake input with stagingFull for maximum Windows compatibility
-  wine921 =
+  # === Audio wine tracks (see modules/apps/audio/reaper.nix, apps.audio.reaper.wineTrack) ===
+  #
+  # "pinned" track. Wine 9.20 stagingFull from the nixpkgs-wine920 input. This is the
+  # default because yabridge 5.1.1 (the last release) requires wine <= 9.21, and 9.22+
+  # breaks plugin GUIs outright: https://github.com/robbert-vdh/yabridge/issues/382
+  # stagingFull pulls in the full set of optional deps for maximum installer compatibility.
+  #
+  # NOTE: the plugin *hosts* run under whatever wine yabridge was built against, not this
+  # one -- nixpkgs' yabridge hardcodes its wine via hardcode-dependencies.patch plus a
+  # postFixup that rewrites the winegcc wrapper. This attr is what installers, winetricks
+  # and the audio-wine helper use, and it must stay version-matched to the yabridge build
+  # so both halves agree on the prefix layout.
+  wineAudioPinned =
     let
       wine920Pkgs = import inputs.nixpkgs-wine920 {
         system = final.stdenv.hostPlatform.system;
@@ -36,6 +45,19 @@ final: prev: {
       };
     in
     wine920Pkgs.wineWowPackages.stagingFull;
+
+  # "modern" track. Current unstable wine staging (11.x). Only usable together with the
+  # yabridge new-wine10-embedding branch (packages/yabridge-wine10), which is the only
+  # version that can embed plugin editors under wine 10/11:
+  # https://github.com/robbert-vdh/yabridge/issues/409
+  # wineWow64Packages, not the deprecated wineWowPackages alias.
+  wineAudioModern = final.wineWow64Packages.stagingFull;
+
+  # The other half of the "modern" track. Built on the unstable toolchain (not
+  # pkgs-stable) -- the wineg++/meson cross-build is sensitive to the wine it is pointed
+  # at, and mixing channels is what broke earlier attempts to swap yabridge's wine.
+  yabridge-wine10 = final.callPackage ../packages/yabridge-wine10 { };
+  yabridgectl-wine10 = final.yabridge-wine10.yabridgectl;
 
   # xdg-desktop-portal-wlr 0.8.3 stalls screencasts after the first frame: sharing a
   # screen shows a frozen still, sharing a window stays black. Upstream's own 0.8.3

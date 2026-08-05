@@ -1,24 +1,57 @@
-args@{ config, pkgs, pkgs-stable, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  pkgs-stable,
+  lib,
+  mkModule,
+  ...
+}:
 
 let
-  # Use Wine Staging 9.20 Full - required for audio plugins and copy protection
-  # Wine 9.22+ has GUI issues with yabridge: https://github.com/robbert-vdh/yabridge/issues/382
-  # This uses a pinned Wine 9.20 stagingFull from the overlay (includes all dependencies)
-  wineStaging = pkgs.wine921;
+  cfg = config.apps.audio.reaper;
+
+  # === Wine tracks ===
+  #
+  # yabridge's plugin hosts run under whatever wine the yabridge *build* was linked
+  # against -- nixpkgs hardcodes it via hardcode-dependencies.patch plus a postFixup
+  # that rewrites the winegcc wrapper. Setting WINELOADER in the environment only
+  # affects installers and standalone apps, never the bridged plugins. So wine and
+  # yabridge have to be selected as a matched pair, and switching between them is a
+  # rebuild rather than a runtime flag: the chainloaders in ~/.local/share/yabridge
+  # can only point at one build at a time.
+  #
+  # Both tracks share WINEPREFIX=~/.wine-audio so iLok/IK activations survive a switch.
+  tracks = {
+    # Wine 9.20 + yabridge 5.1.1 from stable. yabridge 5.1.1 requires wine <= 9.21 and
+    # 9.22+ breaks plugin GUIs: https://github.com/robbert-vdh/yabridge/issues/382
+    pinned = {
+      wine = pkgs.wineAudioPinned;
+      yabridge = pkgs-stable.yabridge;
+      yabridgectl = pkgs-stable.yabridgectl;
+    };
+    # Wine 11 + yabridge's unreleased new-wine10-embedding branch (packages/yabridge-wine10).
+    # Experimental: better on wine 11 overall, but has a known cursor-offset quirk.
+    # https://github.com/robbert-vdh/yabridge/issues/409
+    modern = {
+      wine = pkgs.wineAudioModern;
+      yabridge = pkgs.yabridge-wine10;
+      yabridgectl = pkgs.yabridgectl-wine10;
+    };
+  };
+  track = tracks.${cfg.wineTrack};
 
   # WINEPREFIX setup script for audio plugins with copy protection support
   # This script initializes a dedicated prefix for audio work
   audioWinePrefixSetup = pkgs.writeShellScriptBin "setup-audio-wineprefix" ''
-    #!/usr/bin/env bash
     set -e
 
     AUDIO_WINEPREFIX="$HOME/.wine-audio"
     export WINEPREFIX="$AUDIO_WINEPREFIX"
     export WINEARCH="win64"
     export WINEDEBUG="-all"
-    export WINELOADER="${wineStaging}/bin/wine"
-    export WINESERVER="${wineStaging}/bin/wineserver"
-    export PATH="${wineStaging}/bin:$PATH"
+    export WINELOADER="${track.wine}/bin/wine"
+    export WINESERVER="${track.wine}/bin/wineserver"
+    export PATH="${track.wine}/bin:$PATH"
 
     echo "=== Audio WINEPREFIX Setup Script ==="
     echo "Target: $AUDIO_WINEPREFIX"
@@ -62,225 +95,235 @@ let
 
     echo ""
     echo "=== Setup Complete ==="
-    echo ""
-    echo "Next steps:"
-    echo "1. Set WINEPREFIX=$AUDIO_WINEPREFIX when running audio installers"
-    echo "2. Download and install iLok License Manager from: https://www.ilok.com/"
-    echo "3. Download and install IK Product Manager from: https://www.ikmultimedia.com/"
-    echo "4. Install your VST plugins (SSD5, Amplitube 5, etc.)"
-    echo "5. Run: yabridgectl add \"$AUDIO_WINEPREFIX/drive_c/Program Files/Steinberg/VstPlugins\""
-    echo "6. Run: yabridgectl add \"$AUDIO_WINEPREFIX/drive_c/Program Files/Common Files/VST3\""
-    echo "7. Run: yabridgectl sync"
-    echo ""
-    echo "To run installers in this prefix:"
-    echo "  WINEPREFIX=$AUDIO_WINEPREFIX wine /path/to/installer.exe"
-    echo ""
-    echo "IMPORTANT: Use a physical iLok USB dongle if cloud authorization fails."
   '';
 
   # Helper script to run wine with audio prefix
   audioWine = pkgs.writeShellScriptBin "audio-wine" ''
-    #!/usr/bin/env bash
     export WINEPREFIX="$HOME/.wine-audio"
     export WINEARCH="win64"
     export WINEDEBUG="-all"
     export WINEFSYNC="1"
     export WINE_LARGE_ADDRESS_AWARE="1"
-    export WINELOADER="${wineStaging}/bin/wine"
-    export WINESERVER="${wineStaging}/bin/wineserver"
-    export PATH="${wineStaging}/bin:$PATH"
-    exec "${wineStaging}/bin/wine" "$@"
+    export WINELOADER="${track.wine}/bin/wine"
+    export WINESERVER="${track.wine}/bin/wineserver"
+    export PATH="${track.wine}/bin:$PATH"
+    exec "${track.wine}/bin/wine" "$@"
   '';
 
   # Helper script to run winetricks with audio prefix
   audioWinetricks = pkgs.writeShellScriptBin "audio-winetricks" ''
-    #!/usr/bin/env bash
     export WINEPREFIX="$HOME/.wine-audio"
     export WINEARCH="win64"
-    export WINELOADER="${wineStaging}/bin/wine"
-    export WINESERVER="${wineStaging}/bin/wineserver"
-    export PATH="${wineStaging}/bin:$PATH"
-    exec winetricks "$@"
+    export WINELOADER="${track.wine}/bin/wine"
+    export WINESERVER="${track.wine}/bin/wineserver"
+    export PATH="${track.wine}/bin:$PATH"
+    exec ${pkgs-stable.winetricks}/bin/winetricks "$@"
   '';
 
-  # REAPER wrapper that ensures Wine 9.20 is used for yabridge
-  # This is more reliable than environment.sessionVariables for all shells
-  # Also handles automatic installation of ReaPack and SWS extensions
+  # REAPER wrapper.
+  #
+  # Everything wine-related lives here rather than in environment.sessionVariables:
+  # WINEDLLOVERRIDES in particular must NOT be global, because it forces DXVK DLLs into
+  # every wine prefix on the system, including gaming prefixes that have no DXVK
+  # installed (see modules/apps/gaming/wine.nix).
   reaperWrapper = pkgs.writeShellScriptBin "reaper" ''
-        #!/usr/bin/env bash
+    # Ensure REAPER UserPlugins directory exists
+    REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
+    mkdir -p "$REAPER_USER_PLUGINS"
 
-        # Ensure REAPER UserPlugins directory exists
-        REAPER_USER_PLUGINS="$HOME/.config/REAPER/UserPlugins"
-        mkdir -p "$REAPER_USER_PLUGINS"
+    # Always recreate symlinks to handle nix store path changes after system updates
+    ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
+    ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
 
-        # Always recreate symlinks to handle nix store path changes after system updates
-        ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
-        ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
+    ${lib.optionalString (cfg.wineTrack == "modern") ''
+      # First launch on the modern (wine 11) track: wine upgrades the prefix in place and
+      # there is no way back. Refuse to start until the user has taken a backup.
+      if [ -d "$HOME/.wine-audio" ] && [ ! -e "$HOME/.wine-audio/.wine11-ok" ]; then
+        echo "!!! apps.audio.reaper.wineTrack = \"modern\" (wine 11)." >&2
+        echo "!!! ~/.wine-audio will be upgraded in place and cannot be downgraded." >&2
+        echo "!!! Back it up first, then re-run:" >&2
+        echo "!!!   cp -a ~/.wine-audio ~/.wine-audio.pre-wine11" >&2
+        echo "!!!   touch ~/.wine-audio/.wine11-ok" >&2
+        exit 1
+      fi
+    ''}
 
-        # Create yabridge.toml for IK Multimedia plugins if it doesn't exist
-        # This fixes GUI refresh issues with TONEX, Amplitube, etc.
-        YABRIDGE_CONFIG="$HOME/.config/yabridge/yabridge.toml"
-        if [ ! -e "$YABRIDGE_CONFIG" ]; then
-          echo "Creating yabridge.toml for IK Multimedia plugins..."
-          mkdir -p "$(dirname "$YABRIDGE_CONFIG")"
-          cat > "$YABRIDGE_CONFIG" << 'YABRIDGE_EOF'
-    # Yabridge configuration for audio plugins
-    # See: https://github.com/robbert-vdh/yabridge#configuration
+    # Wine environment for the bridged plugin hosts.
+    # NOTE: WINELOADER does not actually redirect yabridge's plugin hosts (they are linked
+    # against their build-time wine); it is set so any wine tool REAPER shells out to lands
+    # on the same version the prefix was built with.
+    export WINELOADER="${track.wine}/bin/wine"
+    export WINESERVER="${track.wine}/bin/wineserver"
+    export WINEARCH="win64"
+    export WINEDEBUG="-all"
+    export WINEFSYNC="1"
+    export WINE_LARGE_ADDRESS_AWARE="1"
 
-    # Global settings
-    frame_rate = 60
+    # Force DXVK's D3D DLLs -- fixes IK Multimedia (TONEX, Amplitube) GUI refresh.
+    # d2d1 is NOT listed here: it is disabled inside the prefix registry by
+    # setup-audio-wineprefix, so it applies to every launch path, not just this one.
+    export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
+    export DXVK_HUD="0"
+    export DXVK_LOG_LEVEL="none"
+    export DXVK_LOG_PATH="none"
+    export DXVK_STATE_CACHE_PATH="$HOME/.cache/dxvk"
 
-    # IK Multimedia plugins (TONEX, Amplitube, MODO Bass, etc.)
-    # These need editor_xembed for proper GUI refresh on Wayland/Hyprland
-    ["**/IK Multimedia/**"]
-    frame_rate = 120
-    editor_xembed = true
-    YABRIDGE_EOF
-        fi
+    export YABRIDGE_DEBUG_LEVEL="''${YABRIDGE_DEBUG_LEVEL:-0}"
 
-        # Set Wine environment for yabridge
-        export WINELOADER="${wineStaging}/bin/wine"
-        export WINEARCH="win64"
-        export WINEDEBUG="-all"
-        export WINEFSYNC="1"
-        export WINE_LARGE_ADDRESS_AWARE="1"
-        export DXVK_HUD="0"
-        export DXVK_LOG_LEVEL="none"
-        # Force DXVK DLLs - fixes IK Multimedia (TONEX, Amplitube) GUI refresh issues
-        export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
+    # Low latency for REAPER only -- the desktop keeps its 1024 quantum.
+    export PIPEWIRE_LATENCY="''${PIPEWIRE_LATENCY:-128/48000}"
 
-        # Launch REAPER
-        exec ${pkgs.reaper}/bin/reaper "$@"
+    # Keep bridged plugins in step with whatever is installed in the prefix.
+    # Idempotent and fast; home-manager activation does the same on rebuild.
+    ${track.yabridgectl}/bin/yabridgectl sync >/dev/null 2>&1 || true
+
+    exec ${pkgs.reaper}/bin/reaper "$@"
   '';
-in
 
-mkModule {
-  name = "reaper";
-  category = "audio";
-  linuxPackages =
-    { pkgs, pkgs-stable, ... }:
-    [
-      # Use our wrapper instead of reaper directly
-      reaperWrapper
-
-      # === Wine Setup ===
-      # Wine Staging with WoW64 support (64-bit + 32-bit Windows apps)
-      # Staging is required for best plugin compatibility
-      wineStaging
-
-      # Yabridge - bridge for Windows VST plugins
-      # Use stable's default wineWowPackages.yabridge (Wine 9.21 staging).
-      # Do NOT override `wine`: only the pinned 9.21 yabridge wine variant
-      # cross-builds yabridge cleanly. Any other variant (incl. wine 9.20
-      # stagingFull from nixpkgs-wine920) breaks meson's dbus-1 pkg-config
-      # lookup in the wineg++ cross-build. Wine 9.21 is below the 9.22+ GUI
-      # breakage threshold (yabridge#382), so this is safe.
-      pkgs-stable.yabridge
-      pkgs-stable.yabridgectl
-
-      # Winetricks for installing Windows dependencies
-      pkgs-stable.winetricks
-
-      # === DXVK & Vulkan (Critical for modern plugin GUIs) ===
-      pkgs.dxvk # Direct3D to Vulkan translation layer
-      pkgs.vulkan-loader # Vulkan runtime (AMD RADV driver used automatically)
-      pkgs.vulkan-tools # For debugging (vulkaninfo, etc.)
-
-      # === Runtime Dependencies ===
-      pkgs.cabextract # Extract Windows cab files
-      pkgs-stable.wineasio # ASIO to JACK driver for Wine (stable for audio reliability)
-      pkgs.p7zip # For extracting various installer formats
-      pkgs.unzip # Common archive extraction
-      pkgs.reaper-sws-extension
-      pkgs.reaper-reapack-extension
-
-      # === Helper Scripts ===
-      audioWinePrefixSetup # setup-audio-wineprefix command
-      audioWine # audio-wine command
-      audioWinetricks # audio-winetricks command
+  # pkgs.reaper is deliberately not in systemPackages (its bin/reaper would collide with
+  # the wrapper), so ship a desktop entry pointing at the wrapper instead. Exec is the
+  # bare name so it resolves to the wrapper on PATH; the icon is an absolute store path
+  # since reaper's icon theme files are not installed either.
+  reaperDesktopItem = pkgs.makeDesktopItem {
+    name = "cockos-reaper";
+    desktopName = "REAPER";
+    comment = "Digital audio workstation";
+    exec = "reaper %F";
+    icon = "${pkgs.reaper}/share/icons/hicolor/256x256/apps/cockos-reaper.png";
+    startupWMClass = "REAPER";
+    categories = [
+      "AudioVideo"
+      "Audio"
+      "AudioVideoEditing"
+      "Recorder"
     ];
-
-  description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
-
-  linuxExtraConfig = {
-    # Enable JACK audio emulation via PipeWire
-    services.pipewire.jack.enable = true;
-
-    # Configure PAM limits for realtime audio
-    security.pam.loginLimits = [
-      {
-        domain = "@audio";
-        item = "memlock";
-        type = "-";
-        value = "unlimited";
-      }
-      {
-        domain = "@audio";
-        item = "rtprio";
-        type = "-";
-        value = "99";
-      }
-      {
-        domain = "@audio";
-        item = "nice";
-        type = "-";
-        value = "-20";
-      }
+    mimeTypes = [
+      "application/x-reaper-project"
+      "application/x-reaper-project-backup"
+      "application/x-reaper-theme"
     ];
-
-    # Low-latency PipeWire configuration for professional audio
-    # Keys must be quoted strings to preserve dot-notation in the generated JSON,
-    # otherwise Nix expands them into nested objects that PipeWire ignores.
-    services.pipewire.extraConfig.pipewire."10-low-latency" = {
-      "context.properties" = {
-        "default.clock.rate" = 48000;
-        "default.clock.quantum" = 1024;
-        "default.clock.min-quantum" = 32;
-        "default.clock.max-quantum" = 8192;
-      };
-    };
-
-    # JACK-specific PipeWire configuration
-    services.pipewire.extraConfig.jack."20-realtime" = {
-      "jack.properties" = {
-        # Match PipeWire's sample rate
-        "node.latency" = "64/48000";
-        # Enable realtime scheduling
-        "jack.realtime" = true;
-        "jack.realtime-priority" = 88;
-      };
-    };
-
-    users.users.${config.user.userName}.extraGroups = [ "audio" ];
-
-    # Environment variables for Wine/yabridge audio setup
-    # NOTE: Do NOT set WINEPREFIX globally - yabridge auto-detects prefix from plugin path
-    # Setting it globally would override the auto-detection and cause issues
-    environment.sessionVariables = {
-      # Point yabridge to use Wine 9.20 instead of the system Wine
-      # This is critical - Wine 9.22+ has GUI issues with yabridge
-      WINELOADER = "${wineStaging}/bin/wine";
-
-      # Wine configuration (no WINEPREFIX - let yabridge auto-detect from plugin location)
-      WINEARCH = "win64";
-      WINEDEBUG = "-all"; # Disable Wine debug output for performance
-
-      # Performance optimizations
-      WINEFSYNC = "1"; # Enable fsync for better threading (kernel 5.16+)
-      WINE_LARGE_ADDRESS_AWARE = "1"; # Better memory handling for plugins
-
-      # DXVK configuration - fixes UI refresh issues with JUCE plugins (Amplitube, TONEX)
-      DXVK_HUD = "0"; # Disable DXVK overlay (set to "fps" to show FPS)
-      DXVK_LOG_LEVEL = "none"; # Disable DXVK logging for performance
-      DXVK_STATE_CACHE_PATH = "$HOME/.cache/dxvk"; # Cache shader compilations
-      DXVK_LOG_PATH = "none"; # Disable file logging
-
-      # Force Wine to use DXVK DLLs instead of built-in WineD3D
-      # This is critical for IK Multimedia plugins (TONEX, Amplitube) GUI refresh
-      WINEDLLOVERRIDES = "d3d9,d3d10core,d3d11,dxgi=n";
-
-      # Yabridge settings
-      YABRIDGE_DEBUG_LEVEL = "0"; # Set to 1 or 2 for debugging plugin issues
-    };
   };
-} args
+in
+{
+  options.apps.audio.reaper.wineTrack = lib.mkOption {
+    type = lib.types.enum [
+      "pinned"
+      "modern"
+    ];
+    default = "pinned";
+    description = ''
+      Which wine/yabridge pair to build the audio stack against.
+
+      "pinned" (default): wine 9.20 + yabridge 5.1.1 from nixpkgs-stable. Known-good.
+      "modern": wine 11 + the vendored new-wine10-embedding yabridge. Experimental;
+      upgrades ~/.wine-audio irreversibly on first launch (the wrapper refuses to start
+      until you have taken a backup).
+
+      Switching tracks is a rebuild, not a runtime toggle: the chainloaders in
+      ~/.local/share/yabridge can only point at one build at a time.
+    '';
+  };
+
+  imports = [
+    (mkModule {
+      name = "reaper";
+      category = "audio";
+      linuxPackages =
+        { pkgs, pkgs-stable, ... }:
+        [
+          # Use our wrapper instead of reaper directly
+          reaperWrapper
+          reaperDesktopItem
+
+          # === Wine + yabridge (matched pair, see `tracks` above) ===
+          track.wine
+          track.yabridge
+          track.yabridgectl
+
+          # Winetricks for installing Windows dependencies
+          pkgs-stable.winetricks
+
+          # === DXVK & Vulkan (Critical for modern plugin GUIs) ===
+          pkgs.dxvk # Direct3D to Vulkan translation layer
+          pkgs.vulkan-loader # Vulkan runtime (AMD RADV driver used automatically)
+          pkgs.vulkan-tools # For debugging (vulkaninfo, etc.)
+
+          # === Runtime Dependencies ===
+          pkgs.cabextract # Extract Windows cab files
+          pkgs-stable.wineasio # ASIO to JACK driver for Wine (stable for audio reliability)
+          pkgs.p7zip # For extracting various installer formats
+          pkgs.unzip # Common archive extraction
+          pkgs.reaper-sws-extension
+          pkgs.reaper-reapack-extension
+
+          # === Helper Scripts ===
+          audioWinePrefixSetup # setup-audio-wineprefix command
+          audioWine # audio-wine command
+          audioWinetricks # audio-winetricks command
+        ];
+
+      description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
+
+      linuxExtraConfig = {
+        # Enable JACK audio emulation via PipeWire
+        services.pipewire.jack.enable = true;
+
+        # Configure PAM limits for realtime audio.
+        # musnix (audio-performance.enable) sets memlock/rtprio identically plus nofile;
+        # `nice` is ours alone, and duplicate limits.conf lines are harmless.
+        security.pam.loginLimits = [
+          {
+            domain = "@audio";
+            item = "memlock";
+            type = "-";
+            value = "unlimited";
+          }
+          {
+            domain = "@audio";
+            item = "rtprio";
+            type = "-";
+            value = "99";
+          }
+          {
+            domain = "@audio";
+            item = "nice";
+            type = "-";
+            value = "-20";
+          }
+        ];
+
+        # Low-latency PipeWire configuration for professional audio.
+        # The default quantum stays desktop-friendly; the reaper wrapper drops its own
+        # client to 128 via PIPEWIRE_LATENCY.
+        # Keys must be quoted strings to preserve dot-notation in the generated JSON,
+        # otherwise Nix expands them into nested objects that PipeWire ignores.
+        services.pipewire.extraConfig.pipewire."10-low-latency" = {
+          "context.properties" = {
+            "default.clock.rate" = 48000;
+            "default.clock.quantum" = 1024;
+            "default.clock.min-quantum" = 32;
+            "default.clock.max-quantum" = 8192;
+          };
+        };
+
+        # JACK-specific PipeWire configuration
+        services.pipewire.extraConfig.jack."20-realtime" = {
+          "jack.properties" = {
+            # Match PipeWire's sample rate
+            "node.latency" = "64/48000";
+            # Enable realtime scheduling
+            "jack.realtime" = true;
+            "jack.realtime-priority" = 88;
+          };
+        };
+
+        users.users.${config.user.userName}.extraGroups = [ "audio" ];
+
+        # NOTE: no environment.sessionVariables here on purpose. WINELOADER never reached
+        # the bridged plugin hosts (they are linked against their build-time wine), and
+        # WINEDLLOVERRIDES leaked DXVK into every wine prefix on the system. All of it now
+        # lives in the reaper wrapper, scoped to REAPER, or in the prefix registry.
+      };
+    } args)
+  ];
+}

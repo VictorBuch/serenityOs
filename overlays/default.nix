@@ -164,8 +164,8 @@ final: prev: {
       expect = p: toString (p.count or 1);
 
       mkSub = p: ''
-          $n = s/${p.find}/${p.replace}/g || 0;
-          die "  patch ${p.name}: matched $n site(s), want ${expect p}\n" unless $n == ${expect p};
+        $n = s/${p.find}/${p.replace}/g || 0;
+        die "  patch ${p.name}: matched $n site(s), want ${expect p}\n" unless $n == ${expect p};
       '';
 
       # One slurp pass per file: read once, apply every substitution in order,
@@ -180,8 +180,9 @@ final: prev: {
           "$out/${file}"
       '';
     in
-    assert assertMsg (all (p: builtins.match "[a-z0-9-]+" p.name != null) patches)
-      "davinci-resolve-studio: patch names must be kebab-case (they are spliced into a perl string)";
+    assert assertMsg (all (p: builtins.match "[a-z0-9-]+" p.name != null)
+      patches
+    ) "davinci-resolve-studio: patch names must be kebab-case (they are spliced into a perl string)";
     prev.davinci-resolve-studio.override {
       stdenv = prev.stdenv // {
         mkDerivation =

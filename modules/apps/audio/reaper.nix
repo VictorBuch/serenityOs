@@ -10,35 +10,8 @@ args@{
 let
   cfg = config.apps.audio.reaper;
 
-  # === Wine tracks ===
-  #
-  # yabridge's plugin hosts run under whatever wine the yabridge *build* was linked
-  # against -- nixpkgs hardcodes it via hardcode-dependencies.patch plus a postFixup
-  # that rewrites the winegcc wrapper. Setting WINELOADER in the environment only
-  # affects installers and standalone apps, never the bridged plugins. So wine and
-  # yabridge have to be selected as a matched pair, and switching between them is a
-  # rebuild rather than a runtime flag: the chainloaders in ~/.local/share/yabridge
-  # can only point at one build at a time.
-  #
-  # Both tracks share WINEPREFIX=~/.wine-audio so iLok/IK activations survive a switch.
-  tracks = {
-    # Wine 9.20 + yabridge 5.1.1 from stable. yabridge 5.1.1 requires wine <= 9.21 and
-    # 9.22+ breaks plugin GUIs: https://github.com/robbert-vdh/yabridge/issues/382
-    pinned = {
-      wine = pkgs.wineAudioPinned;
-      yabridge = pkgs-stable.yabridge;
-      yabridgectl = pkgs-stable.yabridgectl;
-    };
-    # Wine 11 + yabridge's unreleased new-wine10-embedding branch (packages/yabridge-wine10).
-    # Experimental: better on wine 11 overall, but has a known cursor-offset quirk.
-    # https://github.com/robbert-vdh/yabridge/issues/409
-    modern = {
-      wine = pkgs.wineAudioModern;
-      yabridge = pkgs.yabridge-wine10;
-      yabridgectl = pkgs.yabridgectl-wine10;
-    };
-  };
-  track = tracks.${cfg.wineTrack};
+  # Wine + yabridge, chosen as a matched pair. See _wine-tracks.nix for why.
+  track = (import ./_wine-tracks.nix { inherit pkgs pkgs-stable; }).${cfg.wineTrack};
 
   # WINEPREFIX setup script for audio plugins with copy protection support
   # This script initializes a dedicated prefix for audio work
@@ -235,7 +208,7 @@ in
           reaperWrapper
           reaperDesktopItem
 
-          # === Wine + yabridge (matched pair, see `tracks` above) ===
+          # === Wine + yabridge (matched pair, see _wine-tracks.nix) ===
           track.wine
           track.yabridge
           track.yabridgectl

@@ -17,9 +17,16 @@ let
 
   # Candidate plugin directories inside the wine prefixes. yabridgectl add is idempotent,
   # so this list is re-applied on every activation rather than once ever.
+  #
+  # CASING MATTERS. drive_c is a real Linux directory tree, so "VstPlugins" and
+  # "VstPlugIns" are two different directories even though Windows considers them the
+  # same. Wine writes into whichever spelling already exists, so which one an installer
+  # lands in is down to who created it first. Watching only one spelling is how
+  # AmpliTube's VST2 sat in VstPlugIns unbridged while its VST3 worked fine. List both.
   pluginDirs = [
     "$HOME/.wine-audio/drive_c/Program Files/Steinberg/VstPlugins"
     "$HOME/.wine-audio/drive_c/Program Files/VstPlugins"
+    "$HOME/.wine-audio/drive_c/Program Files/VstPlugIns"
     "$HOME/.wine-audio/drive_c/Program Files/Common Files/VST3"
     "$HOME/.wine-audio/drive_c/Program Files/Common Files/CLAP"
     # Legacy prefix, from before the audio prefix was split out of the gaming one.
@@ -65,10 +72,6 @@ mkModule {
           source = "${track.yabridge}/bin/yabridge-host.exe";
           force = true; # Overwrite existing files from manual installation
         };
-        ".local/share/yabridge/yabridge-host-32.exe" = {
-          source = "${track.yabridge}/bin/yabridge-host-32.exe";
-          force = true;
-        };
         ".local/share/yabridge/libyabridge-chainloader-vst2.so" = {
           source = "${track.yabridge}/lib/libyabridge-chainloader-vst2.so";
           force = true;
@@ -109,36 +112,44 @@ mkModule {
 
             frame_rate = 60
 
-            # === IK Multimedia (Amplitube, TONEX, T-RackS, MODO, ...) ===
-            # editor_xembed uses real X11 embedding instead of yabridge's default
-            # reparenting, which is what fixes the IK GUIs freezing/not repainting under
-            # Wayland + XWayland. On the XFCE Xorg session (desktop-environments.xorg-audio)
-            # embedding is native anyway -- if these GUIs misbehave there, set it to false.
+            # === IK Multimedia (AmpliTube, TONEX, T-RackS, MODO, ...) ===
             # frame_rate 120 keeps their animated meters smooth.
-            ["*Amplitube*"]
-            group = "ik-multimedia"
+            #
+            # editor_xembed forces real X11 embedding instead of yabridge's default
+            # reparenting. Under the default, AmpliTube hangs REAPER on load: the last
+            # thing the bridge logs is
+            #   IPlugView::attached(parent = ..., "X11EmbedWindowID")
+            # with no reply, the yabridge host goes defunct, and REAPER blocks in
+            # futex_do_wait. xembed is the documented remedy for exactly that.
+            #
+            # TWO WAYS THESE SECTIONS SILENTLY DO NOTHING, both hit here already:
+            #   1. The globs are CASE-SENSITIVE. "*Amplitube*" never matches "AmpliTube".
+            #   2. They match the BRIDGED path, which for a VST3 bundle continues past
+            #      the .vst3 into "Foo.vst3/Contents/x86_64-linux/Foo.so". A pattern
+            #      ending in ".vst3" therefore matches nothing.
+            # A section that matches nothing is not an error -- the plugin quietly falls
+            # through to ["*"]. Always confirm with:
+            #   YABRIDGE_DEBUG_LEVEL=1 reaper 2>&1 | grep "config from"
+            #
+            # No `group` here: group hosting needs yabridge-group-host.exe, which this
+            # yabridge build does not ship (bin/ has only yabridge-host{,-32}.exe).
+            ["*AmpliTube*"]
             frame_rate = 120
             editor_xembed = true
 
             ["*IK Multimedia*"]
-            group = "ik-multimedia"
             frame_rate = 120
             editor_xembed = true
 
             ["*TONEX*"]
-            group = "ik-multimedia"
             frame_rate = 120
             editor_xembed = true
 
             ["*T-RackS*"]
-            group = "ik-multimedia"
             frame_rate = 120
             editor_xembed = true
 
             # === Steven Slate (SSD5, ...) ===
-            # Deliberately NOT grouped: SSD5 is a heavy sampler and a crash takes the
-            # whole group process with it.
-            #
             # Known unfixable-from-config bug: dragging an instrument onto the kit inside
             # SSD5's own browser crashes the plugin under wine. Load preset kits instead.
             ["*SSD5*"]
@@ -147,7 +158,6 @@ mkModule {
 
             # === FabFilter ===
             ["*FabFilter*"]
-            group = "fabfilter"
           '';
           force = true;
         };
@@ -161,34 +171,31 @@ mkModule {
             editor_force_dnd = true
             frame_rate = 60
 
-            # See the VST2 config above for why IK plugins get xembed + 120fps.
-            ["*Amplitube*.vst3"]
-            group = "ik-multimedia"
+            # NO ".vst3" SUFFIX on these patterns. yabridge matches the bridged path,
+            # which for a bundle is "Foo.vst3/Contents/x86_64-linux/Foo.so" -- anything
+            # ending in ".vst3" matches nothing at all. See the VST2 config above.
+            ["*AmpliTube*"]
             frame_rate = 120
             editor_xembed = true
 
-            ["*IK Multimedia*.vst3"]
-            group = "ik-multimedia"
+            ["*IK Multimedia*"]
             frame_rate = 120
             editor_xembed = true
 
-            ["*TONEX*.vst3"]
-            group = "ik-multimedia"
+            ["*TONEX*"]
             frame_rate = 120
             editor_xembed = true
 
-            ["*T-RackS*.vst3"]
-            group = "ik-multimedia"
+            ["*T-RackS*"]
             frame_rate = 120
             editor_xembed = true
 
-            # Ungrouped, and no drag-drop of instruments onto the kit. See VST2 config.
-            ["*SSD5*.vst3"]
+            # No drag-drop of instruments onto the kit. See VST2 config.
+            ["*SSD5*"]
 
-            ["*Slate*.vst3"]
+            ["*Slate*"]
 
-            ["*FabFilter*.vst3"]
-            group = "fabfilter"
+            ["*FabFilter*"]
             editor_disable_host_scaling = true
           '';
           force = true;
@@ -203,14 +210,17 @@ mkModule {
             editor_force_dnd = true
             frame_rate = 60
 
-            # See the VST2 config above for why IK plugins get xembed + 120fps.
+            # See the VST2 config above for the xembed rationale and the two ways these
+            # sections silently match nothing.
+            ["*AmpliTube*"]
+            frame_rate = 120
+            editor_xembed = true
+
             ["*IK Multimedia*"]
-            group = "ik-multimedia"
             frame_rate = 120
             editor_xembed = true
 
             ["*TONEX*"]
-            group = "ik-multimedia"
             frame_rate = 120
             editor_xembed = true
           '';

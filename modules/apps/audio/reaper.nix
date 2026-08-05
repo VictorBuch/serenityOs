@@ -99,15 +99,40 @@ let
       winetricks -q dotnet48
     fi
 
-    echo "[4/5] DXVK (Direct3D -> Vulkan)..."
-    # Required for SSD5 and the JUCE-based IK GUIs to render at all.
-    winetricks -q dxvk
+    ${
+      if cfg.wineTrack == "modern" then
+        ''
+          echo "[4/5] DXVK (Direct3D -> Vulkan)..."
+          winetricks -q dxvk
+        ''
+      else
+        ''
+          echo "[4/5] Skipping DXVK -- unusable on the pinned wine 9.20 track."
+          # wine 9.20's winevulkan does not advertise VK_KHR_surface to DXVK, which loads
+          # winevulkan.dll directly rather than going through vulkan-1.dll. Every DXVK
+          # release fails identically ("DxvkInstance: Required instance extensions not
+          # supported"), 2.4.1 through 3.0.2, and the D3D DLLs it drops in then crash any
+          # Electron GPU process that touches them. Wine's builtin wined3d works.
+        ''
+    }
+    echo "[5/5] Direct3D renderer + d2d1..."
+    # wined3d cannot create an OpenGL context in this prefix at all:
+    #   err:d3d:wined3d_caps_gl_ctx_create Failed to find a suitable pixel format.
+    #   err:d3d:wined3d_adapter_gl_init Failed to get a GL context for adapter ...
+    # even though host GL is perfectly healthy (RX 7900 GRE, direct rendering, GL 4.6,
+    # mesa 26.1) -- wine 9.20 is from Oct 2024 and does not get on with this mesa.
+    # wined3d's own Vulkan backend sidesteps GL entirely and does work here. Measured:
+    # Steven Slate Audio Center's Electron GPU process goes from '--use-gl=disabled'
+    # plus a crash-respawn loop to '--use-gl=angle' with zero crashes.
+    wine reg add 'HKCU\Software\Wine\Direct3D' /v renderer /t REG_SZ /d vulkan /f
 
-    echo "[5/5] Disabling d2d1..."
-    # With DXVK installed, wine's Direct2D implementation makes SSD5 open as a black
-    # window. Disabling d2d1 makes those plugins fall back to a path that works. This
+    # wine's Direct2D implementation makes SSD5 open as a black window. Disabling d2d1
+    # makes those plugins fall back to a path that works. This
     # goes in the prefix registry rather than WINEDLLOVERRIDES so it applies no matter
     # how the plugin is launched (reaper wrapper, audio-wine, yabridge host).
+    #
+    # NOTE: this is for SSD5 only. It has no effect on the AmpliTube editor crash --
+    # that reproduces identically with d2d1 enabled and disabled.
     wine reg add 'HKCU\Software\Wine\DllOverrides' /v d2d1 /t REG_SZ /d "" /f
     # If plugin GUIs still glitch, capping the reported GL version sometimes helps:
     #   audio-wine reg add 'HKCU\Software\Wine\Direct3D' /v MaxVersionGL /t REG_DWORD /d 0x30002 /f
@@ -128,25 +153,39 @@ let
   # Physical iLok USB dongles do NOT work under wine -- the driver is a kernel-mode
   # Windows component. iLok Cloud does work, and that is the only supported path here.
   #
-  # ilok.com serves its downloads from a JS-only page behind an S3 bucket that 403s on
-  # probe, so there is no stable URL to hardcode. Point this at a downloaded installer
-  # instead (or drop it in ~/Downloads and let it be found).
+  # The ilok.com download page is JS-only, but the installers themselves sit on a stable
+  # CDN path. Point this at a downloaded installer (or unzip it under ~/Downloads and let
+  # it be found).
+  #
+  # This is the one build verified to install and launch on the pinned wine 9.20 track.
+  ilokInstallerUrl = "https://installers.ilok.com/iloklicensemanager/legacy/5_10/LicenseSupportInstallerWin64_v5.10.5_c55e8d80.zip";
+
   installIlok = pkgs.writeShellScriptBin "install-ilok" ''
     set -euo pipefail
 
     INSTALLER="''${1:-}"
 
     if [ -z "$INSTALLER" ]; then
-      INSTALLER="$(ls -1t "$HOME"/Downloads/*[iI][lL]ok*.exe 2>/dev/null | head -n 1 || true)"
+      # PACE ships License Manager inside a "License Support" bundle, and the .exe is
+      # usually two directories deep in whatever the browser unzipped. Match on both
+      # names and recurse, newest first.
+      INSTALLER="$(find "$HOME/Downloads" -maxdepth 4 -type f \
+        \( -iname '*ilok*.exe' -o -iname '*license*support*.exe' \) \
+        -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -n 1 | cut -d' ' -f2- || true)"
     fi
 
     if [ -z "$INSTALLER" ] || [ ! -f "$INSTALLER" ]; then
       cat <<'EOF'
     No iLok License Manager installer found.
 
-      1. Download the Windows installer (version 5.6.1 is the last one known to work
-         under wine) from https://www.ilok.com/#!license-manager
-      2. Save it to ~/Downloads
+      1. Download the known-good build (License Support Win64 v5.10.5):
+
+         ${ilokInstallerUrl}
+
+         Do NOT use the unversioned LicenseSupportInstallerWin.zip from the front
+         page -- it is a WiX Burn v5 bundle that cannot initialize under wine
+         ("Failed to load manifest as XML document", 0x80070005).
+      2. Unzip it anywhere under ~/Downloads
       3. Re-run: install-ilok            (or: install-ilok /path/to/installer.exe)
 
     Then, once License Manager is running:
@@ -223,18 +262,23 @@ let
     export WINELOADER="${track.wine}/bin/wine"
     export WINESERVER="${track.wine}/bin/wineserver"
     export WINEARCH="win64"
-    export WINEDEBUG="-all"
+    # Overridable. "-all" silences wine's err channel too, which hides plugin-host
+    # crashes completely -- a host dying mid-load then just looks like REAPER freezing.
+    # `WINEDEBUG=fixme-all reaper` keeps err: without the fixme firehose.
+    export WINEDEBUG="''${WINEDEBUG:--all}"
     export WINEFSYNC="1"
     export WINE_LARGE_ADDRESS_AWARE="1"
 
-    # Force DXVK's D3D DLLs -- fixes IK Multimedia (TONEX, Amplitube) GUI refresh.
     # d2d1 is NOT listed here: it is disabled inside the prefix registry by
     # setup-audio-wineprefix, so it applies to every launch path, not just this one.
-    export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
-    export DXVK_HUD="0"
-    export DXVK_LOG_LEVEL="none"
-    export DXVK_LOG_PATH="none"
-    export DXVK_STATE_CACHE_PATH="$HOME/.cache/dxvk"
+    ${lib.optionalString (cfg.wineTrack == "modern") ''
+      # Force DXVK's D3D DLLs -- fixes IK Multimedia (TONEX, Amplitube) GUI refresh.
+      export WINEDLLOVERRIDES="d3d9,d3d10core,d3d11,dxgi=n"
+      export DXVK_HUD="0"
+      export DXVK_LOG_LEVEL="none"
+      export DXVK_LOG_PATH="none"
+      export DXVK_STATE_CACHE_PATH="$HOME/.cache/dxvk"
+    ''}
 
     export YABRIDGE_DEBUG_LEVEL="''${YABRIDGE_DEBUG_LEVEL:-0}"
 

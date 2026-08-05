@@ -13,61 +13,156 @@ let
   # Wine + yabridge, chosen as a matched pair. See _wine-tracks.nix for why.
   track = (import ./_wine-tracks.nix { inherit pkgs pkgs-stable; }).${cfg.wineTrack};
 
-  # WINEPREFIX setup script for audio plugins with copy protection support
-  # This script initializes a dedicated prefix for audio work
+  # Builds ~/.wine-audio, the prefix every Windows plugin and its copy-protection stack
+  # lives in. Kept deliberately minimal: the previous recipe installed dotnet48 plus a
+  # pile of legacy media codecs (wmp10, quartz, ffdshow, devenum, dm*, xact, msxml4/6),
+  # and that polluted prefix is the most likely reason the SSD5 installer failed. None of
+  # SSD5, iLok License Manager (Qt) or the IK installers need any of it.
   audioWinePrefixSetup = pkgs.writeShellScriptBin "setup-audio-wineprefix" ''
-    set -e
+    set -euo pipefail
 
     AUDIO_WINEPREFIX="$HOME/.wine-audio"
+    FRESH=0
+    WITH_DOTNET48=0
+
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --fresh) FRESH=1 ;;
+        --with-dotnet48) WITH_DOTNET48=1 ;;
+        -h|--help)
+          cat <<'USAGE'
+    setup-audio-wineprefix [--fresh] [--with-dotnet48]
+
+      --fresh          Move any existing ~/.wine-audio aside and build from scratch.
+                       Recommended once, to shed the old dotnet48 + media-codec prefix.
+      --with-dotnet48  Also install .NET Framework 4.8. Nothing in the current plugin
+                       set needs it; only add it if a specific installer demands it.
+    USAGE
+          exit 0
+          ;;
+        *) echo "unknown option: $1" >&2; exit 2 ;;
+      esac
+      shift
+    done
+
     export WINEPREFIX="$AUDIO_WINEPREFIX"
     export WINEARCH="win64"
     export WINEDEBUG="-all"
     export WINELOADER="${track.wine}/bin/wine"
     export WINESERVER="${track.wine}/bin/wineserver"
-    export PATH="${track.wine}/bin:$PATH"
+    # winetricks shells out to cabextract/7z/unzip/curl; pin all of them so the recipe
+    # does not depend on what happens to be on the user's PATH.
+    export PATH="${track.wine}/bin:${
+      lib.makeBinPath [
+        pkgs-stable.winetricks
+        pkgs.cabextract
+        pkgs.p7zip
+        pkgs.unzip
+        pkgs.curl
+      ]
+    }:$PATH"
 
-    echo "=== Audio WINEPREFIX Setup Script ==="
+    echo "=== Audio WINEPREFIX setup (${cfg.wineTrack} track, ${track.wine.version or "wine"}) ==="
     echo "Target: $AUDIO_WINEPREFIX"
     echo ""
 
-    # Create prefix if it doesn't exist
-    if [ ! -d "$AUDIO_WINEPREFIX" ]; then
-      echo "[1/7] Creating new 64-bit WINEPREFIX..."
-      wineboot --init
-      sleep 5
-    else
-      echo "[1/7] WINEPREFIX already exists, updating..."
+    if [ "$FRESH" = 1 ] && [ -d "$AUDIO_WINEPREFIX" ]; then
+      BACKUP="$AUDIO_WINEPREFIX.bak-$(date +%Y%m%d-%H%M%S)"
+      echo "--fresh: moving existing prefix to $BACKUP"
+      mv "$AUDIO_WINEPREFIX" "$BACKUP"
+      echo "         (plugin activations live in the prefix -- you will need to"
+      echo "          re-activate via iLok Cloud / the IK Product Manager afterwards)"
+      echo ""
     fi
 
-    # Set Windows version to Windows 10 (required for modern installers)
-    echo "[2/7] Setting Windows version to Windows 10..."
-    winetricks -q win10
+    if [ ! -d "$AUDIO_WINEPREFIX" ]; then
+      echo "[1/5] Creating 64-bit WINEPREFIX..."
+      wineboot --init
+      wineserver -w
+    else
+      echo "[1/5] WINEPREFIX exists, updating in place..."
+    fi
 
-    # Install core fonts (required for proper text rendering in plugins)
-    echo "[3/7] Installing core fonts..."
-    winetricks -q corefonts
+    echo "[2/5] Windows version + fonts + core runtimes..."
+    # win10:               modern installers refuse to run on anything older
+    # corefonts:           plugin GUIs render text with them
+    # gdiplus, msxml3:     iLok License Manager
+    # vcrun2010/2013/2022: the redists SSD5 and the IK plugins actually link against
+    #                      (vcrun2022 covers the whole VS2015-2022 ABI series)
+    winetricks -q win10 corefonts gdiplus msxml3 vcrun2010 vcrun2013 vcrun2022
 
-    # Install .NET Framework 4.8 (required for iLok License Manager)
-    echo "[4/7] Installing .NET Framework 4.8 (this may take a while)..."
-    winetricks -q dotnet48
+    echo "[3/5] Direct3D helper libraries..."
+    winetricks -q d3dcompiler_43 d3dcompiler_47 d3dx9 d3dx10 d3dx11_43
 
-    # Install Visual C++ runtimes (required by many plugins)
-    # Install all versions to maximize compatibility
-    echo "[5/7] Installing Visual C++ runtimes (this may take a while)..."
-    winetricks -q vcrun6 vcrun2005 vcrun2008 vcrun2010 vcrun2012 vcrun2013 vcrun2015 vcrun2019
+    if [ "$WITH_DOTNET48" = 1 ]; then
+      echo "[3b/5] .NET Framework 4.8 (slow, and usually unnecessary)..."
+      winetricks -q dotnet48
+    fi
 
-    # Install GDI+ and other Windows components
-    echo "[6/7] Installing additional Windows components..."
-    winetricks -q gdiplus msxml3 msxml4 msxml6 d3dx9 d3dcompiler_43 d3dcompiler_47 \
-      xact xact_x64 xinput ffdshow quartz wmp10 devenum dmsynth dsdmo dswave msdxmocx
-
-    # Install DXVK for better Direct3D performance (uses Vulkan)
-    # This fixes UI refresh issues with JUCE-based plugins (Amplitube, TONEX, etc.)
-    echo "[7/7] Installing DXVK..."
+    echo "[4/5] DXVK (Direct3D -> Vulkan)..."
+    # Required for SSD5 and the JUCE-based IK GUIs to render at all.
     winetricks -q dxvk
 
+    echo "[5/5] Disabling d2d1..."
+    # With DXVK installed, wine's Direct2D implementation makes SSD5 open as a black
+    # window. Disabling d2d1 makes those plugins fall back to a path that works. This
+    # goes in the prefix registry rather than WINEDLLOVERRIDES so it applies no matter
+    # how the plugin is launched (reaper wrapper, audio-wine, yabridge host).
+    wine reg add 'HKCU\Software\Wine\DllOverrides' /v d2d1 /t REG_SZ /d "" /f
+    # If plugin GUIs still glitch, capping the reported GL version sometimes helps:
+    #   audio-wine reg add 'HKCU\Software\Wine\Direct3D' /v MaxVersionGL /t REG_DWORD /d 0x30002 /f
+    wineserver -w
+
     echo ""
-    echo "=== Setup Complete ==="
+    echo "=== Setup complete ==="
+    echo ""
+    echo "Next:"
+    echo "  1. install-ilok                      # then sign in and activate to iLok Cloud"
+    echo "  2. audio-wine ~/Downloads/<installer>.exe   # SSD5, IK Product Manager, ..."
+    echo "  3. yabridgectl sync                  # also runs automatically on rebuild/launch"
+    echo "  4. reaper                            # then rescan ~/.vst and ~/.vst3 in REAPER"
+  '';
+
+  # iLok License Manager installer.
+  #
+  # Physical iLok USB dongles do NOT work under wine -- the driver is a kernel-mode
+  # Windows component. iLok Cloud does work, and that is the only supported path here.
+  #
+  # ilok.com serves its downloads from a JS-only page behind an S3 bucket that 403s on
+  # probe, so there is no stable URL to hardcode. Point this at a downloaded installer
+  # instead (or drop it in ~/Downloads and let it be found).
+  installIlok = pkgs.writeShellScriptBin "install-ilok" ''
+    set -euo pipefail
+
+    INSTALLER="''${1:-}"
+
+    if [ -z "$INSTALLER" ]; then
+      INSTALLER="$(ls -1t "$HOME"/Downloads/*[iI][lL]ok*.exe 2>/dev/null | head -n 1 || true)"
+    fi
+
+    if [ -z "$INSTALLER" ] || [ ! -f "$INSTALLER" ]; then
+      cat <<'EOF'
+    No iLok License Manager installer found.
+
+      1. Download the Windows installer (version 5.6.1 is the last one known to work
+         under wine) from https://www.ilok.com/#!license-manager
+      2. Save it to ~/Downloads
+      3. Re-run: install-ilok            (or: install-ilok /path/to/installer.exe)
+
+    Then, once License Manager is running:
+      - Sign in with your iLok account
+      - Activate each license to *iLok Cloud*, not to a physical dongle.
+        USB dongles do not work under wine; Cloud does.
+      - Leave the Cloud session open while REAPER runs.
+    EOF
+      exit 1
+    fi
+
+    echo "Installing: $INSTALLER"
+    echo ""
+    echo "After it finishes: sign in, then activate licenses to iLok Cloud (not a dongle)."
+    echo ""
+    exec ${audioWine}/bin/audio-wine "$INSTALLER"
   '';
 
   # Helper script to run wine with audio prefix
@@ -233,6 +328,7 @@ in
           audioWinePrefixSetup # setup-audio-wineprefix command
           audioWine # audio-wine command
           audioWinetricks # audio-winetricks command
+          installIlok # install-ilok command
         ];
 
       description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";

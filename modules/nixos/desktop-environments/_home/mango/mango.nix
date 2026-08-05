@@ -211,6 +211,7 @@ in
           "SUPER,B,spawn,${browser}"
           "SUPER,F,spawn,${fileManager}"
           "SUPER,space,spawn,noctalia msg panel-toggle launcher"
+
           # Friction-free note capture: rofi one-liner -> today's daily note.
           "SUPER,C,spawn,notes-capture"
           "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
@@ -245,6 +246,7 @@ in
           "SUPER+SHIFT,J,exchange_client,down"
           "SUPER+SHIFT,K,exchange_client,up"
 
+
           # --- Master-area sizing ---
           "SUPER,V,setmfact,-0.05"
           "SUPER+SHIFT,V,setmfact,+0.05"
@@ -270,6 +272,10 @@ in
           "SUPER+SHIFT,1,view,1"
           "SUPER+SHIFT,2,view,2"
           "SUPER+SHIFT,3,view,3"
+
+          # --- Switch tag left/right ---
+          "SUPER+CTRL,H,viewtoleft"
+          "SUPER+CTRL,L,viewtoright"
 
           # --- Named scratchpads (Tidal / Discord / Slack) ---
           "SUPER,T,toggle_named_scratchpad,tidal-hifi,none,tidal-hifi"

@@ -23,7 +23,16 @@ mkModule {
           remotes.origin = {
             auto-track-bookmarks = "glob:*";
           };
+          signing = {
+            behavior = "own";
+            backend = "ssh";
+            key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+            backends.ssh = {
+              allowed-signers = "${config.home.homeDirectory}/.config/git/allowed_signers";
+            };
+          };
           ui = {
+            show-cryptographic-signatures = true;
             abandon-on-new = true;
             default-command = "log-recent";
             pager = "delta";

@@ -160,7 +160,7 @@ in
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
           "isnamedscratchpad:1,appid:^[Dd]iscord$"
           "isnamedscratchpad:1,appid:^[Ss]lack$"
-          "isnamedscratchpad:1,appid:^tidal-hifi$"
+          "isnamedscratchpad:1,appid:^sone$"
 
           # Audio/Wine sizing
           "appid:^REAPER$|^reaper$,width:0.85"
@@ -176,7 +176,7 @@ in
           # Catch-all: anything not explicitly pinned above lands on tag 2.
           # negative lookahead — otherwise zen/ghostty/figma/obsidian would end
           # up on tags 1 AND 2. Keep this list in sync with the rules above.
-          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|tidal-hifi|steam)$),tags:2"
+          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|sone|steam)$),tags:2"
         ];
 
         # === Layer rules ===
@@ -277,8 +277,8 @@ in
           "SUPER+CTRL,H,viewtoleft"
           "SUPER+CTRL,L,viewtoright"
 
-          # --- Named scratchpads (Tidal / Discord / Slack) ---
-          "SUPER,T,toggle_named_scratchpad,tidal-hifi,none,tidal-hifi"
+          # --- Named scratchpads (Tidal(sone) / Discord / Slack) ---
+          "SUPER,T,toggle_named_scratchpad,sone,none,sone"
           "SUPER,D,toggle_named_scratchpad,discord,none,discord"
           "SUPER,S,toggle_named_scratchpad,slack,none,slack"
 

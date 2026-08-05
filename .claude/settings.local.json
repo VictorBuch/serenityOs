@@ -128,7 +128,20 @@
       "Bash(git -C /home/serenity/serenityOs diff -- overlays/default.nix modules/homelab/services/home-assistant.nix modules/homelab/services/hermes.nix hosts/mal/configuration.nix)",
       "Bash(git *)",
       "Bash(sudo -n nix-env --list-generations -p /nix/var/nix/profiles/system)",
-      "Bash(nixos-rebuild build *)"
+      "Bash(nixos-rebuild build *)",
+      "Bash(print \"=== lute-v3 pkg ===\")",
+      "Bash(print \"=== packages/default.nix ===\")",
+      "Bash(print \"=== example audio module ===\")",
+      "Bash(print \"=== hosts enabling audio ===\")",
+      "Bash(print \"=== wine921 refs ===\")",
+      "Bash(print \"=== governor ===\")",
+      "Bash(print \"=== gaming wine ===\")",
+      "Bash(print \"=== sddm ===\")",
+      "Bash(print \"=== docs ===\")",
+      "Bash(print \"=== jj ===\")",
+      "Bash(print \"=== inputs: wine920 / musnix ===\")",
+      "Bash(print \"=== gaming/wine.nix ===\")",
+      "Bash(print \"=== _categories audio override ===\")"
     ],
     "deny": [],
     "ask": []

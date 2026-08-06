@@ -19,6 +19,53 @@ let
   # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
   # palette and reloads mango live. See the `source=` include in extraConfig
   # below and modules/nixos/desktop-environments/_home/common/noctalia.nix.
+
+  # Raycast-style slots — pinned to tag 1.
+  tag1Apps = [
+    "zen-beta"
+    "zen"
+    "firefox"
+    "com\\.mitchellh\\.ghostty"
+    "ghostty"
+    "figma-linux"
+    "Figma"
+    "Obsidian"
+    "obsidian"
+  ];
+
+  # Named scratchpads — tag-less by design.
+  scratchpadApps = [
+    "[Dd]iscord"
+    "[Ss]lack"
+    "sone"
+  ];
+
+  # File manager: floats on the current tag.
+  thunarApps = [
+    "[Tt]hunar"
+    "[Tt]hunar-.*"
+    "org\\.xfce\\.[Tt]hunar"
+  ];
+
+  # Portals and dialog-only helpers: float on the current tag.
+  dialogApps = [
+    "xdg-desktop-portal.*"
+    "org\\.freedesktop\\.impl\\.portal\\..*"
+    "zenity"
+    "polkit-.*"
+    "pavucontrol"
+    "\\.?blueman-.*"
+    "nm-connection-editor"
+    "file-roller"
+    "nwg-look"
+    "qt[56]ct"
+  ];
+
+  # Anything matching these keeps whatever tag it inherits; everything else
+  # is swept to tag 2 by the catch-all rule.
+  noSweepApps = tag1Apps ++ scratchpadApps ++ thunarApps ++ dialogApps ++ [ "steam" ];
+
+  alternation = lib.concatStringsSep "|";
 in
 
 {
@@ -155,6 +202,10 @@ in
           "appid:^figma-linux$|^Figma$,tags:1"
           "appid:^Obsidian$|^obsidian$,tags:1"
 
+          # File manager & dialog-style helpers — float on the tag in view.
+          "appid:^(${alternation thunarApps})$,isfloating:1,width:0.65,height:0.7"
+          "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
+
           # Named scratchpads — chat & music
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
@@ -173,10 +224,10 @@ in
           # DaVinci convert helper terminal
           "appid:^davinci-convert$,isfloating:1,width:640,height:400"
 
-          # Catch-all: anything not explicitly pinned above lands on tag 2.
-          # negative lookahead — otherwise zen/ghostty/figma/obsidian would end
-          # up on tags 1 AND 2. Keep this list in sync with the rules above.
-          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|sone|steam)$),tags:2"
+          # Catch-all: full application windows land on tag 2. Negative
+          # lookahead built from noSweepApps — a `tags:` rule always beats the
+          # parent-tag fallback in mango, so exempted appids must be listed.
+          "appid:^(?!(${alternation noSweepApps})$),tags:2"
         ];
 
         # === Layer rules ===

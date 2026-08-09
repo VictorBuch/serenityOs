@@ -36,6 +36,7 @@ in
     # FileFlows container
     virtualisation.oci-containers.containers.fileflows = {
       image = "revenz/fileflows";
+      pull = "always";
       autoStart = true;
 
       ports = [

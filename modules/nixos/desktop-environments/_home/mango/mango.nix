@@ -160,7 +160,7 @@ in
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
           "isnamedscratchpad:1,appid:^[Dd]iscord$"
           "isnamedscratchpad:1,appid:^[Ss]lack$"
-          "isnamedscratchpad:1,appid:^tidal-hifi$"
+          "isnamedscratchpad:1,appid:^sone$"
 
           # Audio/Wine sizing
           "appid:^REAPER$|^reaper$,width:0.85"
@@ -176,7 +176,7 @@ in
           # Catch-all: anything not explicitly pinned above lands on tag 2.
           # negative lookahead — otherwise zen/ghostty/figma/obsidian would end
           # up on tags 1 AND 2. Keep this list in sync with the rules above.
-          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|tidal-hifi|steam)$),tags:2"
+          "appid:^(?!(zen-beta|zen|firefox|com\\.mitchellh\\.ghostty|ghostty|figma-linux|Figma|Obsidian|obsidian|[Dd]iscord|[Ss]lack|sone|steam)$),tags:2"
         ];
 
         # === Layer rules ===
@@ -207,9 +207,10 @@ in
         # === Keybinds ===
         bind = [
           # --- App launchers ---
-          "SUPER,Return,spawn,${terminal}"
-          "SUPER,B,spawn,${browser}"
-          "SUPER,F,spawn,${fileManager}"
+          "SUPER,Return,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
+          "SUPER+SHIFT,Return,spawn,${terminal}"
+          "SUPER,B,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
+          "SUPER,E,spawn,${fileManager}"
           "SUPER,space,spawn,noctalia msg panel-toggle launcher"
 
           # Friction-free note capture: rofi one-liner -> today's daily note.
@@ -227,12 +228,12 @@ in
           # --- Window management ---
           "SUPER,Q,killclient"
           "SUPER,G,togglefloating"
-          "SUPER+SHIFT,F,togglefullscreen"
-          "SUPER,Tab,toggleoverview"
+          "SUPER,F,togglefullscreen"
+          "SUPER,O,toggleoverview"
           "SUPER,Period,zoom"
 
           # --- Layout cycling (user request) ---
-          "SUPER+SHIFT,Return,switch_layout"
+          "SUPER,T,switch_layout"
 
           # --- Vim focus (focus windows) ---
           "SUPER,H,focusdir,left"
@@ -263,22 +264,12 @@ in
           "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
           "SUPER,4,spawn_shell,mango-focus-or-run obsidian 1 obsidian"
 
-          # --- Move client to tag ---
-          "SUPER+CTRL,1,tag,1"
-          "SUPER+CTRL,2,tag,2"
-          "SUPER+CTRL,3,tag,3"
+          # --- Tags (main <-> stash) ---
+          "SUPER,Tab,spawn,mango-tag-toggle"
+          "SUPER+SHIFT,Tab,spawn,mango-tag-toggle --carry"
 
-          # --- Raw tag view (fallback when focus-or-run not enough) ---
-          "SUPER+SHIFT,1,view,1"
-          "SUPER+SHIFT,2,view,2"
-          "SUPER+SHIFT,3,view,3"
-
-          # --- Switch tag left/right ---
-          "SUPER+CTRL,H,viewtoleft"
-          "SUPER+CTRL,L,viewtoright"
-
-          # --- Named scratchpads (Tidal / Discord / Slack) ---
-          "SUPER,T,toggle_named_scratchpad,tidal-hifi,none,tidal-hifi"
+          # --- Named scratchpads (sone / Discord / Slack) ---
+          "SUPER,M,toggle_named_scratchpad,sone,none,sone"
           "SUPER,D,toggle_named_scratchpad,discord,none,discord"
           "SUPER,S,toggle_named_scratchpad,slack,none,slack"
 
@@ -296,7 +287,7 @@ in
 
           # --- Reload / quit ---
           "SUPER+SHIFT,R,reload_config"
-          "SUPER+SHIFT,M,quit"
+          "SUPER+SHIFT,BackSpace,quit"
 
           # --- Screenshots ---
           "ALT+SHIFT,4,spawn_shell,grim -g \"$(slurp)\" - | wl-copy"

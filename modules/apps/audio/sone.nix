@@ -1,8 +1,8 @@
 args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
-  name = "tidal";
+  name = "sone";
   category = "audio";
-  packages = { pkgs, ... }: [ pkgs.tidal-hifi ];
+  packages = { pkgs, ... }: [ pkgs.sone ];
   description = "Tidal music streaming";
 } args

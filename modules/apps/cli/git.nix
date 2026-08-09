@@ -16,15 +16,13 @@ mkModule {
         enable = true;
         package = pkgs.git;
 
-        # Signing handled via raw `settings.gpg.format` below; opt into new default
         signing.format = null;
 
-        # Git settings (new format for HM 26.05)
         settings = {
-          # User configuration
           user = {
             name = "VictorBuch";
             email = "victorbuch@protonmail.com";
+            signingkey = "~/.ssh/id_ed25519.pub";
           };
 
           # Useful aliases
@@ -53,6 +51,12 @@ mkModule {
             default = "current";
           };
 
+          # HTTPS credentials (gitea behind the cloudflare tunnel).
+          # Plaintext in ~/.git-credentials — swap for libsecret if that matters.
+          credential = {
+            helper = "store";
+          };
+
           # Better diff and merge
           diff = {
             colorMoved = "default";
@@ -76,16 +80,15 @@ mkModule {
             sort = "-committerdate";
           };
 
-          # SSH commit signing via FIDO2 YubiKey
           commit = {
-            gpgsign = false;
+            gpgsign = true;
+          };
+          tag = {
+            gpgSign = true;
           };
           gpg = {
             format = "ssh";
             ssh.allowedSignersFile = "~/.config/git/allowed_signers";
-          };
-          user = {
-            signingkey = "~/.ssh/id_ed25519_sk.pub";
           };
         };
 
@@ -125,6 +128,7 @@ mkModule {
       # Allowed signers for SSH commit verification
       # Add both YubiKey public keys so commits from either machine verify correctly
       home.file.".config/git/allowed_signers".text = ''
+        victorbuch@protonmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMh0o97y8g3Tia8qK/Y9qsVZ8ES8CDjZXJU2gtljlZ0S victorbuch@protonmail.com
         victorbuch@protonmail.com sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano
       '';
 

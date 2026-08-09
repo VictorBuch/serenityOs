@@ -15,6 +15,7 @@ in
     inputs.mangowm.hmModules.mango
     ./mango.nix
     ./focus-or-run.nix
+    ./tag-toggle.nix
     ../common/davinci-convert.nix
     ../common/dunst.nix
     ../common/wlogout
@@ -27,6 +28,7 @@ in
     mango = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
+      tag-toggle.enable = lib.mkDefault true;
     };
     noctalia = {
       enable = lib.mkDefault true;

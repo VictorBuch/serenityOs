@@ -1380,11 +1380,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786274629,
-        "narHash": "sha256-YIT+zto0SVjnIWkVeFCY4ZSQbwjOoRoVYRQngiU/azo=",
+        "lastModified": 1786276383,
+        "narHash": "sha256-+ZJ/Zpsr7lOGPGXPPsuaav89ETPlD625n+xslnNaijA=",
         "ref": "refs/heads/main",
-        "rev": "d631fd80bf7ee6e8a06cf3642c4d86bc45c36014",
-        "revCount": 30,
+        "rev": "10e6bdede0354aa40ff53a865469e3ff2315faa9",
+        "revCount": 31,
         "type": "git",
         "url": "https://git.victorbuch.com/VictorBuch/tv-learn"
       },

@@ -32,12 +32,11 @@ let
     };
   };
 
+  # NOTE: `protected` no longer gates anything in Caddy (TinyAuth is gone).
+  # It is kept as metadata: the same set of services gets an SSO auth screen
+  # as Pangolin resources on wash (tunnel path). LAN-direct traffic hits
+  # Caddy without an auth screen.
   services = {
-    auth = {
-      url = "http://127.0.0.1:3002";
-      https = false;
-      protected = false;
-    };
     id = {
       # Pocket ID
       url = "http://127.0.0.1:1411";
@@ -225,7 +224,7 @@ let
       # tv-learn immersion language-learning app
       url = "http://127.0.0.1:3006";
       https = false;
-      protected = true; # tinyauth gate until pocket-id (track #3)
+      protected = true;
     };
     home = {
       # Home Assistant (port 8124; 8123 is taken by crafty)
@@ -249,8 +248,9 @@ let
 
   # Hermes web dashboard (agent.<domain>) — only mounted when the hermes web
   # dashboard is enabled. The dashboard binds loopback with its own auth off,
-  # so it sits behind pocket-id (protected = true). Its DNS-rebind guard
-  # rejects any non-loopback Host header, hence upstreamHost = "localhost".
+  # so its auth screen lives on the Pangolin resource (protected = true). Its
+  # DNS-rebind guard rejects any non-loopback Host header, hence
+  # upstreamHost = "localhost".
   hermesWebService = lib.optionalAttrs (config.homelab.hermes.enable && config.homelab.hermes.web.enable) {
     agent = {
       url = "http://127.0.0.1:${toString config.homelab.hermes.web.port}";
@@ -267,163 +267,133 @@ let
   };
 
   # --- HELPER FUNCTIONS ---
-  # Helper for main domain (victorbuch.com)
-  mkHost = subdomain: service: {
-    name = "${subdomain}.${domain}";
-    value.extraConfig = ''
+  # Request-handling body for one service, independent of domain/TLS.
+  serviceBody =
+    service:
+    if service.isPhpFpm or false then
+      let
+        nextcloudPackage =
+          if config.homelab.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
+      in
+      ''
+        # Nextcloud-specific configuration
+        root * ${nextcloudPackage}
 
-      tls ${config.sops.templates."cf-cert.pem".path} ${config.sops.templates."cf-key.pem".path}
+        # Security headers
+        header {
+          Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+          Referrer-Policy "no-referrer"
+          X-Content-Type-Options "nosniff"
+          X-Download-Options "noopen"
+          X-Frame-Options "SAMEORIGIN"
+          X-Permitted-Cross-Domain-Policies "none"
+          X-Robots-Tag "noindex, nofollow"
+          -X-Powered-By
+        }
 
-      ${
-        if service.protected then
-          ''
-            forward_auth http://127.0.0.1:3002 {
-              uri /api/auth/caddy
-              copy_headers Remote-User Remote-Email Remote-Name Remote-Groups
+        # WebDAV redirects for CardDAV and CalDAV
+        redir /.well-known/carddav /remote.php/dav 301
+        redir /.well-known/caldav /remote.php/dav 301
+        redir /.well-known/webfinger /index.php/.well-known/webfinger 301
+        redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
+
+        # Enable large file uploads
+        request_body {
+          max_size 16G
+        }
+
+        # PHP-FPM configuration for Nextcloud
+        php_fastcgi ${service.url} {
+          root ${nextcloudPackage}
+          env front_controller_active true
+          env modHeadersAvailable true
+        }
+
+        # Serve static files
+        file_server
+      ''
+    else if service.isStaticFiles or false then
+      ''
+        # Serve static files
+        root * ${service.staticPath}
+        file_server
+      ''
+    else if service.isPocketBase or false then
+      ''
+        request_body {
+          max_size 10M
+        }
+
+        # Route /api/* directly to backend
+        handle /api/* {
+          reverse_proxy ${service.url} {
+            header_up Host ${service.upstreamHost or "{host}"}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            transport http {
+              read_timeout 360s
             }
-          ''
-        else
-          ""
-      }
+          }
+        }
 
-      ${
-        if service.isPhpFpm or false then
-          let
-            nextcloudPackage =
-              if config.homelab.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
-          in
-          ''
-            # Nextcloud-specific configuration
-            root * ${nextcloudPackage}
-
-            # Security headers
-            header {
-              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-              Referrer-Policy "no-referrer"
-              X-Content-Type-Options "nosniff"
-              X-Download-Options "noopen"
-              X-Frame-Options "SAMEORIGIN"
-              X-Permitted-Cross-Domain-Policies "none"
-              X-Robots-Tag "noindex, nofollow"
-              -X-Powered-By
+        # Route /_/* directly to backend (PocketBase admin UI)
+        handle /_/* {
+          reverse_proxy ${service.url} {
+            header_up Host ${service.upstreamHost or "{host}"}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            transport http {
+              read_timeout 360s
             }
+          }
+        }
 
-            # WebDAV redirects for CardDAV and CalDAV
-            redir /.well-known/carddav /remote.php/dav 301
-            redir /.well-known/caldav /remote.php/dav 301
-            redir /.well-known/webfinger /index.php/.well-known/webfinger 301
-            redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
+        # Redirect root to /_/
+        redir / /_/ permanent
+      ''
+    else if service.https then
+      ''
+        reverse_proxy ${service.url} {
+          header_up Host ${service.upstreamHost or "{host}"}
+          header_up X-Real-IP {remote_host}
+          header_up X-Forwarded-For {remote_host}
+          header_up X-Forwarded-Proto {scheme}
+          transport http {
+            tls_insecure_skip_verify
+          }
+        }
+      ''
+    else
+      ''
+        reverse_proxy ${service.url} {
+          header_up Host ${service.upstreamHost or "{host}"}
+          ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
+          header_up X-Real-IP {remote_host}
+          header_up X-Forwarded-For {remote_host}
+          header_up X-Forwarded-Proto {scheme}
+        }
+      '';
 
-            # Enable large file uploads
-            request_body {
-              max_size 16G
-            }
+  # One named matcher + handle block per service inside a wildcard vhost.
+  mkHandle = hostDomain: name: service: ''
+    @${name} host ${name}.${hostDomain}
+    handle @${name} {
+      ${serviceBody service}
+    }
+  '';
 
-            # PHP-FPM configuration for Nextcloud
-            php_fastcgi ${service.url} {
-              root ${nextcloudPackage}
-              env front_controller_active true
-              env modHeadersAvailable true
-            }
-
-            # Serve static files
-            file_server
-          ''
-        else if service.isStaticFiles or false then
-          ''
-            # Serve static files
-            root * ${service.staticPath}
-            file_server
-          ''
-        else if service.https then
-          ''
-            reverse_proxy ${service.url} {
-              header_up Host ${service.upstreamHost or "{host}"}
-              header_up X-Real-IP {remote_host}
-              header_up X-Forwarded-For {remote_host}
-              header_up X-Forwarded-Proto {scheme}
-              transport http {
-                tls_insecure_skip_verify
-              }
-            }
-          ''
-        else
-          ''
-            reverse_proxy ${service.url} {
-              header_up Host ${service.upstreamHost or "{host}"}
-              ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
-              header_up X-Real-IP {remote_host}
-              header_up X-Forwarded-For {remote_host}
-              header_up X-Forwarded-Proto {scheme}
-            }
-          ''
-
-      }
-    '';
-  };
-
-  # Helper for WannaShare services on smoothless.org
-  mkWannaShareHost = subdomain: service: {
-    name = "${subdomain}.${smoothlessDomain}"; # e.g., db-wannashare.smoothless.org
-    value.extraConfig = ''
-
-      tls ${config.sops.templates."cf-wannashare-cert.pem".path} ${
-        config.sops.templates."cf-wannashare-key.pem".path
-      }
-
-      ${
-        if service.isStaticFiles or false then
-          ''
-            root * ${service.staticPath}
-            try_files {path} /index.html
-            file_server
-          ''
-        else if service.isPocketBase or false then
-          ''
-            request_body {
-              max_size 10M
-            }
-
-            # Route /api/* directly to backend
-            handle /api/* {
-              reverse_proxy ${service.url} {
-                header_up Host ${service.upstreamHost or "{host}"}
-                header_up X-Real-IP {remote_host}
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                transport http {
-                  read_timeout 360s
-                }
-              }
-            }
-
-            # Route /_/* directly to backend (PocketBase admin UI)
-            handle /_/* {
-              reverse_proxy ${service.url} {
-                header_up Host ${service.upstreamHost or "{host}"}
-                header_up X-Real-IP {remote_host}
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                transport http {
-                  read_timeout 360s
-                }
-              }
-            }
-
-            # Redirect root to /_/
-            redir / /_/ permanent
-          ''
-        else
-          ''
-            reverse_proxy ${service.url} {
-              header_up Host ${service.upstreamHost or "{host}"}
-              header_up X-Real-IP {remote_host}
-              header_up X-Forwarded-For {remote_host}
-              header_up X-Forwarded-Proto {scheme}
-            }
-          ''
-      }
-    '';
+  mkWildcardHost = hostDomain: svcs: {
+    useACMEHost = hostDomain;
+    extraConfig =
+      lib.concatStrings (lib.mapAttrsToList (mkHandle hostDomain) svcs)
+      + ''
+        # Unknown subdomain: close the connection
+        handle {
+          abort
+        }
+      '';
   };
 in
 {
@@ -433,46 +403,35 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    # SSL certificates for main domain (victorbuch.com)
-    sops.templates."cf-cert.pem" = {
-      content = config.sops.placeholder."cloudflare/ssl/origin_certificate";
-      owner = config.services.caddy.user;
-      group = config.services.caddy.group;
-    };
-    sops.templates."cf-key.pem" = {
-      content = config.sops.placeholder."cloudflare/ssl/origin_private_key";
-      owner = config.services.caddy.user;
-      group = config.services.caddy.group;
+    sops.secrets."cloudflare/api_token" = { };
+    sops.templates."acme-cf.env" = {
+      content = ''
+        CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder."cloudflare/api_token"}
+      '';
+      mode = "0400";
     };
 
-    # SSL certificates for WannaShare subdomain (*.wannashare.smoothless.org)
-    sops.templates."cf-wannashare-cert.pem" = {
-      content = config.sops.placeholder."cloudflare/wannashare/ssl/origin_certificate";
-      owner = config.services.caddy.user;
-      group = config.services.caddy.group;
-    };
-    sops.templates."cf-wannashare-key.pem" = {
-      content = config.sops.placeholder."cloudflare/wannashare/ssl/origin_private_key";
-      owner = config.services.caddy.user;
-      group = config.services.caddy.group;
-    };
-
-    sops.secrets = {
-      "cloudflare/ssl/origin_certificate" = {
-        owner = config.services.caddy.user;
+    # Wildcard certs via Let's Encrypt DNS-01 (lego + Cloudflare API).
+    # Replaces the old Cloudflare origin certificates, which are only
+    # trusted behind Cloudflare's proxy.
+    security.acme = {
+      acceptTerms = true;
+      defaults.email = "victorbuch@protonmail.com";
+      certs."${domain}" = {
+        domain = "*.${domain}";
+        extraDomainNames = [ domain ];
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.templates."acme-cf.env".path;
         group = config.services.caddy.group;
+        reloadServices = [ "caddy" ];
       };
-      "cloudflare/ssl/origin_private_key" = {
-        owner = config.services.caddy.user;
+      certs."${smoothlessDomain}" = {
+        domain = "*.${smoothlessDomain}";
+        extraDomainNames = [ smoothlessDomain ];
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.templates."acme-cf.env".path;
         group = config.services.caddy.group;
-      };
-      "cloudflare/wannashare/ssl/origin_certificate" = {
-        owner = config.services.caddy.user;
-        group = config.services.caddy.group;
-      };
-      "cloudflare/wannashare/ssl/origin_private_key" = {
-        owner = config.services.caddy.user;
-        group = config.services.caddy.group;
+        reloadServices = [ "caddy" ];
       };
     };
 
@@ -484,9 +443,15 @@ in
     services.caddy = {
       enable = true;
       email = "victorbuch@protonmail.com";
-      virtualHosts =
-        (lib.mapAttrs' mkHost (services // notesService // hermesWebService))
-        // (lib.mapAttrs' mkWannaShareHost wannashareServices);
+      # Traefik on wash dials mal without SNI (tunnel target is an IP);
+      # serve the main wildcard vhost for SNI-less TLS handshakes.
+      globalConfig = ''
+        default_sni fallback.${domain}
+      '';
+      virtualHosts = {
+        "*.${domain}" = mkWildcardHost domain (services // notesService // hermesWebService);
+        "*.${smoothlessDomain}" = mkWildcardHost smoothlessDomain wannashareServices;
+      };
     };
   };
 }

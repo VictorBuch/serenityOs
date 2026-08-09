@@ -414,7 +414,10 @@ in
         "--advertise-routes=192.168.0.0/24" # Share your local network
       ];
     };
-    cloudflare-tunnel.enable = true;
+    cloudflare-tunnel.enable = true; # disable at pangolin cutover (see PANGOLIN_CUTOVER.md)
+    # Pangolin site connector — needs pangolin/newt_id + pangolin/newt_secret
+    # in secrets/secrets.yaml (from the Pangolin UI) before rebuilding
+    newt.enable = true;
     caddy.enable = true;
     nginx-reverse-proxy.enable = false;
     tinyauth = {

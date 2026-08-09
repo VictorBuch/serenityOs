@@ -229,6 +229,14 @@
           ];
         }
         {
+          name = "wash";
+          # Public VPS running Pangolin: no desktop, no homelab modules
+          extraModules = [
+            ./modules/nixos/system/user.nix
+            inputs.disko.nixosModules.disko
+          ];
+        }
+        {
           name = "shepherd";
           extraModules = [
             (import-tree ./modules/nixos)

@@ -221,6 +221,12 @@ let
       https = false;
       protected = true;
     };
+    learn = {
+      # tv-learn immersion language-learning app
+      url = "http://127.0.0.1:3006";
+      https = false;
+      protected = true; # tinyauth gate until pocket-id (track #3)
+    };
     home = {
       # Home Assistant (port 8124; 8123 is taken by crafty)
       url = "http://127.0.0.1:8124";

@@ -463,6 +463,7 @@ in
     mealie.enable = true;
     lab.enable = false;
     lute.enable = true;
+    tv-learn.enable = true;
 
     hermes = {
       enable = true;

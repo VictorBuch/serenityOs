@@ -1094,6 +1094,7 @@
         "quickshell": "quickshell",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
+        "tv-learn": "tv-learn",
         "wannashare": "wannashare",
         "zen-browser": "zen-browser"
       }
@@ -1370,6 +1371,26 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "tv-learn": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786274629,
+        "narHash": "sha256-YIT+zto0SVjnIWkVeFCY4ZSQbwjOoRoVYRQngiU/azo=",
+        "ref": "refs/heads/main",
+        "rev": "d631fd80bf7ee6e8a06cf3642c4d86bc45c36014",
+        "revCount": 30,
+        "type": "git",
+        "url": "https://git.victorbuch.com/VictorBuch/tv-learn"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.victorbuch.com/VictorBuch/tv-learn"
       }
     },
     "uv2nix": {

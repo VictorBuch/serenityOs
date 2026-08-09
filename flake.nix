@@ -113,6 +113,12 @@
     # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
     wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
 
+    # tv-learn: immersion language-learning media app (learn.victorbuch.com)
+    tv-learn = {
+      url = "git+https://git.victorbuch.com/VictorBuch/tv-learn";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Hermes Agent (self-hosted personal AI agent) — ships its own nixosModule.
     # Deliberately NOT following our nixpkgs: the package is built with uv2nix
     # against its own pinned nixpkgs, and overriding it breaks the sealed venv
@@ -211,6 +217,7 @@
             ./modules/nixos/system/user.nix
             inputs.wannashare.nixosModules.default
             inputs.hermes-agent.nixosModules.default
+            inputs.tv-learn.nixosModules.tv-learn
           ];
         }
         {

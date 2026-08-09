@@ -74,6 +74,22 @@
           filtering_enabled = true;
           parental_enabled = false;
           safebrowsing_enabled = true;
+          # LAN fast-path: hit Caddy on mal directly instead of hairpinning
+          # through the Pangolin VPS. Exact rewrites beat the wildcard, so the
+          # Pangolin dashboard (no vhost on mal) still resolves to wash.
+          # NOTE: mutableSettings defaults to true, so with an existing AdGuard
+          # state file these are documentation — mirror them in the AdGuard UI
+          # (Filters -> DNS rewrites) during cutover.
+          rewrites = [
+            {
+              domain = "*.victorbuch.com";
+              answer = "192.168.0.243";
+            }
+            {
+              domain = "pangolin.victorbuch.com";
+              answer = "89.58.12.15"; # wash (Netcup VPS)
+            }
+          ];
         };
         filters = [
           {

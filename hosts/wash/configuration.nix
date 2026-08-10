@@ -3,6 +3,7 @@
 {
   config,
   pkgs,
+  lib,
   inputs,
   pkgs-stable,
   ...
@@ -164,6 +165,69 @@ in
   # SNI-less — its wildcard cert can never match the dial address, so
   # upstream verification must be off (transport is already encrypted twice).
   services.traefik.staticConfigOptions.serversTransport.insecureSkipVerify = true;
+
+  # Private HTTP resources are terminated by newt on mal's side of the tunnel,
+  # so Pangolin has to ship it a keypair. It gets one by tailing Traefik's
+  # acme.json (server/private/lib/acmeCertSync.ts polls `acme_json_path`,
+  # relative to its WorkingDirectory) and pushing what it finds to every
+  # ssl-enabled site resource.
+  #
+  # Upstream's tmpfiles rule creates Traefik's storage dir 0700 traefik:fossorial,
+  # so the pangolin user cannot even traverse it — the sync warns once per tick,
+  # no certificate row is populated, and newt dies on every private-resource TLS
+  # handshake with "failed to parse TLS keypair: no PEM data".
+  #
+  # Loosening acme.json in place is off the table: chmod on an ACL'd file rewrites
+  # the mask from the group bits, so mode and ACL fight each other, and anything
+  # that perturbs the file Traefik owns risks the public edge. Mirror it instead —
+  # Traefik keeps its untouched 0600 original, a root-run unit copies it somewhere
+  # the fossorial group can read, and privateConfig.yml points the sync at the copy.
+  #
+  # Remove once nixpkgs makes Traefik's acme.json readable to the pangolin user.
+  environment.etc."pangolin/privateConfig.yml".text = ''
+    acme:
+      acme_json_path: "config/letsencrypt-sync/acme.json"
+  '';
+
+  systemd.tmpfiles.settings."20-pangolin-acme-sync" = {
+    "/var/lib/pangolin/config/letsencrypt-sync".d = {
+      user = "root";
+      group = "fossorial";
+      mode = "0750";
+    };
+  };
+
+  # PathChanged fires on close-after-write, so renewals propagate within seconds.
+  systemd.paths.pangolin-acme-mirror = {
+    wantedBy = [ "multi-user.target" ];
+    pathConfig = {
+      PathChanged = "/var/lib/pangolin/config/letsencrypt/acme.json";
+      Unit = "pangolin-acme-mirror.service";
+    };
+  };
+
+  systemd.services.pangolin-acme-mirror = {
+    # Also runs at boot: the path unit only reacts to writes after it starts.
+    wantedBy = [ "multi-user.target" ];
+    after = [ "traefik.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "pangolin-acme-mirror" ''
+        set -eu
+        src=/var/lib/pangolin/config/letsencrypt/acme.json
+        dst=/var/lib/pangolin/config/letsencrypt-sync/acme.json
+        # Traefik creates acme.json empty before its first issuance; copying that
+        # would hand the sync an empty resolver set.
+        [ -s "$src" ] || exit 0
+        ${pkgs.coreutils}/bin/install -m 0640 -o root -g fossorial "$src" "$dst"
+      '';
+    };
+  };
+
+  # The module's preStart only copies config.yml; privateConfig.yml is ours.
+  systemd.services.pangolin.preStart = lib.mkAfter ''
+    cp -f /etc/pangolin/privateConfig.yml ${config.services.pangolin.dataDir}/config/privateConfig.yml
+  '';
 
   environment.systemPackages = with pkgs; [
     neovim

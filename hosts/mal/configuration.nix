@@ -400,6 +400,7 @@ in
     jujutsu.enable = false;
     opencode.enable = false;
     peon-ping.enable = false;
+    herdr.enable = false;
   };
 
   homelab = {

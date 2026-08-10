@@ -415,16 +415,13 @@ in
         "--advertise-routes=192.168.0.0/24" # Share your local network
       ];
     };
-    cloudflare-tunnel.enable = true; # disable at pangolin cutover (see PANGOLIN_CUTOVER.md)
-    # Pangolin site connector — needs pangolin/newt_id + pangolin/newt_secret
-    # in secrets/secrets.yaml (from the Pangolin UI) before rebuilding
+    # Retired at pangolin cutover 2026-08-10; module file kept one release
+    # for rollback (see PANGOLIN_CUTOVER.md Phase 7 for final removal)
+    cloudflare-tunnel.enable = false;
+    # Pangolin site connector (tunnel to wash)
     newt.enable = true;
     caddy.enable = true;
     nginx-reverse-proxy.enable = false;
-    tinyauth = {
-      enable = true;
-      port = 3002;
-    };
     authelia.enable = false;
     adguard.enable = true;
     pocket-id = {

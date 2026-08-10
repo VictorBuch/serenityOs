@@ -30,9 +30,17 @@ let
   };
 
   # Private resources bypass Caddy and hit the service port directly —
-  # the WG tunnel already encrypts, and skipping TLS avoids the SNI dance.
+  # the WG tunnel already encrypts, and skipping Caddy avoids the SNI dance.
   # full-domain reuses the public name so the same URL works with the
   # client connected (tunnel) and at home (AdGuard rewrite -> Caddy).
+  #
+  # `ssl` and `scheme` are INDEPENDENT legs, not one passthrough:
+  #   ssl    -> client-side TLS. Pangolin terminates it and serves the
+  #             *.<domain> wildcard cert (prefer_wildcard_cert on wash).
+  #             Must be true: the browser opens https://<name>.<domain>
+  #             either way, and a plaintext upstream answering a ClientHello
+  #             is exactly SSL_ERROR_RX_RECORD_TOO_LONG.
+  #   scheme -> how Pangolin dials the upstream on mal.
   urlPort = url: lib.toInt (builtins.head (builtins.match ".*:([0-9]+)" url));
   mkPrivateResource = domain: name: service: {
     inherit name;
@@ -41,7 +49,7 @@ let
     destination = "localhost";
     destination-port = urlPort service.url;
     scheme = if service.https or false then "https" else "http";
-    ssl = service.https or false;
+    ssl = true;
     full-domain = "${name}.${domain}";
   };
 

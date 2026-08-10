@@ -169,7 +169,10 @@
       "Bash(sort -k3 -rn)",
       "Bash(ps -eo pid,etimes,cmd -p 6653,6682,6684)",
       "Bash(ps -eo pid,etime,pcpu,stat,comm,args)",
-      "Bash(ps -eo pid,etime,pcpu,stat,args --sort=start_time)"
+      "Bash(ps -eo pid,etime,pcpu,stat,args --sort=start_time)",
+      "WebFetch(domain:docs.pangolin.net)",
+      "Bash(python3 -)",
+      "Bash(jj git *)"
     ],
     "deny": [],
     "ask": []

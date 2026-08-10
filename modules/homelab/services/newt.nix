@@ -28,6 +28,26 @@ let
     ];
     auth.sso-enabled = service.protected or false;
   };
+
+  # Private resources bypass Caddy and hit the service port directly —
+  # the WG tunnel already encrypts, and skipping TLS avoids the SNI dance.
+  # full-domain reuses the public name so the same URL works with the
+  # client connected (tunnel) and at home (AdGuard rewrite -> Caddy).
+  urlPort = url: lib.toInt (builtins.head (builtins.match ".*:([0-9]+)" url));
+  mkPrivateResource = domain: name: service: {
+    inherit name;
+    mode = "http";
+    enabled = true;
+    destination = "localhost";
+    destination-port = urlPort service.url;
+    scheme = if service.https or false then "https" else "http";
+    ssl = service.https or false;
+    full-domain = "${name}.${domain}";
+  };
+
+  isPrivate = _: s: s.private or false;
+  publicOf = svcs: lib.filterAttrs (n: s: !(isPrivate n s)) svcs;
+  privateOf = svcs: lib.filterAttrs isPrivate svcs;
 in
 {
   options.homelab.newt = {
@@ -62,9 +82,17 @@ in
       settings.endpoint = cfg.endpoint;
       environmentFile = config.sops.templates."newt.env".path;
 
-      blueprint.proxy-resources =
-        lib.mapAttrs (mkResource hl.domain) config.homelab.edge.services
-        // lib.mapAttrs (mkResource hl.smoothlessDomain) config.homelab.edge.wannashareServices;
+      blueprint = {
+        proxy-resources =
+          lib.mapAttrs (mkResource hl.domain) (publicOf config.homelab.edge.services)
+          // lib.mapAttrs (mkResource hl.smoothlessDomain) (
+            publicOf config.homelab.edge.wannashareServices
+          );
+
+        private-resources = lib.mapAttrs (mkPrivateResource hl.domain) (
+          privateOf config.homelab.edge.services
+        );
+      };
     };
   };
 }

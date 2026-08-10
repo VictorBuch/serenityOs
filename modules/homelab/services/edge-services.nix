@@ -13,6 +13,9 @@
 #   url            backend URL for Caddy (empty for static sites)
 #   protected      true -> Pangolin SSO auth screen on the tunnel path
 #                  (LAN-direct traffic is never gated)
+#   private        true -> NOT published on the internet; becomes a Pangolin
+#                  private resource, reachable only with a connected Pangolin
+#                  client (olm) or on the LAN. Same URL both ways.
 #   https          backend speaks TLS (self-signed; Caddy skips verify)
 #   isPhpFpm / isStaticFiles / isPocketBase / staticPath / upstreamHost /
 #   upstreamOrigin  special-case routing handled by caddy.nix
@@ -60,6 +63,7 @@
         url = "http://127.0.0.1:3030";
         https = false;
         protected = true;
+        private = true;
       };
       status = {
         url = "http://127.0.0.1:3001";
@@ -70,64 +74,75 @@
         url = "https://127.0.0.1:8443";
         https = true;
         protected = true;
+        private = true;
       };
       ad = {
         url = "http://127.0.0.1:3000";
         https = false;
         protected = true;
+        private = true;
       };
       shows = {
         # Sonarr
         url = "http://127.0.0.1:8989";
         https = false;
         protected = true;
+        private = true;
       };
       movies = {
         # Radarr
         url = "http://127.0.0.1:7878";
         https = false;
         protected = true;
+        private = true;
       };
       music = {
         # Lidarr
         url = "http://127.0.0.1:8686";
         https = false;
         protected = true;
+        private = true;
       };
       books = {
         # Readarr
         url = "http://127.0.0.1:8787";
         https = false;
         protected = true;
+        private = true;
       };
       prowlarr = {
         url = "http://127.0.0.1:9696";
         https = false;
         protected = true;
+        private = true;
       };
       subtitles = {
         # Bazarr
         url = "http://127.0.0.1:6767";
         https = false;
         protected = true;
+        private = true;
       };
       qbittorrent = {
         # qBittorrent WebUI (host port 8081 -> pia-tun -> qbittorrent:8080)
         url = "http://127.0.0.1:8081";
         https = false;
         protected = true;
+        private = true;
       };
       qui = {
         # qui modern web UI for qBittorrent
         url = "http://127.0.0.1:7476";
         https = false;
         protected = false; # OIDC handled by qui itself via pocket-id
+        private = true;
       };
       mousehole = {
         # MAM dynamic seedbox IP updater (published via pia-tun on host:5010)
         url = "http://127.0.0.1:5010";
         https = false;
         protected = true;
+        private = true;
       };
       subscriptions = {
         # Wallos
@@ -209,6 +224,7 @@
         url = "http://127.0.0.1:19200";
         https = false;
         protected = false; # OIDC handled by FileFlows itself
+        private = true;
       };
       ntfy = {
         # ntfy-sh push notifications

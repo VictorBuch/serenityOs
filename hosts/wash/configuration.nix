@@ -126,6 +126,9 @@ in
 
   services.pangolin = {
     enable = true;
+    # Enterprise build (free for personal use; key from app.pangolin.net,
+    # entered at /admin/license) — needed for HTTP private resources
+    package = pkgs.fosrl-pangolin.override { edition = "enterprise"; };
     openFirewall = true;
     baseDomain = domain;
     dashboardDomain = "pangolin.${domain}";

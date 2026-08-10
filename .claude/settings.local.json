@@ -150,7 +150,8 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(m['name'] if 'name' in m else list\\(m.keys\\(\\)\\), m.get\\('active'\\), m.get\\('active_tags'\\)\\) for m in d['monitors']]\")",
       "Bash(nix-store -r /nix/store/9ijjx2glsqkkd8cxlfnlf1akvj2rd8i7-mango-config.conf.drv)",
       "Bash(grim shot.png)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(audio-winetricks -q dxvk2052)"
     ],
     "deny": [],
     "ask": []

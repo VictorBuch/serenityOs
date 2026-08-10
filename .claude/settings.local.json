@@ -172,7 +172,8 @@
       "Bash(ps -eo pid,etime,pcpu,stat,args --sort=start_time)",
       "WebFetch(domain:docs.pangolin.net)",
       "Bash(python3 -)",
-      "Bash(jj git *)"
+      "Bash(jj git *)",
+      "Bash(jj describe *)"
     ],
     "deny": [],
     "ask": []

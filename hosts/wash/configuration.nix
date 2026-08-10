@@ -143,6 +143,9 @@ in
           prefer_wildcard_cert = true;
         };
       };
+      # Integration API (port 3003) — used for API-key operations like
+      # license activation; also silences traefik's int-api-service noise
+      flags.enable_integration_api = true;
     };
   };
 

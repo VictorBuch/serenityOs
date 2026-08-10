@@ -149,8 +149,13 @@ Product Manager installs the licensing DLLs the plugins refuse to load without:
 
 ```bash
 audio-wine ~/Downloads/IK_Product_Manager_*.exe
-audio-wine "$HOME/.wine-audio/drive_c/Program Files (x86)/IK Multimedia/IK Product Manager/IK Product Manager.exe"
+ik-product-manager
 ```
+
+`ik-product-manager` and `slate-audio-center` find the executable in either of the paths
+each vendor installs to, refuse to start a second instance behind a wedged first one, and
+pass the flags those apps need under wine. Prefer them over calling `audio-wine` on the
+`.exe` by hand.
 
 ### 4. Point REAPER at them
 
@@ -206,6 +211,40 @@ break Electron apps. That is reason enough not to install it here. It is *not* e
 that plugins do not want it.
 
 SSD5 is untested — it is not installed in the current prefix.
+
+### IK Product Manager opens a black window
+
+Different cause from the DXVK one above, and it survives onto the `modern` track. The
+launcher passes `--disable-gpu`, which fixes it.
+
+Chromium's GPU process starts, answers version queries and looks healthy, so the usual
+"is Vulkan/GL working" checks all pass. What fails is the command buffer channel between
+renderer and GPU process:
+
+```
+ERROR:command_buffer_proxy_impl.cc(122)] ContextResult::kTransientFailure:
+    Failed to send GpuChannelMsg_CreateCommandBuffer
+```
+
+The window is created but never mapped — `xwininfo -id <win>` reports `IsUnMapped` for
+every one of its top-levels, because the app waits on `ready-to-show` and the renderer
+never gets there. Measured on the same prefix, back to back:
+
+| | first IPC (`e:REQUEST`) | window | outcome |
+|---|---|---|---|
+| default | t+133s | never `IsViewable` | process dies |
+| `--disable-gpu` | t+3s | shows, renders | works |
+
+Note what the failure is *not*: the app is not crashing on startup and it is not stuck on
+JavaScript. `document.readyState` sits at `"loading"` with a null `document.body` for
+minutes. To see that for yourself, launch with `--remote-debugging-port=9222` and query
+the renderer over CDP — `curl -s http://127.0.0.1:9222/json` lists the pages, and
+`Runtime.evaluate` against the page's `webSocketDebuggerUrl` reads its actual state. That
+is far more direct than guessing from a blank window.
+
+Steven Slate Audio Center does **not** need this flag; it renders through the
+`renderer=vulkan` wined3d setting `setup-audio-wineprefix` applies. Add `--disable-gpu` to
+`slate-audio-center` only if it ever regresses.
 
 ### SSD5: don't drag instruments onto the kit
 

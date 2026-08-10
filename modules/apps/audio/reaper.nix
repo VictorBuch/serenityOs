@@ -214,6 +214,7 @@ let
       label,
       candidates,
       procMatch,
+      extraArgs ? [ ],
     }:
     pkgs.writeShellScriptBin name ''
       set -uo pipefail
@@ -248,7 +249,7 @@ let
         exit 1
       fi
 
-      exec ${audioWine}/bin/audio-wine "$EXE" "$@"
+      exec ${audioWine}/bin/audio-wine "$EXE" ${lib.escapeShellArgs extraArgs} "$@"
     '';
 
   ikProductManager = mkPrefixApp {
@@ -259,6 +260,15 @@ let
       "$HOME/.wine-audio/drive_c/Program Files/IK Multimedia/IK Product Manager/IK Product Manager.exe"
       "$HOME/.wine-audio/drive_c/Program Files (x86)/IK Multimedia/IK Product Manager/IK Product Manager.exe"
     ];
+    # Without this the window is created but never mapped, and the app looks like a black
+    # screen that eventually vanishes. Measured, same machine, same prefix:
+    #   default   -- "ContextResult::kTransientFailure: Failed to send
+    #                GpuChannelMsg_CreateCommandBuffer", first IPC at t+133s, no window
+    #                ever reaches IsViewable, process dies.
+    #   --disable-gpu -- first IPC at t+3s, page renders, window shows.
+    # Its GPU process comes up and answers version queries, so this is not the usual
+    # missing-Vulkan story; the command buffer channel itself is what fails under wine.
+    extraArgs = [ "--disable-gpu" ];
   };
 
   slateAudioCenter = mkPrefixApp {

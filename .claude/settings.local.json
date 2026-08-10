@@ -158,7 +158,17 @@
       "Bash(qemu-img info *)",
       "Bash(nix-store --gc --print-dead)",
       "Bash(nix-env --list-generations --profile /nix/var/nix/profiles/system)",
-      "Bash(xargs -r du -sch --exclude='*')"
+      "Bash(xargs -r du -sch --exclude='*')",
+      "Bash(awk -F'\\\\t' '{s+=$1} END {printf \"%.1f GB\\\\n\", s/1073741824}' /tmp/claude-1000/-home-jayne-serenityOs/337732e3-17c9-48cb-ade0-f63c5ba7aeb0/scratchpad/big.tsv)",
+      "Bash(findmnt -t btrfs -o TARGET,SOURCE,FSROOT)",
+      "Bash(stat -c '%D %n' / /home /nix /var /var/lib/libvirt)",
+      "Bash(awk -F'\\\\t' '{s+=$1} END {printf \"files >500M total: %.1f GB\\\\n\", s/1073741824}' all.tsv)",
+      "Bash(awk -F'\\\\t' '{n[$1]++; sz[$1]=$2} END {t=0; c=0; for \\(k in n\\) if \\(n[k]>1\\) {t+=sz[k]; c++} printf \"duplicated basenames: %d, reclaimable if identical: %.1f GB\\\\n\", c, t/1073741824}' /tmp/claude-1000/-home-jayne-serenityOs/337732e3-17c9-48cb-ade0-f63c5ba7aeb0/scratchpad/insv.tsv)",
+      "Bash(awk -F'\\\\t' '{n[$1]++; s[$1]+=$2} END {for \\(k in s\\) printf \"%s\\\\t%d files\\\\t%.1f GB\\\\n\", k, n[k], s[k]/1073741824}')",
+      "Bash(sort -k3 -rn)",
+      "Bash(ps -eo pid,etimes,cmd -p 6653,6682,6684)",
+      "Bash(ps -eo pid,etime,pcpu,stat,comm,args)",
+      "Bash(ps -eo pid,etime,pcpu,stat,args --sort=start_time)"
     ],
     "deny": [],
     "ask": []

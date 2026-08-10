@@ -204,11 +204,80 @@ let
     exec ${audioWine}/bin/audio-wine "$INSTALLER"
   '';
 
+  # Launchers for the vendor manager apps that live inside the prefix. Both are Electron,
+  # and Electron takes a single-instance lock: if an earlier instance is wedged, launching
+  # again hands off to the dead window and nothing appears. So refuse to start when one is
+  # already running, and print the pids rather than leaving you guessing.
+  mkPrefixApp =
+    {
+      name,
+      label,
+      candidates,
+      procMatch,
+    }:
+    pkgs.writeShellScriptBin name ''
+      set -uo pipefail
+
+      EXE=""
+      while IFS= read -r candidate; do
+        [ -n "$candidate" ] || continue
+        if [ -f "$candidate" ]; then
+          EXE="$candidate"
+          break
+        fi
+      done <<PATHS
+      ${lib.concatStringsSep "\n" candidates}
+      PATHS
+
+      if [ -z "$EXE" ]; then
+        echo "${label} is not installed in ~/.wine-audio." >&2
+        echo "Looked in:" >&2
+        cat >&2 <<PATHS
+      ${lib.concatStringsSep "\n" candidates}
+      PATHS
+        exit 1
+      fi
+
+      RUNNING="$(pgrep -f '${procMatch}' 2>/dev/null | tr '\n' ' ' || true)"
+      if [ -n "''${RUNNING// /}" ]; then
+        echo "${label} is already running (pids: ''${RUNNING%% })." >&2
+        echo "" >&2
+        echo "Electron hands a second launch off to the existing instance, so if its" >&2
+        echo "window is missing or frozen you will see nothing. Stop it and retry:" >&2
+        echo "  kill -9 ''${RUNNING%% }" >&2
+        exit 1
+      fi
+
+      exec ${audioWine}/bin/audio-wine "$EXE" "$@"
+    '';
+
+  ikProductManager = mkPrefixApp {
+    name = "ik-product-manager";
+    label = "IK Product Manager";
+    procMatch = "IK Product Manager.exe";
+    candidates = [
+      "$HOME/.wine-audio/drive_c/Program Files/IK Multimedia/IK Product Manager/IK Product Manager.exe"
+      "$HOME/.wine-audio/drive_c/Program Files (x86)/IK Multimedia/IK Product Manager/IK Product Manager.exe"
+    ];
+  };
+
+  slateAudioCenter = mkPrefixApp {
+    name = "slate-audio-center";
+    label = "Steven Slate Audio Center";
+    procMatch = "Steven Slate Audio Center.exe";
+    candidates = [
+      "$HOME/.wine-audio/drive_c/users/$USER/AppData/Local/Programs/Steven Slate Audio Center/Steven Slate Audio Center.exe"
+      "$HOME/.wine-audio/drive_c/Program Files/Steven Slate Audio Center/Steven Slate Audio Center.exe"
+    ];
+  };
+
   # Helper script to run wine with audio prefix
   audioWine = pkgs.writeShellScriptBin "audio-wine" ''
     export WINEPREFIX="$HOME/.wine-audio"
     export WINEARCH="win64"
-    export WINEDEBUG="-all"
+    # Overridable, same as the reaper wrapper: "-all" hides wine's err channel, and with
+    # it any crash an installer or manager app hits.
+    export WINEDEBUG="''${WINEDEBUG:--all}"
     export WINEFSYNC="1"
     export WINE_LARGE_ADDRESS_AWARE="1"
     export WINELOADER="${track.wine}/bin/wine"
@@ -373,6 +442,8 @@ in
           audioWine # audio-wine command
           audioWinetricks # audio-winetricks command
           installIlok # install-ilok command
+          ikProductManager # ik-product-manager command
+          slateAudioCenter # slate-audio-center command
         ];
 
       description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";

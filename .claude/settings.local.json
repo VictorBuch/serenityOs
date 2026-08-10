@@ -151,7 +151,14 @@
       "Bash(nix-store -r /nix/store/9ijjx2glsqkkd8cxlfnlf1akvj2rd8i7-mango-config.conf.drv)",
       "Bash(grim shot.png)",
       "Bash(echo \"exit=$?\")",
-      "Bash(audio-winetricks -q dxvk2052)"
+      "Bash(audio-winetricks -q dxvk2052)",
+      "Bash(findmnt -no TARGET,SOURCE,SIZE,USED /mnt)",
+      "Bash(virsh -c qemu:///system list --all)",
+      "Bash(xargs -r du -sh)",
+      "Bash(qemu-img info *)",
+      "Bash(nix-store --gc --print-dead)",
+      "Bash(nix-env --list-generations --profile /nix/var/nix/profiles/system)",
+      "Bash(xargs -r du -sch --exclude='*')"
     ],
     "deny": [],
     "ask": []

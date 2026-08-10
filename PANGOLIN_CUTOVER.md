@@ -7,34 +7,28 @@ Caddy stays as internal vhost router on mal (LAN path + PHP-FPM/static/hermes).
 Everything in the repo is already prepared:
 
 - `hosts/wash/` — VPS host running `services.pangolin` (+ Traefik + gerbil)
-- `secrets/vps.yaml` — wash-only vault (`pangolin/server_secret` set,
-  `cloudflare/api_token` is a **placeholder**)
+- `secrets/vps.yaml` — wash-only vault, complete (server secret + CF token)
 - `modules/homelab/services/newt.nix` — `homelab.newt` (enabled on mal, needs secrets)
 - `modules/homelab/services/caddy.nix` — reworked: LE wildcard certs via
   ACME DNS-01 (no more CF origin certs), TinyAuth forward_auth removed
-- `modules/homelab/services/adguard.nix` — LAN rewrites (`WASH_VPS_IP` placeholder)
+- `modules/homelab/services/adguard.nix` — LAN rewrites (wash IP set)
 
 The wash age private key is at `~/.config/sops/age/wash.key` on inara
 (public key already in `.sops.yaml`). Keep it until the install is done.
 
 ---
 
-## Phase 0 — Cloudflare API token (blocking, do first)
+## Phase 0 — Cloudflare API token ✅ DONE (2026-08-10)
 
-The old `cloudflare/api_token` scope is unknown. Mint a fresh token at
-Cloudflare → My Profile → API Tokens: **Zone / DNS / Edit** on BOTH
-`victorbuch.com` and `smoothless.org`. Then:
-
-```sh
-sops secrets/secrets.yaml   # set cloudflare/api_token (mal Caddy uses it for DNS-01)
-sops secrets/vps.yaml       # replace the REPLACE_ME cloudflare/api_token value
-```
+Existing `cloudflare/api_token` verified via `scripts/check-cf-token.sh`:
+DNS:Edit works on both zones; token copied into `secrets/vps.yaml`.
+(Script + this note deletable after cutover.)
 
 ## Phase 1 — Order VPS + install
 
-1. Order **Netcup VPS 500 G12** (x86_64). Note the public IPv4 → `<VPS_IP>`.
+1. Order **Netcup VPS 500 G12** (x86_64). Note the public IPv4 → `89.58.12.15`.
 2. Cloudflare DNS: add **unproxied** (grey cloud) A record
-   `pangolin.victorbuch.com → <VPS_IP>`.
+   `pangolin.victorbuch.com → 89.58.12.15`.
 3. Netcup SCP: boot the **rescue system**, note root password, confirm disk:
    `lsblk` → if the disk is `/dev/vda` (not `/dev/sda`), edit `hosts/wash/disko.nix`.
 4. Stage the age key and install from this repo:
@@ -48,12 +42,12 @@ nix run github:nix-community/nixos-anywhere -- \
   --flake .#wash \
   --generate-hardware-config nixos-generate-config hosts/wash/hardware-configuration.nix \
   --extra-files /tmp/wash-extra-files \
-  root@<VPS_IP>
+  root@89.58.12.15
 ```
 
 5. Commit the regenerated `hosts/wash/hardware-configuration.nix`; delete
    `/tmp/wash-extra-files`.
-6. Verify: `ssh wash@<VPS_IP>`, then
+6. Verify: `ssh wash@89.58.12.15`, then
    `systemctl status pangolin gerbil traefik`, `ss -ulpn | grep 51820`.
 7. Browse `https://pangolin.victorbuch.com` → complete initial setup
    (create the server-admin account). Cert must be a valid LE wildcard.
@@ -91,43 +85,46 @@ Pangolin resources exist and DNS is flipped. Do Phases 2–5 in one evening.
 4. Create resource `id.victorbuch.com` → target `localhost:443`, method
    https, site mal — **no auth** (it is the IdP; gating it deadlocks login).
 5. Create test resource `status.victorbuch.com` (same target, **SSO on**).
-   Cloudflare DNS: specific unproxied A `status.victorbuch.com → <VPS_IP>`
+   Cloudflare DNS: specific unproxied A `status.victorbuch.com → 89.58.12.15`
    (specific record beats the wildcard still pointing at the tunnel).
 6. From **mobile data**: `https://status.victorbuch.com` → Pangolin auth
    screen → Pocket ID passkey → Uptime Kuma. 
 
 ## Phase 4 — LAN path
 
-1. Set the real `<VPS_IP>` in `modules/homelab/services/adguard.nix`
-   (replace `WASH_VPS_IP`), rebuild mal.
+1. Wash IP already set in `modules/homelab/services/adguard.nix` — this
+   applies with the Phase 2 rebuild.
 2. AdGuard runs with `mutableSettings = true` → also add in the AdGuard UI
    (Filters → DNS rewrites):
    - `*.victorbuch.com` → `192.168.0.243`
-   - `pangolin.victorbuch.com` → `<VPS_IP>`
+   - `pangolin.victorbuch.com` → `89.58.12.15`
 3. Verify on LAN: `dig @192.168.0.243 photos.victorbuch.com` → `192.168.0.243`;
    browser gets valid LE cert from Caddy, no auth screen, apps load
    (immich, paperless, hermes agent, nextcloud).
 
-## Phase 5 — Full resource inventory (Pangolin UI)
+## Phase 5 — Full resource inventory (declarative, already in repo)
 
-All resources: target `localhost:443`, method **https**, site "mal".
-Matches the `protected` flags in `modules/homelab/services/caddy.nix`.
+Resources are **generated from `modules/homelab/services/edge-services.nix`**
+via the newt blueprint (`modules/homelab/services/newt.nix`) — the same list
+that drives Caddy, so LAN path and tunnel path cannot drift. 39 resources,
+all targeting `localhost:443` https on site "mal"; `protected = true` maps
+to Pangolin's SSO auth screen.
 
-**SSO on** (auth screen): dashboard, ma, files, status, crafty, ad, shows,
-movies, music, books, prowlarr, subtitles, qbittorrent, mousehole,
-subscriptions, paperless, lute, learn, tools, agent
+They are pushed when newt connects (the Phase 2 rebuild). In this phase just
+**verify in the Pangolin UI** that all 39 appear with the right auth flags,
+and that they coexist cleanly with the two hand-made Phase 3 resources
+(`id`, `status`) — delete the hand-made ones if the blueprint duplicated them.
 
-**No auth** (own login / API clients): id, photos, home, jellyfin, plex,
-nextcloud, git, cooking, request, audiobooks, ntfy, cv, invoice, fileflows,
-qui, notes — and on smoothless.org: wannashare, db-wannashare, suboptimal
+Adding a service later: one entry in edge-services.nix, rebuild mal. Done —
+both paths.
 
 Not recreated: `auth.victorbuch.com` (TinyAuth is gone).
 
 ## Phase 6 — DNS flip + retire tunnel
 
 1. Cloudflare DNS (TTL 300, keep old values noted for rollback):
-   - `*.victorbuch.com`: tunnel CNAME → **unproxied A** `<VPS_IP>`
-   - `*.smoothless.org`: tunnel CNAME → **unproxied A** `<VPS_IP>`
+   - `*.victorbuch.com`: tunnel CNAME → **unproxied A** `89.58.12.15`
+   - `*.smoothless.org`: tunnel CNAME → **unproxied A** `89.58.12.15`
 2. `hosts/mal/configuration.nix`:
    - `cloudflare-tunnel.enable = false;`
    - delete the `tinyauth = { ... };` block

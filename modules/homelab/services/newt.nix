@@ -6,6 +6,24 @@
 let
   cfg = config.homelab.newt;
   hl = config.homelab;
+
+  # One Pangolin resource per edge service (see edge-services.nix — shared
+  # with caddy.nix so the tunnel path and the LAN path can never drift).
+  # Every resource targets Caddy on this host, which fans out by Host header;
+  # `protected` becomes Pangolin's SSO auth screen on the public path.
+  mkResource = domain: name: service: {
+    inherit name;
+    protocol = "http";
+    full-domain = "${name}.${domain}";
+    targets = [
+      {
+        hostname = "localhost";
+        method = "https";
+        port = 443;
+      }
+    ];
+    auth.sso-enabled = service.protected or false;
+  };
 in
 {
   options.homelab.newt = {
@@ -37,6 +55,10 @@ in
       enable = true;
       settings.endpoint = cfg.endpoint;
       environmentFile = config.sops.templates."newt.env".path;
+
+      blueprint.proxy-resources =
+        lib.mapAttrs (mkResource hl.domain) config.homelab.edge.services
+        // lib.mapAttrs (mkResource hl.smoothlessDomain) config.homelab.edge.wannashareServices;
     };
   };
 }

@@ -15,6 +15,10 @@ let
     inherit name;
     protocol = "http";
     full-domain = "${name}.${domain}";
+    # Caddy routes by Host and needs a matching SNI to complete the TLS
+    # handshake — traefik would otherwise dial SNI-less (tunnel IP target)
+    # and Caddy rejects that.
+    tls-server-name = "${name}.${domain}";
     targets = [
       {
         hostname = "localhost";
@@ -48,6 +52,8 @@ in
         NEWT_SECRET=${config.sops.placeholder."pangolin/newt_secret"}
       '';
       mode = "0400";
+      # EnvironmentFile content changes don't restart units on their own
+      restartUnits = [ "newt.service" ];
     };
 
     # Outbound-only: wss to pangolin + WireGuard to gerbil, no firewall ports needed

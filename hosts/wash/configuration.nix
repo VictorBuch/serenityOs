@@ -165,36 +165,6 @@ in
   # upstream verification must be off (transport is already encrypted twice).
   services.traefik.staticConfigOptions.serversTransport.insecureSkipVerify = true;
 
-  # Private HTTP resources are terminated by newt on the far side of the
-  # tunnel, so Pangolin has to ship it a keypair. It gets one by tailing
-  # Traefik's acme.json (server/private/lib/acmeCertSync.ts, polling
-  # `config/letsencrypt/acme.json` relative to its WorkingDirectory).
-  #
-  # Upstream's own tmpfiles rule creates that directory 0700 traefik:fossorial
-  # — group gets nothing, so the pangolin user cannot even traverse it. The
-  # sync warns once and returns, no certificate row is ever populated, and
-  # newt dies on every TLS handshake with "failed to parse TLS keypair: no PEM
-  # data". Public resources are unaffected because Traefik reads acme.json as
-  # its owner. 0750 + a default ACL hand the fossorial group read access and
-  # keep it across renewals.
-  #
-  # Sorts after upstream's "10-fossorial-paths"; drop once nixpkgs ships a fix.
-  systemd.tmpfiles.settings."20-pangolin-acme-readable" = {
-    "/var/lib/pangolin/config/letsencrypt" = {
-      z = {
-        user = "traefik";
-        group = "fossorial";
-        mode = "0750";
-      };
-      "A+".argument = "d:g:fossorial:rX,g:fossorial:rX";
-    };
-    "/var/lib/pangolin/config/letsencrypt/acme.json".z = {
-      user = "traefik";
-      group = "fossorial";
-      mode = "0640";
-    };
-  };
-
   environment.systemPackages = with pkgs; [
     neovim
     git

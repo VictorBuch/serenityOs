@@ -35,7 +35,11 @@ in
       "1.1.1.1"
       "9.9.9.9"
     ];
-    # 80/443 TCP + 51820 UDP are opened by services.pangolin.openFirewall
+    # 80/443 TCP + 51820 UDP are opened by services.pangolin.openFirewall.
+    # Gerbil's actual UDP data-plane server listens on 21820 (module's
+    # openFirewall misses it) — without this, newt's WG handshake is dropped
+    # and every tunneled request 504s.
+    firewall.allowedUDPPorts = [ 21820 ];
   };
 
   # GC, auto-upgrade, store optimization, boot cleanup
@@ -149,6 +153,11 @@ in
       "1.1.1.1:53"
       "1.0.0.1:53"
     ];
+
+  # Resource targets are mal's Caddy over the encrypted WG tunnel, dialed
+  # SNI-less — its wildcard cert can never match the dial address, so
+  # upstream verification must be off (transport is already encrypted twice).
+  services.traefik.staticConfigOptions.serversTransport.insecureSkipVerify = true;
 
   environment.systemPackages = with pkgs; [
     neovim

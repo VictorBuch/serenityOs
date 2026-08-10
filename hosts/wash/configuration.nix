@@ -20,12 +20,21 @@ in
 
   boot = {
     loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    # Netcup's UEFI NVRAM does not persist reliably across power cycles —
+    # skip EFI variables and rely on the fallback \EFI\BOOT\BOOTX64.EFI path
+    loader.efi.canTouchEfiVariables = false;
   };
 
   networking = {
     hostName = "wash";
     useDHCP = true;
+    # Static resolvers: DHCP populates resolv.conf too late for traefik's
+    # startup (badger plugin download + ACME hit an empty resolv.conf and
+    # fall back to [::1]:53). Baked-in entries close the race for good.
+    nameservers = [
+      "1.1.1.1"
+      "9.9.9.9"
+    ];
     # 80/443 TCP + 51820 UDP are opened by services.pangolin.openFirewall
   };
 
@@ -41,6 +50,17 @@ in
   yubikey.enable = false;
 
   user.userName = username;
+
+  # Key-only SSH box with no console password — wheel must sudo without one
+  security.sudo.wheelNeedsPassword = false;
+
+  # Traefik downloads the badger plugin and reaches LE at startup; without
+  # this it races DHCP/DNS on boot and comes up degraded (plugins disabled,
+  # ACME stuck on [::1]:53)
+  systemd.services.traefik = {
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+  };
 
   # FIDO2 SSH authorized keys -- one per YubiKey (same as mal)
   users.users."${username}".openssh.authorizedKeys.keys = [
@@ -86,10 +106,14 @@ in
       mode = "0400";
     };
 
-    # lego (via traefik) reads CF_DNS_API_TOKEN for DNS-01 wildcard certs
+    # lego (via traefik) reads CF_DNS_API_TOKEN for DNS-01 wildcard certs.
+    # Propagation timeout raised: default 60s loses to recursive resolvers'
+    # ~5 min negative caching of _acme-challenge names.
     templates."traefik-cf.env" = {
       content = ''
         CF_DNS_API_TOKEN=${config.sops.placeholder."cloudflare/api_token"}
+        CLOUDFLARE_PROPAGATION_TIMEOUT=300
+        CLOUDFLARE_POLLING_INTERVAL=10
       '';
       owner = "traefik";
       mode = "0400";
@@ -116,6 +140,15 @@ in
   };
 
   services.traefik.environmentFiles = [ config.sops.templates."traefik-cf.env".path ];
+
+  # DNS-01 propagation self-check must not use the box's recursive resolvers
+  # (netcup/quad9 negative-cache _acme-challenge lookups); Cloudflare's own
+  # resolver sees the zone update within seconds.
+  services.traefik.staticConfigOptions.certificatesResolvers.letsencrypt.acme.dnsChallenge.resolvers =
+    [
+      "1.1.1.1:53"
+      "1.0.0.1:53"
+    ];
 
   environment.systemPackages = with pkgs; [
     neovim
@@ -147,6 +180,7 @@ in
     jujutsu.enable = false;
     opencode.enable = false;
     peon-ping.enable = false;
+    herdr.enable = false;
   };
 
   system.stateVersion = "25.11";

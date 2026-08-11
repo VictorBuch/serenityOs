@@ -1,438 +1,214 @@
-# Development Environment Templates
+# Development Environments
 
-Portable, reproducible development environments using [devenv](https://devenv.sh) and direnv for automatic activation.
+Shared [devenv](https://devenv.sh) modules, imported by projects rather than copied into them.
 
-## Why devenv?
+## The idea
 
-**Benefits over traditional approaches:**
+A project does **not** get a copy of the config. It gets a short `devenv.yaml` that
+imports modules from this repo:
 
-- ✅ **Portable** - Copy templates to any project, no dependency on this flake
-- ✅ **Team-friendly** - Teammates only need `nix` + `devenv` installed
-- ✅ **Reproducible** - Exact same environment across all machines
-- ✅ **Auto-activation** - Environments activate automatically with `direnv`
-- ✅ **Rich features** - Language modules, services, git hooks, custom scripts
-- ✅ **Service management** - PostgreSQL, Redis, and more with `devenv up`
+```yaml
+inputs:
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+  serenity:
+    url: github:VictorBuch/serenityOs
+    flake: false
 
-## Available Templates
-
-| Template             | Use Case                  | Key Features                                    |
-| -------------------- | ------------------------- | ----------------------------------------------- |
-| **nodejs**           | Next.js, React, any JS/TS | Node.js 22, all package managers, Prettier     |
-| **vue-nuxt**         | Vue 3 & Nuxt 3 projects   | Node.js 20 LTS, pnpm, Vue language server       |
-| **flutter**          | Flutter mobile/web apps   | Flutter, Android SDK, Dart formatter            |
-| **flutter-appwrite** | Flutter + Appwrite        | Everything in flutter + Appwrite CLI            |
-| **docker**           | Docker Compose projects   | Docker, Node.js, PostgreSQL, Redis (via devenv) |
-| **go**               | Backend APIs, CLI tools   | Latest Go, gopls, delve, golangci-lint, sqlc    |
-
-## Prerequisites
-
-Your teammates only need:
-
-```bash
-# 1. Install Nix (if not already installed)
-sh <(curl -L https://nixos.org/nix/install)
-
-# 2. Install devenv
-nix-env -iA nixpkgs.devenv
-
-# 3. Install direnv (optional, but recommended)
-nix-env -iA nixpkgs.direnv
-
-# 4. Add direnv hook to your shell
-# For bash: add to ~/.bashrc
-eval "$(direnv hook bash)"
-
-# For zsh: add to ~/.zshrc
-eval "$(direnv hook zsh)"
+imports:
+  - serenity/devenvs/modules/base
+  - serenity/devenvs/modules/nodejs
 ```
 
-## Quick Start
+Consequences:
 
-### Starting a New Project
+- **One place to fix things.** Edit `devenvs/modules/nodejs/devenv.nix`, push, and every
+  project picks it up on its next `devenv update`.
+- **Projects stay pinned.** `devenv.lock` records the exact commit each project fetched, so
+  nothing changes under a project until you deliberately update it.
+- **Portable.** Unlike a symlink into `~/serenityOs`, this resolves on a teammate's machine
+  and in CI — the repo is public and the input is fetched, not linked.
 
-**Next.js / React Project:**
+---
+
+# Workflow
+
+## Starting a new project
 
 ```bash
-# Create your Next.js app
-npx create-next-app@latest my-app
+npx create-next-app@latest my-app     # scaffold the app first
 cd my-app
 
-# Copy the nodejs template
-cp -r ~/serenityOs/devshells/nodejs/* .
+devenv-init node                       # writes devenv.yaml, devenv.nix, .envrc, .gitignore
+direnv allow                           # builds the env, activates it
 
-# Allow direnv to activate
-direnv allow
-
-# Environment is now active!
-npm install
-npm run dev
-```
-
-**Vue / Nuxt Project:**
-
-```bash
-# Create your Vue app
-npm create vue@latest my-vue-app
-cd my-vue-app
-
-# Copy the vue-nuxt template
-cp -r ~/serenityOs/devshells/vue-nuxt/* .
-
-# Allow direnv
-direnv allow
-
-# Ready to go!
+cmds                                   # see what commands you got
 pnpm install
-pnpm dev
-```
-
-**Flutter Project:**
-
-```bash
-# Create Flutter app
-flutter create my_flutter_app
-cd my_flutter_app
-
-# Copy the flutter template
-cp -r ~/serenityOs/devshells/flutter/* .
-
-# Allow direnv
-direnv allow
-
-# Verify setup
-doctor  # Custom script from template
-flutter run
-```
-
-**Docker Compose Project:**
-
-```bash
-# Create project directory
-mkdir my-fullstack-app && cd my-fullstack-app
-
-# Copy the docker template
-cp -r ~/serenityOs/devshells/docker/* .
-
-# Allow direnv
-direnv allow
-
-# Start local PostgreSQL + Redis
-devenv up -d
-
-# Your services are now running!
-```
-
-## How It Works
-
-1. **Templates are standalone** - Each template contains all configuration needed
-2. **direnv watches for `.envrc`** - Automatically loads environment when you `cd` into project
-3. **devenv manages everything** - Packages, services, git hooks, scripts all defined in `devenv.nix`
-4. **No coupling** - Projects don't depend on your NixOS/Darwin configuration
-
-## Template Features
-
-### Automatic Formatting (Pre-commit Hooks)
-
-All templates include git hooks that run formatters before each commit:
-
-- **nodejs/vue-nuxt**: Prettier (JavaScript, TypeScript, Vue, JSON)
-- **flutter/flutter-appwrite**: Dart format
-- **docker**: Prettier (for JS/JSON files)
-
-Formatters run automatically on `git commit` - no manual formatting needed!
-
-### Custom Scripts
-
-Each template includes helpful scripts:
-
-**nodejs template:**
-
-```bash
-dev      # Start development server (auto-detects pnpm/yarn/bun/npm)
-build    # Build for production
-test     # Run tests
-format   # Manually format code with Prettier
-```
-
-**vue-nuxt template:**
-
-```bash
-dev      # Start dev server with pnpm
-build    # Build for production
-preview  # Preview production build
-format   # Format code with Prettier
-```
-
-**flutter templates:**
-
-```bash
-doctor       # Run flutter doctor
-devices      # List available devices
-clean        # Clean and get dependencies
-run-android  # Run on Android device
-run-web      # Run in Chrome
-analyze      # Analyze Dart code
-```
-
-**flutter-appwrite template** (includes all flutter scripts plus):
-
-```bash
-appwrite-login   # Login to Appwrite
-appwrite-deploy  # Deploy Appwrite function
-```
-
-**docker template:**
-
-```bash
-up         # Start docker-compose services
-down       # Stop docker-compose services
-logs       # Follow logs
-ps         # List containers
-db-reset   # Reset local PostgreSQL
-db-connect # Connect to PostgreSQL
-```
-
-### Services (Docker Template)
-
-The docker template includes built-in services managed by devenv:
-
-```bash
-# Start services in background
-devenv up -d
-
-# Services now running:
-# - PostgreSQL: localhost:5432 (database: devdb)
-# - Redis: localhost:6379
-
-# Stop services
-devenv down
-```
-
-Services persist data in `.devenv/state/` directory.
-
-## Usage Examples
-
-### Team Collaboration
-
-**Developer 1 (you):**
-
-```bash
-# Create project and add devenv template
-npx create-next-app@latest awesome-app
-cd awesome-app
-cp -r ~/serenityOs/devshells/nodejs/* .
-git add .
-git commit -m "Add devenv configuration"
-git push
-```
-
-**Developer 2 (teammate):**
-
-```bash
-# Clone and setup (only needs nix + devenv installed)
-git clone <repo>
-cd awesome-app
-direnv allow
-
-# Environment automatically loads!
-npm install
-npm run dev
-```
-
-### Switching Between Projects
-
-```bash
-# Working on a Flutter app
-cd ~/projects/my-flutter-app
-# Flutter tools automatically available
-doctor
-
-# Switch to a Next.js project
-cd ~/projects/my-next-app
-# Node.js tools automatically available, Flutter unloaded
 dev
-
-# Switch to a project with services
-cd ~/projects/my-fullstack-app
-devenv up -d  # Start PostgreSQL + Redis
-dev           # Start app server
 ```
 
-### Using Without direnv
+Order matters: run the app's own scaffolder first. `create-next-app` and friends refuse to
+run in a non-empty directory, and `devenv-init` won't clobber existing files without
+`--force`.
 
-If you prefer manual control:
+Then commit all four files. That is what makes the environment work for anyone else who
+clones the project.
+
+## Choosing what to pass
+
+If a preset fits, use it:
+
+| Preset             | Modules                         |
+| ------------------ | ------------------------------- |
+| `node`             | nodejs                          |
+| `vue`              | nodejs, vue-nuxt                |
+| `go`               | go                              |
+| `docker`           | docker                          |
+| `fullstack`        | nodejs, docker, postgres, redis |
+| `flutter`          | flutter                         |
+| `flutter-appwrite` | flutter, nodejs, appwrite       |
+| `work`             | nodejs, docker, work            |
+
+Otherwise compose modules directly:
 
 ```bash
-# Enter the environment manually
-devenv shell
-
-# Run a single command
-devenv shell dev
-
-# Exit the environment
-exit
+devenv-init go,postgres           # Go API with a local database
+devenv-init nodejs,docker         # Node app, Docker for services
+devenv-init --list                # remind yourself what exists
+devenv-init fullstack ~/proj/x    # scaffold somewhere other than the current directory
 ```
 
-## Customizing Templates
+`base` is always included. Adding a module later is just another line under `imports:` in
+`devenv.yaml`, followed by `direnv reload`.
 
-### Per-Project Customization
+## Project-specific configuration
 
-Each project can customize its own `devenv.nix`:
+Goes in the project's own `devenv.nix`, which starts empty:
 
 ```nix
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
-  # Extend the template
-  languages.javascript.enable = true;
+  packages = [ pkgs.awscli2 ];
 
-  # Add project-specific packages
-  packages = with pkgs; [
-    postgresql  # Add PostgreSQL client
-  ];
+  env.DATABASE_URL = "postgresql://localhost:5432/myapp";
 
-  # Add project-specific environment variables
-  env.DATABASE_URL = "postgresql://localhost/mydb";
+  # Shared modules use mkDefault, so plain assignment overrides them.
+  languages.javascript.package = pkgs.nodejs_22;
 
-  # Override or add scripts
-  scripts.migrate.exec = ''
-    npm run migrate
+  scripts.deploy.exec = ''
+    exec ./scripts/deploy.sh "$@"
   '';
 }
 ```
 
-### Adding Services
+Never edit the `imports:` list to work around a shared module. Override it here, or fix the
+shared module for everyone.
 
-Any project can add services to its `devenv.nix`:
+## Services
 
-```nix
-{
-  # ... existing config ...
+Modules that declare services (`postgres`, `redis`) do not start automatically:
 
-  services.postgres = {
-    enable = true;
-    initialDatabases = [{ name = "myapp"; }];
-  };
-
-  services.redis.enable = true;
-}
+```bash
+devenv up -d     # start in the background
+devenv down      # stop
 ```
 
-Then start with: `devenv up -d`
+## Pulling in shared-module fixes
 
-## Available Services
+```bash
+devenv update            # everything
+devenv update serenity   # only the shared modules
+```
 
-devenv supports many services out of the box:
+Nothing changes until you run this. That is the point — a project you set up a year ago
+keeps building.
 
-- **Databases**: PostgreSQL, MySQL, MongoDB, CouchDB
-- **Cache/Queue**: Redis, Memcached, RabbitMQ, Kafka
-- **Search**: Elasticsearch, Meilisearch
-- **And many more**: See [devenv.sh/services](https://devenv.sh/services/)
+## Editing the shared modules
+
+Changes need to be pushed before other projects see them. To iterate without pushing:
+
+```bash
+devenv-init --local node
+```
+
+This points the input at `path:~/serenityOs/devenvs` instead of GitHub, and devenv picks up
+edits automatically with no re-lock. The path is machine-specific — switch the `serenity`
+input back to `github:VictorBuch/serenityOs` before committing the project.
+
+## Adding a new module
+
+1. Create `devenvs/modules/<name>/devenv.nix`.
+2. Add `<name>` to `known_modules` in `modules/apps/development/devenv-init.sh`.
+3. `git add` it — flakes only see git-tracked files.
+
+Modules describe themselves through the `serenity.cmds` option declared in `base`, so
+`cmds` stays accurate:
+
+```nix
+serenity.cmds = ''
+  deploy            Ship it
+'';
+```
+
+Use `lib.mkDefault` for anything a project might reasonably want to override.
+
+---
+
+# Reference
+
+## Modules
+
+| Module     | Provides                                                            | Commands                                                 |
+| ---------- | ------------------------------------------------------------------- | -------------------------------------------------------- |
+| `base`     | jq, the `cmds` help listing                                         | `cmds`                                                   |
+| `nodejs`   | Node 24, npm/pnpm/yarn/bun, TypeScript, prettier + pre-commit hook  | `pm` `dev` `build` `check` `fmt`                         |
+| `vue-nuxt` | Vue language server, defaults to pnpm — needs `nodejs`              | `preview`                                                |
+| `go`       | Go, gopls, delve, golangci-lint, sqlc, gofmt + govet hooks          | `dev` `build` `check` `cover` `lint` `mod-init`          |
+| `docker`   | docker client, compose, lazydocker                                  | `compose` `up` `down` `logs` `ps`                        |
+| `postgres` | PostgreSQL 17 service on 127.0.0.1:5432, database `devdb`           | `db` `db-reset`                                          |
+| `redis`    | Redis service on 6379                                               | `cache`                                                  |
+| `flutter`  | Flutter, Android SDK/NDK, JDK 17, gradle, dart-format hook          | `emu` `doctor` `devices` `check` `analyze` `fmt` `reset` |
+| `appwrite` | Appwrite CLI, installed into `.devenv` on first use — needs `nodejs` | `appwrite` `appwrite-deploy`                             |
+| `work`     | gcloud, Prisma 6 + engine env vars — needs `nodejs` and `docker`    | `db-push` `db-generate` `db-studio`                      |
+
+Run `cmds` inside any environment to see what it provides.
+
+## Gotchas
+
+- Imported modules cannot declare their own `inputs`. Anything a module needs
+  (`git-hooks`, `allowUnfree`) has to be in the project's root `devenv.yaml`; `devenv-init`
+  handles this. A missing `git-hooks` input is a hard evaluation failure, not a warning.
+- Script names avoid shell builtins — hence `check` rather than `test` and `cmds` rather
+  than `help`. A `scripts.test` is shadowed by bash's `test` builtin and never runs.
+- `work` replaces what used to be a system-wide module, so those tools exist only inside
+  work projects.
+- The `nodePackages.*` attribute set no longer exists in nixpkgs. Use top-level names
+  (`pkgs.pnpm`, `pkgs.typescript`, `pkgs.prettier`).
+
+## Prerequisites
+
+Only needed by people who aren't on this NixOS config:
+
+```bash
+sh <(curl -L https://nixos.org/nix/install)   # nix
+nix profile install nixpkgs#devenv            # devenv
+nix profile install nixpkgs#direnv            # direnv (optional)
+eval "$(direnv hook bash)"                    # or zsh/fish, in your shell rc
+```
+
+Without direnv, use `devenv shell` to enter an environment manually.
 
 ## Troubleshooting
 
-### direnv not activating
+**Environment doesn't activate.** `direnv allow`. Re-run it after `devenv.yaml` changes.
 
-```bash
-# Check if direnv is installed
-direnv version
+**`To use 'git-hooks', run ...`.** The project's `devenv.yaml` is missing the `git-hooks`
+input. Re-scaffold, or copy the input block from the example at the top.
 
-# Allow the directory
-cd /path/to/project
-direnv allow
-```
+**Services won't start.** Run `devenv up` in the foreground to see errors. To wipe service
+data: `rm -rf .devenv/state/`.
 
-### devenv not found
+**Stale packages.** `devenv update`, then `direnv reload`.
 
-```bash
-# Install devenv
-nix-env -iA nixpkgs.devenv
-
-# Or use nix-shell temporarily
-nix-shell -p devenv
-```
-
-### Services not starting
-
-```bash
-# Check service status
-devenv up  # Run in foreground to see errors
-
-# Check service state
-ls .devenv/state/
-
-# Reset services (deletes data!)
-rm -rf .devenv/state/
-devenv up
-```
-
-### Git hooks not running
-
-```bash
-# Reinstall hooks
-devenv shell
-# Hooks are automatically installed on shell entry
-
-# Or manually install
-pre-commit install
-```
-
-## Migrating Existing Projects
-
-To add devenv to an existing project:
-
-```bash
-# 1. Choose the appropriate template
-cd my-existing-project
-
-# 2. Copy template files (don't overwrite your files!)
-cp ~/serenityOs/devshells/nodejs/devenv.nix .
-cp ~/serenityOs/devshells/nodejs/devenv.yaml .
-cp ~/serenityOs/devshells/nodejs/.envrc .
-cat ~/serenityOs/devshells/nodejs/.gitignore >> .gitignore
-
-# 3. Customize devenv.nix for your project
-
-# 4. Activate
-direnv allow
-```
-
-## Cleaning Up
-
-```bash
-# Remove unused devenv generations
-devenv gc
-
-# Remove old direnv cache
-rm -rf .direnv/
-
-# Remove service data
-rm -rf .devenv/state/
-```
-
-## Tips & Best Practices
-
-1. **Commit devenv files to git** - Team can use the same environment
-2. **Don't commit `.devenv/` or `.direnv/`** - Already in `.gitignore`
-3. **Use `direnv allow` after pulling** - If `devenv.nix` changes, re-allow
-4. **Keep templates minimal** - Add packages as needed per-project
-5. **Use services sparingly** - Only enable services you actively use
-6. **Document custom scripts** - Add comments in `devenv.nix`
-
-## Need Help?
-
-- **devenv documentation**: [devenv.sh](https://devenv.sh)
-- **Language modules**: [devenv.sh/languages](https://devenv.sh/languages/)
-- **Services**: [devenv.sh/services](https://devenv.sh/services/)
-- **Git hooks**: [devenv.sh/git-hooks](https://devenv.sh/git-hooks/)
-
-## Template Details
-
-Each template has its own README with specific documentation:
-
-- [nodejs/README.md](./nodejs/README.md)
-- [vue-nuxt/README.md](./vue-nuxt/README.md)
-- [flutter/README.md](./flutter/README.md)
-- [flutter-appwrite/README.md](./flutter-appwrite/README.md)
-- [docker/README.md](./docker/README.md)
-- [go/README.md](./go/README.md)
+**Reclaiming disk.** `devenv gc`.

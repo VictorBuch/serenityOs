@@ -54,11 +54,59 @@ in
       llvmPackages.libcxx
     ];
 
+  git-hooks.hooks.dart-format.enable = lib.mkDefault true;
+
+  serenity.cmds = ''
+    emu               Launch an Android emulator (default AVD: pixel_6)
+    doctor            flutter doctor -v
+    devices           List flutter devices and adb devices
+    check             flutter test
+    analyze           flutter analyze
+    fmt               dart format .
+    reset             flutter clean && flutter pub get
+  '';
+
   scripts = {
     emu.exec = ''
       exec emulator -avd "''${1:-pixel_6}" "''${@:2}"
     '';
+
+    doctor.exec = lib.mkDefault ''
+      exec flutter doctor -v "$@"
+    '';
+
+    devices.exec = lib.mkDefault ''
+      flutter devices
+      echo
+      adb devices
+    '';
+
+    check.exec = lib.mkDefault ''
+      exec flutter test "$@"
+    '';
+
+    analyze.exec = lib.mkDefault ''
+      exec flutter analyze "$@"
+    '';
+
+    fmt.exec = lib.mkDefault ''
+      if [ "$#" -eq 0 ]; then
+        exec dart format .
+      fi
+      exec dart format "$@"
+    '';
+
+    reset.exec = lib.mkDefault ''
+      flutter clean
+      exec flutter pub get
+    '';
   };
+
+  enterTest = ''
+    if [ -d test ]; then
+      flutter test
+    fi
+  '';
 
   enterShell = ''
     # On darwin, point Flutter at a system Chrome/Edge if present; otherwise leave unset.

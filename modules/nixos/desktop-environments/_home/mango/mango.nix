@@ -127,7 +127,7 @@ in
         gappiv = 4;
         gappoh = 4;
         gappov = 4;
-        smartgaps = 1;
+        smartgaps = 0;
         no_border_when_single = 1;
 
         border_radius = 8;
@@ -135,15 +135,15 @@ in
         unfocused_opacity = 0.9;
 
         # === Blur ===
-        # blur = 1;
-        # blur_layer = 1;
-        # blur_optimized = 1;
-        # blur_params_num_passes = 3;
-        # blur_params_radius = 6;
-        # blur_params_noise = 0.015;
-        # blur_params_brightness = 0.95;
-        # blur_params_contrast = 0.95;
-        # blur_params_saturation = 1.1;
+        blur = 1;
+        blur_layer = 1;
+        blur_optimized = 1;
+        blur_params_num_passes = 2;
+        blur_params_radius = 4;
+        blur_params_noise = 0.015;
+        blur_params_brightness = 0.95;
+        blur_params_contrast = 0.95;
+        blur_params_saturation = 1.1;
 
         # Colors (bordercolor/focuscolor/urgentcolor/scratchpadcolor/...) are
         # provided live by noctalia via the sourced noctalia.conf (extraConfig).

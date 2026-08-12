@@ -173,7 +173,9 @@
       "WebFetch(domain:docs.pangolin.net)",
       "Bash(python3 -)",
       "Bash(jj git *)",
-      "Bash(jj describe *)"
+      "Bash(jj describe *)",
+      "Bash(awk '{print $3}' /tmp/claude-1000/-home-jayne-serenityOs/8d19087e-71e9-4fed-bb8a-724974561b02/scratchpad/gpuclk.log)",
+      "Bash(find /nix/store/4hnhprrilhkridlcxz4kggiwq6zn3d3q-mango-nightly -type f '\\(' -name *.conf -o -name *.md -o -name *README* '\\)')"
     ],
     "deny": [],
     "ask": []

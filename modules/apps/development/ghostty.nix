@@ -16,11 +16,10 @@ let
     # only writes palette/background/foreground/cursor/selection. Stylix used to
     # supply this from `opacity.terminal`, but its ghostty target is disabled (it
     # bundles colors+opacity+fonts behind one switch), so opacity has to be set
-    # here or the window renders fully opaque and background-blur-radius is a
-    # no-op. Sorts before `theme` in the generated config, which is fine: the
-    # theme file never sets an opacity key, so there is nothing to clobber it.
+    # here or the window renders fully opaque. Sorts before `theme` in the
+    # generated config, which is fine: the theme file never sets an opacity key,
+    # so there is nothing to clobber it.
     background-opacity = 0.85;
-    background-blur-radius = 25;
     window-decoration = false;
     confirm-close-surface = false;
     # Same story as background-opacity: the disabled stylix target was also the

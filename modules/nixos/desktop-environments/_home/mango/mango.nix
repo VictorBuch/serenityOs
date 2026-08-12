@@ -134,6 +134,10 @@ in
         focused_opacity = 1.0;
         unfocused_opacity = 0.9;
 
+        # === Shadows ===
+        shadows = 0;
+        layer_shadows = 0;
+
         # === Blur ===
         blur = 1;
         blur_layer = 1;

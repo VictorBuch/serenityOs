@@ -31,7 +31,8 @@ in
           bar.main = {
             position = "bottom";
             thickness = 24;
-            background_opacity = 0.95;
+            background_opacity = 0.1;
+            shadow = false;
 
             start = [
               "clock"
@@ -57,14 +58,6 @@ in
             ];
           };
 
-          # Plugin distribution (v5). Declaring [[plugins.source]] at all
-          # replaces noctalia's built-in defaults wholesale, so the two
-          # upstream git sources are repeated here alongside the local one.
-          #
-          # NOTE: plugins.enabled is also written by the plugin GUI into
-          # ~/.local/state/noctalia/settings.toml, and that file wins over
-          # this one (arrays are replaced, not merged). Delete the [plugins]
-          # block there for this list to take effect.
           plugins = {
             source = [
               {

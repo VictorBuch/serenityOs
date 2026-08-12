@@ -175,7 +175,21 @@
       "Bash(jj git *)",
       "Bash(jj describe *)",
       "Bash(awk '{print $3}' /tmp/claude-1000/-home-jayne-serenityOs/8d19087e-71e9-4fed-bb8a-724974561b02/scratchpad/gpuclk.log)",
-      "Bash(find /nix/store/4hnhprrilhkridlcxz4kggiwq6zn3d3q-mango-nightly -type f '\\(' -name *.conf -o -name *.md -o -name *README* '\\)')"
+      "Bash(find /nix/store/4hnhprrilhkridlcxz4kggiwq6zn3d3q-mango-nightly -type f '\\(' -name *.conf -o -name *.md -o -name *README* '\\)')",
+      "Bash(gh issue *)",
+      "Bash(python3 -c ' *)",
+      "Bash(ps -eo pid,ppid,pcpu,pmem,rss,comm,args --sort=-pcpu)",
+      "Bash(/tmp/claude-1000/-home-jayne-serenityOs/f41530c8-d3d8-4a60-a7c8-aee801537d2b/scratchpad/mango-blur-bisect.sh reset *)",
+      "Bash(herdr --help)",
+      "Bash(herdr session *)",
+      "Bash(env)",
+      "Bash(echo \"--- exit $? ---\")",
+      "Bash(herdr config *)",
+      "Bash(ghostty +list-config)",
+      "Bash(echo \"=== exit $? ===\")",
+      "Bash(ghostty +show-config --default)",
+      "Bash(ps -p 980847 -o pid,etime=)",
+      "Bash(nix-instantiate --parse modules/apps/development/ghostty.nix)"
     ],
     "deny": [],
     "ask": []

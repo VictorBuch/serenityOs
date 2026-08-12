@@ -92,6 +92,12 @@
     # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
     nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
 
+    # Pinned nixpkgs for DaVinci Resolve Studio 21.0.3 (see overlays/default.nix).
+    # The byte patches there target one exact build, so this input must be bumped
+    # deliberately (and the patches re-verified), never by `nix flake update`.
+    # 21.0.4 already breaks the invert-einval-guard patch.
+    nixpkgs-resolve.url = "github:nixos/nixpkgs/0954f7ee2f6bb3dc7d4e3d0d8bcb8fd4bde4cfc5";
+
     # Realtime audio tuning (threadirqs, IRQ priorities, rlimits).
     # Used by modules/nixos/system/audio-performance.nix WITHOUT its realtime kernel --
     # the stock kernel plus threadirqs is enough for REAPER at a 128-frame quantum.

@@ -119,6 +119,14 @@ final: prev: {
         mapAttrsToList
         ;
 
+      # Version-locked to the nixpkgs-resolve input, not our rolling nixpkgs.
+      resolvePkgs = import inputs.nixpkgs-resolve {
+        system = final.stdenv.hostPlatform.system;
+        config = {
+          allowUnfree = true;
+        };
+      };
+
       # Each entry is one byte substitution. To add another, append an attrset:
       #
       #   {
@@ -194,12 +202,12 @@ final: prev: {
     assert assertMsg (all (p: builtins.match "[a-z0-9-]+" p.name != null)
       patches
     ) "davinci-resolve-studio: patch names must be kebab-case (they are spliced into a perl string)";
-    prev.davinci-resolve-studio.override {
-      stdenv = prev.stdenv // {
+    resolvePkgs.davinci-resolve-studio.override {
+      stdenv = resolvePkgs.stdenv // {
         mkDerivation =
           attrs:
-          (prev.stdenv.mkDerivation attrs).overrideAttrs (old: {
-            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ final.perl ];
+          (resolvePkgs.stdenv.mkDerivation attrs).overrideAttrs (old: {
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ resolvePkgs.perl ];
             postFixup =
               (old.postFixup or "")
               + concatStrings (mapAttrsToList patchFile (groupBy (p: p.file or "bin/resolve") patches));

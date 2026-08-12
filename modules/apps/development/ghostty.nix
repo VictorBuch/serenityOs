@@ -20,6 +20,7 @@ let
     # generated config, which is fine: the theme file never sets an opacity key,
     # so there is nothing to clobber it.
     background-opacity = 0.85;
+    alpha-blending = "native";
     window-decoration = false;
     confirm-close-surface = false;
     # Same story as background-opacity: the disabled stylix target was also the

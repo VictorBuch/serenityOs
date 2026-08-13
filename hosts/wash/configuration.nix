@@ -225,8 +225,23 @@ in
   };
 
   # The module's preStart only copies config.yml; privateConfig.yml is ours.
+  #
+  # The chmod keeps the frontend and the backend on the same edition. The
+  # package's ExecStart wrapper refreshes the Next.js build out of the store
+  # with `test -f .next/.nix_skip_setup || { rm -rf .next && cp -rd $out/.next . }`,
+  # and `cp -rd` preserves the store's read-only mode — so the copy it just
+  # made is undeletable, every later `rm -rf` fails with EACCES, and .next is
+  # pinned to whichever package first populated the dataDir. Switching the
+  # package (oss -> enterprise, or any version bump) then leaves dist/server.mjs
+  # running from the new store path while the dashboard is still served by the
+  # old build: no /admin/license route, "Community Edition" forever.
+  #
+  # Remove once nixpkgs stops copying the store's mode bits into the dataDir.
   systemd.services.pangolin.preStart = lib.mkAfter ''
     cp -f /etc/pangolin/privateConfig.yml ${config.services.pangolin.dataDir}/config/privateConfig.yml
+    if [ -d ${config.services.pangolin.dataDir}/.next ]; then
+      chmod -R u+w ${config.services.pangolin.dataDir}/.next
+    fi
   '';
 
   environment.systemPackages = with pkgs; [

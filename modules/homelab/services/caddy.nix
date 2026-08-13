@@ -34,7 +34,7 @@ let
         handle /api/* {
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {http.request.client_ip}
+            header_up X-Real-IP {client_ip}
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             transport http {
@@ -47,7 +47,7 @@ let
         handle /_/* {
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {http.request.client_ip}
+            header_up X-Real-IP {client_ip}
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             transport http {

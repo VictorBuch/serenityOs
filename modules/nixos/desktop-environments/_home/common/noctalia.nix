@@ -338,7 +338,7 @@ in
         # noctalia's built-in defaults wholesale, so the two upstream git
         # sources are repeated here alongside the local one.
         plugins = {
-          auto_update = true;
+          auto_update = "all";
           source = [
             {
               name = "official";
@@ -362,6 +362,7 @@ in
 
           enabled = [
             "avivbintangaringga/nix-monitor"
+            "pozzoo/hassio" # the `status` bar widget + plugin_settings below
           ]
           ++ lib.optional davinci.enable davinci.pluginId;
         };

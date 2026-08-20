@@ -7,7 +7,7 @@
 
 let
   terminal = "ghostty";
-  fileManager = "thunar";
+  fileManager = "dolphin";
   browser = "zen-beta";
   shell = "noctalia";
   # Window-decoration colors are no longer set here: noctalia's `mango`
@@ -36,10 +36,9 @@ let
   ];
 
   # File manager: floats on the current tag.
-  thunarApps = [
-    "[Tt]hunar"
-    "[Tt]hunar-.*"
-    "org\\.xfce\\.[Tt]hunar"
+  fileManagerApps = [
+    "[Dd]olphin"
+    "org\\.kde\\.dolphin"
   ];
 
   # Portals and dialog-only helpers: float on the current tag.
@@ -58,7 +57,7 @@ let
 
   # Anything matching these keeps whatever tag it inherits; everything else
   # is swept to tag 2 by the catch-all rule.
-  noSweepApps = tag1Apps ++ scratchpadApps ++ thunarApps ++ dialogApps ++ [ "steam" ];
+  noSweepApps = tag1Apps ++ scratchpadApps ++ fileManagerApps ++ dialogApps ++ [ "steam" ];
 
   alternation = lib.concatStringsSep "|";
 in
@@ -75,6 +74,16 @@ in
     home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
 
     home.sessionVariables.QT_QPA_PLATFORMTHEME = lib.mkForce "qt6ct";
+
+    # First declared default in this repo. Without it "open containing folder"
+    # from any app was undefined, because nothing claimed inode/directory.
+    # NOTE: this makes ~/.config/mimeapps.list a read-only store symlink, so
+    # "set as default" from an application's own settings will fail -- defaults
+    # have to be declared here instead.
+    xdg.mimeApps = {
+      enable = true;
+      defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
+    };
     xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
       [Desktop Entry]
       Type=Application
@@ -202,7 +211,7 @@ in
           "appid:^Obsidian$|^obsidian$,tags:1"
 
           # File manager & dialog-style helpers — float on the tag in view.
-          "appid:^(${alternation thunarApps})$,isfloating:1,width:0.65,height:0.7"
+          "appid:^(${alternation fileManagerApps})$,isfloating:1,width:0.65,height:0.7"
           "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
 
           # Named scratchpads — chat & music

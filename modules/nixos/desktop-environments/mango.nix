@@ -92,7 +92,6 @@
     services = {
       blueman.enable = true;
       udisks2.enable = true;
-      tumbler.enable = true; # Thumbnail support for images Thunar
       gvfs.enable = true;
       pipewire = {
         enable = true;
@@ -104,11 +103,11 @@
     };
 
     programs.nm-applet.enable = true;
-    security.rtkit.enable = true;
 
-    # Thunar file manager
-    programs.thunar.enable = true;
-    programs.xfconf.enable = true;
+    # kio-fuse is dbus-activated; without this it never starts and Dolphin's
+    # remote locations stay invisible to non-KDE apps.
+    services.dbus.packages = [ pkgs.kdePackages.kio-fuse ];
+    security.rtkit.enable = true;
 
     environment.systemPackages =
       (with pkgs; [
@@ -133,6 +132,15 @@
         cliphist
         wl-clipboard
         kdePackages.breeze-icons
+
+        # File manager. Colours come from noctalia's `kcolorscheme` template
+        # (kdeglobals) plus the `qt` template via qt6ct; kio-extras carries the
+        # protocol handlers and thumbnailers Dolphin expects.
+        kdePackages.dolphin
+        kdePackages.kio-extras
+        kdePackages.kio-fuse
+        kdePackages.ffmpegthumbs
+        kdePackages.kdegraphics-thumbnailers
 
         grim
         slurp

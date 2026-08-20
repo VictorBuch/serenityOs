@@ -16,6 +16,10 @@ let
   # The DaVinci Convert bar widget ships as a local noctalia plugin from
   # ../common/davinci-convert.nix. That module is only imported by the DEs
   # that want it, so everything below stays optional.
+  # tomlkit preserves formatting and comments, so the shell's own state file
+  # comes back looking untouched apart from the key we remove.
+  tomlPy = pkgs.python3.withPackages (ps: [ ps.tomlkit ]);
+
   davinci = lib.attrByPath [ "home" "desktop-environments" "common" "davinci-convert" ] {
     enable = false;
   } config;
@@ -423,6 +427,39 @@ in
     # template writes at runtime (~/.config/qt6ct/colors/noctalia.conf). HM
     # owns this file; noctalia only writes the separate colors file, so there
     # is no read-only conflict. This is what makes Qt apps pick up the palette.
+    # Live Seam + state policing. See docs/adr/0001-nix-declares-the-shell.md.
+    #
+    # The shell merges ~/.config/noctalia/*.toml alphabetically, then overlays
+    # ~/.local/state/noctalia/settings.toml on top of everything. So:
+    #   - the seam must sort AFTER config.toml (the name the HM module writes),
+    #     hence zz-, or it would load first and lose;
+    #   - a theme.mode key in the state file outranks the pinned dark mode here,
+    #     which is drift, not configuration. The wallpaper path, monitor
+    #     overrides and plugins.auto_update in that file are app-owned and are
+    #     deliberately left alone.
+    home.activation.noctaliaSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            seam="$HOME/.config/noctalia/zz-local.toml"
+            if [ ! -e "$seam" ]; then
+              mkdir -p "$(dirname "$seam")"
+              echo '# Live Seam -- not managed by Nix. Merged after config.toml, so' > "$seam"
+              echo '# keys here win. Apply with `noctalia msg config-reload`.' >> "$seam"
+            fi
+
+            state="$HOME/.local/state/noctalia/settings.toml"
+            if [ -f "$state" ]; then
+              ${tomlPy}/bin/python3 - "$state" <<'PYSTRIP'
+      import sys, tomlkit
+      path = sys.argv[1]
+      doc = tomlkit.parse(open(path).read())
+      theme = doc.get("theme")
+      if theme is not None and "mode" in theme:
+          del theme["mode"]
+          open(path, "w").write(tomlkit.dumps(doc))
+          print("noctalia: removed theme.mode override from settings.toml")
+      PYSTRIP
+            fi
+    '';
+
     xdg.configFile."qt6ct/qt6ct.conf".text = ''
       [Appearance]
       color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf

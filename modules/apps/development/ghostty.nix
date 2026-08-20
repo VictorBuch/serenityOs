@@ -1,4 +1,10 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 let
   # `monoFamily` comes from osConfig.fonts.mono.familyMono, so it follows the
@@ -37,7 +43,9 @@ mkModule {
   name = "ghostty";
   category = "development";
   linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
-  darwinExtraConfig = { homebrew.casks = [ "ghostty" ]; };
+  darwinExtraConfig = {
+    homebrew.casks = [ "ghostty" ];
+  };
   description = "Ghostty terminal emulator";
   homeConfig =
     {
@@ -51,15 +59,31 @@ mkModule {
       # Fall back to the generic "monospace" fontconfig alias if fonts.nix is not
       # in play (bare HM, or a host with fonts.enable = false) so this module
       # still evaluates standalone.
-      settings = ghosttySettings (
-        lib.attrByPath [ "fonts" "mono" "familyMono" ] "monospace" osConfig
-      );
+      settings =
+        ghosttySettings (lib.attrByPath [ "fonts" "mono" "familyMono" ] "monospace" osConfig)
+        // {
+          # Live Seam. The leading `?` suppresses the error when the file is
+          # absent, and ghostty loads included files *after* the config that
+          # names them, so anything here wins. Absolute path on purpose: a
+          # relative one resolves against the config file, which is a store
+          # symlink. Reload with SIGUSR2 or ctrl+shift+comma.
+          config-file = "?${config.home.homeDirectory}/.config/ghostty/local";
+        };
     in
     {
       programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
         enable = true;
         inherit settings;
       };
+
+      home.activation.ghosttyLocalSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        seam="$HOME/.config/ghostty/local"
+        if [ ! -e "$seam" ]; then
+          mkdir -p "$(dirname "$seam")"
+          echo '# Live Seam -- not managed by Nix. Loaded after the generated' > "$seam"
+          echo '# config, so settings here win. Reload with ctrl+shift+comma.' >> "$seam"
+        fi
+      '';
       xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
         text = lib.generators.toKeyValue { } settings;
       };

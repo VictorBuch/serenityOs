@@ -90,6 +90,18 @@ in
       Hidden=true
     '';
 
+    # Live Seam: a writable file sourced last, so anything set there beats the
+    # generated config without a rebuild. mango reloads on `mmsg dispatch
+    # reload_config` (SUPER+SHIFT+R).
+    home.activation.mangoLocalSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      seam="$HOME/.config/mango/local.conf"
+      if [ ! -e "$seam" ]; then
+        mkdir -p "$(dirname "$seam")"
+        echo '# Live Seam -- not managed by Nix. Sourced after the generated' > "$seam"
+        echo '# config, so settings here win. Reload with SUPER+SHIFT+R.' >> "$seam"
+      fi
+    '';
+
     wayland.windowManager.mango = {
       enable = true;
 
@@ -100,6 +112,7 @@ in
       # build/first-run (parse warns but succeeds).
       extraConfig = ''
         source=~/.config/mango/noctalia.conf
+        source=~/.config/mango/local.conf
       '';
 
       autostart_sh = ''

@@ -6,7 +6,6 @@
     ./focus-or-run.nix
     ../common/wlogout
     ../common/hyprlock
-    ../common/dunst.nix
     ../common/fuzzel.nix
     ../common/noctalia.nix
   ];
@@ -21,7 +20,6 @@
     };
     common = {
       fuzzel.enable = lib.mkDefault true;
-      dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;
       hyprlock.enable = lib.mkDefault true;
     };

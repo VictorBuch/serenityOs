@@ -10,11 +10,6 @@ let
   fileManager = "thunar";
   browser = "zen-beta";
   shell = "noctalia";
-  applicationLauncher = "rofi -show drun";
-  calcLauncher = "rofi -show calc -no-show-match -no-sort";
-  windowSwitcher = "rofi -show window";
-  emojiPicker = "rofi -show emoji";
-  powerMenu = "rofi -show power-menu";
   # Window-decoration colors are no longer set here: noctalia's `mango`
   # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
   # palette and reloads mango live. See the `source=` include in extraConfig
@@ -266,14 +261,14 @@ in
           "SUPER+SHIFT,Return,spawn,${terminal}"
           "SUPER,B,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
           "SUPER,E,spawn,${fileManager}"
-          "SUPER,space,spawn,noctalia msg panel-toggle launcher"
+          "SUPER,space,spawn,${shell} msg panel-toggle launcher"
 
           # Friction-free note capture: rofi one-liner -> today's daily note.
           "SUPER,C,spawn,notes-capture"
-          "SUPER+SHIFT,C,spawn_shell,${calcLauncher}"
-          "SUPER,Z,spawn_shell,${windowSwitcher}"
-          "SUPER+SHIFT,E,spawn_shell,${emojiPicker}"
-          "SUPER+SHIFT,P,spawn_shell,${powerMenu}"
+          "SUPER+SHIFT,C,spawn,${shell} msg panel-toggle launcher /calc"
+          "SUPER,Z,spawn,${shell} msg panel-toggle launcher /windows"
+          "SUPER+SHIFT,E,spawn,${shell} msg panel-toggle launcher /emoji"
+          "SUPER+SHIFT,P,spawn,${shell} msg panel-toggle session"
           "SUPER,N,spawn,rofi-vpn"
           "SUPER+SHIFT,N,spawn,rofi-network-manager"
           "SUPER+SHIFT,B,spawn,rofi-bluetooth"
@@ -301,7 +296,6 @@ in
           "SUPER+SHIFT,L,exchange_client,right"
           "SUPER+SHIFT,J,exchange_client,down"
           "SUPER+SHIFT,K,exchange_client,up"
-
 
           # --- Master-area sizing ---
           "SUPER,V,setmfact,-0.05"
@@ -345,8 +339,8 @@ in
           "SUPER+SHIFT,BackSpace,quit"
 
           # --- Screenshots ---
-          "ALT+SHIFT,4,spawn_shell,grim -g \"$(slurp)\" - | wl-copy"
-          "ALT+SHIFT,5,spawn_shell,grim - | wl-copy"
+          "ALT+SHIFT,4,spawn,${shell} msg screenshot-region"
+          "ALT+SHIFT,5,spawn,${shell} msg screenshot-fullscreen"
 
           # --- Media keys ---
           "NONE,XF86AudioRaiseVolume,spawn,wpctl set-volume @DEFAULT_SINK@ 5%+"

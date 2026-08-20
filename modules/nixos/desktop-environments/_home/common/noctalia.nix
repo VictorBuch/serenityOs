@@ -100,6 +100,16 @@ in
             size = 12;
           };
 
+          # The shell owns screenshots now (mango binds msg screenshot-region
+          # and screenshot-fullscreen), so these stop being cosmetic. The old
+          # grim | wl-copy binds only ever put the image on the clipboard.
+          screenshot = {
+            copy_to_clipboard = true;
+            save_to_file = true;
+            freeze_screen = true;
+            show_cursor = false;
+          };
+
           launcher = {
             show_icons = true;
             sort_by_usage = true;

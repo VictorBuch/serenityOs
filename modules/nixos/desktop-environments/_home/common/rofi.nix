@@ -138,13 +138,13 @@ in
     stylix.targets.rofi.enable = false;
 
     home.packages = with pkgs; [
-      rofi-vpn            # NetworkManager VPN toggle
-      rofi-power-menu     # power/lock menu modi script
-      rofi-bluetooth      # bluetooth devices
+      rofi-vpn # NetworkManager VPN toggle
+      rofi-power-menu # power/lock menu modi script
+      rofi-bluetooth # bluetooth devices
       rofi-network-manager # wifi + ethernet
-      rofi-pulse-select   # audio sink/source switcher
-      rofi-screenshot     # screenshot menu
-      libqalculate        # qalc backend — currency + scientific calc for rofi-calc
+      rofi-pulse-select # audio sink/source switcher
+      rofi-screenshot # screenshot menu
+      libqalculate # qalc backend — currency + scientific calc for rofi-calc
     ];
 
     # Cache currency exchange rates daily so rofi-calc currency conversions
@@ -169,27 +169,20 @@ in
     programs.rofi = {
       enable = true;
       package = pkgs.rofi;
-      plugins = with pkgs; [
-        rofi-calc
-        rofi-emoji
-      ];
       terminal = "${pkgs.ghostty}/bin/ghostty";
 
+      # Demoted to a dmenu backend. The shell's launcher owns drun, calc,
+      # window switching, emoji and the session menu (its providers live in
+      # src/launcher/), so rofi is kept only for the rofi-* wrapper scripts
+      # and as the xdg-desktop-portal-wlr screencast source chooser, which
+      # names ${pkgs.rofi}/bin/rofi by absolute path.
       extraConfig = {
-        modi = "drun,run,calc,window,emoji,power-menu:${pkgs.rofi-power-menu}/bin/rofi-power-menu";
+        modi = "run";
         show-icons = true;
         icon-theme = config.stylix.icons.dark;
-        display-drun = "  Apps";
         display-run = "  Run";
-        display-calc = "  Calc";
-        display-window = "  Windows";
-        display-emoji = "  Emoji";
-        display-power-menu = "  Power";
         drun-display-format = "{name}";
-        sidebar-mode = true;
         kb-cancel = "Escape";
-        # rofi-calc: copy result on Enter
-        calc-command = "echo -n '{result}' | wl-copy";
       };
 
       theme = "${rasiTheme}";

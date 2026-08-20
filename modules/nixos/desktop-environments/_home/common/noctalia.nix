@@ -45,7 +45,7 @@ in
 
           # Solid pills on a glass strip: the capsules carry the contrast, the
           # bar itself stays transparent.
-          capsule = true;
+          capsule = false;
           capsule_fill = "surface_variant";
           capsule_opacity = 1.0;
           capsule_padding = 6;

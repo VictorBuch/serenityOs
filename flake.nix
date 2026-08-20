@@ -140,6 +140,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Nocturne: plain-text notes + tasks + agenda (Tauri desktop app).
+    nocturne = {
+      url = "git+https://git.victorbuch.com/VictorBuch/Nocturne";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Hermes Agent (self-hosted personal AI agent) — ships its own nixosModule.
     # Deliberately NOT following our nixpkgs: the package is built with uv2nix
     # against its own pinned nixpkgs, and overriding it breaks the sealed venv

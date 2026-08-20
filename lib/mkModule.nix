@@ -33,7 +33,7 @@
 # Inner module function -- receives the full NixOS module args via `args` passthrough
 { config, pkgs, pkgs-stable ? pkgs, lib, ... }:
 let
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 
   # Build option path: apps.browsers.firefox or homelab.caddy
   optPath =

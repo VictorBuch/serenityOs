@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] Easier live update dotfiles for Jayne
-- [ ] Icons, file managers and other services seem very scattered and not very unified. Lets fix that for Jayne
-- [ ] replace noctalia with [caelestial shell](https://github.com/caelestia-dots/shell), or ryoku shell for Jayne.
+- [x] Easier live update dotfiles for Jayne
+- [x] Icons, file managers and other services seem very scattered and not very unified. Lets fix that for Jayne
 - [ ] Install / configure crowd sec on wash
+- [ ] Copyparty instead of nextcloud, i just need a simple file upload/download ui like a NAS service

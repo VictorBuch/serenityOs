@@ -34,6 +34,9 @@ let
 
   # Per-category overrides for which modules default to disabled
   overrides = {
+    audio = {
+      feedback = false;
+    };
     gaming = {
       ps3 = false;
     };

@@ -71,7 +71,7 @@ mkModule {
         };
     in
     {
-      programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
+      programs.ghostty = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         enable = true;
         inherit settings;
       };
@@ -84,7 +84,7 @@ mkModule {
           echo '# config, so settings here win. Reload with ctrl+shift+comma.' >> "$seam"
         fi
       '';
-      xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
+      xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         text = lib.generators.toKeyValue { } settings;
       };
     };

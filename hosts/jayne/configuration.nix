@@ -104,6 +104,9 @@ in
   environment.systemPackages = with pkgs; [
     networkmanager-openvpn
     openvpn
+
+    # Nocturne desktop app (own flake, Linux-only package).
+    inputs.nocturne.packages.${pkgs.stdenv.hostPlatform.system}.nocturne
   ];
 
   # Desktop environments
@@ -126,6 +129,8 @@ in
 
     audio = {
       enable = true;
+
+      feedback.enable = true;
 
       # wine 11.14 + yabridge's new-wine10-embedding branch, instead of the pinned
       # wine 9.20 + yabridge 5.1.1.

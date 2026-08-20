@@ -9,7 +9,7 @@
 
 {
   home.username = username;
-  home.homeDirectory = if pkgs.stdenv.isLinux then "/home/${username}" else "/Users/${username}";
+  home.homeDirectory = if pkgs.stdenv.hostPlatform.isLinux then "/home/${username}" else "/Users/${username}";
 
   home.stateVersion = "24.05"; # Please read the comment before changing.
 

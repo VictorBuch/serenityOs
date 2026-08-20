@@ -6,7 +6,7 @@ let
   hasAmdGpu = config.amd-gpu.enable or false;
 
   ollamaPkg =
-    if pkgs.stdenv.isDarwin then pkgs.ollama
+    if pkgs.stdenv.hostPlatform.isDarwin then pkgs.ollama
     else if hasAmdGpu then pkgs.ollama-rocm
     else pkgs.ollama;
 in

@@ -6,7 +6,7 @@
 }:
 
 let
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
   user = if (config ? user.userName) then config.user.userName else "victorbuch";
   homeDir = if isLinux then "/home" else "/Users";
   flakePath = "${homeDir}/${user}/serenityOs";

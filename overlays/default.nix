@@ -23,6 +23,9 @@ final: prev: {
   # Lute v3 - language learning web application
   lute-v3 = final.callPackage ../packages/lute-v3 { };
 
+  # fee[dB]ack - guitar practice app, wrapped from the upstream AppImage
+  feedback-desktop = final.callPackage ../packages/feedback-desktop { };
+
   # rtirq: raises the priority of the audio interface's IRQ threads. Used by
   # modules/nixos/system/audio-performance.nix via musnix.rtirq.
   #

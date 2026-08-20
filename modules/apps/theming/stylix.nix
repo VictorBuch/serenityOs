@@ -12,7 +12,7 @@ let
   # home-manager, and by environment.sessionVariables at the system level.
   cursor = {
     package = pkgs.colloid-cursors;
-    name = "Colloid-dark-cursors";
+    name = "Colloid-cursors";
     size = 16;
   };
 
@@ -111,7 +111,11 @@ mkModule {
 
           home.packages = [ icons.package ];
 
-          dconf.settings."org/gnome/desktop/interface".icon-theme = icons.dark;
+          dconf.settings."org/gnome/desktop/interface" = {
+            icon-theme = icons.dark;
+            cursor-theme = cursor.name;
+            cursor-size = cursor.size;
+          };
         }
       )
     ];

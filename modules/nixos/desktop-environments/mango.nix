@@ -31,6 +31,8 @@
 
     services.displayManager.defaultSession = "mango";
 
+    environment.sessionVariables.QT_QPA_PLATFORMTHEME = "qt6ct";
+
     services.gnome.gnome-keyring.enable = true;
     security.pam.services.login.enableGnomeKeyring = true;
     services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
@@ -88,10 +90,13 @@
 
         xwayland-satellite
 
+        unrar
+
         # File manager. Colours come from noctalia's `kcolorscheme` template
         # (kdeglobals) plus the `qt` template via qt6ct; kio-extras carries the
         # protocol handlers and thumbnailers Dolphin expects.
         kdePackages.dolphin
+        kdePackages.ark
         kdePackages.kio-extras
         kdePackages.kio-fuse
         kdePackages.ffmpegthumbs

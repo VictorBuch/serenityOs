@@ -311,8 +311,8 @@ in
           # Friction-free note capture: rofi one-liner -> today's daily note.
           "SUPER,C,spawn,notes-capture"
           "SUPER+SHIFT,C,spawn,${shell} msg panel-toggle launcher /calc"
-          "SUPER,Z,spawn,${shell} msg panel-toggle launcher /windows"
-          "SUPER+SHIFT,E,spawn,${shell} msg panel-toggle launcher /emoji"
+          "SUPER,Z,spawn,${shell} msg panel-toggle launcher /win"
+          "SUPER+SHIFT,E,spawn,${shell} msg panel-toggle launcher /emo"
           "SUPER+SHIFT,P,spawn,${shell} msg panel-toggle session"
           "SUPER,N,spawn,rofi-vpn"
           "SUPER+SHIFT,N,spawn,rofi-network-manager"

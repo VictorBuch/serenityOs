@@ -15,6 +15,12 @@ let
     name = "Colloid-dark-cursors";
     size = 16;
   };
+
+  icons = {
+    enable = true;
+    package = pkgs.colloid-icon-theme;
+    dark = "Colloid-Dark";
+  };
 in
 
 mkModule {
@@ -53,10 +59,7 @@ mkModule {
 
             inherit cursor;
 
-            icons = {
-              package = pkgs.colloid-icon-theme;
-              dark = "Colloid-Dark";
-            };
+            inherit icons;
 
             fonts = {
               monospace = {
@@ -105,6 +108,10 @@ mkModule {
               ];
             };
           };
+
+          home.packages = [ icons.package ];
+
+          dconf.settings."org/gnome/desktop/interface".icon-theme = icons.dark;
         }
       )
     ];

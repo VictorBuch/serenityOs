@@ -337,8 +337,8 @@ in
           "SUPER+ALT,SPACE,switch_keyboard_layout"
 
           # --- Lock / session ---
-          "SUPER,Escape,spawn_shell,${shell} ipc call lockScreen lock"
-          "SUPER+SHIFT,Escape,spawn_shell,${shell} ipc call sessionMenu lockAndSuspend"
+          "SUPER,Escape,spawn_shell,${shell} msg session lock"
+          "SUPER+SHIFT,Escape,spawn_shell,${shell} msg session lock-and-suspend"
 
           # --- Reload / quit ---
           "SUPER+SHIFT,R,reload_config"

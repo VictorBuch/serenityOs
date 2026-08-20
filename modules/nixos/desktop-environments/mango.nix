@@ -6,11 +6,15 @@
   ...
 }:
 {
+  imports = [ ./_wayland-session.nix ];
+
   options = {
     desktop-environments.mango.enable = lib.mkEnableOption "Enables Mango WM (dwl-based wlroots compositor)";
   };
 
   config = lib.mkIf config.desktop-environments.mango.enable {
+
+    desktop-environments.wayland-session.enable = true;
 
     home-manager.sharedModules = [ ./_home/mango ];
 
@@ -25,28 +29,12 @@
       package = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
-    sddm.enable = true;
     services.displayManager.defaultSession = "mango";
 
     services.gnome.gnome-keyring.enable = true;
     security.pam.services.login.enableGnomeKeyring = true;
     services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
     programs.ssh.startAgent = true;
-
-    security.polkit = {
-      enable = true;
-      extraConfig = ''
-        polkit.addRule(function(action, subject) {
-          if (
-            subject.isInGroup("wheel")
-            && (action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
-                action.id == "org.freedesktop.udisks2.filesystem-mount")
-          ) {
-            return polkit.Result.YES;
-          }
-        });
-      '';
-    };
 
     xdg.portal = {
       enable = true;
@@ -86,52 +74,19 @@
       };
     };
 
-    hardware.bluetooth.enable = true;
-    hardware.bluetooth.powerOnBoot = true;
-
-    services = {
-      blueman.enable = true;
-      udisks2.enable = true;
-      gvfs.enable = true;
-      pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-        jack.enable = true;
-      };
-    };
-
-    programs.nm-applet.enable = true;
-
     # kio-fuse is dbus-activated; without this it never starts and Dolphin's
     # remote locations stay invisible to non-KDE apps.
     services.dbus.packages = [ pkgs.kdePackages.kio-fuse ];
-    security.rtkit.enable = true;
 
     environment.systemPackages =
       (with pkgs; [
-        libnotify
-        awww
         #hyprlock
         #dunst
-        pipewire
-        wireplumber
-        pavucontrol
-        blueman
-        networkmanagerapplet
         polkit_gnome
         #waybar
         #wlogout
 
-        qt5.qtwayland
-        qt6.qtwayland
-
         xwayland-satellite
-
-        cliphist
-        wl-clipboard
-        kdePackages.breeze-icons
 
         # File manager. Colours come from noctalia's `kcolorscheme` template
         # (kdeglobals) plus the `qt` template via qt6ct; kio-extras carries the

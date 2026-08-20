@@ -90,6 +90,29 @@ in
       Hidden=true
     '';
 
+    # KDE apps resolve their icon theme through KIconTheme, which reads
+    # ~/.config/kdeglobals -- not qt6ct.conf. Without this Dolphin falls back to
+    # Breeze regardless of what qt6ct says. kdeglobals cannot be HM-owned: the
+    # shell's kcolorscheme template merges the palette into it at runtime and
+    # needs it writable, so seed the key idempotently instead.
+    home.activation.kdeIconTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            ${pkgs.python3}/bin/python3 - "$HOME/.config/kdeglobals" ${config.stylix.icons.dark} <<'PYICON'
+      import os, sys, re
+      path, theme = sys.argv[1], sys.argv[2]
+      os.makedirs(os.path.dirname(path), exist_ok=True)
+      text = open(path).read() if os.path.exists(path) else ""
+      if re.search(r"^\[Icons\]", text, re.M):
+          new = re.sub(r"(^\[Icons\][^\[]*?^Theme=).*$", r"\g<1>" + theme, text, flags=re.M)
+          if new == text and "Theme=" not in text.split("[Icons]")[1].split("[")[0]:
+              new = text.replace("[Icons]", "[Icons]\nTheme=" + theme, 1)
+      else:
+          new = text.rstrip("\n") + "\n\n[Icons]\nTheme=" + theme + "\n"
+      if new != text:
+          open(path, "w").write(new)
+          print("kdeglobals: icon theme set to " + theme)
+      PYICON
+    '';
+
     # Live Seam: a writable file sourced last, so anything set there beats the
     # generated config without a rebuild. mango reloads on `mmsg dispatch
     # reload_config` (SUPER+SHIFT+R).

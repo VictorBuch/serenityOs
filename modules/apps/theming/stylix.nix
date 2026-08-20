@@ -1,4 +1,21 @@
-args@{ config, pkgs, lib, inputs, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  mkModule,
+  ...
+}:
+
+let
+  # Single source for the pointer cursor. Consumed twice below: by stylix inside
+  # home-manager, and by environment.sessionVariables at the system level.
+  cursor = {
+    package = pkgs.colloid-cursors;
+    name = "Colloid-dark-cursors";
+    size = 16;
+  };
+in
 
 mkModule {
   name = "stylix";
@@ -6,10 +23,24 @@ mkModule {
   description = "Stylix home manager theming";
   # Inject stylix HM module and config via sharedModules
   linuxExtraConfig = {
+    # home.sessionVariables only reaches interactive shells (hm-session-vars.sh);
+    # it never reaches a compositor launched by the display manager, which then
+    # falls back to the default cursor theme. These have to be session-level.
+    environment.sessionVariables = {
+      XCURSOR_THEME = cursor.name;
+      XCURSOR_SIZE = toString cursor.size;
+    };
+
     home-manager.sharedModules = [
       inputs.stylix.homeModules.stylix
       (
-        { config, pkgs, lib, osConfig ? { }, ... }:
+        {
+          config,
+          pkgs,
+          lib,
+          osConfig ? { },
+          ...
+        }:
         {
           stylix = {
             enable = true;
@@ -20,11 +51,7 @@ mkModule {
             base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-storm.yaml";
             image = "${config.wallpaper}";
 
-            cursor = {
-              package = pkgs.colloid-cursors;
-              name = "Colloid-dark-cursors";
-              size = 16;
-            };
+            inherit cursor;
 
             icons = {
               package = pkgs.colloid-icon-theme;
@@ -73,8 +100,9 @@ mkModule {
               qt.enable = false; # noctalia's qt template owns qt6ct/qt5ct colors
 
               # Zen browser stylix integration
-              zen-browser.profileNames =
-                lib.mkIf (config.programs.zen-browser.enable or false) [ config.home.username ];
+              zen-browser.profileNames = lib.mkIf (config.programs.zen-browser.enable or false) [
+                config.home.username
+              ];
             };
           };
         }

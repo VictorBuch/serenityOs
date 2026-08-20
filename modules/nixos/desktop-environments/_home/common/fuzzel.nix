@@ -26,7 +26,7 @@
           horizontal-pad = 24;
           vertical-pad = 20;
           inner-pad = 14;
-          icon-theme = "WhiteSur-icon-theme-dark";
+          icon-theme = config.stylix.icons.dark;
           dpi-aware = "yes";
         };
 

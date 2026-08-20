@@ -132,7 +132,7 @@
 
         cliphist
         wl-clipboard
-        papirus-icon-theme
+        kdePackages.breeze-icons
 
         grim
         slurp

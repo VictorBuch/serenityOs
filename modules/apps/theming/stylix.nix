@@ -21,14 +21,14 @@ mkModule {
             image = "${config.wallpaper}";
 
             cursor = {
-              package = pkgs.whitesur-cursors;
-              name = "WhiteSur-cursors";
+              package = pkgs.colloid-cursors;
+              name = "Colloid-dark-cursors";
               size = 16;
             };
 
             icons = {
-              package = pkgs.whitesur-icon-theme;
-              dark = "WhiteSur-icon-theme-dark";
+              package = pkgs.colloid-icon-theme;
+              dark = "Colloid-Dark";
             };
 
             fonts = {

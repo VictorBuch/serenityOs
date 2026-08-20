@@ -178,7 +178,7 @@ in
       extraConfig = {
         modi = "drun,run,calc,window,emoji,power-menu:${pkgs.rofi-power-menu}/bin/rofi-power-menu";
         show-icons = true;
-        icon-theme = "WhiteSur-icon-theme-dark";
+        icon-theme = config.stylix.icons.dark;
         display-drun = "  Apps";
         display-run = "  Run";
         display-calc = "  Calc";

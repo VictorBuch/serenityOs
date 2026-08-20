@@ -122,7 +122,7 @@
 
         cliphist
         wl-clipboard
-        papirus-icon-theme
+        kdePackages.breeze-icons
 
         # Screenshot tools
         grim # Screenshot tool

@@ -249,9 +249,9 @@ in
       # Adopt new HM default (was `config.gtk.theme` prior to 26.05)
       gtk.gtk4.theme = lib.mkForce null;
 
-      # Quickshell icon hint — match stylix's WhiteSur
+      # Quickshell icon hint — match stylix
       home.sessionVariables = {
-        QS_ICON_THEME = "WhiteSur-icon-theme-dark";
+        QS_ICON_THEME = config.stylix.icons.dark;
       };
 
       # Install Qt SVG support packages
@@ -277,7 +277,7 @@ in
         color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
         custom_palette=true
         style=Fusion
-        icon_theme=WhiteSur-icon-theme-dark
+        icon_theme=${config.stylix.icons.dark}
         standard_dialogs=default
       '';
     }

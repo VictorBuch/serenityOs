@@ -218,7 +218,7 @@ in
           "isnamedscratchpad:1,appid:^sone$"
 
           # Audio/Wine sizing
-          "appid:^REAPER$|^reaper$,width:0.85"
+          "appid:^REAPER$|^reaper$,isfloating:0"
           "title:^iLok|PACE|License,isfloating:1,width:0.6,height:0.6"
           "title:^IK Product Manager|IK Multimedia,isfloating:1,width:0.6,height:0.6"
 

@@ -77,8 +77,15 @@
     };
 
     # Herdr: mouse-first terminal multiplexer (tmux/zellij alternative).
+    #
+    # Pinned. ffc4e26 (2026-08-18) broke keyboard input to TUI applications
+    # running inside herdr -- ghostty on its own is unaffected, so it is herdr's
+    # terminal layer, not the emulator. 29 commits land between this rev and
+    # that one, several touching terminal input; "fix(perf): eliminate
+    # redundant terminal wake work" (#2962) is the most likely culprit.
+    # Unpin once that is confirmed fixed upstream.
     herdr = {
-      url = "github:ogulcancelik/herdr";
+      url = "github:ogulcancelik/herdr/51b7064ef0a02642393bab1d2eea0f4dbd8414d2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

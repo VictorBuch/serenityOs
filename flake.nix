@@ -39,6 +39,8 @@
     skwd-wall = {
       url = "github:liixini/skwd-wall";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.quickshell.inputs.nixpkgs.follows = "nixpkgs";
+      inputs.skwd-daemon.inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Wallpaper packs, merged into the pool by home/wallpaper-pool.nix.

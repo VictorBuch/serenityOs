@@ -2,10 +2,10 @@
 {
 
   options = {
-    home.desktop-environments.common.hyprlock.enable = lib.mkEnableOption "Enables Hyprlock";
+    home.desktop.common.hyprlock.enable = lib.mkEnableOption "Enables Hyprlock";
   };
 
-  config = lib.mkIf config.home.desktop-environments.common.hyprlock.enable {
+  config = lib.mkIf config.home.desktop.common.hyprlock.enable {
     programs.hyprlock = {
       enable = true;
       settings = {

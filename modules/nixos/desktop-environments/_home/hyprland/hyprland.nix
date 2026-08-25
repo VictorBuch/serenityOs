@@ -6,6 +6,7 @@
 }:
 
 let
+  apps = config.home.desktop.apps;
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
@@ -16,10 +17,10 @@ in
 {
 
   options = {
-    home.desktop-environments.hyprland.enable = lib.mkEnableOption "Enables hyprland home manager";
+    home.desktop.compositor.hyprland.enable = lib.mkEnableOption "Enables hyprland home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.hyprland.enable {
+  config = lib.mkIf config.home.desktop.compositor.hyprland.enable {
 
     home.sessionVariables.NIXOS_OZONE_WL = "1";
 
@@ -127,11 +128,11 @@ in
           "$mainMod, F, exec, ${fileManager}"
 
           # Raycast-style focus-or-run (matches niri Mod+1/2/3/T/D)
-          "$mainMod, 1, exec, focus-or-run-hypr zen-beta ${browser}"
-          "$mainMod, 2, exec, focus-or-run-hypr com.mitchellh.ghostty ${terminal}"
-          "$mainMod, 3, exec, focus-or-run-hypr Slack slack"
-          "$mainMod, T, exec, focus-or-run-hypr tidal-hifi tidal-hifi"
-          "$mainMod, D, exec, focus-or-run-hypr discord discord"
+          "$mainMod, 1, exec, focus-or-run-hypr ${apps.zen.appId} ${apps.zen.command}"
+          "$mainMod, 2, exec, focus-or-run-hypr ${apps.ghostty.appId} ${apps.ghostty.command}"
+          "$mainMod, 3, exec, focus-or-run-hypr ${apps.slack.appId} ${apps.slack.command}"
+          "$mainMod, T, exec, focus-or-run-hypr ${apps.tidal.appId} ${apps.tidal.command}"
+          "$mainMod, D, exec, focus-or-run-hypr ${apps.discord.appId} ${apps.discord.command}"
 
           # Noctalia shell controls
           "$mainMod, Space, exec, ${shell} ipc call launcher toggle"
@@ -190,13 +191,13 @@ in
         # so boolean effects (float/pin/center) get an explicit `1`.
         windowrule = [
           # Main work apps → workspace 1 (browser + terminal tile side-by-side)
-          "workspace 1 silent, match:class ^(zen-beta|zen|firefox)$"
-          "workspace 1 silent, match:class ^(com.mitchellh.ghostty|ghostty)$"
+          "workspace 1 silent, match:class ^(${apps.zen.alternatives})$"
+          "workspace 1 silent, match:class ^(${apps.ghostty.alternatives})$"
 
           # "Out of way" apps → special workspaces (Sway-style scratchpad)
           # Toggle via Mod+3 / Mod+T / Mod+D focus-or-run, or movetoworkspace bind.
-          "workspace special:chat silent, match:class ^([Ss]lack)$"
-          "workspace special:chat silent, match:class ^([Dd]iscord)$"
+          "workspace special:chat silent, match:class ^(${apps.slack.alternatives})$"
+          "workspace special:chat silent, match:class ^(${apps.discord.alternatives})$"
           "workspace special:music silent, match:class ^(tidal-hifi)$"
           "workspace special:games silent, match:class ^(steam)$"
           "workspace special:games silent, match:class ^(steam_app_.*)$"

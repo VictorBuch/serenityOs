@@ -6,6 +6,7 @@
 }:
 
 let
+  apps = config.home.desktop.apps;
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
@@ -18,10 +19,10 @@ in
 
 {
   options = {
-    home.desktop-environments.niri.enable = lib.mkEnableOption "Enables niri home manager";
+    home.desktop.compositor.niri.enable = lib.mkEnableOption "Enables niri home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.niri.enable {
+  config = lib.mkIf config.home.desktop.compositor.niri.enable {
 
     # Set Wayland environment variable
     home.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -122,11 +123,11 @@ in
             Mod+F { spawn "${fileManager}"; }
 
             // Raycast-style focus-or-run bindings (Alt + numbers)
-            Mod+1 { spawn "focus-or-run" "zen-beta" "zen"; }
-            Mod+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
-            Mod+3 { spawn "focus-or-run" "Slack" "slack"; }
-            Mod+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
-            Mod+D { spawn "focus-or-run" "discord" "discord"; }
+            Mod+1 { spawn "focus-or-run" "${apps.zen.appId}" "${apps.zen.command}"; }
+            Mod+2 { spawn "focus-or-run" "${apps.ghostty.appId}" "${apps.ghostty.command}"; }
+            Mod+3 { spawn "focus-or-run" "${apps.slack.appId}" "${apps.slack.command}"; }
+            Mod+T { spawn "focus-or-run" "${apps.tidal.appId}" "${apps.tidal.command}"; }
+            Mod+D { spawn "focus-or-run" "${apps.discord.appId}" "${apps.discord.command}"; }
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
@@ -213,11 +214,11 @@ in
 
         // Application workspace assignments
         window-rule {
-            match app-id=r#"^org\.wezfurlong\.wezterm$|^dev\.warp\.Warp$|^com\.mitchellh\.ghostty$|^ghostty$"#
+            match app-id=r#"^org\.wezfurlong\.wezterm$|^dev\.warp\.Warp$|${apps.ghostty.regex}"#
             open-on-workspace "main"
         }
         window-rule {
-            match app-id=r#"^zen-beta$|^zen$|^firefox$"#
+            match app-id=r#"${apps.zen.regex}"#
             open-on-workspace "main"
         }
         window-rule {
@@ -225,15 +226,15 @@ in
             open-on-workspace "scratchpad"
         }
         window-rule {
-            match app-id=r#"^discord$|^[Dd]iscord$"#
+            match app-id=r#"${apps.discord.regex}"#
             open-on-workspace "chat"
         }
         window-rule {
-            match app-id=r#"^slack$|^[Ss]lack$"#
+            match app-id=r#"${apps.slack.regex}"#
             open-on-workspace "chat"
         }
         window-rule {
-            match app-id=r#"^tidal-hifi$|^[Tt]idal-hifi$"#
+            match app-id=r#"${apps.tidal.regex}"#
             open-on-workspace "scratchpad"
         }
 

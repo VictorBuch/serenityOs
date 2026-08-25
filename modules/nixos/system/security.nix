@@ -24,7 +24,6 @@
     security.pam.services = {
       sudo.u2fAuth = true;
       polkit-1.u2fAuth = true; # GUI privilege escalation dialogs
-      hyprlock.u2fAuth = true; # Screen lock unlock
       # Disable u2f on login (and transitively sddm, which is `substack login`).
       # A `sufficient` u2f module short-circuits pam_unix, so pam_gnome_keyring
       # never captures the login password and the keyring stays locked in the

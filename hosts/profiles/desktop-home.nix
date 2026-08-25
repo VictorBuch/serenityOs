@@ -4,9 +4,13 @@
 { inputs, ... }:
 {
   # Flake HM modules still need to be imported here
-  # (they define HM options used by our modules)
+  # (they define HM options used by our modules).
+  #
+  # noctalia is NOT in this list: home-manager now ships its own
+  # programs.noctalia module, and importing both makes the option collide.
+  # The flake's package is selected in
+  # modules/nixos/desktop-environments/_home/common/noctalia.nix instead.
   home-manager.sharedModules = [
-    inputs.noctalia.homeModules.default
     inputs.zen-browser.homeModules.default
   ];
 

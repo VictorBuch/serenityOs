@@ -2,10 +2,11 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "podman";
+  platforms = [ "linux" ];
   category = "emulation";
-  linuxPackages = { pkgs, ... }: [ ]; # Podman enabled via virtualisation.podman
+  packages = { pkgs, ... }: [ ]; # Podman enabled via virtualisation.podman
   description = "Podman container engine (Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     virtualisation.containers.enable = true;
     virtualisation.podman = {
       enable = true;

@@ -7,11 +7,11 @@
 {
 
   options = {
-    desktop-environments.kde.enable = lib.mkEnableOption "Enables KDE";
+    desktop.environment.kde.enable = lib.mkEnableOption "the KDE Plasma Desktop Environment";
   };
 
-  config = lib.mkIf config.desktop-environments.kde.enable {
-    sddm.enable = true;
+  config = lib.mkIf config.desktop.environment.kde.enable {
+    desktop.loginManager.sddm.enable = true;
     services.xserver.enable = true; # optional
     services.displayManager.sddm.enable = true;
     services.displayManager.sddm.wayland.enable = true;

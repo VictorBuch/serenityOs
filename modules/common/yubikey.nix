@@ -6,7 +6,7 @@
   ...
 }:
 let
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in
 {
   options.yubikey.enable = lib.mkEnableOption "YubiKey support";

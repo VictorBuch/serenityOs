@@ -6,16 +6,18 @@
 {
   imports = [
     ./home.nix
+    ./wallpaper-pool.nix
+    ./live-seams.nix
   ];
 
   options = {
     wallpaper = lib.mkOption {
       type = lib.types.path;
-      # Night wallpaper of the dynamic day/night pair, so static consumers
-      # (wlogout, lock background, stylix fallback image) match the desk at
-      # night. The live desktop palette itself comes from noctalia's wallpaper
-      # engine, not this option.
-      default = ./wallpapers/night/cloudsnight.jpg;
+      # Build-time fallback for consumers that need a fixed path (stylix's
+      # base16 source image, wlogout's background). The live desktop wallpaper
+      # and palette come from noctalia's pool in ./wallpapers, which rotates at
+      # runtime and never passes through this option.
+      default = ./wallpapers/cloudsnight.jpg;
       description = "Path to the wallpaper used across modules.";
     };
   };

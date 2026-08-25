@@ -5,6 +5,7 @@ mkModule {
   category = "utilities";
   packages = { pkgs, ... }: [
     pkgs.pam-cli
+    pkgs.yt-dlp
   ];
   description = "Command-line development and management tools";
 } args

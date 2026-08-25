@@ -2,10 +2,11 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "web-apps";
+  platforms = [ "linux" ];
   category = "utilities";
-  linuxPackages = { pkgs, ... }: [ pkgs.chromium ];
+  packages = { pkgs, ... }: [ pkgs.chromium ];
   description = "Web desktop apps (PWAs, Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     home-manager.users.${config.user.userName} =
       let
         browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";

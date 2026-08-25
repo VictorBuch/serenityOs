@@ -5,41 +5,25 @@
   ...
 }:
 {
+  imports = [ ./_session.nix ];
 
   options = {
-    desktop-environments.hyprland.enable = lib.mkEnableOption "Enables Hyprland WM";
+    desktop.compositor.hyprland.enable = lib.mkEnableOption "Hyprland (wlroots compositor)";
   };
 
-  config = lib.mkIf config.desktop-environments.hyprland.enable {
+  config = lib.mkIf config.desktop.compositor.hyprland.enable {
 
-    # Inject Home Manager config for hyprland (keybinds, animations, etc.)
-    home-manager.sharedModules = [ ./_home/hyprland ];
+    desktop.session = {
+      enable = true;
+      name = "hyprland";
+      homeModule = ./_home/hyprland;
+    };
 
-    # Enable the Hyprland Window Manager
     programs.hyprland = {
       enable = true;
       xwayland.enable = true;
     };
 
-    sddm.enable = true;
-
-    # Enable polkit
-    security.polkit.enable = true;
-
-    # Allow wheel group users to mount drives without password
-    security.polkit.extraConfig = ''
-      polkit.addRule(function(action, subject) {
-        if (
-          subject.isInGroup("wheel")
-          && (action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
-              action.id == "org.freedesktop.udisks2.filesystem-mount")
-        ) {
-          return polkit.Result.YES;
-        }
-      });
-    '';
-
-    # Enable portals with proper configuration
     xdg.portal = {
       enable = true;
       extraPortals = with pkgs; [
@@ -55,61 +39,15 @@
       };
     };
 
-    #Enable bluetooth
-    hardware.bluetooth.enable = true; # enables support for Bluetooth
-    hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
-    services.blueman.enable = true;
-
-    # Enable services for Nautilus to work with external drives
-    services.udisks2.enable = true; # Auto-mount removable drives
-    services.gvfs.enable = true; # GNOME Virtual File System (needed by Nautilus)
-
-    # Enable network manager applet
-    programs.nm-applet.enable = true;
-
-    # Configure keymap in X11
-    # services.xserver = {
-    #   xkb = {
-    #     layout = "us, dk";
-    #     variant = "";
-    #     options = "grp:alt_space_toggle";
-    #   };
-    # };
-
-    # Enable sound with pipewire.
-    security.rtkit.enable = true;
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      # If you want to use JACK applications, uncomment this
-      jack.enable = true;
-    };
-
     environment.systemPackages = with pkgs; [
-      libnotify
-      awww # swww renamed
       hypridle # Idle
       hyprlock # Lock screen
-      # Bar provided by noctalia via home-manager (../_home/common/noctalia.nix)
+      # Bar provided by noctalia via home-manager (./_home/common/noctalia.nix)
       hyprpolkitagent
       dunst # Notification manager
-      pipewire
-      wireplumber
       nautilus
-      pavucontrol
-      blueman # bluetooth manager (blueberry removed upstream)
-      networkmanagerapplet # wifi manager
       hyprshot # Screenshot tool
       wlogout
-
-      qt5.qtwayland
-      qt6.qtwayland
-
-      cliphist
-      wl-clipboard
-      papirus-icon-theme
     ];
   };
 }

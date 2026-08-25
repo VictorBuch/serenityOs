@@ -3,6 +3,7 @@
   lib,
   options,
   config,
+  expiring,
   ...
 }:
 let
@@ -182,13 +183,18 @@ in
       address = "0.0.0.0";
 
       # Override package to disable all test phases
-      package = pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
-        doCheck = false;
-        doInstallCheck = false;
-        checkPhase = "";
-        installCheckPhase = "";
-        pytestCheckPhase = "";
-      });
+      package =
+        expiring.onBump pkgs.paperless-ngx "3.0.5"
+          "retest paperless-ngx with its own test phases before keeping them disabled"
+          (
+            pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
+              doCheck = false;
+              doInstallCheck = false;
+              checkPhase = "";
+              installCheckPhase = "";
+              pytestCheckPhase = "";
+            })
+          );
 
       dataDir = "${paperlessDir}/data";
       mediaDir = "${paperlessDir}/media";

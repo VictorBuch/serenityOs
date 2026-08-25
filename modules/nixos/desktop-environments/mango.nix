@@ -6,15 +6,19 @@
   ...
 }:
 {
+  imports = [ ./_session.nix ];
+
   options = {
-    desktop-environments.mango.enable = lib.mkEnableOption "Enables Mango WM (dwl-based wlroots compositor)";
+    desktop.compositor.mango.enable = lib.mkEnableOption "Mango (dwl-based wlroots compositor)";
   };
 
-  config = lib.mkIf config.desktop-environments.mango.enable {
+  config = lib.mkIf config.desktop.compositor.mango.enable {
 
-    home-manager.sharedModules = [ ./_home/mango ];
-
-    i18n.inputMethod.enable = false;
+    desktop.session = {
+      enable = true;
+      name = "mango";
+      homeModule = ./_home/mango;
+    };
 
     # nixpkgs upstreamed this module (programs/wayland/mango.nix); the login
     # session entry is wired automatically via services.displayManager.sessionPackages.
@@ -25,28 +29,7 @@
       package = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
-    sddm.enable = true;
-    services.displayManager.defaultSession = "mango";
-
-    services.gnome.gnome-keyring.enable = true;
-    security.pam.services.login.enableGnomeKeyring = true;
-    services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
-    programs.ssh.startAgent = true;
-
-    security.polkit = {
-      enable = true;
-      extraConfig = ''
-        polkit.addRule(function(action, subject) {
-          if (
-            subject.isInGroup("wheel")
-            && (action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
-                action.id == "org.freedesktop.udisks2.filesystem-mount")
-          ) {
-            return polkit.Result.YES;
-          }
-        });
-      '';
-    };
+    environment.sessionVariables.QT_QPA_PLATFORMTHEME = "qt6ct";
 
     xdg.portal = {
       enable = true;
@@ -86,56 +69,28 @@
       };
     };
 
-    hardware.bluetooth.enable = true;
-    hardware.bluetooth.powerOnBoot = true;
-
-    services = {
-      blueman.enable = true;
-      udisks2.enable = true;
-      tumbler.enable = true; # Thumbnail support for images Thunar
-      gvfs.enable = true;
-      pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-        jack.enable = true;
-      };
-    };
-
-    programs.nm-applet.enable = true;
-    security.rtkit.enable = true;
-
-    # Thunar file manager
-    programs.thunar.enable = true;
-    programs.xfconf.enable = true;
+    # kio-fuse is dbus-activated; without this it never starts and Dolphin's
+    # remote locations stay invisible to non-KDE apps.
+    services.dbus.packages = [ pkgs.kdePackages.kio-fuse ];
 
     environment.systemPackages =
       (with pkgs; [
-        libnotify
-        awww
-        #hyprlock
-        #dunst
-        pipewire
-        wireplumber
-        pavucontrol
-        blueman
-        networkmanagerapplet
         polkit_gnome
-        #waybar
-        #wlogout
-
-        qt5.qtwayland
-        qt6.qtwayland
 
         xwayland-satellite
 
-        cliphist
-        wl-clipboard
-        papirus-icon-theme
+        unrar
 
-        grim
-        slurp
+        # File manager. Colours come from noctalia's `kcolorscheme` template
+        # (kdeglobals) plus the `qt` template via qt6ct; kio-extras carries the
+        # protocol handlers and thumbnailers Dolphin expects.
+        kdePackages.dolphin
+        kdePackages.ark
+        kdePackages.kio-extras
+        kdePackages.kio-fuse
+        kdePackages.ffmpegthumbs
+        kdePackages.kdegraphics-thumbnailers
+
         brightnessctl
         playerctl
         wlr-randr

@@ -40,11 +40,9 @@ in
   nvidia.enable = true;
 
   # Desktop environments
-  desktop-environments = {
-    gnome.enable = true;
-    hyprland.enable = false;
-    kde.enable = false;
-    niri.enable = true;
+  desktop = {
+    compositor.niri.enable = true;
+    environment.gnome.enable = true;
   };
 
   # Apps - lighter setup for laptop

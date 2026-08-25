@@ -52,11 +52,11 @@ let
 in
 {
   options = {
-    home.desktop-environments.mango.focus-or-run.enable =
+    home.desktop.compositor.mango.focus-or-run.enable =
       lib.mkEnableOption "Enable focus-or-run helper for mango";
   };
 
-  config = lib.mkIf config.home.desktop-environments.mango.focus-or-run.enable {
+  config = lib.mkIf config.home.desktop.compositor.mango.focus-or-run.enable {
     home.packages = [ focus-or-run ];
   };
 }

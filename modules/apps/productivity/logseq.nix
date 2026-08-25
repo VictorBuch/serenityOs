@@ -17,12 +17,14 @@ mkModule {
   # After first switch, run once:
   #   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   #   flatpak install flathub com.logseq.Logseq
-  linuxPackages = { ... }: [ ]; # no system package; flatpak provides it
-  linuxExtraConfig = {
-    services.flatpak.enable = true;
-    xdg.portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
+  # No system package on Linux either; the flatpak below provides it.
+  extraConfig =
+    { lib, platform, ... }:
+    lib.optionalAttrs (platform == "linux") {
+      services.flatpak.enable = true;
+      xdg.portal = {
+        enable = true;
+        xdgOpenUsePortal = true;
+      };
     };
-  };
 } args

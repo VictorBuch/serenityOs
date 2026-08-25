@@ -35,6 +35,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Wallpaper selector + its daemon. Owns picking; noctalia applies and themes.
+    skwd-wall = {
+      url = "github:liixini/skwd-wall";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.quickshell.inputs.nixpkgs.follows = "nixpkgs";
+      inputs.skwd-daemon.inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Wallpaper packs, merged into the pool by home/wallpaper-pool.nix.
+    wallpapers-nord = {
+      url = "github:ChrisTitusTech/nord-background";
+      flake = false;
+    };
+
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -77,8 +91,15 @@
     };
 
     # Herdr: mouse-first terminal multiplexer (tmux/zellij alternative).
+    #
+    # Pinned. ffc4e26 (2026-08-18) broke keyboard input to TUI applications
+    # running inside herdr -- ghostty on its own is unaffected, so it is herdr's
+    # terminal layer, not the emulator. 29 commits land between this rev and
+    # that one, several touching terminal input; "fix(perf): eliminate
+    # redundant terminal wake work" (#2962) is the most likely culprit.
+    # Unpin once that is confirmed fixed upstream.
     herdr = {
-      url = "github:ogulcancelik/herdr";
+      url = "github:ogulcancelik/herdr/51b7064ef0a02642393bab1d2eea0f4dbd8414d2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -91,6 +112,12 @@
     # Pinned nixpkgs for Wine 9.20 (audio/yabridge compatibility)
     # Wine 9.22+ has GUI issues: https://github.com/robbert-vdh/yabridge/issues/382
     nixpkgs-wine920.url = "github:nixos/nixpkgs/c792c60b8a97daa7efe41a6e4954497ae410e0c1";
+
+    # Pinned nixpkgs for DaVinci Resolve Studio 21.0.3 (see overlays/default.nix).
+    # The byte patches there target one exact build, so this input must be bumped
+    # deliberately (and the patches re-verified), never by `nix flake update`.
+    # 21.0.4 already breaks the invert-einval-guard patch.
+    nixpkgs-resolve.url = "github:nixos/nixpkgs/0954f7ee2f6bb3dc7d4e3d0d8bcb8fd4bde4cfc5";
 
     # Realtime audio tuning (threadirqs, IRQ priorities, rlimits).
     # Used by modules/nixos/system/audio-performance.nix WITHOUT its realtime kernel --
@@ -124,6 +151,12 @@
     # tv-learn: immersion language-learning media app (learn.victorbuch.com)
     tv-learn = {
       url = "git+https://git.victorbuch.com/VictorBuch/tv-learn";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Nocturne: plain-text notes + tasks + agenda (Tauri desktop app).
+    nocturne = {
+      url = "git+https://git.victorbuch.com/VictorBuch/Nocturne";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -298,7 +331,7 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib) mkModule;
+                inherit (customLib) mkModule expiring;
                 pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };
@@ -333,7 +366,7 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib) mkModule;
+                inherit (customLib) mkModule expiring;
                 pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };

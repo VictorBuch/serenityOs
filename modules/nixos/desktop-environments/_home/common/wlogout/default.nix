@@ -6,10 +6,10 @@ in
 {
 
   options = {
-    home.desktop-environments.common.wlogout.enable = lib.mkEnableOption "Enables wlogout home manager";
+    home.desktop.common.wlogout.enable = lib.mkEnableOption "Enables wlogout home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.common.wlogout.enable {
+  config = lib.mkIf config.home.desktop.common.wlogout.enable {
       programs.wlogout = {
       enable = true;
       style = ''

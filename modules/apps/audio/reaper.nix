@@ -418,8 +418,9 @@ in
   imports = [
     (mkModule {
       name = "reaper";
+      platforms = [ "linux" ];
       category = "audio";
-      linuxPackages =
+      packages =
         { pkgs, pkgs-stable, ... }:
         [
           # Use our wrapper instead of reaper directly
@@ -458,7 +459,7 @@ in
 
       description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
 
-      linuxExtraConfig = {
+      extraConfig = {
         # Enable JACK audio emulation via PipeWire
         services.pipewire.jack.enable = true;
 
@@ -509,6 +510,25 @@ in
             "jack.realtime" = true;
             "jack.realtime-priority" = 88;
           };
+        };
+
+        services.pipewire.wireplumber.extraConfig."51-daw-capture" = {
+          "monitor.alsa.rules" = [
+            {
+              matches = [ { "device.name" = "alsa_card.usb-Focusrite_Scarlett_Solo_USB-00"; } ];
+              actions.update-props = {
+                "api.acp.auto-profile" = false;
+                "device.profile" = "pro-audio";
+              };
+            }
+            {
+              matches = [ { "node.name" = "~alsa_input.usb-046d_081b.*"; } ];
+              actions.update-props = {
+                "priority.session" = 100;
+                "priority.driver" = 100;
+              };
+            }
+          ];
         };
 
         users.users.${config.user.userName}.extraGroups = [ "audio" ];

@@ -63,7 +63,7 @@
       enable = true;
       defaultEditor = true;
       globals.mapleader = " ";
-      clipboard.providers.wl-copy.enable = pkgs.stdenv.isLinux;
+      clipboard.providers.wl-copy.enable = pkgs.stdenv.hostPlatform.isLinux;
 
       colorschemes.catppuccin = {
         enable = true;

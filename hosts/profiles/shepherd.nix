@@ -51,12 +51,7 @@
     };
   };
 
-  desktop-environments = {
-    gnome.enable = false;
-    hyprland.enable = false;
-    kde.enable = false;
-    niri.enable = true;
-  };
+  desktop.compositor.niri.enable = true;
 
   hardware.graphics.enable = true;
   services.xserver = {
@@ -69,8 +64,10 @@
     extraSpecialArgs = {
       inherit inputs pkgs-stable;
     };
+    # noctalia is NOT in this list, for the same reason it is absent from
+    # hosts/profiles/desktop-home.nix: home-manager ships its own
+    # programs.noctalia module, and importing both makes the option collide.
     sharedModules = [
-      inputs.noctalia.homeModules.default
       inputs.zen-browser.homeModules.default
     ];
   };

@@ -2,10 +2,11 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "steam";
+  platforms = [ "linux" ];
   category = "gaming";
-  linuxPackages = { pkgs, ... }: [ ]; # Steam is enabled via programs.steam
+  packages = { pkgs, ... }: [ ]; # Steam is enabled via programs.steam
   description = "Steam gaming platform (Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true; # Open ports for Steam Remote Play

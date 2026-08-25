@@ -6,15 +6,16 @@ args@{
 
 mkModule {
   name = "syncthing";
+  platforms = [ "linux" ];
   category = "utilities";
-  linuxPackages =
+  packages =
     { pkgs, ... }:
     [
       pkgs.syncthing
       pkgs.gnomeExtensions.syncthing-toggle
     ];
   description = "Syncthing file synchronization (Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     services.syncthing = {
       enable = true;
       dataDir = "/home/${config.user.userName}"; # default location for new folders

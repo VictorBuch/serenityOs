@@ -104,28 +104,26 @@ in
   environment.systemPackages = with pkgs; [
     networkmanager-openvpn
     openvpn
+
+    # Nocturne desktop app (own flake, Linux-only package).
+    inputs.nocturne.packages.${pkgs.stdenv.hostPlatform.system}.nocturne
   ];
 
   # Desktop environments
-  desktop-environments = {
-    gnome.enable = true;
-    kde.enable = false;
-    hyprland.enable = false;
-    niri.enable = false;
-    mango.enable = true;
+  desktop = {
+    compositor.mango.enable = true;
+    environment.gnome.enable = true;
     # Escape hatch for plugin GUIs that misbehave under Wayland: pick "Xfce" at SDDM.
-    xorg-audio.enable = true;
+    extraSessions.xorg-audio.enable = true;
   };
 
   # Apps - full workstation
   apps = {
 
-    ai = {
-      enable = true;
-    };
-
     audio = {
       enable = true;
+
+      feedback.enable = true;
 
       # wine 11.14 + yabridge's new-wine10-embedding branch, instead of the pinned
       # wine 9.20 + yabridge 5.1.1.
@@ -182,6 +180,10 @@ in
       nixcats.enable = true;
       nixvim.enable = false;
     };
+
+    # Wallpaper picker. noctalia still draws the wallpaper and derives the
+    # palette from it; skwd just chooses which one.
+    theming.skwd-wall.enable = true;
   };
 
   # YubiKey: PAM U2F sudo + screen lock on removal

@@ -33,7 +33,7 @@ mkModule {
       ...
     }:
     let
-      isLinux = pkgs.stdenv.isLinux;
+      isLinux = pkgs.stdenv.hostPlatform.isLinux;
     in
     {
       home.packages = with pkgs; [

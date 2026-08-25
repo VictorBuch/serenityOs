@@ -2,26 +2,23 @@
 
 {
   imports = [
+    ../common/apps.nix
     ./hyprland.nix
     ./focus-or-run.nix
     ../common/wlogout
     ../common/hyprlock
-    ../common/dunst.nix
     ../common/fuzzel.nix
     ../common/noctalia.nix
   ];
 
-  home.desktop-environments = {
-    hyprland = {
+  home.desktop = {
+    compositor.hyprland = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
     };
-    noctalia = {
-      enable = lib.mkDefault true;
-    };
+    shell.noctalia.enable = lib.mkDefault true;
     common = {
       fuzzel.enable = lib.mkDefault true;
-      dunst.enable = lib.mkDefault false;
       wlogout.enable = lib.mkDefault true;
       hyprlock.enable = lib.mkDefault true;
     };

@@ -5,7 +5,10 @@ mkModule {
   category = "audio";
   packages = { pkgs, ... }: [ pkgs.spotify ];
   description = "Spotify music streaming";
-  linuxExtraConfig = {
-    networking.firewall.allowedUDPPorts = [ 5353 ];
-  };
+  # Spotify Connect discovery; the firewall option is NixOS-only.
+  extraConfig =
+    { lib, platform, ... }:
+    lib.optionalAttrs (platform == "linux") {
+      networking.firewall.allowedUDPPorts = [ 5353 ];
+    };
 } args

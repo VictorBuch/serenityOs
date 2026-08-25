@@ -7,7 +7,7 @@
 }:
 let
   cfg = config;
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in
 {
 

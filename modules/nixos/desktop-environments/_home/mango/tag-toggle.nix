@@ -39,11 +39,11 @@ let
 in
 {
   options = {
-    home.desktop-environments.mango.tag-toggle.enable =
+    home.desktop.compositor.mango.tag-toggle.enable =
       lib.mkEnableOption "Enable tag-toggle helper for mango";
   };
 
-  config = lib.mkIf config.home.desktop-environments.mango.tag-toggle.enable {
+  config = lib.mkIf config.home.desktop.compositor.mango.tag-toggle.enable {
     home.packages = [ tag-toggle ];
   };
 }

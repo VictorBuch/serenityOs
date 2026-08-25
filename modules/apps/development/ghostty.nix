@@ -1,4 +1,10 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 let
   # `monoFamily` comes from osConfig.fonts.mono.familyMono, so it follows the
@@ -20,6 +26,7 @@ let
     # generated config, which is fine: the theme file never sets an opacity key,
     # so there is nothing to clobber it.
     background-opacity = 0.85;
+    alpha-blending = "native";
     window-decoration = false;
     confirm-close-surface = false;
     # Same story as background-opacity: the disabled stylix target was also the
@@ -35,8 +42,10 @@ in
 mkModule {
   name = "ghostty";
   category = "development";
-  linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
-  darwinExtraConfig = { homebrew.casks = [ "ghostty" ]; };
+  packages =
+    { pkgs, lib, platform, ... }:
+    lib.optionals (platform == "linux") [ pkgs.ghostty ];
+  casks = [ "ghostty" ];
   description = "Ghostty terminal emulator";
   homeConfig =
     {
@@ -50,16 +59,30 @@ mkModule {
       # Fall back to the generic "monospace" fontconfig alias if fonts.nix is not
       # in play (bare HM, or a host with fonts.enable = false) so this module
       # still evaluates standalone.
-      settings = ghosttySettings (
-        lib.attrByPath [ "fonts" "mono" "familyMono" ] "monospace" osConfig
-      );
+      settings =
+        ghosttySettings (lib.attrByPath [ "fonts" "mono" "familyMono" ] "monospace" osConfig)
+        // {
+          # Live Seam. The leading `?` suppresses the error when the file is
+          # absent, and ghostty loads included files *after* the config that
+          # names them, so anything here wins. Absolute path on purpose: a
+          # relative one resolves against the config file, which is a store
+          # symlink. Reload with SIGUSR2 or ctrl+shift+comma.
+          config-file = "?${config.home.homeDirectory}/.config/ghostty/local";
+        };
     in
     {
-      programs.ghostty = lib.mkIf pkgs.stdenv.isLinux {
+      programs.ghostty = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         enable = true;
         inherit settings;
       };
-      xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
+
+      # Both platforms: the Darwin config written below names the same seam.
+      home.liveSeams.ghostty = {
+        path = ".config/ghostty/local";
+        reload = "SIGUSR2 or ctrl+shift+comma";
+      };
+
+      xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         text = lib.generators.toKeyValue { } settings;
       };
     };

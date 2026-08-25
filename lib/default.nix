@@ -7,4 +7,7 @@
   # Module helper for creating app/service modules with enable options
   # Handles cross-platform packages, stable/unstable mixing, and Home Manager injection
   mkModule = import ./mkModule.nix { inherit lib; };
+
+  # Wrappers that make an override warn once its reason to exist is gone
+  expiring = import ./expiring.nix { inherit lib; };
 }

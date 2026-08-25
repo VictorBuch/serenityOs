@@ -163,6 +163,7 @@ in
         border_radius = 8;
         focused_opacity = 1.0;
         unfocused_opacity = 0.9;
+        borderpx = 2;
 
         # === Shadows ===
         shadows = 0;

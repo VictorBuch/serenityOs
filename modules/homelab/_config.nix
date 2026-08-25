@@ -25,11 +25,6 @@ in
       default = "/mnt/pool/files";
       description = "Shared user-files root served by copyparty and synced by Syncthing";
     };
-    nextcloudDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/mnt/pool/nextcloud";
-      description = "Directory for Nextcloud data";
-    };
     paperlessDir = lib.mkOption {
       type = lib.types.str;
       default = "/mnt/pool/paperless";

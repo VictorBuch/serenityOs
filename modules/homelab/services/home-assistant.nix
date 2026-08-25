@@ -142,7 +142,6 @@ in
 	"music_assistant"
 	"hyperion"
 	"immich"
-	"nextcloud"
 	"ntfy"
 	"paperless_ngx"
 	"overseerr"

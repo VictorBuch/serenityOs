@@ -357,9 +357,6 @@ in
         "--advertise-routes=192.168.0.0/24" # Share your local network
       ];
     };
-    # Retired at pangolin cutover 2026-08-10; module file kept one release
-    # for rollback (see PANGOLIN_CUTOVER.md Phase 7 for final removal)
-    cloudflare-tunnel.enable = false;
     # Pangolin site connector (tunnel to wash)
     newt.enable = true;
     caddy.enable = true;
@@ -390,7 +387,6 @@ in
       qui.enable = true;
       mousehole.enable = true;
     };
-    nextcloud.enable = false;
 
     # NAS: copyparty serves /mnt/pool/files at files.<domain> with its own
     # accounts and share links; Syncthing keeps subfolders of it two-way

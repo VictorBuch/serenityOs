@@ -246,9 +246,6 @@
 
         # Restart dependent services that may have failed
         echo "Restarting dependent services..."
-        systemctl try-restart nextcloud-directories.service 2>/dev/null || true
-        systemctl try-restart nextcloud-setup.service 2>/dev/null || true
-        systemctl try-restart phpfpm-nextcloud.service 2>/dev/null || true
         systemctl try-restart paperless-directories.service 2>/dev/null || true
         systemctl try-restart paperless-scheduler.service 2>/dev/null || true
       else

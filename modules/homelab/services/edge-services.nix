@@ -17,7 +17,7 @@
 #                  private resource, reachable only with a connected Pangolin
 #                  client (olm) or on the LAN. Same URL both ways.
 #   https          backend speaks TLS (self-signed; Caddy skips verify)
-#   isPhpFpm / isStaticFiles / isPocketBase / staticPath / upstreamHost /
+#   isStaticFiles / isPocketBase / staticPath / upstreamHost /
 #   upstreamOrigin  special-case routing handled by caddy.nix
 {
   config,
@@ -184,12 +184,6 @@
         url = "http://127.0.0.1:8004";
         https = false;
         protected = false;
-      };
-      nextcloud = {
-        url = "unix//run/phpfpm/nextcloud.sock";
-        https = false;
-        protected = false;
-        isPhpFpm = true;
       };
       git = {
         url = "http://127.0.0.1:3004";

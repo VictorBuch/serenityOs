@@ -778,11 +778,6 @@ in
                           check-url = "${local}:3004";
                         }
                         {
-                          title = "NextCloud";
-                          url = "https://nextcloud.${hl.domain}";
-                          icon = "sh:nextcloud";
-                        }
-                        {
                           title = "HyperHDR";
                           url = "http://${nixosIp}:8090";
                           icon = "sh:hyperhdr";

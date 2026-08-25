@@ -18,49 +18,7 @@ let
   # Request-handling body for one service, independent of domain/TLS.
   serviceBody =
     service:
-    if service.isPhpFpm or false then
-      let
-        nextcloudPackage =
-          if config.homelab.nextcloud.enable then config.services.nextcloud.package else pkgs.nextcloud32;
-      in
-      ''
-        # Nextcloud-specific configuration
-        root * ${nextcloudPackage}
-
-        # Security headers
-        header {
-          Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-          Referrer-Policy "no-referrer"
-          X-Content-Type-Options "nosniff"
-          X-Download-Options "noopen"
-          X-Frame-Options "SAMEORIGIN"
-          X-Permitted-Cross-Domain-Policies "none"
-          X-Robots-Tag "noindex, nofollow"
-          -X-Powered-By
-        }
-
-        # WebDAV redirects for CardDAV and CalDAV
-        redir /.well-known/carddav /remote.php/dav 301
-        redir /.well-known/caldav /remote.php/dav 301
-        redir /.well-known/webfinger /index.php/.well-known/webfinger 301
-        redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
-
-        # Enable large file uploads
-        request_body {
-          max_size 16G
-        }
-
-        # PHP-FPM configuration for Nextcloud
-        php_fastcgi ${service.url} {
-          root ${nextcloudPackage}
-          env front_controller_active true
-          env modHeadersAvailable true
-        }
-
-        # Serve static files
-        file_server
-      ''
-    else if service.isStaticFiles or false then
+    if service.isStaticFiles or false then
       ''
         # Serve static files
         root * ${service.staticPath}

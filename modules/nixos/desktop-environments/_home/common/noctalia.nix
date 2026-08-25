@@ -227,8 +227,8 @@ in
             directory = wallDir;
             directory_dark = wallDir;
             automation = {
-              enabled = false;
-              interval_seconds = 21600;
+              enabled = true;
+              interval_seconds = 7200;
               order = "random";
               recursive = false;
             };

@@ -64,9 +64,10 @@
     extraSpecialArgs = {
       inherit inputs pkgs-stable;
     };
+    # noctalia is NOT in this list, for the same reason it is absent from
+    # hosts/profiles/desktop-home.nix: home-manager ships its own
+    # programs.noctalia module, and importing both makes the option collide.
     sharedModules = [
-      { disabledModules = [ "programs/noctalia.nix" ]; }
-      inputs.noctalia.homeModules.default
       inputs.zen-browser.homeModules.default
     ];
   };

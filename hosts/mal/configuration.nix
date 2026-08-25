@@ -392,6 +392,8 @@ in
   apps.cli = {
     enable = true;
     git.enable = true;
+    # Personal notes vault; nothing on this host reads or writes it.
+    notes.enable = false;
     fzf.enable = true;
     nushell.enable = true;
     zsh.enable = false;

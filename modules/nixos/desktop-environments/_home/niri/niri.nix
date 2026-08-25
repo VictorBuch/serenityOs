@@ -214,11 +214,11 @@ in
 
         // Application workspace assignments
         window-rule {
-            match app-id=r#"^org\.wezfurlong\.wezterm$|^dev\.warp\.Warp$|^com\.mitchellh\.ghostty$|^ghostty$"#
+            match app-id=r#"^org\.wezfurlong\.wezterm$|^dev\.warp\.Warp$|${apps.ghostty.regex}"#
             open-on-workspace "main"
         }
         window-rule {
-            match app-id=r#"^zen-beta$|^zen$|^firefox$"#
+            match app-id=r#"${apps.zen.regex}"#
             open-on-workspace "main"
         }
         window-rule {
@@ -226,15 +226,15 @@ in
             open-on-workspace "scratchpad"
         }
         window-rule {
-            match app-id=r#"^discord$|^[Dd]iscord$"#
+            match app-id=r#"${apps.discord.regex}"#
             open-on-workspace "chat"
         }
         window-rule {
-            match app-id=r#"^slack$|^[Ss]lack$"#
+            match app-id=r#"${apps.slack.regex}"#
             open-on-workspace "chat"
         }
         window-rule {
-            match app-id=r#"^tidal-hifi$|^[Tt]idal-hifi$"#
+            match app-id=r#"${apps.tidal.regex}"#
             open-on-workspace "scratchpad"
         }
 

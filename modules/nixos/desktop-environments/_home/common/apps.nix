@@ -113,7 +113,10 @@ in
     };
     tidal = {
       command = "tidal-hifi";
-      windowIds = [ "tidal-hifi" ];
+      windowIds = [
+        "tidal-hifi"
+        "Tidal-hifi"
+      ];
     };
     dolphin = {
       command = "dolphin";

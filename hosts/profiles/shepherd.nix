@@ -65,6 +65,7 @@
       inherit inputs pkgs-stable;
     };
     sharedModules = [
+      { disabledModules = [ "programs/noctalia.nix" ]; }
       inputs.noctalia.homeModules.default
       inputs.zen-browser.homeModules.default
     ];

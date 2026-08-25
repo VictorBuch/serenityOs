@@ -191,13 +191,13 @@ in
         # so boolean effects (float/pin/center) get an explicit `1`.
         windowrule = [
           # Main work apps → workspace 1 (browser + terminal tile side-by-side)
-          "workspace 1 silent, match:class ^(zen-beta|zen|firefox)$"
-          "workspace 1 silent, match:class ^(com.mitchellh.ghostty|ghostty)$"
+          "workspace 1 silent, match:class ^(${apps.zen.alternatives})$"
+          "workspace 1 silent, match:class ^(${apps.ghostty.alternatives})$"
 
           # "Out of way" apps → special workspaces (Sway-style scratchpad)
           # Toggle via Mod+3 / Mod+T / Mod+D focus-or-run, or movetoworkspace bind.
-          "workspace special:chat silent, match:class ^([Ss]lack)$"
-          "workspace special:chat silent, match:class ^([Dd]iscord)$"
+          "workspace special:chat silent, match:class ^(${apps.slack.alternatives})$"
+          "workspace special:chat silent, match:class ^(${apps.discord.alternatives})$"
           "workspace special:music silent, match:class ^(tidal-hifi)$"
           "workspace special:games silent, match:class ^(steam)$"
           "workspace special:games silent, match:class ^(steam_app_.*)$"

@@ -76,7 +76,8 @@ mkModule {
         inherit settings;
       };
 
-      home.liveSeams.ghostty = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+      # Both platforms: the Darwin config written below names the same seam.
+      home.liveSeams.ghostty = {
         path = ".config/ghostty/local";
         reload = "SIGUSR2 or ctrl+shift+comma";
       };

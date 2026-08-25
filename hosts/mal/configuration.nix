@@ -423,8 +423,6 @@ in
     # Pangolin site connector (tunnel to wash)
     newt.enable = true;
     caddy.enable = true;
-    nginx-reverse-proxy.enable = false;
-    authelia.enable = false;
     adguard.enable = true;
     pocket-id = {
       enable = true;
@@ -437,7 +435,6 @@ in
 
     # Monitor and Dashboards
     dashboard = {
-      homarr.enable = false;
       glance.enable = true;
     };
     uptime-kuma.enable = true;
@@ -453,8 +450,19 @@ in
       qui.enable = true;
       mousehole.enable = true;
     };
-    filebrowser.enable = false;
-    nextcloud.enable = true;
+    nextcloud.enable = false;
+
+    # NAS: copyparty serves /mnt/pool/files at files.<domain> with its own
+    # accounts and share links; Syncthing keeps subfolders of it two-way
+    # synced with the desktops, which is the part copyparty cannot do.
+    copyparty.enable = true;
+    filesync = {
+      enable = true;
+      folders = [ "projects" ];
+      devices = {
+        jayne = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";
+      };
+    };
 
     # Utils
     # homelab.mam-dynamic-seedbox.enable = true;
@@ -470,9 +478,6 @@ in
 
     hermes = {
       enable = true;
-      # Discord instead of Signal: bot token + allowlist from sops
-      # (hermes/discord_bot_token, hermes/discord_allowed_users).
-      signal.enable = false;
       discord.enable = true;
       # Web chat UI at agent.victorbuch.com (behind pocket-id via Caddy).
       web.enable = true;
@@ -489,7 +494,7 @@ in
     invoice-ninja.enable = true;
     notes = {
       enable = true;
-      devices = {inara = "<ID>"; pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM"; terra = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";};
+      devices = {inara = "<ID>"; pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM"; jayne = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";};
     };
 
     # Sharing

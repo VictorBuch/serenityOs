@@ -19,7 +19,7 @@ The Mal server runs various services managed through NixOS modules:
 - **Media**: Immich (photos), Jellyfin, Plex, Mealie (recipes)
 - **Development**: Gitea (Git hosting with CI/CD)
 - **Monitoring**: Uptime Kuma, Glance Dashboard
-- **File Management**: Filebrowser, Nextcloud
+- **File Management**: copyparty (NAS UI + share links), Syncthing (two-way sync), Nextcloud (being retired)
 - **Downloads**: Deluge with VPN, Sonarr, Radarr, Prowlarr
 - **Other**: Crafty (Minecraft), Music Assistant, HyperHDR
 
@@ -517,6 +517,108 @@ free -h
 ip addr show
 ss -tulpn
 ```
+
+## File Storage: copyparty + Syncthing
+
+Replaces Nextcloud with two tools that each do one job well, both pointed at
+`homelab.filesDir` (`/mnt/pool/files`):
+
+| Need | Tool | Where |
+| --- | --- | --- |
+| Browse / upload / download UI, external share links | copyparty | `files.victorbuch.com` |
+| Two-way sync with desktops (REAPER projects, etc.) | Syncthing | `/mnt/pool/files/projects` |
+
+### Why both
+
+copyparty ships **no two-way sync client** — its `u2c` CLI only mirrors local
+to server (`--dr` deletes remote extras), and WebDAV/partyfuse are live mounts,
+not sync. Anything that needs the Nextcloud-desktop-client behaviour goes
+through Syncthing instead. Because both point at the same directory, a project
+synced up from a laptop is immediately browsable and shareable in copyparty.
+
+### Permissions model
+
+`/mnt/pool/files` is `2770 root:files`. Both `copyparty` and `serenity` (which
+Syncthing runs as) are members of `files`, and both services run with
+`UMask=0002`, so the setgid bit makes every new file group-writable by the
+other service. Getting this wrong is how you end up with a folder copyparty can
+list but not delete from.
+
+**After the first switch**, any shell session that was already open predates the
+`files` group and will get `Permission denied` on `/mnt/pool/files`, because
+supplementary groups are fixed at login. The permissions are fine — the session
+is stale. Log out and back in, or `exec su - serenity`, then confirm with
+`id -nG`. Migration steps run under `sudo` and are unaffected.
+
+Note that a rebuild which restarts `syncthing.service` can make
+`syncthing-init.service` report `failed with result 'dependency'` — it is only
+ordered `After=syncthing.service`, so its job gets dropped if syncthing is
+mid-restart in the same transaction. `switch-to-configuration` retries it and it
+succeeds; check `systemctl show syncthing-init -p Result` before investigating.
+
+### Exposure
+
+`files` is a **public** Pangolin resource (`protected = false` in
+`modules/homelab/services/edge-services.nix`). This is deliberate: copyparty
+authenticates users itself, and its share links (`/share/<key>`, with expiry
+and optional password) must be reachable by recipients who have no SSO account.
+An SSO wall would block them before copyparty ever saw the request.
+
+### Login
+
+Username is `homelab.copyparty.account` (defaults to `serenity`); the password
+lives in SOPS at `copyparty/password`:
+
+```bash
+sops secrets/secrets.yaml   # edit under the `copyparty:` key
+sudo systemctl restart copyparty
+```
+
+### Migrating off Nextcloud
+
+Nextcloud stores files as plain files on disk, so the move is a copy — no
+export step:
+
+```bash
+# 1. Copy the Nextcloud files into the copyparty volume (~3.2 GB)
+sudo rsync -aP --info=progress2 \
+  /mnt/pool/nextcloud/data/victorbuch@proton.me/files/ \
+  /mnt/pool/files/
+
+# 2. Hand them to the shared group
+sudo chown -R copyparty:files /mnt/pool/files
+sudo chmod -R g+rwX /mnt/pool/files
+
+# 3. Verify at https://files.victorbuch.com, then retire Nextcloud in
+#    hosts/mal/configuration.nix:
+#      nextcloud.enable = false;
+#    and remove the `nextcloud` entry from edge-services.nix.
+
+# 4. Only once you are certain, reclaim the space:
+sudo rm -rf /mnt/pool/nextcloud
+```
+
+Nextcloud's MySQL database and Redis instance are torn down by
+`nextcloud.enable = false`; the `nextcloud/*` SOPS secrets can be dropped at
+the same time.
+
+### Adding a sync peer
+
+```bash
+# On the desktop: Syncthing UI -> Actions -> Show ID
+# Then add it to hosts/mal/configuration.nix:
+#   homelab.filesync.devices = { jayne = "XXXXXXX-..."; };
+sudo nixos-rebuild switch --flake .#mal
+```
+
+Syncthing keeps a 30-day staggered version history per folder in
+`.stversions`, which covers what Nextcloud's file-versions gave you. REAPER
+scratch files (`*.reapeaks`, `*.rpp-bak`, autosaves) are excluded via
+`homelab.filesync.ignorePatterns`.
+
+**Caveat:** do not keep a REAPER session open on files that are actively
+syncing. Sync agents and DAWs fight over open handles. Work locally, or let the
+project settle before switching machines.
 
 ## Configuration Files
 

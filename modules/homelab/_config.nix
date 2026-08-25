@@ -20,6 +20,11 @@ in
       default = "/mnt/pool/immich";
       description = "Directory for Immich photo storage";
     };
+    filesDir = lib.mkOption {
+      type = lib.types.str;
+      default = "/mnt/pool/files";
+      description = "Shared user-files root served by copyparty and synced by Syncthing";
+    };
     nextcloudDir = lib.mkOption {
       type = lib.types.str;
       default = "/mnt/pool/nextcloud";

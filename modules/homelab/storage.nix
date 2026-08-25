@@ -63,9 +63,16 @@
     ];
   };
 
+  # Shared user-files root. copyparty serves it over http and Syncthing keeps
+  # it two-way synced with the desktops; both write as members of `files`, and
+  # the setgid bit makes new files inherit that group so neither service ends
+  # up with files the other cannot touch.
+  users.groups.files = { };
+
   # Create /cache directory on boot
   systemd.tmpfiles.rules = [
     "d /cache 0755 root root -"
+    "d ${config.homelab.filesDir} 2770 root files -"
   ];
 
   # Systemd service for cache mover

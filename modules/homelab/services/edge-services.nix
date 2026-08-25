@@ -60,10 +60,13 @@
         protected = true;
       };
       files = {
-        url = "http://127.0.0.1:3030";
+        # copyparty. Public on purpose: it authenticates users itself, and its
+        # /share links must be reachable by people who have no SSO account —
+        # a Pangolin auth screen would stop the recipient before copyparty
+        # ever sees the request.
+        url = "http://127.0.0.1:3923";
         https = false;
-        protected = true;
-        private = true;
+        protected = false;
       };
       status = {
         url = "http://127.0.0.1:3001";

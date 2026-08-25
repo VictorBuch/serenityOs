@@ -171,11 +171,6 @@ in
         stylixTargets = [ "starship" ];
         note = "Unowned by design: noctalia's starship template edits the config in place, which fails on home-manager's read-only symlink, so it is excluded from builtinIds too.";
       };
-      rofi = {
-        colors = "app";
-        stylixTargets = [ "rofi" ];
-        note = "rofi.nix renders its own .rasi from config.lib.stylix.colors, so the target would be a second writer.";
-      };
     };
 
     assertions = lib.mapAttrsToList (name: app: {

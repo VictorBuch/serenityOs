@@ -183,6 +183,10 @@ in
       nixcats.enable = true;
       nixvim.enable = false;
     };
+
+    # Wallpaper picker. noctalia still draws the wallpaper and derives the
+    # palette from it; skwd just chooses which one.
+    theming.skwd-wall.enable = true;
   };
 
   # YubiKey: PAM U2F sudo + screen lock on removal

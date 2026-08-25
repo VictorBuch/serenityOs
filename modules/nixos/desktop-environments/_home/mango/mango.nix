@@ -146,6 +146,7 @@ in
         ${browser} &
         ${terminal} &
         figma-linux &
+        skwd-daemon &
       '';
 
       settings = {
@@ -314,6 +315,7 @@ in
           "SUPER,Z,spawn,${shell} msg panel-toggle launcher /win"
           "SUPER+SHIFT,E,spawn,${shell} msg panel-toggle launcher /emo"
           "SUPER+SHIFT,P,spawn,${shell} msg panel-toggle session"
+          "SUPER,P,spawn_shell,skwd wall toggle"
           "SUPER,N,spawn,rofi-vpn"
           "SUPER+SHIFT,N,spawn,rofi-network-manager"
           "SUPER+SHIFT,B,spawn,rofi-bluetooth"

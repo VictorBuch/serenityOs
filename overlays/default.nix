@@ -2,7 +2,11 @@
   inputs,
   ...
 }:
-final: prev: {
+final: prev:
+let
+  expiring = import ../lib/expiring.nix { inherit (prev) lib; };
+in
+{
   # AI coding agents from numtide/llm-agents.nix
   llm-agents = inputs.llm-agents.packages.${final.stdenv.hostPlatform.system};
 
@@ -35,7 +39,10 @@ final: prev: {
   # under any name, so without this line musnix.rtirq.enable fails with
   # "attribute 'rtirq' missing". Only the package is pulled across; the rest of musnix's
   # overlay is its PREEMPT_RT kernel set, which audio-performance.nix deliberately avoids.
-  rtirq = final.callPackage "${inputs.musnix}/pkgs/os-specific/linux/rtirq" { };
+  rtirq =
+    expiring.whenPackaged prev "rtirq"
+      "drop this attr and let musnix.rtirq.enable use the nixpkgs package"
+      (final.callPackage "${inputs.musnix}/pkgs/os-specific/linux/rtirq" { });
 
   # === Audio wine tracks (see modules/apps/audio/reaper.nix, apps.audio.reaper.wineTrack) ===
   #
@@ -58,7 +65,9 @@ final: prev: {
         };
       };
     in
-    wine920Pkgs.wineWowPackages.stagingFull;
+    expiring.onBump prev.yabridge "5.1.1"
+      "yabridge moved past the release that caps wine at 9.21 -- recheck whether the pinned track is still needed"
+      wine920Pkgs.wineWowPackages.stagingFull;
 
   # "modern" track. Current unstable wine staging (11.x). Only usable together with the
   # yabridge new-wine10-embedding branch (packages/yabridge-wine10), which is the only
@@ -91,15 +100,20 @@ final: prev: {
   # it, so it is not a safe target yet.
   #
   # Drop this once nixpkgs ships the upstream patch release that fixes the stall.
-  xdg-desktop-portal-wlr = prev.xdg-desktop-portal-wlr.overrideAttrs (_old: {
-    version = "0.8.2";
-    src = final.fetchFromGitHub {
-      owner = "emersion";
-      repo = "xdg-desktop-portal-wlr";
-      rev = "01171a150b705cf07066ebc0fb7e1ff537027bec";
-      hash = "sha256-HITf/hgiASWvn/z49mzS8IS1vuyXwdk1JiAOOHRSQMo=";
-    };
-  });
+  xdg-desktop-portal-wlr =
+    expiring.atVersion prev.xdg-desktop-portal-wlr "0.8.4"
+      "retest screensharing without the pin, then delete this override"
+      (
+        prev.xdg-desktop-portal-wlr.overrideAttrs (_old: {
+          version = "0.8.2";
+          src = final.fetchFromGitHub {
+            owner = "emersion";
+            repo = "xdg-desktop-portal-wlr";
+            rev = "01171a150b705cf07066ebc0fb7e1ff537027bec";
+            hash = "sha256-HITf/hgiASWvn/z49mzS8IS1vuyXwdk1JiAOOHRSQMo=";
+          };
+        })
+      );
 
   # DaVinci Resolve Studio: byte-level patches to the shipped binaries.
   #

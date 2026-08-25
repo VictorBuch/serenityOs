@@ -35,6 +35,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Wallpaper selector + its daemon. Owns picking; noctalia applies and themes.
+    skwd-wall = {
+      url = "github:liixini/skwd-wall";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Wallpaper packs, merged into the pool by home/wallpaper-pool.nix.
+    wallpapers-nord = {
+      url = "github:ChrisTitusTech/nord-background";
+      flake = false;
+    };
+
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -317,7 +329,7 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib) mkModule;
+                inherit (customLib) mkModule expiring;
                 pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };
@@ -352,7 +364,7 @@
               pkgs = pkgsFor system;
               specialArgs = {
                 inherit inputs system;
-                inherit (customLib) mkModule;
+                inherit (customLib) mkModule expiring;
                 pkgs = pkgsFor system;
                 pkgs-stable = stablePkgsFor system;
               };

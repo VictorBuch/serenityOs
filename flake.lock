@@ -782,6 +782,37 @@
         "type": "github"
       }
     },
+    "nixpkgs_4": {
+      "locked": {
+        "lastModified": 1768127708,
+        "narHash": "sha256-1Sm77VfZh3mU0F5OqKABNLWxOuDeHIlcFjsXeeiPazs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ffbc9f8cbaacfb331b6017d5a5abb21a492c9a38",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-unstable",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1787498568,
+        "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixvim": {
       "inputs": {
         "flake-parts": "flake-parts_4",
@@ -1156,6 +1187,24 @@
         "type": "github"
       }
     },
+    "quickshell_2": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_4"
+      },
+      "locked": {
+        "lastModified": 1787440121,
+        "narHash": "sha256-OZdLL1rMR9kjTFZroOODeyQ0u6nrSxcFHlK6JUi+R/c=",
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "rev": "0fed22a2c47d9568ddf13cf61586b3f2ac4378a2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "disko": "disko",
@@ -1193,9 +1242,11 @@
         "plugins-lze": "plugins-lze",
         "plugins-lzextras": "plugins-lzextras",
         "quickshell": "quickshell",
+        "skwd-wall": "skwd-wall",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "tv-learn": "tv-learn",
+        "wallpapers-nord": "wallpapers-nord",
         "wannashare": "wannashare",
         "zen-browser": "zen-browser"
       }
@@ -1241,6 +1292,46 @@
       "original": {
         "owner": "wlrfx",
         "repo": "scenefx",
+        "type": "github"
+      }
+    },
+    "skwd-daemon": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1787519816,
+        "narHash": "sha256-MqJbWqIJg33UZYbKJ04mpFiYVSCkmWnV2XeQl0yzdhk=",
+        "owner": "liixini",
+        "repo": "skwd-daemon",
+        "rev": "d5f46c462c2a5270a915a85cd68fc00e34c05c8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "liixini",
+        "repo": "skwd-daemon",
+        "type": "github"
+      }
+    },
+    "skwd-wall": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "quickshell": "quickshell_2",
+        "skwd-daemon": "skwd-daemon"
+      },
+      "locked": {
+        "lastModified": 1787134573,
+        "narHash": "sha256-TZ1oFqgfGgwEfvWnb7xc8gW6GwHXmN5gLVVS3k5AgXA=",
+        "owner": "liixini",
+        "repo": "skwd-wall",
+        "rev": "49a2f5c0bdc711cde5b70f145ff659380954882a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "liixini",
+        "repo": "skwd-wall",
         "type": "github"
       }
     },
@@ -1532,6 +1623,22 @@
       "original": {
         "owner": "pyproject-nix",
         "repo": "uv2nix",
+        "type": "github"
+      }
+    },
+    "wallpapers-nord": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776140014,
+        "narHash": "sha256-Ez3b29IuQuKtDmWbrxx0bI+bRvGlduD42stg7pydXIE=",
+        "owner": "ChrisTitusTech",
+        "repo": "nord-background",
+        "rev": "8f3dc598c132eaabdba7e7af5dc0acb45fbaa2b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ChrisTitusTech",
+        "repo": "nord-background",
         "type": "github"
       }
     },

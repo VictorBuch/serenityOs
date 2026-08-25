@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   osConfig ? { },
   ...
 }:
@@ -32,6 +33,7 @@ in
   config = lib.mkIf cfg.enable ({
     programs.noctalia = {
       enable = true;
+      package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       settings = {
         bar.order = [ "main" ];
@@ -60,7 +62,6 @@ in
 
           start = [
             "control-center"
-            "wallpaper"
             "status" # pozzoo/hassio widget
             "nix-monitor" # avivbintangaringga/nix-monitor widget
           ]
@@ -214,13 +215,15 @@ in
         };
 
         # === Wallpaper ===
-        # One flat pool. theme.mode is pinned to "dark", so noctalia only ever
-        # reads directory_dark (src/shell/wallpaper/wallpaper_paths.cpp) --
+        # skwd-wall picks (modules/apps/theming/skwd-wall.nix) and hands the
+        # path over with `noctalia msg wallpaper-set`; noctalia draws it and
+        # relights the palette. theme.mode is pinned to "dark", so noctalia only
+        # ever reads directory_dark (src/shell/wallpaper/wallpaper_paths.cpp) --
         # directory is set to the same path so a future mode change cannot
         # silently empty the pool.
         wallpaper =
           let
-            wallDir = "${config.home.homeDirectory}/serenityOs/home/wallpapers";
+            wallDir = config.wallpapers.path;
           in
           {
             enabled = true;
@@ -232,8 +235,8 @@ in
             directory = wallDir;
             directory_dark = wallDir;
             automation = {
-              enabled = true;
-              interval_seconds = 21600; # 6h -- the whole palette relights on each pick
+              enabled = false;
+              interval_seconds = 21600;
               order = "random";
               recursive = false;
             };

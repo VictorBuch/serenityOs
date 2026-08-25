@@ -42,7 +42,18 @@ let
   platform = if pkgs.stdenv.hostPlatform.isLinux then "linux" else "darwin";
 
   # Build option path: apps.browsers.firefox or homelab.caddy
-  optPath = if category != null then [ "apps" category name ] else [ "apps" name ];
+  optPath =
+    if category != null then
+      [
+        "apps"
+        category
+        name
+      ]
+    else
+      [
+        "apps"
+        name
+      ];
 
   cfg = lib.attrByPath optPath { enable = false; } config;
 
@@ -84,13 +95,15 @@ in
     if !compatible then
       { }
     else
-      lib.mkIf cfg.enable (lib.mkMerge [
-        (lib.optionalAttrs (sysPkgs != [ ]) {
-          environment.systemPackages = sysPkgs;
-        })
-        (lib.optionalAttrs (resolvedExtra != { }) resolvedExtra)
-        (lib.optionalAttrs (homeConfig != null) {
-          home-manager.sharedModules = [ homeConfig ];
-        })
-      ]);
+      lib.mkIf cfg.enable (
+        lib.mkMerge [
+          (lib.optionalAttrs (sysPkgs != [ ]) {
+            environment.systemPackages = sysPkgs;
+          })
+          (lib.optionalAttrs (resolvedExtra != { }) resolvedExtra)
+          (lib.optionalAttrs (homeConfig != null) {
+            home-manager.sharedModules = [ homeConfig ];
+          })
+        ]
+      );
 }

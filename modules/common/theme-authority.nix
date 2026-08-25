@@ -173,13 +173,14 @@ in
       };
     };
 
-    assertions = lib.mapAttrsToList (name: app: {
-      assertion = app.colors != "noctalia" -> app.noctaliaTemplates == [ ];
-      message = "theme.authority.apps.${name}: colors are written by ${app.colors}, so it must not also list noctaliaTemplates.";
-    }) apps
-    ++ lib.mapAttrsToList (name: app: {
-      assertion = app.colors != "noctalia" || app.noctaliaTemplates != [ ];
-      message = "theme.authority.apps.${name}: colors are assigned to noctalia but no template renders them, so nothing writes them at all.";
-    }) apps;
+    assertions =
+      lib.mapAttrsToList (name: app: {
+        assertion = app.colors != "noctalia" -> app.noctaliaTemplates == [ ];
+        message = "theme.authority.apps.${name}: colors are written by ${app.colors}, so it must not also list noctaliaTemplates.";
+      }) apps
+      ++ lib.mapAttrsToList (name: app: {
+        assertion = app.colors != "noctalia" || app.noctaliaTemplates != [ ];
+        message = "theme.authority.apps.${name}: colors are assigned to noctalia but no template renders them, so nothing writes them at all.";
+      }) apps;
   };
 }

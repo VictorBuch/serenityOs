@@ -18,10 +18,10 @@ in
 
 {
   options = {
-    home.desktop-environments.niri.enable = lib.mkEnableOption "Enables niri home manager";
+    home.desktop.compositor.niri.enable = lib.mkEnableOption "Enables niri home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.niri.enable {
+  config = lib.mkIf config.home.desktop.compositor.niri.enable {
 
     # Set Wayland environment variable
     home.sessionVariables.NIXOS_OZONE_WL = "1";

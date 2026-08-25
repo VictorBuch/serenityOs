@@ -6,19 +6,19 @@
   ...
 }:
 {
-  imports = [ ./_wayland-session.nix ];
+  imports = [ ./_session.nix ];
 
   options = {
-    desktop-environments.mango.enable = lib.mkEnableOption "Enables Mango WM (dwl-based wlroots compositor)";
+    desktop.compositor.mango.enable = lib.mkEnableOption "Mango (dwl-based wlroots compositor)";
   };
 
-  config = lib.mkIf config.desktop-environments.mango.enable {
+  config = lib.mkIf config.desktop.compositor.mango.enable {
 
-    desktop-environments.wayland-session.enable = true;
-
-    home-manager.sharedModules = [ ./_home/mango ];
-
-    i18n.inputMethod.enable = false;
+    desktop.session = {
+      enable = true;
+      name = "mango";
+      homeModule = ./_home/mango;
+    };
 
     # nixpkgs upstreamed this module (programs/wayland/mango.nix); the login
     # session entry is wired automatically via services.displayManager.sessionPackages.
@@ -29,14 +29,7 @@
       package = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
-    services.displayManager.defaultSession = "mango";
-
     environment.sessionVariables.QT_QPA_PLATFORMTHEME = "qt6ct";
-
-    services.gnome.gnome-keyring.enable = true;
-    security.pam.services.login.enableGnomeKeyring = true;
-    services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
-    programs.ssh.startAgent = true;
 
     xdg.portal = {
       enable = true;
@@ -82,11 +75,7 @@
 
     environment.systemPackages =
       (with pkgs; [
-        #hyprlock
-        #dunst
         polkit_gnome
-        #waybar
-        #wlogout
 
         xwayland-satellite
 
@@ -102,8 +91,6 @@
         kdePackages.ffmpegthumbs
         kdePackages.kdegraphics-thumbnailers
 
-        grim
-        slurp
         brightnessctl
         playerctl
         wlr-randr

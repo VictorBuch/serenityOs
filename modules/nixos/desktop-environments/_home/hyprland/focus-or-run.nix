@@ -33,11 +33,11 @@ let
 in
 {
   options = {
-    home.desktop-environments.hyprland.focus-or-run.enable =
+    home.desktop.compositor.hyprland.focus-or-run.enable =
       lib.mkEnableOption "Enable focus-or-run script for Raycast-style app launching";
   };
 
-  config = lib.mkIf config.home.desktop-environments.hyprland.focus-or-run.enable {
+  config = lib.mkIf config.home.desktop.compositor.hyprland.focus-or-run.enable {
     home.packages = [ focus-or-run ];
   };
 }

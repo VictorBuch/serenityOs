@@ -64,10 +64,10 @@ in
 
 {
   options = {
-    home.desktop-environments.mango.enable = lib.mkEnableOption "Enables mango home manager";
+    home.desktop.compositor.mango.enable = lib.mkEnableOption "Enables mango home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.mango.enable {
+  config = lib.mkIf config.home.desktop.compositor.mango.enable {
 
     home.sessionVariables.NIXOS_OZONE_WL = "1";
 

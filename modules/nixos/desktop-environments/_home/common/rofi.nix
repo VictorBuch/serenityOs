@@ -129,11 +129,11 @@ let
 in
 {
   options = {
-    home.desktop-environments.common.rofi.enable =
+    home.desktop.common.rofi.enable =
       lib.mkEnableOption "Rofi (wayland) — launcher + community plugins";
   };
 
-  config = lib.mkIf config.home.desktop-environments.common.rofi.enable {
+  config = lib.mkIf config.home.desktop.common.rofi.enable {
     home.packages = with pkgs; [
       rofi-vpn # NetworkManager VPN toggle
       rofi-power-menu # power/lock menu modi script

@@ -110,14 +110,11 @@ in
   ];
 
   # Desktop environments
-  desktop-environments = {
-    gnome.enable = true;
-    kde.enable = false;
-    hyprland.enable = false;
-    niri.enable = false;
-    mango.enable = true;
+  desktop = {
+    compositor.mango.enable = true;
+    environment.gnome.enable = true;
     # Escape hatch for plugin GUIs that misbehave under Wayland: pick "Xfce" at SDDM.
-    xorg-audio.enable = true;
+    extraSessions.xorg-audio.enable = true;
   };
 
   # Apps - full workstation

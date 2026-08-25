@@ -9,7 +9,8 @@
 let
   optPath = [
     "home"
-    "desktop-environments"
+    "desktop"
+    "shell"
     "noctalia"
   ];
   cfg = lib.attrByPath optPath { enable = false; } config;
@@ -21,7 +22,7 @@ let
   # comes back looking untouched apart from the key we remove.
   tomlPy = pkgs.python3.withPackages (ps: [ ps.tomlkit ]);
 
-  davinci = lib.attrByPath [ "home" "desktop-environments" "common" "davinci-convert" ] {
+  davinci = lib.attrByPath [ "home" "desktop" "common" "davinci-convert" ] {
     enable = false;
   } config;
 

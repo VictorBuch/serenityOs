@@ -21,15 +21,13 @@ in
     ../common/noctalia.nix
   ];
 
-  home.desktop-environments = {
-    mango = {
+  home.desktop = {
+    compositor.mango = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
       tag-toggle.enable = lib.mkDefault true;
     };
-    noctalia = {
-      enable = lib.mkDefault true;
-    };
+    shell.noctalia.enable = lib.mkDefault true;
     common = {
       davinci-convert.enable = lib.mkDefault davinciEnabled;
       rofi.enable = lib.mkDefault true;

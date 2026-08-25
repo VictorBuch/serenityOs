@@ -51,12 +51,7 @@
     };
   };
 
-  desktop-environments = {
-    gnome.enable = false;
-    hyprland.enable = false;
-    kde.enable = false;
-    niri.enable = true;
-  };
+  desktop.compositor.niri.enable = true;
 
   hardware.graphics.enable = true;
   services.xserver = {

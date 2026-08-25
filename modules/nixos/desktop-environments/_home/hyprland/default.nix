@@ -10,14 +10,12 @@
     ../common/noctalia.nix
   ];
 
-  home.desktop-environments = {
-    hyprland = {
+  home.desktop = {
+    compositor.hyprland = {
       enable = lib.mkDefault true;
       focus-or-run.enable = lib.mkDefault true;
     };
-    noctalia = {
-      enable = lib.mkDefault true;
-    };
+    shell.noctalia.enable = lib.mkDefault true;
     common = {
       fuzzel.enable = lib.mkDefault true;
       wlogout.enable = lib.mkDefault true;

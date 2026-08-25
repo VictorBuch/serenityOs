@@ -7,18 +7,15 @@
 {
 
   options = {
-    desktop-environments.gnome.enable = lib.mkEnableOption "Enables Gnome DE";
+    desktop.environment.gnome.enable = lib.mkEnableOption "the GNOME Desktop Environment";
   };
 
-  config = lib.mkIf config.desktop-environments.gnome.enable {
+  config = lib.mkIf config.desktop.environment.gnome.enable {
     services.xserver.enable = true;
-    services.displayManager.gdm.enable =
-      !(
-        config.desktop-environments.kde.enable
-        || config.desktop-environments.hyprland.enable
-        || config.desktop-environments.niri.enable
-        || config.desktop-environments.mango.enable
-      );
+    # GDM only when nothing else has claimed the login manager.
+    services.displayManager.gdm.enable = !(
+      config.desktop.environment.kde.enable || config.desktop.session.enable
+    );
     services.desktopManager.gnome.enable = true;
     environment.gnome.excludePackages =
       (with pkgs; [

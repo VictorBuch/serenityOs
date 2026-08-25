@@ -16,10 +16,10 @@ in
 {
 
   options = {
-    home.desktop-environments.hyprland.enable = lib.mkEnableOption "Enables hyprland home manager";
+    home.desktop.compositor.hyprland.enable = lib.mkEnableOption "Enables hyprland home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.hyprland.enable {
+  config = lib.mkIf config.home.desktop.compositor.hyprland.enable {
 
     home.sessionVariables.NIXOS_OZONE_WL = "1";
 

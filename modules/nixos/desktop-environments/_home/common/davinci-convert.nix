@@ -6,7 +6,7 @@
   ...
 }:
 let
-  optPath = [ "home" "desktop-environments" "common" "davinci-convert" ];
+  optPath = [ "home" "desktop" "common" "davinci-convert" ];
   cfg = lib.attrByPath optPath { enable = false; } config;
 
   convertDir = "${config.home.homeDirectory}/Videos/convert_queue";

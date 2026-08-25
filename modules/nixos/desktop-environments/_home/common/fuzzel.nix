@@ -6,10 +6,10 @@
 }:
 {
   options = {
-    home.desktop-environments.common.fuzzel.enable = lib.mkEnableOption "Enables fuzzel home manager";
+    home.desktop.common.fuzzel.enable = lib.mkEnableOption "Enables fuzzel home manager";
   };
 
-  config = lib.mkIf config.home.desktop-environments.common.fuzzel.enable {
+  config = lib.mkIf config.home.desktop.common.fuzzel.enable {
     programs.fuzzel = {
       enable = true;
 

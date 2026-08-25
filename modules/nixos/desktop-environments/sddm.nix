@@ -8,10 +8,10 @@
 {
 
   options = {
-    sddm.enable = lib.mkEnableOption "Enables SDDM";
+    desktop.loginManager.sddm.enable = lib.mkEnableOption "SDDM as the login manager";
   };
 
-  config = lib.mkIf config.sddm.enable {
+  config = lib.mkIf config.desktop.loginManager.sddm.enable {
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;

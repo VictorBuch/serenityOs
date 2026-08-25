@@ -2,7 +2,8 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "feedback";
+  platforms = [ "linux" ];
   category = "audio";
-  linuxPackages = { pkgs, ... }: [ pkgs.feedback-desktop ];
+  packages = { pkgs, ... }: [ pkgs.feedback-desktop ];
   description = "fee[dB]ack - guitar practice app with integrated audio engine and VST hosting";
 } args

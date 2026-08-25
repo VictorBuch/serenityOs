@@ -1,7 +1,6 @@
 { lib }:
 
-# Simplified module helper - replaces mkApp, mkHomeModule
-# Creates an enable option and conditionally applies config when enabled.
+# Module helper: creates an enable option and applies config when enabled.
 #
 # Usage:
 #   args@{ config, pkgs, lib, mkModule, ... }:
@@ -10,90 +9,88 @@
 #     category = "communication";
 #     packages = { pkgs, ... }: [ pkgs.discord ];
 #   } args
+#
+# `packages` and `extraConfig` may be a value or a function of
+# { pkgs, pkgs-stable, lib, platform }, where platform is "linux" or "darwin".
+# Which platforms a module is for is stated, not inferred: set `platforms`.
 
 {
   name,
   category ? null,
-  namespace ? "apps",
   description ? "Enable ${name}",
+  platforms ? [
+    "linux"
+    "darwin"
+  ],
   packages ? null,
-  linuxPackages ? null,
-  darwinPackages ? null,
-  extraConfig ? {},
-  linuxExtraConfig ? {},
-  darwinExtraConfig ? {},
+  extraConfig ? { },
   homeConfig ? null,
-  linuxHomeConfig ? null,
-  darwinHomeConfig ? null,
   # Homebrew shortcuts (Darwin only). Require `darwin.homebrew.enable = true`.
   brews ? [ ],
   casks ? [ ],
 }:
 
 # Inner module function -- receives the full NixOS module args via `args` passthrough
-{ config, pkgs, pkgs-stable ? pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  pkgs-stable ? pkgs,
+  lib,
+  ...
+}:
 let
-  isLinux = pkgs.stdenv.hostPlatform.isLinux;
+  platform = if pkgs.stdenv.hostPlatform.isLinux then "linux" else "darwin";
 
   # Build option path: apps.browsers.firefox or homelab.caddy
-  optPath =
-    if category != null then
-      [ namespace category name ]
-    else
-      [ namespace name ];
+  optPath = if category != null then [ "apps" category name ] else [ "apps" name ];
 
   cfg = lib.attrByPath optPath { enable = false; } config;
 
-  # Resolve packages -- functions receive both pkgs and pkgs-stable
   resolve =
-    p:
-    if p == null then
-      [ ]
-    else if lib.isFunction p then
-      p { inherit pkgs pkgs-stable; }
+    v:
+    if v == null then
+      null
+    else if lib.isFunction v then
+      v {
+        inherit
+          pkgs
+          pkgs-stable
+          lib
+          platform
+          ;
+      }
     else
-      p;
+      v;
 
-  # Platform-aware package selection
-  sysPkgs =
-    if linuxPackages != null || darwinPackages != null then
-      resolve (if isLinux then linuxPackages else darwinPackages)
-    else
-      resolve packages;
+  sysPkgs = if packages == null then [ ] else resolve packages;
 
-  # Homebrew shortcuts -> darwin homebrew config
   hasHomebrew = brews != [ ] || casks != [ ];
-  homebrewConfig = lib.optionalAttrs (!isLinux && hasHomebrew) {
-    homebrew = {
-      inherit brews casks;
-    };
+  homebrewConfig = lib.optionalAttrs (platform == "darwin" && hasHomebrew) {
+    homebrew = { inherit brews casks; };
   };
 
-  # Platform-aware extra config
-  platformExtra = lib.recursiveUpdate (lib.recursiveUpdate extraConfig (
-    if isLinux then linuxExtraConfig else darwinExtraConfig
-  )) homebrewConfig;
+  resolvedExtra = lib.recursiveUpdate (resolve extraConfig) homebrewConfig;
 
-  # Platform-aware home config
-  platformHome =
-    if isLinux then (if linuxHomeConfig != null then linuxHomeConfig else homeConfig)
-    else (if darwinHomeConfig != null then darwinHomeConfig else homeConfig);
-
-  # Platform compatibility check
-  isLinuxOnly = linuxPackages != null && darwinPackages == null && packages == null && !hasHomebrew;
-  isDarwinOnly = (darwinPackages != null || hasHomebrew) && linuxPackages == null && packages == null;
-  compatible = !(isLinuxOnly && !isLinux) && !(isDarwinOnly && isLinux);
+  compatible = lib.elem platform platforms;
 in
 {
   options = lib.setAttrByPath (optPath ++ [ "enable" ]) (lib.mkEnableOption description);
 
-  config = lib.mkIf (cfg.enable && compatible) (lib.mkMerge [
-    (lib.optionalAttrs (sysPkgs != [ ]) {
-      environment.systemPackages = sysPkgs;
-    })
-    (lib.optionalAttrs (platformExtra != { }) platformExtra)
-    (lib.optionalAttrs (platformHome != null) {
-      home-manager.sharedModules = [ platformHome ];
-    })
-  ]);
+  # On a platform this module is not for, define nothing at all. `mkIf false`
+  # would not be enough: the module system still type-checks the option paths
+  # inside it, and a Linux-only module names options that do not exist on
+  # Darwin.
+  config =
+    if !compatible then
+      { }
+    else
+      lib.mkIf cfg.enable (lib.mkMerge [
+        (lib.optionalAttrs (sysPkgs != [ ]) {
+          environment.systemPackages = sysPkgs;
+        })
+        (lib.optionalAttrs (resolvedExtra != { }) resolvedExtra)
+        (lib.optionalAttrs (homeConfig != null) {
+          home-manager.sharedModules = [ homeConfig ];
+        })
+      ]);
 }

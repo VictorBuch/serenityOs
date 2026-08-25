@@ -2,10 +2,11 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "corectrl";
+  platforms = [ "linux" ];
   category = "gaming";
-  linuxPackages = { pkgs, ... }: [ ]; # CoreCtrl is enabled via programs.corectrl
+  packages = { pkgs, ... }: [ ]; # CoreCtrl is enabled via programs.corectrl
   description = "CoreCtrl AMD GPU control (Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     programs.corectrl.enable = true;
   };
 } args

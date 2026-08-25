@@ -134,10 +134,11 @@ let
 in
 mkModule {
   name = "gpu-passthrough";
+  platforms = [ "linux" ];
   category = "emulation";
   description = "Windows VM with GPU passthrough (Studio Mode)";
 
-  linuxPackages = { pkgs, ... }: [
+  packages = { pkgs, ... }: [
     pkgs.looking-glass-client
     pkgs.virt-manager
     pkgs.virt-viewer # standalone SPICE/VNC console
@@ -148,7 +149,7 @@ mkModule {
     studioStop
   ];
 
-  linuxExtraConfig = {
+  extraConfig = {
     # IOMMU + VFIO kernel setup. pcie_aspm=off prevents AER errors on AMD.
     # amdgpu.runpm=0 disables dGPU runtime power management. Without this,
     # amdgpu cycles the RX 7900 XT through PSP/SMU suspend+resume when idle;

@@ -418,8 +418,9 @@ in
   imports = [
     (mkModule {
       name = "reaper";
+      platforms = [ "linux" ];
       category = "audio";
-      linuxPackages =
+      packages =
         { pkgs, pkgs-stable, ... }:
         [
           # Use our wrapper instead of reaper directly
@@ -458,7 +459,7 @@ in
 
       description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
 
-      linuxExtraConfig = {
+      extraConfig = {
         # Enable JACK audio emulation via PipeWire
         services.pipewire.jack.enable = true;
 

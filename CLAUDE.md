@@ -270,14 +270,29 @@ mkModule {
 ```
 
 **Platform-specific packages:**
+
+Which platforms a module is for is stated, not inferred:
+
+```nix
+mkModule {
+  name = "steam";
+  category = "gaming";
+  platforms = [ "linux" ];
+  packages = { pkgs, ... }: [ pkgs.steam ];
+}
+```
+
+A module that exists on both platforms but differs between them branches on
+`platform`, which is `"linux"` or `"darwin"`:
+
 ```nix
 mkModule {
   name = "ghostty";
   category = "development";
-  linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
-  darwinExtraConfig = {
-    homebrew.casks = [ "ghostty" ];
-  };
+  packages =
+    { pkgs, lib, platform, ... }:
+    lib.optionals (platform == "linux") [ pkgs.ghostty ];
+  casks = [ "ghostty" ];   # Darwin only, applied via nix-homebrew
 }
 ```
 
@@ -296,11 +311,11 @@ mkModule {
 **mkModule parameters:**
 - `name` (required) - Module name, used in option path
 - `category` (optional) - Subdirectory category, creates `apps.<category>.<name>.enable`
-- `namespace` (default: `"apps"`) - Top-level option namespace
-- `packages` / `linuxPackages` / `darwinPackages` - System packages (functions receiving `{ pkgs, pkgs-stable }`)
-- `extraConfig` / `linuxExtraConfig` / `darwinExtraConfig` - Additional NixOS/Darwin config
-- `homeConfig` / `linuxHomeConfig` / `darwinHomeConfig` - Home Manager config (injected via `home-manager.sharedModules`)
-- Linux-only modules (only `linuxPackages` set) are automatically skipped on Darwin
+- `platforms` (default: both) - `[ "linux" ]`, `[ "darwin" ]`, or both. On a platform not listed, the module defines nothing at all
+- `packages` - System packages. A list, or a function receiving `{ pkgs, pkgs-stable, lib, platform }`
+- `extraConfig` - Additional NixOS/Darwin config. An attrset, or a function receiving the same arguments
+- `homeConfig` - Home Manager config (injected via `home-manager.sharedModules`)
+- `brews` / `casks` - Homebrew shortcuts, applied on Darwin only
 
 ### Adding a New Package
 

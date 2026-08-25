@@ -56,13 +56,14 @@ in
 
 mkModule {
   name = "yabridge";
+  platforms = [ "linux" ];
   category = "audio";
   description = "Yabridge configuration for Windows VST plugins with copy protection support";
 
   # No packages here -- reaper.nix installs yabridge/yabridgectl so there is exactly
   # one place deciding which track is active.
 
-  linuxHomeConfig =
+  homeConfig =
     { lib, ... }:
     {
       home.file = {

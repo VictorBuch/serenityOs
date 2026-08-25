@@ -12,12 +12,13 @@ let
 in
 mkModule {
   name = "skwd-wall";
+  platforms = [ "linux" ];
   category = "theming";
   description = "Skwd-wall wallpaper selector (picks; noctalia applies and derives the palette)";
 
-  linuxPackages = _: [ skwd ];
+  packages = _: [ skwd ];
 
-  linuxHomeConfig =
+  homeConfig =
     {
       config,
       lib,

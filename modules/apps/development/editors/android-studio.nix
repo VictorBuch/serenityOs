@@ -4,6 +4,8 @@ mkModule {
   name = "android-studio";
   category = "development";
   description = "android studio";
-  linuxPackages = { pkgs, ... }: [ pkgs.androidStudioPackages.canary ];
+  packages =
+    { pkgs, lib, platform, ... }:
+    lib.optionals (platform == "linux") [ pkgs.androidStudioPackages.canary ];
   casks = [ "android-studio" ];
 } args

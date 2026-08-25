@@ -87,9 +87,10 @@ let
 in
 mkModule {
   name = "herdr";
+  platforms = [ "linux" ];
   category = "cli";
   description = "Mouse-first terminal multiplexer (tmux/zellij alternative)";
-  linuxPackages =
+  packages =
     { pkgs, ... }:
     [
       pkgs.herdr
@@ -102,7 +103,7 @@ mkModule {
       adopt-jj-workspaces
     ];
 
-  linuxHomeConfig = { pkgs, lib, ... }: {
+  homeConfig = { pkgs, lib, ... }: {
     # Space definitions consumed by herdr-sesh at runtime.
     xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
 

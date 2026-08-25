@@ -29,10 +29,11 @@ in
 
 mkModule {
   name = "stylix";
+  platforms = [ "linux" ];
   category = "theming";
   description = "Stylix home manager theming";
   # Inject stylix HM module and config via sharedModules
-  linuxExtraConfig = {
+  extraConfig = {
     # home.sessionVariables only reaches interactive shells (hm-session-vars.sh);
     # it never reaches a compositor launched by the display manager, which then
     # falls back to the default cursor theme. These have to be session-level.

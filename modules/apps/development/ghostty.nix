@@ -42,10 +42,10 @@ in
 mkModule {
   name = "ghostty";
   category = "development";
-  linuxPackages = { pkgs, ... }: [ pkgs.ghostty ];
-  darwinExtraConfig = {
-    homebrew.casks = [ "ghostty" ];
-  };
+  packages =
+    { pkgs, lib, platform, ... }:
+    lib.optionals (platform == "linux") [ pkgs.ghostty ];
+  casks = [ "ghostty" ];
   description = "Ghostty terminal emulator";
   homeConfig =
     {

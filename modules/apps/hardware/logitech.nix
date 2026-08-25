@@ -8,9 +8,10 @@ args@{
 
 mkModule {
   name = "logitech";
+  platforms = [ "linux" ];
   category = "hardware";
   description = "Logitech wireless devices (Unifying/Bolt receivers) with Solaar";
-  linuxExtraConfig = {
+  extraConfig = {
     programs.solaar.enable = true;
   };
 } args

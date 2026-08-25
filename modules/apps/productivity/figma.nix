@@ -6,7 +6,9 @@ args@{
 mkModule {
   name = "figma";
   category = "productivity";
-  linuxPackages = { pkgs, ... }: [ pkgs.figma-linux ];
+  packages =
+    { pkgs, lib, platform, ... }:
+    lib.optionals (platform == "linux") [ pkgs.figma-linux ];
   casks = [ "figma" ];
   description = "Figma";
 } args

@@ -149,9 +149,9 @@ mkModule {
   category = "cli";
   description = "Friction-free plain-markdown notes vault: capture + search CLI";
 
-  # Cross-platform retrieval/authoring commands.
   packages =
-    { pkgs, ... }:
+    { pkgs, lib, platform, ... }:
+    # Retrieval and authoring work anywhere.
     [
       nf
       nn
@@ -159,12 +159,9 @@ mkModule {
       notes-init
       pkgs.ripgrep
       pkgs.fzf
-    ];
-
-  # Capture is wayland/rofi-driven (bound to SUPER+C in mango) — Linux only.
-  linuxPackages =
-    { pkgs, ... }:
-    [
+    ]
+    # Capture is wayland/rofi-driven (bound to SUPER+C in mango).
+    ++ lib.optionals (platform == "linux") [
       notes-capture
       pkgs.libnotify
     ];

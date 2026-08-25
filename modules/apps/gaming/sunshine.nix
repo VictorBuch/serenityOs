@@ -2,10 +2,11 @@ args@{ config, pkgs, lib, mkModule, ... }:
 
 mkModule {
   name = "sunshine";
+  platforms = [ "linux" ];
   category = "gaming";
-  linuxPackages = { pkgs, ... }: [ ]; # Sunshine is enabled via services.sunshine
+  packages = { pkgs, ... }: [ ]; # Sunshine is enabled via services.sunshine
   description = "Sunshine game streaming (Linux only)";
-  linuxExtraConfig = {
+  extraConfig = {
     services.sunshine = {
       enable = true;
       autoStart = true;

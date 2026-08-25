@@ -123,10 +123,6 @@ in
   # Apps - full workstation
   apps = {
 
-    ai = {
-      enable = true;
-    };
-
     audio = {
       enable = true;
 

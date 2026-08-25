@@ -45,11 +45,11 @@ nix run github:nix-community/nixos-anywhere -- \
   root@89.58.12.15
 ```
 
-5. Commit the regenerated `hosts/wash/hardware-configuration.nix`; delete
+1. Commit the regenerated `hosts/wash/hardware-configuration.nix`; delete
    `/tmp/wash-extra-files`.
-6. Verify: `ssh wash@89.58.12.15`, then
+2. Verify: `ssh wash@89.58.12.15`, then
    `systemctl status pangolin gerbil traefik`, `ss -ulpn | grep 51820`.
-7. Browse `https://pangolin.victorbuch.com` → complete initial setup
+3. Browse `https://pangolin.victorbuch.com` → complete initial setup
    (create the server-admin account). Cert must be a valid LE wildcard.
 
 ## Phase 2 — Connect mal
@@ -57,11 +57,13 @@ nix run github:nix-community/nixos-anywhere -- \
 1. Pangolin UI: create org → create **Site** "mal" (type: Newt). Copy the
    generated Newt ID + secret.
 2. `sops secrets/secrets.yaml` → add:
+
    ```yaml
    pangolin:
-       newt_id: <id>
-       newt_secret: <secret>
+     newt_id: <id>
+     newt_secret: <secret>
    ```
+
 3. On mal: `sudo nixos-rebuild switch --flake .#mal`
    (this rebuild also applies the Caddy rework: LE wildcard certs get issued
    via DNS-01, TinyAuth gate disappears from Caddy — see coexistence note below)
@@ -88,7 +90,7 @@ Pangolin resources exist and DNS is flipped. Do Phases 2–5 in one evening.
    Cloudflare DNS: specific unproxied A `status.victorbuch.com → 89.58.12.15`
    (specific record beats the wildcard still pointing at the tunnel).
 6. From **mobile data**: `https://status.victorbuch.com` → Pangolin auth
-   screen → Pocket ID passkey → Uptime Kuma. 
+   screen → Pocket ID passkey → Uptime Kuma.
 
 ## Phase 4 — LAN path
 
@@ -146,7 +148,7 @@ Not recreated: `auth.victorbuch.com` (TinyAuth is gone).
 - Websockets: hermes chat, HA, crafty console
 - wannashare + suboptimal load
 
-## Phase 7 — Cleanup (after ~1 week stable)
+## Phase 7 — Cleanup (after ~1 week stable) NEXT STEP
 
 - Delete `modules/homelab/services/cloudflare-tunnels.nix` and
   `modules/homelab/oci-containers/tinyauth.nix`

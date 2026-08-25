@@ -134,16 +134,6 @@ in
 
     age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
 
-    templates."cloudflared-credentials" = {
-      content = ''
-        {"AccountTag":"${config.sops.placeholder."cloudflare/tunnel/account_tag"}","TunnelSecret":"${
-          config.sops.placeholder."cloudflare/tunnel/tunnel_secret"
-        }","TunnelID":"${config.sops.placeholder."cloudflare/tunnel/tunnel_id"}"}
-      '';
-      owner = "root";
-      group = "root";
-      mode = "0400";
-    };
     secrets = {
       "vpn/pia/username" = {
         mode = "0444";
@@ -165,41 +155,6 @@ in
         owner = "root";
         group = "root";
       };
-      "cloudflare/tunnel/account_tag" = {
-        mode = "0444";
-        owner = "root";
-        group = "root";
-      };
-      "cloudflare/tunnel/tunnel_secret" = {
-        mode = "0444";
-        owner = "root";
-        group = "root";
-      };
-      "cloudflare/tunnel/tunnel_id" = {
-        mode = "0444";
-        owner = "root";
-        group = "root";
-      };
-      # "authelia/jwt_secret" = {
-      #   mode = "0400";
-      #   owner = "authelia-main";
-      #   group = "authelia-main";
-      # };
-      # "authelia/session_secret" = {
-      #   mode = "0400";
-      #   owner = "authelia-main";
-      #   group = "authelia-main";
-      # };
-      # "authelia/storage_encryption_key" = {
-      #   mode = "0400";
-      #   owner = "authelia-main";
-      #   group = "authelia-main";
-      # };
-      # "authelia/admin_password_hash" = {
-      #   mode = "0400";
-      #   owner = "authelia-main";
-      #   group = "authelia-main";
-      # };
       "sonarr_api_key" = {
         mode = "0444";
         owner = "root";
@@ -209,16 +164,6 @@ in
         mode = "0444";
         owner = "root";
         group = "root";
-      };
-      "nextcloud/admin_password" = {
-        mode = "0400";
-        owner = "nextcloud";
-        group = "nextcloud";
-      };
-      "nextcloud/db_password" = {
-        mode = "0400";
-        owner = "nextcloud";
-        group = "nextcloud";
       };
       "mam/session_cookie" = {
         mode = "0400";
@@ -244,11 +189,6 @@ in
         mode = "0400";
         owner = "mealie";
         group = "mealie";
-      };
-      "tinyauth/users" = {
-        mode = "0400";
-        owner = "root";
-        group = "root";
       };
       "gitea/runner_token" = {
         mode = "0444";

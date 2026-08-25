@@ -92,7 +92,7 @@ in
 
   # VPN: Tailscale (mesh) + NetworkManager OpenVPN plugin (for PIA .ovpn imports)
   services.tailscale = {
-    enable = true;
+    enable = false;
     useRoutingFeatures = "client";
     extraUpFlags = [ "--operator=${username}" ];
   };
@@ -125,18 +125,6 @@ in
 
       feedback.enable = true;
 
-      # wine 11.14 + yabridge's new-wine10-embedding branch, instead of the pinned
-      # wine 9.20 + yabridge 5.1.1.
-      #
-      # The pinned track fails three separate ways on this machine, all of them
-      # wine-9.20-vs-modern-system problems:
-      #   - DXVK cannot create a Vulkan instance (winevulkan does not expose
-      #     VK_KHR_surface to it) at any DXVK version from 2.4.1 to 3.0.2.
-      #   - wined3d cannot create an OpenGL context ("Failed to find a suitable pixel
-      #     format") despite host GL being healthy (RX 7900 GRE, GL 4.6, mesa 26.1).
-      #   - Opening AmpliTube's editor stack-overflows inside wine's ntdll and kills the
-      #     plugin host, which REAPER then waits on forever.
-      # No 32-bit bitbridge on this track; every installed plugin here is 64-bit.
       reaper.wineTrack = "modern";
     };
 
@@ -155,8 +143,7 @@ in
     emacs.enable = false;
 
     emulation = {
-      enable = false;
-      gpu-passthrough.enable = false;
+      enable = true;
     };
 
     gaming = {

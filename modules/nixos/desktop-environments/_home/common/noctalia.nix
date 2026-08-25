@@ -24,6 +24,10 @@ let
   davinci = lib.attrByPath [ "home" "desktop-environments" "common" "davinci-convert" ] {
     enable = false;
   } config;
+
+  # Derived from the Theme Authority table in modules/common/theme-authority.nix.
+  # The fallback keeps this module evaluable under bare home-manager.
+  builtinTemplateIds = lib.attrByPath [ "theme" "authority" "noctalia" "builtinIds" ] [ ] osConfig;
 in
 {
   options = lib.setAttrByPath (optPath ++ [ "enable" ]) (
@@ -174,9 +178,9 @@ in
 
         # === Dynamic theming (Material You from wallpaper) ===
         # Colors are derived live from the active wallpaper and pushed into
-        # every app whose template is listed below. Stylix's colour targets for
-        # those apps are disabled in modules/apps/theming/stylix.nix so this
-        # wins; see docs/adr/0001-nix-declares-the-shell.md.
+        # every app the Theme Authority table assigns to noctalia. That same
+        # table switches stylix's targets for those apps off, so the two can
+        # never both write; see docs/adr/0001-nix-declares-the-shell.md.
         theme = {
           mode = "dark";
           source = "wallpaper";
@@ -196,20 +200,7 @@ in
 
           templates = {
             enable_builtin_templates = true;
-            # NOTE: starship is intentionally excluded -- its template edits
-            # the starship config in place, which fails on home-manager's
-            # read-only symlink. Every template below writes an include/theme
-            # file at a path HM does not manage.
-            builtin_ids = [
-              "mango" # window borders / decorations (live via mmsg reload)
-              "ghostty" # primary terminal (live via SIGUSR2)
-              "kitty" # terminal
-              "btop" # system monitor (live via SIGUSR2)
-              "gtk3" # GTK3 apps
-              "gtk4" # GTK4 apps
-              "qt" # qt6ct/qt5ct palette
-              "kcolorscheme" # merges into ~/.config/kdeglobals -- Dolphin reads this
-            ];
+            builtin_ids = builtinTemplateIds;
             enable_community_templates = false;
           };
         };

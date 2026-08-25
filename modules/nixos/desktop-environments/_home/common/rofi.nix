@@ -134,9 +134,6 @@ in
   };
 
   config = lib.mkIf config.home.desktop-environments.common.rofi.enable {
-    # Custom theme already pulls stylix colors directly — disable auto-target.
-    stylix.targets.rofi.enable = false;
-
     home.packages = with pkgs; [
       rofi-vpn # NetworkManager VPN toggle
       rofi-power-menu # power/lock menu modi script

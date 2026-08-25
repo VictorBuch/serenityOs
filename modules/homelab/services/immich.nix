@@ -154,7 +154,7 @@ in
       mediaLocation = immichDir;
 
       settings = {
-        server.externalDomain = "https://immich.${domain}"; # Domain for publicly shared links, including http(s)://
+        server.externalDomain = "https://photos.${domain}"; # Domain for publicly shared links, including http(s)://
         newVersionCheck.enabled = true; # Check for new versions. This feature relies on periodic communication with github.com.
 	ffmpeg = {
           accel = "nvenc";

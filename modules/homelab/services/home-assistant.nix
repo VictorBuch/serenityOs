@@ -146,6 +146,7 @@ in
 	"roborock"
 	"homekit"
 	"homekit_controller"
+	"androidtv_remote"
       ];
 
       customComponents = with pkgs.home-assistant-custom-components; [
@@ -180,6 +181,17 @@ in
           time_zone = "Europe/Prague";
           latitude = 50.022414337137704;
           longitude = 14.402442466652143;
+        };
+
+	recorder = {
+          purge_keep_days = 10;
+          exclude.entities = [
+            "sensor.server_smart_plug_server_current"
+            "sensor.server_smart_plug_server_voltage"
+            "sensor.smart_plug_terra_current"
+            "sensor.smart_plug_terra_voltage"
+            "switch.server_adaptive_lighting_smart_lamps_adaptive_lighting_smart_lamps"
+          ];
         };
 
         # UI-managed automations, scenes, and scripts

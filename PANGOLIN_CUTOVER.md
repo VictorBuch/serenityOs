@@ -94,8 +94,11 @@ Pangolin resources exist and DNS is flipped. Do Phases 2–5 in one evening.
 
 1. Wash IP already set in `modules/homelab/services/adguard.nix` — this
    applies with the Phase 2 rebuild.
-2. AdGuard runs with `mutableSettings = true` → also add in the AdGuard UI
-   (Filters → DNS rewrites):
+2. AdGuard runs with `mutableSettings = true`, which *merges* the declarative
+   rewrites into the state file on every start — no UI step needed, but the
+   merge also overwrites whatever the UI holds. Each rewrite must carry
+   `enabled = true;`; without it AdGuard stores the rewrite disabled and
+   ignores it (this is what silently broke the LAN path after cutover).
    - `*.victorbuch.com` → `192.168.0.243`
    - `pangolin.victorbuch.com` → `89.58.12.15`
 3. Verify on LAN: `dig @192.168.0.243 photos.victorbuch.com` → `192.168.0.243`;

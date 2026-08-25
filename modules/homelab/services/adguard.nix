@@ -77,17 +77,27 @@
           # LAN fast-path: hit Caddy on mal directly instead of hairpinning
           # through the Pangolin VPS. Exact rewrites beat the wildcard, so the
           # Pangolin dashboard (no vhost on mal) still resolves to wash.
-          # NOTE: mutableSettings defaults to true, so with an existing AdGuard
-          # state file these are documentation — mirror them in the AdGuard UI
-          # (Filters -> DNS rewrites) during cutover.
+          #
+          # `enabled` is mandatory: AdGuard's rewrite record carries the field,
+          # and an absent key unmarshals to false, so the rewrite gets stored
+          # disabled and silently ignored. mutableSettings = true merges this
+          # list into the state file on every start, so leaving it out also
+          # re-disables anything toggled on in the AdGuard UI.
+          #
+          # Keep BOTH entries enabled together: caddy.nix's wildcard vhost ends
+          # in `handle { abort }` and there is no `pangolin` entry in
+          # edge-services.nix, so the wildcard on its own would point the
+          # Pangolin dashboard at mal and get the connection dropped.
           rewrites = [
             {
               domain = "*.victorbuch.com";
               answer = "192.168.0.243";
+              enabled = true;
             }
             {
               domain = "pangolin.victorbuch.com";
               answer = "89.58.12.15"; # wash (Netcup VPS)
+              enabled = true;
             }
           ];
         };

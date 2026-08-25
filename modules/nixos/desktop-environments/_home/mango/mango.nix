@@ -6,39 +6,31 @@
 }:
 
 let
-  terminal = "ghostty";
-  fileManager = "dolphin";
-  browser = "zen-beta";
   shell = "noctalia";
   # Window-decoration colors are no longer set here: noctalia's `mango`
   # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
   # palette and reloads mango live. See the `source=` include in extraConfig
   # below and modules/nixos/desktop-environments/_home/common/noctalia.nix.
 
+  apps = config.home.desktop.apps;
+
+  # The mango adapter's call into the shared focus helper: match on every
+  # window identifier the app is known to use, land it on its pinned tag.
+  focusOrRun = app: tag: "mango-focus-or-run '${app.regex}' ${toString tag} ${app.command}";
+
   # Raycast-style slots — pinned to tag 1.
-  tag1Apps = [
-    "zen-beta"
-    "zen"
-    "firefox"
-    "com\\.mitchellh\\.ghostty"
-    "ghostty"
-    "figma-linux"
-    "Figma"
-    "Obsidian"
-    "obsidian"
+  tag1 = with apps; [
+    zen
+    ghostty
+    figma
+    obsidian
   ];
 
   # Named scratchpads — tag-less by design.
-  scratchpadApps = [
-    "[Dd]iscord"
-    "[Ss]lack"
-    "sone"
-  ];
-
-  # File manager: floats on the current tag.
-  fileManagerApps = [
-    "[Dd]olphin"
-    "org\\.kde\\.dolphin"
+  scratchpads = with apps; [
+    sone
+    discord
+    slack
   ];
 
   # Portals and dialog-only helpers: float on the current tag.
@@ -57,7 +49,10 @@ let
 
   # Anything matching these keeps whatever tag it inherits; everything else
   # is swept to tag 2 by the catch-all rule.
-  noSweepApps = tag1Apps ++ scratchpadApps ++ fileManagerApps ++ dialogApps ++ [ "steam" ];
+  noSweep =
+    map (app: app.alternatives) (tag1 ++ scratchpads ++ [ apps.dolphin ])
+    ++ dialogApps
+    ++ [ "steam" ];
 
   alternation = lib.concatStringsSep "|";
 in
@@ -137,9 +132,9 @@ in
         ${shell} &
         easyeffects --gapplication-service &
         wl-paste --watch cliphist store &
-        ${browser} &
-        ${terminal} &
-        figma-linux &
+        ${apps.zen.command} &
+        ${apps.ghostty.command} &
+        ${apps.figma.command} &
         skwd-daemon &
       '';
 
@@ -234,23 +229,17 @@ in
         ];
 
         # === Window rules ===
-        windowrule = [
-          # Raycast-style slots: pin appid → tag so focus-or-run lands consistently
-          "appid:^zen-beta$|^zen$|^firefox$,tags:1"
-          "appid:^com\\.mitchellh\\.ghostty$|^ghostty$,tags:1"
-          "appid:^figma-linux$|^Figma$,tags:1"
-          "appid:^Obsidian$|^obsidian$,tags:1"
-
-          # File manager & dialog-style helpers — float on the tag in view.
-          "appid:^(${alternation fileManagerApps})$,isfloating:1,width:0.65,height:0.7"
-          "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
-
-          # Named scratchpads — chat & music
+        # Raycast-style slots: pin appid → tag so focus-or-run lands consistently.
+        windowrule =
+          map (app: "appid:${app.regex},tags:1") tag1
+          # Named scratchpads — chat & music.
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
-          "isnamedscratchpad:1,appid:^[Dd]iscord$"
-          "isnamedscratchpad:1,appid:^[Ss]lack$"
-          "isnamedscratchpad:1,appid:^sone$"
+          ++ map (app: "isnamedscratchpad:1,appid:${app.regex}") scratchpads
+          ++ [
+          # File manager & dialog-style helpers — float on the tag in view.
+          "appid:^(${apps.dolphin.alternatives})$,isfloating:1,width:0.65,height:0.7"
+          "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
 
           # Audio/Wine sizing
           "appid:^REAPER$|^reaper$,isfloating:0"
@@ -264,9 +253,9 @@ in
           "appid:^davinci-convert$,isfloating:1,width:640,height:400"
 
           # Catch-all: full application windows land on tag 2. Negative
-          # lookahead built from noSweepApps — a `tags:` rule always beats the
+          # lookahead built from noSweep — a `tags:` rule always beats the
           # parent-tag fallback in mango, so exempted appids must be listed.
-          "appid:^(?!(${alternation noSweepApps})$),tags:2"
+          "appid:^(?!(${alternation noSweep})$),tags:2"
         ];
 
         # === Layer rules ===
@@ -297,10 +286,10 @@ in
         # === Keybinds ===
         bind = [
           # --- App launchers ---
-          "SUPER,Return,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
-          "SUPER+SHIFT,Return,spawn,${terminal}"
-          "SUPER,B,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
-          "SUPER,E,spawn,${fileManager}"
+          "SUPER,Return,spawn_shell,${focusOrRun apps.ghostty 1}"
+          "SUPER+SHIFT,Return,spawn,${apps.ghostty.command}"
+          "SUPER,B,spawn_shell,${focusOrRun apps.zen 1}"
+          "SUPER,E,spawn,${apps.dolphin.command}"
           "SUPER,space,spawn,${shell} msg panel-toggle launcher"
 
           # Friction-free note capture: rofi one-liner -> today's daily note.
@@ -349,19 +338,19 @@ in
           # --- Raycast-style focus-or-run (SUPER+1..5) ---
           # Pinned tags via windowrule; helper launches if missing, then jumps to tag
           # and cycles focusstack until appid matches.
-          "SUPER,1,spawn_shell,mango-focus-or-run zen-beta 1 zen-beta"
-          "SUPER,2,spawn_shell,mango-focus-or-run ghostty 1 ghostty"
-          "SUPER,3,spawn_shell,mango-focus-or-run figma-linux 1 figma-linux"
-          "SUPER,4,spawn_shell,mango-focus-or-run obsidian 1 obsidian"
+          "SUPER,1,spawn_shell,${focusOrRun apps.zen 1}"
+          "SUPER,2,spawn_shell,${focusOrRun apps.ghostty 1}"
+          "SUPER,3,spawn_shell,${focusOrRun apps.figma 1}"
+          "SUPER,4,spawn_shell,${focusOrRun apps.obsidian 1}"
 
           # --- Tags (main <-> stash) ---
           "SUPER,Tab,spawn,mango-tag-toggle"
           "SUPER+SHIFT,Tab,spawn,mango-tag-toggle --carry"
 
           # --- Named scratchpads (sone / Discord / Slack) ---
-          "SUPER,M,toggle_named_scratchpad,sone,none,sone"
-          "SUPER,D,toggle_named_scratchpad,discord,none,discord"
-          "SUPER,S,toggle_named_scratchpad,slack,none,slack"
+          "SUPER,M,toggle_named_scratchpad,${apps.sone.command},none,${apps.sone.command}"
+          "SUPER,D,toggle_named_scratchpad,${apps.discord.command},none,${apps.discord.command}"
+          "SUPER,S,toggle_named_scratchpad,${apps.slack.command},none,${apps.slack.command}"
 
           # --- Standard scratchpad pool ---
           "SUPER,I,minimized"

@@ -6,6 +6,7 @@
 }:
 
 let
+  apps = config.home.desktop.apps;
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
@@ -127,11 +128,11 @@ in
           "$mainMod, F, exec, ${fileManager}"
 
           # Raycast-style focus-or-run (matches niri Mod+1/2/3/T/D)
-          "$mainMod, 1, exec, focus-or-run-hypr zen-beta ${browser}"
-          "$mainMod, 2, exec, focus-or-run-hypr com.mitchellh.ghostty ${terminal}"
-          "$mainMod, 3, exec, focus-or-run-hypr Slack slack"
-          "$mainMod, T, exec, focus-or-run-hypr tidal-hifi tidal-hifi"
-          "$mainMod, D, exec, focus-or-run-hypr discord discord"
+          "$mainMod, 1, exec, focus-or-run-hypr ${apps.zen.appId} ${apps.zen.command}"
+          "$mainMod, 2, exec, focus-or-run-hypr ${apps.ghostty.appId} ${apps.ghostty.command}"
+          "$mainMod, 3, exec, focus-or-run-hypr ${apps.slack.appId} ${apps.slack.command}"
+          "$mainMod, T, exec, focus-or-run-hypr ${apps.tidal.appId} ${apps.tidal.command}"
+          "$mainMod, D, exec, focus-or-run-hypr ${apps.discord.appId} ${apps.discord.command}"
 
           # Noctalia shell controls
           "$mainMod, Space, exec, ${shell} ipc call launcher toggle"

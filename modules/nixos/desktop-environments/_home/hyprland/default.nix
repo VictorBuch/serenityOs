@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../common/apps.nix
     ./hyprland.nix
     ./focus-or-run.nix
     ../common/wlogout

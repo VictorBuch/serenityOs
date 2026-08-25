@@ -11,6 +11,7 @@ in
 
 {
   imports = [
+    ../common/apps.nix
     ./niri.nix
     ./focus-or-run.nix
     ../common/davinci-convert.nix

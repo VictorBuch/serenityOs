@@ -12,6 +12,7 @@ in
 
 {
   imports = [
+    ../common/apps.nix
     inputs.mangowm.hmModules.mango
     ./mango.nix
     ./focus-or-run.nix

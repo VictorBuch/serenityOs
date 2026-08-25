@@ -6,6 +6,7 @@
 }:
 
 let
+  apps = config.home.desktop.apps;
   terminal = "ghostty";
   fileManager = "nautilus";
   browser = "zen-beta";
@@ -122,11 +123,11 @@ in
             Mod+F { spawn "${fileManager}"; }
 
             // Raycast-style focus-or-run bindings (Alt + numbers)
-            Mod+1 { spawn "focus-or-run" "zen-beta" "zen"; }
-            Mod+2 { spawn "focus-or-run" "com.mitchellh.ghostty" "ghostty"; }
-            Mod+3 { spawn "focus-or-run" "Slack" "slack"; }
-            Mod+T { spawn "focus-or-run" "tidal-hifi" "tidal-hifi"; }
-            Mod+D { spawn "focus-or-run" "discord" "discord"; }
+            Mod+1 { spawn "focus-or-run" "${apps.zen.appId}" "${apps.zen.command}"; }
+            Mod+2 { spawn "focus-or-run" "${apps.ghostty.appId}" "${apps.ghostty.command}"; }
+            Mod+3 { spawn "focus-or-run" "${apps.slack.appId}" "${apps.slack.command}"; }
+            Mod+T { spawn "focus-or-run" "${apps.tidal.appId}" "${apps.tidal.command}"; }
+            Mod+D { spawn "focus-or-run" "${apps.discord.appId}" "${apps.discord.command}"; }
 
             // Noctalia shell controls
             Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }

@@ -7,6 +7,7 @@
   imports = [
     ./home.nix
     ./wallpaper-pool.nix
+    ./live-seams.nix
   ];
 
   options = {

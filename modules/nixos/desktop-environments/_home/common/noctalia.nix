@@ -418,28 +418,23 @@ in
       libsForQt5.qt5ct
     ];
 
-    # qt6ct base config: a static pointer to the color scheme noctalia's `qt`
-    # template writes at runtime (~/.config/qt6ct/colors/noctalia.conf). HM
-    # owns this file; noctalia only writes the separate colors file, so there
-    # is no read-only conflict. This is what makes Qt apps pick up the palette.
-    # Live Seam + state policing. See docs/adr/0001-nix-declares-the-shell.md.
-    #
-    # The shell merges ~/.config/noctalia/*.toml alphabetically, then overlays
-    # ~/.local/state/noctalia/settings.toml on top of everything. So:
-    #   - the seam must sort AFTER config.toml (the name the HM module writes),
-    #     hence zz-, or it would load first and lose;
-    #   - a theme.mode key in the state file outranks the pinned dark mode here,
-    #     which is drift, not configuration. The wallpaper path, monitor
-    #     overrides and plugins.auto_update in that file are app-owned and are
-    #     deliberately left alone.
-    home.activation.noctaliaSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            seam="$HOME/.config/noctalia/zz-local.toml"
-            if [ ! -e "$seam" ]; then
-              mkdir -p "$(dirname "$seam")"
-              echo '# Live Seam -- not managed by Nix. Merged after config.toml, so' > "$seam"
-              echo '# keys here win. Apply with `noctalia msg config-reload`.' >> "$seam"
-            fi
+    home.liveSeams.noctalia = {
+      # The shell merges ~/.config/noctalia/*.toml alphabetically, so the seam
+      # must sort AFTER config.toml -- the filename the home-manager module
+      # writes -- hence zz-, or it would load first and lose.
+      path = ".config/noctalia/zz-local.toml";
+      precedence = "Merged after config.toml, so keys here win.";
+      reload = "`noctalia msg config-reload`";
+    };
 
+    # The shell overlays ~/.local/state/noctalia/settings.toml on top of
+    # everything, so a theme.mode key there outranks the pinned dark mode above.
+    # That is drift, not configuration. The wallpaper path, monitor overrides and
+    # plugins.auto_update in the same file are app-owned and deliberately left
+    # alone. tomlkit preserves formatting and comments, so the file comes back
+    # looking untouched apart from the key removed.
+    # See docs/adr/0001-nix-declares-the-shell.md.
+    home.activation.noctaliaStatePolicing = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             state="$HOME/.local/state/noctalia/settings.toml"
             if [ -f "$state" ]; then
               ${tomlPy}/bin/python3 - "$state" <<'PYSTRIP'
@@ -455,6 +450,10 @@ in
             fi
     '';
 
+    # qt6ct base config: a static pointer to the color scheme noctalia's `qt`
+    # template writes at runtime (~/.config/qt6ct/colors/noctalia.conf). HM
+    # owns this file; noctalia only writes the separate colors file, so there
+    # is no read-only conflict. This is what makes Qt apps pick up the palette.
     xdg.configFile."qt6ct/qt6ct.conf".text = ''
       [Appearance]
       color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf

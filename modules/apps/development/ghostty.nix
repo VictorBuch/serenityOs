@@ -76,14 +76,11 @@ mkModule {
         inherit settings;
       };
 
-      home.activation.ghosttyLocalSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        seam="$HOME/.config/ghostty/local"
-        if [ ! -e "$seam" ]; then
-          mkdir -p "$(dirname "$seam")"
-          echo '# Live Seam -- not managed by Nix. Loaded after the generated' > "$seam"
-          echo '# config, so settings here win. Reload with ctrl+shift+comma.' >> "$seam"
-        fi
-      '';
+      home.liveSeams.ghostty = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+        path = ".config/ghostty/local";
+        reload = "SIGUSR2 or ctrl+shift+comma";
+      };
+
       xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         text = lib.generators.toKeyValue { } settings;
       };

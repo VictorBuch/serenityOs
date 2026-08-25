@@ -113,17 +113,11 @@ in
       PYICON
     '';
 
-    # Live Seam: a writable file sourced last, so anything set there beats the
-    # generated config without a rebuild. mango reloads on `mmsg dispatch
-    # reload_config` (SUPER+SHIFT+R).
-    home.activation.mangoLocalSeam = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      seam="$HOME/.config/mango/local.conf"
-      if [ ! -e "$seam" ]; then
-        mkdir -p "$(dirname "$seam")"
-        echo '# Live Seam -- not managed by Nix. Sourced after the generated' > "$seam"
-        echo '# config, so settings here win. Reload with SUPER+SHIFT+R.' >> "$seam"
-      fi
-    '';
+    home.liveSeams.mango = {
+      path = ".config/mango/local.conf";
+      precedence = "Sourced after the generated config, so settings here win.";
+      reload = "SUPER+SHIFT+R";
+    };
 
     wayland.windowManager.mango = {
       enable = true;

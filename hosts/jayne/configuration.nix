@@ -144,6 +144,7 @@ in
 
     emulation = {
       enable = true;
+      podman.enable = false;
     };
 
     gaming = {

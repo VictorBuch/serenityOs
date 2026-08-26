@@ -55,7 +55,10 @@ let
     # Containers Resolve will open. Matroska/WebM/AVI always need a remux.
     supported_container="mov mp4"
     # Audio: Resolve on Linux only reads uncompressed PCM, so every
-    # compressed audio codec is re-encoded.
+    # compressed audio codec is re-encoded. Streams whose codec this ffmpeg
+    # build cannot decode (iPhone's apple_apac spatial track) are dropped.
+    decodable_audio="$("$ffmpeg" -hide_banner -decoders 2>/dev/null \
+      | awk 'NR > 2 && $1 ~ /^A/ { print $2 }' | tr '\n' ' ')"
 
     in_list () {
       local needle="$1" item
@@ -131,6 +134,7 @@ let
     todo_files=()
     todo_vmode=()
     todo_amode=()
+    todo_amap=()
     todo_label=()
 
     echo "-----------------------------"
@@ -148,7 +152,11 @@ let
       fi
 
       vcodec="$(probe "$file" -select_streams v:0 -show_entries stream=codec_name | head -1)"
-      acodec="$(probe "$file" -select_streams a:0 -show_entries stream=codec_name | head -1)"
+      acodecs=()
+      while IFS= read -r acodec_line; do
+        [ -n "$acodec_line" ] && acodecs+=("$acodec_line")
+      done < <(probe "$file" -select_streams a -show_entries stream=codec_name)
+      acodec="''${acodecs[0]:-}"
 
       # ffprobe reports comma-separated container lists, e.g. "mov,mp4,m4a,..."
       container_ok=false
@@ -165,13 +173,24 @@ let
       fi
 
       amode="copy"
-      case "$acodec" in
-        "" ) ;;                  # no audio track
-        pcm_* ) ;;               # already uncompressed
-        * ) amode="pcm" ;;
-      esac
+      amap=""
+      dropped_audio=0
+      for ai in "''${!acodecs[@]}"; do
+        ac="''${acodecs[$ai]}"
+        if ! in_list "$ac" "$decodable_audio"; then
+          dropped_audio=$(( dropped_audio + 1 ))
+          echo "  drop     $name audio stream a:$ai ($ac) — no decoder"
+          continue
+        fi
+        amap="$amap $ai"
+        case "$ac" in
+          pcm_* ) ;;               # already uncompressed
+          * ) amode="pcm" ;;
+        esac
+      done
 
-      if [ "$vmode" = "copy" ] && [ "$amode" = "copy" ] && [ "$container_ok" = true ]; then
+      if [ "$vmode" = "copy" ] && [ "$amode" = "copy" ] && [ "$container_ok" = true ] \
+         && [ "$dropped_audio" -eq 0 ]; then
         echo "  ok       $name ($vcodec / ''${acodec:-no audio}) — already Resolve-ready"
         continue
       fi
@@ -189,6 +208,7 @@ let
       todo_files+=("$file")
       todo_vmode+=("$vmode")
       todo_amode+=("$amode")
+      todo_amap+=("$amap")
       todo_label+=("$label")
     done
 
@@ -228,8 +248,16 @@ let
         vargs=( -vf format=yuv422p -c:v dnxhd -profile:v dnxhr_hq )
       fi
 
+      amap="''${todo_amap[$i]}"
+      amaps=()
+      for ai in $amap; do
+        amaps+=( -map "0:a:$ai" )
+      done
+
       aargs=()
-      if [ "$amode" = "copy" ]; then
+      if [ -z "$amap" ]; then
+        aargs=( -an )
+      elif [ "$amode" = "copy" ]; then
         aargs=( -c:a copy )
       else
         aargs=( -c:a pcm_s16le )
@@ -240,7 +268,7 @@ let
 
       err_log="$(mktemp)"
       "$ffmpeg" -hide_banner -nostdin -y -i "$current_file" \
-        -map 0:V? -map 0:a? -map_metadata 0 \
+        -map 0:V? "''${amaps[@]}" -map_metadata 0 -dn -sn \
         "''${vargs[@]}" "''${aargs[@]}" \
         -progress pipe:1 \
         "$output_file" 2>"$err_log" | write_progress

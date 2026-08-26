@@ -81,43 +81,70 @@
     path = with pkgs; [bash coreutils rsync findutils gawk];  # Added gawk for awk command
     script = ''
       #!/usr/bin/env bash
+      set -euo pipefail
 
       CACHE="/cache"
       BACKING="/mnt/cold"
       THRESHOLD=80  # Percentage
       TARGET=60     # Target after cleanup
+      AGE_DAYS=7
 
-      # Get cache usage percentage
-      USAGE=$(df "''${CACHE}" | awk 'NR==2 {print int($5)}')
+      usage_pct() { df --output=pcent "''${CACHE}" | tail -1 | tr -dc '0-9'; }
 
-      if [ "''${USAGE}" -gt "''${THRESHOLD}" ]; then
-        echo "Cache at ''${USAGE}%, moving files to backing storage..."
-
-        # Find files older than 7 days, move oldest first
-        find "''${CACHE}" -type f -atime +7 -printf '%A@ %p\0' 2>/dev/null | \
-          sort -z -n | \
-          while IFS= read -r -d "" line; do
-            FILE=$(echo "''${line}" | cut -d' ' -f2-)
-            RELPATH="''${FILE#''${CACHE}/}"
-
-            # Create directory structure in backing storage
-            mkdir -p "''${BACKING}/$(dirname "''${RELPATH}")"
-
-            # Move file
-            rsync -a --remove-source-files "''${FILE}" "''${BACKING}/''${RELPATH}"
-
-            # Check if we've reached target usage
-            CURRENT=$(df "''${CACHE}" | awk 'NR==2 {print int($5)}')
-            [ "''${CURRENT}" -le "''${TARGET}" ] && break
-          done
-
-        # Clean up empty directories
-        find "''${CACHE}" -type d -empty -delete 2>/dev/null || true
-
-        echo "Cache cleanup complete. Usage now: $(df "''${CACHE}" | awk 'NR==2 {print $5}')"
-      else
+      USAGE=$(usage_pct)
+      if [ "''${USAGE}" -le "''${THRESHOLD}" ]; then
         echo "Cache at ''${USAGE}%, no cleanup needed."
+        exit 0
       fi
+
+      SIZE=$(df --output=size -B1 "''${CACHE}" | tail -1 | tr -dc '0-9')
+      USED=$(df --output=used -B1 "''${CACHE}" | tail -1 | tr -dc '0-9')
+      NEED=$(( USED - SIZE * TARGET / 100 ))
+      echo "Cache at ''${USAGE}%, need to free $(numfmt --to=iec "''${NEED}")"
+
+      WORK=$(mktemp -d)
+      trap 'rm -rf "''${WORK}"' EXIT
+
+      # inode <TAB> atime <TAB> size <TAB> path-relative-to-CACHE
+      find "''${CACHE}" -type f -printf '%i\t%A@\t%s\t%P\n' > "''${WORK}/all"
+
+      # The unit of movement is the inode, not the path. rsync only preserves
+      # hardlinks between files inside a *single* transfer, so a Sonarr import
+      # (torrent in downloads/ hardlinked to the file in tv/) has to move as
+      # one batch. Moving paths one at a time -- as this did before -- silently
+      # forks every seeded file into two independent copies on the cold pool.
+      # An inode is eligible only when its most recently read link is cold, so
+      # something still being watched keeps all of its links on the SSD.
+      awk -F'\t' -v cutoff="$(date -d "''${AGE_DAYS} days ago" +%s)" '
+        { if (!($1 in newest) || $2 > newest[$1]) newest[$1] = $2; size[$1] = $3 }
+        END { for (i in newest) if (newest[i] < cutoff)
+                printf "%d\t%d\t%d\n", newest[i], i, size[i] }
+      ' "''${WORK}/all" | sort -n > "''${WORK}/groups"
+
+      # Coldest inodes first, until the batch covers what we need to free.
+      awk -F'\t' -v need="''${NEED}" \
+        '{ total += $3; print $2; if (total >= need) exit }' \
+        "''${WORK}/groups" > "''${WORK}/inodes"
+
+      if [ ! -s "''${WORK}/inodes" ]; then
+        echo "Nothing older than ''${AGE_DAYS} days to move; cache still at ''${USAGE}%."
+        exit 0
+      fi
+
+      # Expand the chosen inodes back out to every path that links to them.
+      awk -F'\t' 'NR==FNR { want[$1] = 1; next } ($1 in want) { print $4 }' \
+        "''${WORK}/inodes" "''${WORK}/all" > "''${WORK}/files-from"
+
+      echo "Moving $(wc -l < "''${WORK}/files-from") paths ($(wc -l < "''${WORK}/inodes") inodes)"
+
+      # -H is the whole point: one invocation, hardlinks intact on arrival.
+      rsync -aH --remove-source-files --files-from="''${WORK}/files-from" \
+        "''${CACHE}/" "''${BACKING}/"
+
+      # Clean up empty directories
+      find "''${CACHE}" -type d -empty -delete 2>/dev/null || true
+
+      echo "Cache cleanup complete. Usage now: $(usage_pct)%"
     '';
     serviceConfig = {
       Type = "oneshot";

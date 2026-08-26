@@ -616,6 +616,10 @@ in
                         timezone = "-04";
                         interval = 20;
                         api-base-url = "http://localhost:8989";
+                        # Posters are fetched by the browser, not by glance, so
+                        # they go through Caddy's same-origin cover proxy
+                        # instead of api-base-url (see edge-services.nix).
+                        cover-proxy = "/covers/sonarr";
                         key = {
                           _secret = "/run/credentials/glance.service/sonarr-api_key";
                         };
@@ -638,6 +642,9 @@ in
                         timezone = "-04";
                         interval = 20;
                         api-base-url = "http://localhost:7878";
+                        # Same as the Sonarr widget above — browser-loaded
+                        # posters go through the same-origin cover proxy.
+                        cover-proxy = "/covers/radarr";
                         key = {
                           _secret = "/run/credentials/glance.service/radarr-api_key";
                         };

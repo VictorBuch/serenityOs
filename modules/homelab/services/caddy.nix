@@ -83,12 +83,29 @@ let
       '';
 
   # One named matcher + handle block per service inside a wildcard vhost.
-  mkHandle = hostDomain: name: service: ''
-    @${name} host ${name}.${hostDomain}
-    handle @${name} {
-      ${serviceBody service}
-    }
-  '';
+  # `extraRoutes` is raw Caddyfile placed ahead of the service's own body, so a
+  # service can claim specific paths before the catch-all proxy. The body then
+  # moves into a nested `handle` so a request can only ever take one of the two.
+  mkHandle =
+    hostDomain: name: service:
+    let
+      body =
+        if service ? extraRoutes then
+          ''
+            ${service.extraRoutes}
+            handle {
+              ${serviceBody service}
+            }
+          ''
+        else
+          serviceBody service;
+    in
+    ''
+      @${name} host ${name}.${hostDomain}
+      handle @${name} {
+        ${body}
+      }
+    '';
 
   mkWildcardHost = hostDomain: svcs: {
     useACMEHost = hostDomain;
@@ -113,6 +130,18 @@ in
     sops.templates."acme-cf.env" = {
       content = ''
         CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder."cloudflare/api_token"}
+      '';
+      mode = "0400";
+    };
+
+    # Sonarr/Radarr keys for the dashboard cover-proxy routes (see the
+    # `dashboard` entry in edge-services.nix). Caddy reads them as
+    # {env.SONARR_API_KEY} / {env.RADARR_API_KEY} so they stay out of the Nix
+    # store and out of the dashboard HTML.
+    sops.templates."caddy.env" = {
+      content = ''
+        SONARR_API_KEY=${config.sops.placeholder."sonarr_api_key"}
+        RADARR_API_KEY=${config.sops.placeholder."radarr_api_key"}
       '';
       mode = "0400";
     };
@@ -149,6 +178,7 @@ in
     services.caddy = {
       enable = true;
       email = "victorbuch@protonmail.com";
+      environmentFile = config.sops.templates."caddy.env".path;
       # Traefik on wash dials mal without SNI (tunnel target is an IP);
       # serve the main wildcard vhost for SNI-less TLS handshakes.
       globalConfig = ''

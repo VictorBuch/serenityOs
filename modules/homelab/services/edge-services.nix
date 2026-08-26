@@ -52,6 +52,25 @@
         url = "http://127.0.0.1:8080";
         https = false;
         protected = true;
+        # Glance's Sonarr/Radarr widgets emit poster <img> tags that the
+        # *browser* loads, so they cannot point at the arrs' loopback ports.
+        # These same-origin paths proxy the covers and inject the API key
+        # server-side, which also keeps the keys out of the dashboard HTML.
+        # Paired with `cover-proxy` in dashboard.nix.
+        extraRoutes = ''
+          handle_path /covers/sonarr/* {
+            rewrite * /api/v3/mediacover{path}
+            reverse_proxy http://127.0.0.1:8989 {
+              header_up X-Api-Key {env.SONARR_API_KEY}
+            }
+          }
+          handle_path /covers/radarr/* {
+            rewrite * /api/v3/mediacover{path}
+            reverse_proxy http://127.0.0.1:7878 {
+              header_up X-Api-Key {env.RADARR_API_KEY}
+            }
+          }
+        '';
       };
       ma = {
         # Music Assistant

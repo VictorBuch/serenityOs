@@ -179,29 +179,37 @@ in
               };
               base_url = "http://localhost:8989";
 
-              # trash's `series` sizes leave preferred at 995 MB/min, i.e.
-              # "always take the biggest". Sizes are MB per minute, so a 50
-              # minute episode lands near preferred * 50. WEB is where nearly
-              # everything comes from and its bitrate is fixed by the source
-              # anyway; the cap that matters is Bluray-1080p, which is how the
-              # library ended up with 7-8 GiB Mr. Robot and Banshee episodes.
+              # Sizes are MB per minute, so a 50 minute episode lands near
+              # preferred * 50. `max` is a HARD REJECT, not a quality band --
+              # steering happens through `preferred`, which is what Sonarr
+              # scores release proximity against. Numbers below are calibrated
+              # against the existing library: WEB episodes measured min 16.6 /
+              # mean 51.1 / max 81.7 MB/min, so preferred 55 sits on the mean
+              # and nothing real gets rejected. Bluray measured p10 85 / p50 111
+              # / max 186 -- it is the fallback tier, used only when no WEB
+              # release exists, so its ceiling is deliberately generous. An
+              # earlier max of 90 here would have rejected 158 of 191 Bluray
+              # episodes in this library.
               quality_definition = {
                 type = "series";
                 qualities = [
                   {
                     name = "WEBDL-1080p";
+                    min = 15;
                     preferred = 55;
                     max = 130;
                   }
                   {
                     name = "WEBRip-1080p";
+                    min = 15;
                     preferred = 55;
                     max = 130;
                   }
                   {
                     name = "Bluray-1080p";
-                    preferred = 60;
-                    max = 90;
+                    min = 20;
+                    preferred = 80;
+                    max = 200;
                   }
                 ];
               };
@@ -263,34 +271,71 @@ in
               # trash's `movie` sizes leave preferred at 1999 MB/min --
               # effectively unbounded, so Radarr always takes the largest
               # release it can find, which is why the library averaged 12.2 GiB
-              # a film. Sizes are MB per minute: 82 puts a two hour film around
-              # 9.6 GB, with max as a hard reject well above that so a slightly
-              # chunky release still gets through.
+              # a film. Sizes are MB per minute: preferred 82 puts a two hour
+              # film around 9.6 GB.
+              #
+              # `max` is a HARD REJECT and does no steering, so it is set as a
+              # backstop against remux-tier bloat rather than as a quality band.
+              # Measured against the existing library, a max of 120 rejected 8
+              # of 31 Bluray films -- including the UHD-source HDR x265
+              # downscales this config specifically wants (Dune 187, Hot Fuzz
+              # 147, Wicked 142 MB/min) and grainy catalogue titles that
+              # genuinely need the bitrate (Monty Python 1974 at 169). The guide
+              # min of 50.8 is calibrated for x264 and rejected 4 more, among
+              # them efficient encodes at 39-49 MB/min; lowering it is what lets
+              # HEVC through at all.
               quality_definition = {
                 type = "movie";
                 qualities = [
                   {
                     name = "Bluray-1080p";
+                    min = 20;
                     preferred = 82;
-                    max = 120;
+                    max = 220;
                   }
                   {
                     name = "WEBDL-1080p";
+                    min = 12.5;
                     preferred = 60;
-                    max = 100;
+                    max = 150;
                   }
                   {
                     name = "WEBRip-1080p";
+                    min = 12.5;
                     preferred = 60;
-                    max = 100;
+                    max = 150;
                   }
                 ];
               };
 
+              # Guide order, plus a WEB 720p tier at the bottom. The guide
+              # profile stops at Bluray-720p; with a small indexer set an
+              # obscure title can have neither a 1080p nor a Bluray-720p
+              # release, and the cost of one more fallback rung is nothing
+              # because it only ever wins when everything above it is absent.
               quality_profiles = [
                 {
                   trash_id = "d1d67249d3890e49bc12e275d989a7e9"; # HD Bluray + WEB
                   reset_unmatched_scores.enabled = true;
+                  quality_sort = "top";
+                  qualities = [
+                    { name = "Bluray-1080p"; }
+                    {
+                      name = "WEB 1080p";
+                      qualities = [
+                        "WEBDL-1080p"
+                        "WEBRip-1080p"
+                      ];
+                    }
+                    { name = "Bluray-720p"; }
+                    {
+                      name = "WEB 720p";
+                      qualities = [
+                        "WEBDL-720p"
+                        "WEBRip-720p"
+                      ];
+                    }
+                  ];
                 }
               ];
 

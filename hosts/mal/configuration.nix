@@ -392,6 +392,10 @@ in
     # accounts and share links; Syncthing keeps subfolders of it two-way
     # synced with the desktops, which is the part copyparty cannot do.
     copyparty.enable = true;
+
+    # SMB on top of the same trees, for mounting the pool as a network drive
+    # in Dolphin/Finder. LAN and Tailscale only -- never through the tunnel.
+    samba.enable = true;
     filesync = {
       enable = true;
       folders = [ "projects" ];

@@ -344,10 +344,15 @@ in
   # old build: no /admin/license route, "Community Edition" forever.
   #
   # Remove once nixpkgs stops copying the store's mode bits into the dataDir.
+  #
+  # The chmod must not fail the unit: `chmod -R` walks a tree the ExecStart
+  # wrapper may still be replacing, so it races on files that vanish mid-walk
+  # ("cannot access .../page.js.nft.json") and exits 1, killing preStart and
+  # with it gerbil and traefik. Best-effort is the correct semantic here.
   systemd.services.pangolin.preStart = lib.mkAfter ''
     cp -f /etc/pangolin/privateConfig.yml ${config.services.pangolin.dataDir}/config/privateConfig.yml
     if [ -d ${config.services.pangolin.dataDir}/.next ]; then
-      chmod -R u+w ${config.services.pangolin.dataDir}/.next
+      chmod -R u+w ${config.services.pangolin.dataDir}/.next || true
     fi
   '';
 
@@ -356,7 +361,7 @@ in
   # runtime — without this it throws unhandledRejection EACCES on every image.
   # preStart cannot cover it: the copy happens after it, inside ExecStart.
   systemd.services.pangolin.postStart = ''
-    chmod -R u+w ${config.services.pangolin.dataDir}/.next
+    chmod -R u+w ${config.services.pangolin.dataDir}/.next || true
   '';
 
   environment.systemPackages = with pkgs; [

@@ -43,8 +43,13 @@ in
     firewall.allowedUDPPorts = [ 21820 ];
   };
 
-  # GC, auto-upgrade, store optimization, boot cleanup
+  # GC, store optimization, boot cleanup
   maintenance.enable = true;
+
+  # Weekly auto-upgrade, matching mal. Both ends of the pangolin tunnel have to
+  # move together: wash upgrading only on manual deploys is what let it jump
+  # 3.5 weeks of nixpkgs in one go on 2026-08-27 and break the tunnel.
+  autoupgrade.enable = true;
 
   time.timeZone = "Europe/Copenhagen";
   i18n.defaultLocale = "en_DK.UTF-8";
@@ -125,12 +130,21 @@ in
     };
   };
 
-  # Operational note — the module wires gerbil `requires` pangolin and traefik
-  # `requires`/`partOf` gerbil. systemd propagates stop down that chain but
-  # never propagates start back up, so `systemctl stop pangolin` takes the
-  # whole edge offline (traefik drops 80/443, every tunnelled host refuses
-  # connections) and `systemctl start pangolin` does NOT bring it back.
-  # Use `restart`, or start the chain: `systemctl start pangolin gerbil traefik`.
+  # The module wires gerbil `requires` pangolin and traefik `requires`/`partOf`
+  # gerbil. systemd propagates stop down that chain but never propagates start
+  # back up, so anything that takes pangolin down — a failed start, a restart
+  # that loses a race — drops 80/443 and leaves them down until someone notices
+  # and runs `systemctl start pangolin gerbil traefik` by hand. That cost a
+  # 40 minute outage on 2026-08-27.
+  #
+  # Upholds= is the missing edge: while the upholding unit is running, systemd
+  # keeps starting the upheld one until it is active. Stop still propagates down
+  # (intended), but recovery now propagates back up on its own. The module
+  # already upholds traefik from gerbil; only this half was missing, which is
+  # why a pangolin that failed twice and succeeded on the third restart left
+  # gerbil and traefik dead behind it.
+  systemd.services.pangolin.upholds = [ "gerbil.service" ];
+
   services.pangolin = {
     enable = true;
     # Enterprise build (free for personal use; key from app.pangolin.net,

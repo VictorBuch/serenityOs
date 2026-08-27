@@ -70,10 +70,17 @@ in
       })
 
       # Linux-only: Auto-upgrade
+      #
+      # Weekly, not nightly. A nightly `--update-input nixpkgs` walks each host
+      # forward on its own schedule, so hosts that talk to each other drift apart
+      # between deploys — on 2026-08-27 that shipped gerbil 1.5.0 to one end of
+      # the pangolin tunnel while the other still ran the older newt, and the
+      # public edge went down. Weekly keeps the drift window short enough to
+      # correlate a breakage with the bump that caused it.
       (lib.mkIf cfg.autoupgrade.enable {
         system.autoUpgrade = {
           enable = true;
-          dates = "02:00";
+          dates = "Sun *-*-* 02:00:00";
           randomizedDelaySec = "45min";
           flake = inputs.self.outPath;
           flags = [

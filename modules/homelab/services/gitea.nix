@@ -167,7 +167,10 @@ in
 
     # SOPS secrets configuration
     sops.secrets."gitea/runner_token" = {
-      mode = "0444"; # Make readable by both runner users
+      # Both runners take this through systemd EnvironmentFile, which PID 1
+      # reads as root before the unit drops privileges, so it never needs to be
+      # readable by the runner users themselves.
+      mode = "0400";
       owner = "root";
       group = "root";
       restartUnits = [
@@ -183,7 +186,7 @@ in
       '';
       owner = "root";
       group = "root";
-      mode = "0444";
+      mode = "0400";
     };
 
     # Open firewall port for Gitea SSH

@@ -134,34 +134,40 @@ in
 
     age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
 
+    # Every consumer of these reads them either through a sops template
+    # (rendered by sops-nix as root) or through a systemd LoadCredential entry
+    # (read by PID 1 as root before the unit drops privileges), so none of them
+    # need to be readable by anyone else. 0444 put plaintext VPN credentials,
+    # *arr API keys and the gitea runner token within reach of every local
+    # account and every unsandboxed service on the box.
     secrets = {
       "vpn/pia/username" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "vpn/pia/password" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "qbittorrent/username" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "qbittorrent/password" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "sonarr_api_key" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "radarr_api_key" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
@@ -176,12 +182,12 @@ in
         group = "root";
       };
       "immich/db_password" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
       "immich_api_key" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };
@@ -191,7 +197,7 @@ in
         group = "mealie";
       };
       "gitea/runner_token" = {
-        mode = "0444";
+        mode = "0400";
         owner = "root";
         group = "root";
       };

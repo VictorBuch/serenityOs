@@ -189,7 +189,8 @@
       "Bash(echo \"=== exit $? ===\")",
       "Bash(ghostty +show-config --default)",
       "Bash(ps -p 980847 -o pid,etime=)",
-      "Bash(nix-instantiate --parse modules/apps/development/ghostty.nix)"
+      "Bash(nix-instantiate --parse modules/apps/development/ghostty.nix)",
+      "Bash(grep -i \"source$\")"
     ],
     "deny": [],
     "ask": []

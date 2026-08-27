@@ -125,6 +125,12 @@ in
     };
   };
 
+  # Operational note — the module wires gerbil `requires` pangolin and traefik
+  # `requires`/`partOf` gerbil. systemd propagates stop down that chain but
+  # never propagates start back up, so `systemctl stop pangolin` takes the
+  # whole edge offline (traefik drops 80/443, every tunnelled host refuses
+  # connections) and `systemctl start pangolin` does NOT bring it back.
+  # Use `restart`, or start the chain: `systemctl start pangolin gerbil traefik`.
   services.pangolin = {
     enable = true;
     # Enterprise build (free for personal use; key from app.pangolin.net,
@@ -242,6 +248,14 @@ in
     if [ -d ${config.services.pangolin.dataDir}/.next ]; then
       chmod -R u+w ${config.services.pangolin.dataDir}/.next
     fi
+  '';
+
+  # Same read-only mode, second victim: the copy the wrapper makes on *this*
+  # start is read-only too, and Next.js's image optimizer writes .next/cache at
+  # runtime — without this it throws unhandledRejection EACCES on every image.
+  # preStart cannot cover it: the copy happens after it, inside ExecStart.
+  systemd.services.pangolin.postStart = ''
+    chmod -R u+w ${config.services.pangolin.dataDir}/.next
   '';
 
   environment.systemPackages = with pkgs; [

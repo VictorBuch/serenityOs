@@ -236,20 +236,12 @@ in
       DynamicUser = lib.mkForce false;
       SupplementaryGroups = [ "systemd-journal" ];
       PrivateUsers = lib.mkForce false;
-      # glibc opens a netlink socket to enumerate local addresses before it sends
-      # a DNS query, so without AF_NETLINK every lookup fails as "no such host"
-      # with no packet leaving the box — which kills the `cscli hub update` that
-      # ExecStartPre hard-fails on. Upstream lists AF_UNIX/INET/INET6 only.
-      RestrictAddressFamilies = [ "AF_NETLINK" ];
       # Otherwise one unreachable hub CDN at boot leaves the agent down for good.
       Restart = "on-failure";
     };
   };
 
-  systemd.services.crowdsec-update-hub.serviceConfig = {
-    DynamicUser = lib.mkForce false;
-    RestrictAddressFamilies = [ "AF_NETLINK" ];
-  };
+  systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
 
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 

@@ -245,6 +245,11 @@ in
 
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 
+  # The bouncer `requires` the register unit but is only ordered after crowdsec,
+  # so on a cold boot it can hit LoadCredential before the API key file exists
+  # and dies with 243/CREDENTIALS. Order it behind the unit that writes the key.
+  systemd.services.crowdsec-firewall-bouncer.after = [ "crowdsec-firewall-bouncer-register.service" ];
+
   # The register unit shells out to the raw cscli, which reads
   # /etc/crowdsec/config.yaml — a path the module never populates, since its own
   # cscli wrapper passes `-c <store path>` instead. Publish the same generated
@@ -359,6 +364,9 @@ in
     git
     jq
     sops
+    # Inspecting what the crowdsec bouncer actually enforces: the ban sets live
+    # in ipset, matched from CROWDSEC_CHAIN, not in the iptables rules themselves.
+    ipset
   ];
 
   home-manager = {

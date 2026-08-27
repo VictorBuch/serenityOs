@@ -16,6 +16,15 @@ let
 
   # --- HELPER FUNCTIONS ---
   # Request-handling body for one service, independent of domain/TLS.
+  #
+  # Client IP: use {client_ip}, never {remote_host}. newt targets Caddy at
+  # localhost:443, so {remote_host} is 127.0.0.1 for every tunnelled request —
+  # it would stamp the loopback address onto all internet traffic and defeat
+  # any backend check that keys on the client address (Home Assistant's
+  # `local_only` webhooks, for one). {client_ip} resolves through the global
+  # `trusted_proxies` allowlist below, so it yields the real client from the
+  # tunnel and the peer address for LAN-direct requests, and a LAN client
+  # cannot forge it because its own address is not in the allowlist.
   serviceBody =
     service:
     if service.isStaticFiles or false then
@@ -35,7 +44,7 @@ let
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
             header_up X-Real-IP {client_ip}
-            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-For {client_ip}
             header_up X-Forwarded-Proto {scheme}
             transport http {
               read_timeout 360s
@@ -48,7 +57,7 @@ let
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
             header_up X-Real-IP {client_ip}
-            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-For {client_ip}
             header_up X-Forwarded-Proto {scheme}
             transport http {
               read_timeout 360s
@@ -63,8 +72,8 @@ let
       ''
         reverse_proxy ${service.url} {
           header_up Host ${service.upstreamHost or "{host}"}
-          header_up X-Real-IP {remote_host}
-          header_up X-Forwarded-For {remote_host}
+          header_up X-Real-IP {client_ip}
+          header_up X-Forwarded-For {client_ip}
           header_up X-Forwarded-Proto {scheme}
           transport http {
             tls_insecure_skip_verify
@@ -76,8 +85,8 @@ let
         reverse_proxy ${service.url} {
           header_up Host ${service.upstreamHost or "{host}"}
           ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
-          header_up X-Real-IP {remote_host}
-          header_up X-Forwarded-For {remote_host}
+          header_up X-Real-IP {client_ip}
+          header_up X-Forwarded-For {client_ip}
           header_up X-Forwarded-Proto {scheme}
         }
       '';

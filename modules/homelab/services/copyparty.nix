@@ -39,8 +39,8 @@ let
       shr-site: https://files.${domain}/
 
       # Trust the closest proxy (Caddy on loopback) for the client IP. Caddy's
-      # serviceBody sets X-Forwarded-For to {remote_host}, replacing rather
-      # than appending, so the nearest hop is the only value available — and
+      # serviceBody sets X-Forwarded-For to {client_ip}, replacing rather than
+      # appending, so the resolved client is the only value present — and
       # without this copyparty refuses to use the header at all and warns on
       # every single request.
       rproxy: -1

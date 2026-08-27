@@ -213,6 +213,19 @@ in
     ];
   };
 
+  # Upstream runs crowdsec under DynamicUser, and the bouncer's register unit
+  # claims "crowdsec" in its StateDirectory — so systemd migrates /var/lib/crowdsec
+  # into /var/lib/private/crowdsec and leaves a symlink behind, which the module's
+  # own tmpfiles rules and every host-side cscli then choke on:
+  #   Error: while setting up trace directory: mkdir /var/lib/crowdsec: file exists
+  # A static user takes that mechanism out of play for all three units (systemd
+  # refuses DynamicUser against a user that exists statically).
+  users.groups.crowdsec = { };
+  users.users.crowdsec = {
+    isSystemUser = true;
+    group = "crowdsec";
+  };
+
   # The upstream unit is hardened past what a journalctl acquisition survives:
   # `path = mkForce []` leaves journalctl off PATH, and the journal files are
   # 0640 root:systemd-journal, which PrivateUsers keeps out of reach even with
@@ -220,10 +233,25 @@ in
   systemd.services.crowdsec = {
     environment.PATH = lib.mkForce "${config.systemd.package}/bin";
     serviceConfig = {
+      DynamicUser = lib.mkForce false;
       SupplementaryGroups = [ "systemd-journal" ];
       PrivateUsers = lib.mkForce false;
+      # glibc opens a netlink socket to enumerate local addresses before it sends
+      # a DNS query, so without AF_NETLINK every lookup fails as "no such host"
+      # with no packet leaving the box — which kills the `cscli hub update` that
+      # ExecStartPre hard-fails on. Upstream lists AF_UNIX/INET/INET6 only.
+      RestrictAddressFamilies = [ "AF_NETLINK" ];
+      # Otherwise one unreachable hub CDN at boot leaves the agent down for good.
+      Restart = "on-failure";
     };
   };
+
+  systemd.services.crowdsec-update-hub.serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    RestrictAddressFamilies = [ "AF_NETLINK" ];
+  };
+
+  systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 
   # registerBouncer defaults to true whenever crowdsec is enabled, so the API
   # key is minted and handed over by a oneshot unit — nothing to put in sops.

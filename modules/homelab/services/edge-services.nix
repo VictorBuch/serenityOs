@@ -43,7 +43,7 @@
     services = {
       id = {
         # Pocket ID — the OIDC IdP itself; must never sit behind an auth
-        # screen or Pangolin/qui/fileflows/hermes logins deadlock
+        # screen or Pangolin/qui/fileflows logins deadlock
         url = "http://127.0.0.1:1411";
         https = false;
         protected = false;
@@ -275,18 +275,6 @@
         protected = false;
         isStaticFiles = true;
         staticPath = "/var/www/notes";
-      };
-    }
-    # Hermes web dashboard (agent.<domain>). Binds loopback with its own auth
-    # off, so its auth screen lives on the Pangolin resource. Its DNS-rebind
-    # guard rejects any non-loopback Host header, hence upstreamHost/Origin.
-    // lib.optionalAttrs (config.homelab.hermes.enable && config.homelab.hermes.web.enable) {
-      agent = {
-        url = "http://127.0.0.1:${toString config.homelab.hermes.web.port}";
-        https = false;
-        protected = true;
-        upstreamHost = "localhost";
-        upstreamOrigin = "https://localhost";
       };
     };
 

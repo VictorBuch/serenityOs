@@ -790,11 +790,6 @@ in
                           icon = "sh:hyperhdr";
                           check-url = "${local}:8090";
                         }
-                        {
-                          title = "Agent";
-                          url = "https://agent.${hl.domain}";
-                          icon = "sh:hermes-agent";
-                        }
                       ];
                     }
                     # Productivity & Tools Monitor Group

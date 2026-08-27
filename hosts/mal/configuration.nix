@@ -422,18 +422,6 @@ in
     lute.enable = true;
     tv-learn.enable = true;
 
-    hermes = {
-      enable = true;
-      discord.enable = true;
-      # Off: sops has no `hermes/signal_phone` / `hermes/signal_allowed_users`,
-      # and the module's signal.enable defaults to true.
-      signal.enable = false;
-      # Web chat UI at agent.victorbuch.com (behind pocket-id via Caddy).
-      web.enable = true;
-      # Home Assistant MCP over SSE; token from sops (hermes/hass_token).
-      homeAssistant.enable = true;
-    };
-
     # Development
     gitea.enable = true;
 

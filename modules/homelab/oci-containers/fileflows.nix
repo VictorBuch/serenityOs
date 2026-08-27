@@ -20,11 +20,6 @@ in
 
   config = lib.mkIf config.homelab.fileflows.enable {
 
-    # Firewall rules
-    networking.firewall.allowedTCPPorts = [
-      19200 # Web UI
-    ];
-
     # Persistent data directories
     systemd.tmpfiles.rules = [
       "d /var/lib/fileflows 0770 ${uid} multimedia"
@@ -39,8 +34,11 @@ in
       pull = "always";
       autoStart = true;
 
+      # Loopback-only: Caddy fronts the UI at fileflows.<domain>. Publishing
+      # on 0.0.0.0 would also bypass the NixOS firewall entirely, since docker
+      # installs its own nat/DOCKER-USER rules.
       ports = [
-        "19200:5000" # Web UI
+        "127.0.0.1:19200:5000" # Web UI
       ];
 
       environment = {
@@ -57,8 +55,13 @@ in
         config.sops.templates."fileflows-env".path
       ];
 
+      # No docker.sock here. FileFlows only needs it for docker-mod/self-update,
+      # which this deployment does not use, and its whole purpose is running
+      # user-authored flow scripts — handing those the host daemon socket turns
+      # any FileFlows compromise into root on the host. `:ro` would not help:
+      # the Docker API is request/response over the socket, so POST
+      # /containers/create still works through a read-only bind mount.
       volumes = [
-        "/var/run/docker.sock:/var/run/docker.sock:ro"
         "/var/lib/fileflows/data:/app/Data"
         "/var/lib/fileflows/logs:/app/Logs"
         "/var/lib/fileflows/temp:/temp"

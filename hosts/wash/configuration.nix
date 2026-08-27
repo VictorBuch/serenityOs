@@ -172,6 +172,63 @@ in
   # upstream verification must be off (transport is already encrypted twice).
   services.traefik.staticConfigOptions.serversTransport.insecureSkipVerify = true;
 
+  # Traefik logs nothing per-request by default; crowdsec's traefik parser needs
+  # the access log. No filePath means stdout, which lands in the journal that
+  # crowdsec already reads — no extra log file to keep readable.
+  services.traefik.staticConfigOptions.accessLog.format = "json";
+
+  # CrowdSec on the public edge: sshd bruteforce + HTTP scanning/CVE probing,
+  # enforced in the kernel by the firewall bouncer (iptables+ipset — nftables
+  # is off on this host). fail2ban above still covers sshd independently.
+  services.crowdsec = {
+    enable = true;
+    autoUpdateService = true;
+
+    settings = {
+      # Standalone engine, so it runs its own LAPI (module defaults it off) and
+      # registers itself against the community API for the blocklists.
+      general.api.server.enable = true;
+      lapi.credentialsFile = "/var/lib/crowdsec/local_api_credentials.yaml";
+      capi.credentialsFile = "/var/lib/crowdsec/online_api_credentials.yaml";
+    };
+
+    hub.collections = [
+      "crowdsecurity/linux" # includes sshd parsers + scenarios
+      "crowdsecurity/traefik"
+      "crowdsecurity/http-cve"
+      "crowdsecurity/base-http-scenarios"
+    ];
+
+    localConfig.acquisitions = [
+      {
+        source = "journalctl";
+        journalctl_filter = [ "_SYSTEMD_UNIT=sshd.service" ];
+        labels.type = "syslog";
+      }
+      {
+        source = "journalctl";
+        journalctl_filter = [ "_SYSTEMD_UNIT=traefik.service" ];
+        labels.type = "traefik";
+      }
+    ];
+  };
+
+  # The upstream unit is hardened past what a journalctl acquisition survives:
+  # `path = mkForce []` leaves journalctl off PATH, and the journal files are
+  # 0640 root:systemd-journal, which PrivateUsers keeps out of reach even with
+  # the group. Both have to be undone for the acquisition to read anything.
+  systemd.services.crowdsec = {
+    environment.PATH = lib.mkForce "${config.systemd.package}/bin";
+    serviceConfig = {
+      SupplementaryGroups = [ "systemd-journal" ];
+      PrivateUsers = lib.mkForce false;
+    };
+  };
+
+  # registerBouncer defaults to true whenever crowdsec is enabled, so the API
+  # key is minted and handed over by a oneshot unit — nothing to put in sops.
+  services.crowdsec-firewall-bouncer.enable = true;
+
   # Private HTTP resources are terminated by newt on mal's side of the tunnel,
   # so Pangolin has to ship it a keypair. It gets one by tailing Traefik's
   # acme.json (server/private/lib/acmeCertSync.ts polls `acme_json_path`,

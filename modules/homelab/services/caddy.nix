@@ -34,7 +34,7 @@ let
         handle /api/* {
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {remote_host}
+            header_up X-Real-IP {http.request.client_ip}
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             transport http {
@@ -47,7 +47,7 @@ let
         handle /_/* {
           reverse_proxy ${service.url} {
             header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {remote_host}
+            header_up X-Real-IP {http.request.client_ip}
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             transport http {
@@ -183,6 +183,9 @@ in
       # serve the main wildcard vhost for SNI-less TLS handshakes.
       globalConfig = ''
         default_sni fallback.${domain}
+        servers {
+          trusted_proxies static ::1/128 127.0.0.1/32
+        }
       '';
       virtualHosts = {
         "*.${domain}" = mkWildcardHost domain edge.services;

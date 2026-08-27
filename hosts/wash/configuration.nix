@@ -245,6 +245,25 @@ in
 
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 
+  # The register unit shells out to the raw cscli, which reads
+  # /etc/crowdsec/config.yaml — a path the module never populates, since its own
+  # cscli wrapper passes `-c <store path>` instead. Publish the same generated
+  # config there so every raw invocation (this unit, an interactive one) works.
+  environment.etc."crowdsec/config.yaml".source =
+    (pkgs.formats.yaml { }).generate "crowdsec.yaml"
+      config.services.crowdsec.settings.general;
+
+  # First-run bootstrap deadlock: the setup script runs `cscli machine add`
+  # before `cscli capi register`, but naming capi.credentialsFile puts the path
+  # in config.yaml straight away, so the machine add dies on the file that
+  # register has not written yet. An empty placeholder satisfies the load, and
+  # `capi register` fills it on the same run (its guard greps for a password).
+  systemd.tmpfiles.settings."20-crowdsec-capi"."/var/lib/crowdsec/online_api_credentials.yaml".f = {
+    user = "crowdsec";
+    group = "crowdsec";
+    mode = "0600";
+  };
+
   # registerBouncer defaults to true whenever crowdsec is enabled, so the API
   # key is minted and handed over by a oneshot unit — nothing to put in sops.
   services.crowdsec-firewall-bouncer.enable = true;

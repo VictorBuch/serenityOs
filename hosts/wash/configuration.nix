@@ -12,6 +12,25 @@ let
   username = "wash";
   domain = "victorbuch.com";
   wannaShareDomain = "smoothless.org";
+
+  # Pangolin only offers the "Country" match type in resource rules once it can
+  # resolve IPs to countries; with no maxmind_db_path in config.yml the Match
+  # Type dropdown is Path/IP/IP Range only. MaxMind's own downloads want an
+  # account and a license key, so this pins node-geolite2-redist's mirror of
+  # GeoLite2-Country instead. Country assignments drift slowly — bump rev and
+  # hash when it goes stale (the redist repo republishes weekly).
+  geolite2Country =
+    pkgs.runCommand "GeoLite2-Country.mmdb"
+      {
+        src = pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/GitSquared/node-geolite2-redist/f12a2cefc912d73f5c073d1cdd97ab1e36d7b26f/redist/GeoLite2-Country.tar.gz";
+          hash = "sha256-CP2YNfXvJnPg/l/S4A1WyoeG8hPXvxHMPN0UwGIL1Kk=";
+        };
+      }
+      ''
+        tar -xzf $src --strip-components=1
+        install -m 0444 GeoLite2-Country.mmdb $out
+      '';
 in
 {
   imports = [
@@ -167,6 +186,10 @@ in
       # Integration API (port 3003) — used for API-key operations like
       # license activation; also silences traefik's int-api-service noise
       flags.enable_integration_api = true;
+      # Turns on the Country match type in resource rules (geo-blocking) and
+      # the location-aware analytics that share the same database. Store path
+      # is readable under the unit's ProtectSystem=full.
+      server.maxmind_db_path = "${geolite2Country}";
     };
   };
 

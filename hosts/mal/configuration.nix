@@ -215,6 +215,18 @@ in
       "paperless/secret_key" = {
         mode = "0400";
       };
+      "wannashare/anthropic_api_key" = {
+        mode = "0400";
+        owner = "root";
+        group = "root";
+      };
+    };
+
+    templates."wannashare-env" = {
+      content = ''
+        ANTHROPIC_API_KEY=${config.sops.placeholder."wannashare/anthropic_api_key"}
+      '';
+      mode = "0400";
     };
   };
 
@@ -435,7 +447,10 @@ in
     };
 
     # Sharing
-    wannashare.enable = true;
+    wannashare = {
+      enable = true;
+      environmentFile = config.sops.templates."wannashare-env".path;
+    };
 
   };
 

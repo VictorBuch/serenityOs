@@ -83,14 +83,6 @@ in
   # Key-only SSH box with no console password — wheel must sudo without one
   security.sudo.wheelNeedsPassword = false;
 
-  # Traefik downloads the badger plugin and reaches LE at startup; without
-  # this it races DHCP/DNS on boot and comes up degraded (plugins disabled,
-  # ACME stuck on [::1]:53)
-  systemd.services.traefik = {
-    wants = [ "network-online.target" ];
-    after = [ "network-online.target" ];
-  };
-
   # FIDO2 SSH authorized keys -- one per YubiKey (same as mal)
   users.users."${username}".openssh.authorizedKeys.keys = [
     "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"
@@ -163,6 +155,54 @@ in
   # why a pangolin that failed twice and succeeded on the third restart left
   # gerbil and traefik dead behind it.
   systemd.services.pangolin.upholds = [ "gerbil.service" ];
+
+  # Second half of the same story, and the one that actually caused the long
+  # outages. Pangolin dies of V8 heap exhaustion (status=6/ABRT, "Ineffective
+  # mark-compacts near heap limit", ~3G RSS on a 3.8G box) and systemd restarts
+  # it. Because gerbil `requires` pangolin and traefik `requires`+`partOf`
+  # gerbil, every one of those bounces tears down the public listener too --
+  # even though traefik's HTTP provider polls pangolin's localhost:3001 with its
+  # own backoff and rides a restart out perfectly well on its own.
+  #
+  # nixpkgs' traefik module then sets StartLimitBurst=5 with a *24 hour*
+  # StartLimitIntervalSec (86400, not systemd's 10s default). Five pangolin
+  # crashes in a day is enough to lock traefik out for the remainder of that
+  # sliding window, and gerbil's Upholds= retries every 10s against a limiter
+  # that will not clear -- 78,433 `start-limit-hit` entries in three days, and
+  # 80/443 refusing connections for 12h35m on 2026-08-29. The tunnel came back
+  # at 10:37:55, 10:38:02, 10:38:09 on three consecutive days: not a timer, just
+  # the 24h window sliding.
+  #
+  # So: ordering, not stop-propagation. traefik stays up across a pangolin
+  # bounce, which also keeps /api/v1/auth/newt/get-token reachable so newt can
+  # reconnect the moment the backend returns.
+  #
+  # requiredBy on gerbil has to go too -- it plants a symlink in
+  # traefik.service.requires/, which mkForce on traefik.requires cannot reach.
+  systemd.services.gerbil.requiredBy = lib.mkForce [ ];
+
+  systemd.services.traefik = {
+    requires = lib.mkForce [ ];
+    partOf = lib.mkForce [ ];
+
+    # network-online: traefik downloads the badger plugin and reaches LE at
+    # startup; without this it races DHCP/DNS on boot and comes up degraded
+    # (plugins disabled, ACME stuck on [::1]:53).
+    wants = [
+      "gerbil.service"
+      "network-online.target"
+    ];
+    after = [ "network-online.target" ];
+
+    # A rate limit that outlives the incident it is rate-limiting is not a
+    # safety net. One minute bounds a genuine crash-spin (Upholds= retries at
+    # 10s, so ~6 attempts/min against a burst of 10) and clears itself long
+    # before anyone notices. Upstream's 24h window is presumably there to keep a
+    # restart loop off Let's Encrypt, but these are DNS-01 wildcards read from
+    # acme.json -- a restart re-reads them, it does not re-issue.
+    startLimitIntervalSec = lib.mkForce 60;
+    startLimitBurst = lib.mkForce 10;
+  };
 
   services.pangolin = {
     enable = true;
@@ -370,36 +410,67 @@ in
 
   # The module's preStart only copies config.yml; privateConfig.yml is ours.
   #
-  # The chmod keeps the frontend and the backend on the same edition. The
-  # package's ExecStart wrapper refreshes the Next.js build out of the store
-  # with `test -f .next/.nix_skip_setup || { rm -rf .next && cp -rd $out/.next . }`,
-  # and `cp -rd` preserves the store's read-only mode — so the copy it just
-  # made is undeletable, every later `rm -rf` fails with EACCES, and .next is
-  # pinned to whichever package first populated the dataDir. Switching the
-  # package (oss -> enterprise, or any version bump) then leaves dist/server.mjs
-  # running from the new store path while the dashboard is still served by the
-  # old build: no /admin/license route, "Community Edition" forever.
+  # The rest of this takes the .next lifecycle away from the package wrapper.
+  # That wrapper refreshes the Next.js build out of the store on every start:
+  #
+  #   test -f .next/.nix_skip_setup || { rm -rf .next && cp -rd $out/share/pangolin/.next .; }
+  #
+  # `cp -rd` preserves the store's read-only mode, which breaks two things.
+  #
+  # First, the copy is undeletable, so the next `rm -rf` fails with EACCES and
+  # .next stays pinned to whichever package first populated the dataDir.
+  # Switching the package (oss -> enterprise, or any version bump) then leaves
+  # dist/server.mjs running from the new store path while the dashboard is still
+  # served by the old build: no /admin/license route, "Community Edition"
+  # forever. (`public` and `node_modules` are symlinked, not copied, so they are
+  # unaffected — .next is the only one that needs this.)
+  #
+  # Second, 0555 dirs mean Next.js's image optimizer cannot mkdir .next/cache,
+  # so every image throws `unhandledRejection EACCES` and is re-optimized in
+  # memory, never evicted to disk.
+  #
+  # A postStart chmod cannot fix the second one: the unit is Type=simple, so
+  # postStart fires the moment systemd forks, while the wrapper's `cp -rd` is
+  # still running — the chmod walks a tree that is then replaced underneath it
+  # by read-only files. It also races on files that vanish mid-walk
+  # ("cannot access .../page.js.nft.json") and exits 1, which would kill
+  # preStart and take gerbil and traefik with it.
+  #
+  # So do the whole thing here instead, where nothing else is touching the tree,
+  # and leave the marker behind so the wrapper skips its own copy. Copying
+  # unconditionally from the *current* package path is what keeps the pinning
+  # bug fixed — the marker must never mean "already set up", only "not your job".
   #
   # Remove once nixpkgs stops copying the store's mode bits into the dataDir.
-  #
-  # The chmod must not fail the unit: `chmod -R` walks a tree the ExecStart
-  # wrapper may still be replacing, so it races on files that vanish mid-walk
-  # ("cannot access .../page.js.nft.json") and exits 1, killing preStart and
-  # with it gerbil and traefik. Best-effort is the correct semantic here.
   systemd.services.pangolin.preStart = lib.mkAfter ''
     cp -f /etc/pangolin/privateConfig.yml ${config.services.pangolin.dataDir}/config/privateConfig.yml
+
     if [ -d ${config.services.pangolin.dataDir}/.next ]; then
       chmod -R u+w ${config.services.pangolin.dataDir}/.next || true
     fi
+    rm -rf ${config.services.pangolin.dataDir}/.next
+    cp -rd ${config.services.pangolin.package}/share/pangolin/.next ${config.services.pangolin.dataDir}/.next
+    chmod -R u+w ${config.services.pangolin.dataDir}/.next
+    touch ${config.services.pangolin.dataDir}/.next/.nix_skip_setup
   '';
 
-  # Same read-only mode, second victim: the copy the wrapper makes on *this*
-  # start is read-only too, and Next.js's image optimizer writes .next/cache at
-  # runtime — without this it throws unhandledRejection EACCES on every image.
-  # preStart cannot cover it: the copy happens after it, inside ExecStart.
-  systemd.services.pangolin.postStart = ''
-    chmod -R u+w ${config.services.pangolin.dataDir}/.next || true
-  '';
+  # The Sunday auto-upgrade builds its own closure, and on 2026-08-30 05:09 a
+  # 1.6G node process in that build triggered a *global* OOM on this 3.8G box:
+  #
+  #   task_memcg=/system.slice/nixos-upgrade.service, task=node, anon-rss:1630052kB
+  #   nixos-upgrade.service: Failed with result 'oom-kill'
+  #
+  # The build genuinely runs inside this unit's cgroup (not nix-daemon's), so a
+  # cap here contains it. MemoryHigh throttles and reclaims first so a build that
+  # merely runs hot swaps instead of dying; MemoryMax is the hard stop that keeps
+  # the kernel's global OOM killer from ever having to choose between the build
+  # and the public edge. A capped build that fails just leaves the old
+  # generation booted and retries next Sunday — cheap, compared to taking
+  # pangolin down to finish an upgrade.
+  systemd.services.nixos-upgrade.serviceConfig = {
+    MemoryHigh = "1500M";
+    MemoryMax = "2G";
+  };
 
   environment.systemPackages = with pkgs; [
     neovim

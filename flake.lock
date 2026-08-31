@@ -1438,15 +1438,16 @@
     },
     "wannashare": {
       "locked": {
-        "lastModified": 1788159464,
-        "narHash": "sha256-x6YyTXMTsLQQ/2+ETQQBdlJOAplbxqeKQ0VkjEkZHEw=",
-        "ref": "refs/heads/main",
-        "rev": "a514b6b936bc5d118ea26e8257a4687bfd96430b",
-        "revCount": 568,
+        "lastModified": 1788140089,
+        "narHash": "sha256-rg/8zAQsKvSN9/szeePvRYmRK5oSbaQW9+dIfp/Riqs=",
+        "ref": "feat/351-receipt-scan",
+        "rev": "17541732540c575f72c2117d56c8c31bb734c12f",
+        "revCount": 579,
         "type": "git",
         "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       },
       "original": {
+        "ref": "feat/351-receipt-scan",
         "type": "git",
         "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       }

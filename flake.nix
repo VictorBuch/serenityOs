@@ -146,7 +146,9 @@
     peon-ping.url = "github:PeonPing/peon-ping";
 
     # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
-    wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
+    # TEMPORARY: homelab.wannashare.environmentFile only exists on this branch.
+    # Drop the ?ref= once it lands on main.
+    wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git?ref=feat/351-receipt-scan";
 
     # tv-learn: immersion language-learning media app (learn.victorbuch.com)
     tv-learn = {

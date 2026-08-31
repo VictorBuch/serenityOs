@@ -1438,11 +1438,11 @@
     },
     "wannashare": {
       "locked": {
-        "lastModified": 1787387606,
-        "narHash": "sha256-zK+cBbED7MT0U+gVOOAkfPvXozK3suszs7NLcENaXhk=",
+        "lastModified": 1788159464,
+        "narHash": "sha256-x6YyTXMTsLQQ/2+ETQQBdlJOAplbxqeKQ0VkjEkZHEw=",
         "ref": "refs/heads/main",
-        "rev": "e2c32c6ee136dacc4685076be1fb99531b4bd7c0",
-        "revCount": 540,
+        "rev": "a514b6b936bc5d118ea26e8257a4687bfd96430b",
+        "revCount": 568,
         "type": "git",
         "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       },

@@ -27,7 +27,7 @@ let
     # so there is nothing to clobber it.
     background-opacity = 0.85;
     alpha-blending = "native";
-    window-decoration = false;
+    window-decoration = "none";
     confirm-close-surface = false;
     # Same story as background-opacity: the disabled stylix target was also the
     # only writer of font-family, so without this ghostty silently falls back to

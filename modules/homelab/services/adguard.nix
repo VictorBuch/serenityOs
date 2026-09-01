@@ -99,6 +99,16 @@
               answer = "89.58.12.15"; # wash (Netcup VPS)
               enabled = true;
             }
+            {
+              # The portfolio is on GitHub Pages, not mal. Without this the
+              # wildcard above sends www.victorbuch.com to Caddy, which has no
+              # www vhost, so the site is broken on the LAN and fine everywhere
+              # else. Answering with the Pages hostname rather than an IP keeps
+              # it correct if GitHub renumbers.
+              domain = "www.victorbuch.com";
+              answer = "victorbuch.github.io";
+              enabled = true;
+            }
           ];
         };
         filters = [

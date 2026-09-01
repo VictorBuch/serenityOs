@@ -1,5 +1,6 @@
 {
   config,
+  options,
   pkgs,
   lib,
   ...
@@ -24,6 +25,7 @@ let
     ghostty
     figma
     obsidian
+    dolphin
   ];
 
   # Named scratchpads — tag-less by design.
@@ -50,7 +52,7 @@ let
   # Anything matching these keeps whatever tag it inherits; everything else
   # is swept to tag 2 by the catch-all rule.
   noSweep =
-    map (app: app.alternatives) (tag1 ++ scratchpads ++ [ apps.dolphin ])
+    map (app: app.alternatives) (tag1 ++ scratchpads)
     ++ dialogApps
     ++ [ "steam" ];
 
@@ -68,8 +70,6 @@ in
 
     home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
 
-    home.sessionVariables.QT_QPA_PLATFORMTHEME = lib.mkForce "qt6ct";
-
     # First declared default in this repo. Without it "open containing folder"
     # from any app was undefined, because nothing claimed inode/directory.
     # NOTE: this makes ~/.config/mimeapps.list a read-only store symlink, so
@@ -79,6 +79,12 @@ in
       enable = true;
       defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
     };
+
+    xdg.dataFile."dbus-1/services/org.freedesktop.FileManager1.service".text = ''
+      [D-BUS Service]
+      Name=org.freedesktop.FileManager1
+      Exec=${pkgs.kdePackages.dolphin}/bin/dolphin --daemon
+    '';
     xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
       [Desktop Entry]
       Type=Application
@@ -116,6 +122,10 @@ in
 
     wayland.windowManager.mango = {
       enable = true;
+
+      systemd.variables = options.wayland.windowManager.mango.systemd.variables.default ++ [
+        "QT_QPA_PLATFORMTHEME"
+      ];
 
       # Pull in noctalia's live-generated color file. noctalia writes
       # ~/.config/mango/noctalia.conf (writable, not HM-managed) from the
@@ -211,11 +221,12 @@ in
         # === Environment ===
         env = [
           "XCURSOR_SIZE,16"
+          "QT_QPA_PLATFORMTHEME,qt6ct"
         ];
 
         # === Monitors ===
         monitorrule = [
-          "name:^DP-1$,width:2560,height:1440,refresh:144,x:0,y:0,scale:1.2"
+          "name:^DP-2$,width:2560,height:1440,refresh:143.912,x:0,y:0,scale:1"
           "name:^Virtual-1$,width:2560,height:1600,refresh:60,x:0,y:0,scale:1.1"
         ];
 
@@ -238,8 +249,7 @@ in
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
           ++ map (app: "isnamedscratchpad:1,appid:${app.regex}") scratchpads
           ++ [
-          # File manager & dialog-style helpers — float on the tag in view.
-          "appid:^(${apps.dolphin.alternatives})$,isfloating:1,width:0.65,height:0.7"
+          # Dialog-style helpers — float on the tag in view.
           "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
 
           # Audio/Wine sizing
@@ -290,7 +300,7 @@ in
           "SUPER,Return,spawn_shell,${focusOrRun apps.ghostty 1}"
           "SUPER+SHIFT,Return,spawn,${apps.ghostty.command}"
           "SUPER,B,spawn_shell,${focusOrRun apps.zen 1}"
-          "SUPER,E,spawn,${apps.dolphin.command}"
+          "SUPER,E,spawn_shell,${focusOrRun apps.dolphin 1}"
           "SUPER,space,spawn,${shell} msg panel-toggle launcher"
 
           # Friction-free note capture: rofi one-liner -> today's daily note.

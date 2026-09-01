@@ -29,8 +29,6 @@
       package = inputs.mangowm.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
-    environment.sessionVariables.QT_QPA_PLATFORMTHEME = "qt6ct";
-
     xdg.portal = {
       enable = true;
 

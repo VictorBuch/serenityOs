@@ -15,7 +15,7 @@
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
-      package = pkgs.kdePackages.sddm;
+      package = lib.mkDefault pkgs.kdePackages.sddm;
       theme = "sddm-astronaut-theme";
       settings = {
         General = {

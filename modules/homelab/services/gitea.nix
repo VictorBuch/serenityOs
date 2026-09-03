@@ -160,6 +160,9 @@ in
             nodejs
             sudo
             docker
+	    gawk
+	    gnused
+	    wget
           ];
         };
       };

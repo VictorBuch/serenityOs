@@ -79,6 +79,7 @@ in
       enable = true;
       defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
     };
+    xdg.configFile."mimeapps.list".force = true;
 
     xdg.dataFile."dbus-1/services/org.freedesktop.FileManager1.service".text = ''
       [D-BUS Service]

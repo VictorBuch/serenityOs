@@ -38,7 +38,6 @@ let
       feedback = false;
     };
     gaming = {
-      ps3 = false;
     };
     neovim = {
       nixvim = false;

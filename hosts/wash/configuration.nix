@@ -83,6 +83,8 @@ in
   # Key-only SSH box with no console password — wheel must sudo without one
   security.sudo.wheelNeedsPassword = false;
 
+  nix.settings.trusted-users = [ username ];
+
   # FIDO2 SSH authorized keys -- one per YubiKey (same as mal)
   users.users."${username}".openssh.authorizedKeys.keys = [
     "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINIkyb8ktnpdCcN3S2k6gkSGqtoMeAATgUaF3mET/FP7AAAABHNzaDo= jayne@yubikey-5c-nano"

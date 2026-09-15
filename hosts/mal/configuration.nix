@@ -296,6 +296,8 @@ in
     loadModels = [ "gemma3:4b" ];
   };
 
+  nix.settings.trusted-users = [ username ];
+
   # FIDO2 SSH authorized keys -- one per YubiKey
   users.users."${username}" = {
     extraGroups = [ "docker" ];

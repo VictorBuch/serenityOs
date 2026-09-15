@@ -91,6 +91,13 @@ mkModule {
                 claude ...$args
               }
             }
+
+            def --wrapped rmal [...args] {
+              nixos-rebuild switch --flake ($env.HOME | path join "serenityOs#mal") --target-host serenity@mal --ask-sudo-password ...$args
+            }
+            def --wrapped rwash [...args] {
+              nixos-rebuild switch --flake ($env.HOME | path join "serenityOs#wash") --target-host wash@89.58.12.15 --sudo ...$args
+            }
           '';
         };
 

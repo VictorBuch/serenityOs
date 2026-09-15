@@ -29,8 +29,8 @@ in
 
     apiPort = lib.mkOption {
       type = lib.types.port;
-      default = 8092;
-      description = "Loopback port of the RomM API behind nginx (8080 belongs to glance).";
+      default = 8094;
+      description = "Loopback port of the RomM API behind nginx (8080 belongs to glance, 8090 and 8092 to hyperhdr).";
     };
 
     redisPort = lib.mkOption {

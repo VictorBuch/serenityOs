@@ -12,6 +12,90 @@ mkModule {
       ...
     }:
     {
+      home.packages = [ pkgs.starship-jj ];
+
+      xdg.configFile."starship-jj/starship-jj.toml".source =
+        (pkgs.formats.toml { }).generate "starship-jj.toml"
+          {
+            module_separator = " ";
+            reset_color = false;
+            bookmarks = {
+              search_depth = 100;
+              exclude = [ ];
+            };
+            module = [
+              {
+                type = "Symbol";
+                symbol = "󱗆";
+                color = "Yellow";
+              }
+              {
+                type = "Bookmarks";
+                separator = " ";
+                color = "Yellow";
+                behind_symbol = "⇡";
+                surround_with_quotes = false;
+              }
+              {
+                type = "Commit";
+                previous_message_symbol = "⇣";
+                max_length = 24;
+                show_previous_if_empty = false;
+                empty_text = "";
+                surround_with_quotes = false;
+              }
+              {
+                type = "State";
+                separator = " ";
+                conflict = {
+                  disabled = false;
+                  text = "(CONFLICT)";
+                  color = "Red";
+                };
+                divergent = {
+                  disabled = false;
+                  text = "(DIVERGENT)";
+                  color = "Cyan";
+                };
+                empty = {
+                  disabled = true;
+                  text = "(EMPTY)";
+                  color = "Yellow";
+                };
+                immutable = {
+                  disabled = false;
+                  text = "(IMMUTABLE)";
+                  color = "Yellow";
+                };
+                hidden = {
+                  disabled = false;
+                  text = "(HIDDEN)";
+                  color = "Yellow";
+                };
+              }
+              {
+                type = "Metrics";
+                template = "[{changed} {added}{removed}]";
+                hide_if_empty = true;
+                color = "Yellow";
+                changed_files = {
+                  prefix = "";
+                  suffix = "";
+                  color = "Cyan";
+                };
+                added_lines = {
+                  prefix = "+";
+                  suffix = "";
+                  color = "Green";
+                };
+                removed_lines = {
+                  prefix = "-";
+                  suffix = "";
+                  color = "Red";
+                };
+              }
+            ];
+          };
 
       programs.starship = {
         enable = true;
@@ -20,7 +104,7 @@ mkModule {
         settings = {
           "$schema" = "https://starship.rs/config-schema.json";
 
-          format = "$status$os $directory  $git_branch$git_status $golang$nodejs$php$python $cmd_duration$line_break$character";
+          format = "$status$os $directory  \${custom.jj}\${custom.git} $golang$nodejs$php$python $cmd_duration$line_break$character";
 
           # palette = "catppuccin_mocha"; # managed by stylix
 
@@ -57,6 +141,25 @@ mkModule {
               work = "󰦑";
               serenityOs = "󰚀";
             };
+          };
+
+          custom.jj = {
+            command = "starship-jj --ignore-working-copy starship prompt";
+            when = "starship-jj root --ignore-working-copy";
+            shell = [ "sh" ];
+            format = "$output";
+          };
+
+          custom.git = {
+            command =
+              let
+                starship = lib.getExe config.programs.starship.package;
+              in
+              "STARSHIP_SHELL= ${starship} module git_branch; STARSHIP_SHELL= ${starship} module git_status";
+            when = "! starship-jj root --ignore-working-copy";
+            require_repo = true;
+            shell = [ "sh" ];
+            format = "$output";
           };
 
           git_branch = {

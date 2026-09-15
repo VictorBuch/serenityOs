@@ -237,6 +237,37 @@ in
 
   services.traefik.environmentFiles = [ config.sops.templates."traefik-cf.env".path ];
 
+  # badger is Pangolin's auth middleware, and every router Pangolin generates
+  # references it. As a remote plugin Traefik downloads it at startup; if that
+  # fetch fails, Traefik disables plugins for the life of the process and every
+  # router is rejected -- 404 on all hosts while the dashboard stays up. That
+  # happened 2026-09-15 09:17 ("network is unreachable") despite the
+  # network-online ordering and static resolvers above, so take the network out
+  # of it: pin the source in the store and load it as a local plugin (no Go
+  # deps, so no vendoring). Keep in step with the version the pangolin module
+  # pins in experimental.plugins.badger.
+  services.traefik.staticConfigOptions.experimental = {
+    plugins = lib.mkForce { };
+    localPlugins.badger.moduleName = "github.com/fosrl/badger";
+  };
+  # Traefik resolves plugins-local/ against WorkingDirectory (its dataDir).
+  systemd.services.traefik.serviceConfig.ExecStartPre = lib.mkAfter [
+    "${pkgs.writeShellScript "traefik-badger-local" ''
+      set -eu
+      dest=plugins-local/src/github.com/fosrl/badger
+      rm -rf "$dest"
+      mkdir -p "$(dirname "$dest")"
+      cp -rT --no-preserve=mode ${
+        pkgs.fetchFromGitHub {
+          owner = "fosrl";
+          repo = "badger";
+          rev = "v1.2.0";
+          hash = "sha256-iHL2amAuiiufb9hlokRP14wHq2Ei2eQdUlYP4FmpS9o=";
+        }
+      } "$dest"
+    ''}"
+  ];
+
   # DNS-01 propagation self-check must not use the box's recursive resolvers
   # (netcup/quad9 negative-cache _acme-challenge lookups); Cloudflare's own
   # resolver sees the zone update within seconds.

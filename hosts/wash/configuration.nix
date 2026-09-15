@@ -327,7 +327,13 @@ in
   # The bouncer `requires` the register unit but is only ordered after crowdsec,
   # so on a cold boot it can hit LoadCredential before the API key file exists
   # and dies with 243/CREDENTIALS. Order it behind the unit that writes the key.
-  systemd.services.crowdsec-firewall-bouncer.after = [ "crowdsec-firewall-bouncer-register.service" ];
+  systemd.services.crowdsec-firewall-bouncer = {
+    after = [ "crowdsec-firewall-bouncer-register.service" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "15s";
+    };
+  };
 
   # The register unit shells out to the raw cscli, which reads
   # /etc/crowdsec/config.yaml — a path the module never populates, since its own

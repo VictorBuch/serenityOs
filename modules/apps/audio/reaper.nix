@@ -321,6 +321,22 @@ let
     ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
     ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
 
+    REAPER_INI="$HOME/.config/REAPER/reaper.ini"
+    [ -f "$REAPER_INI" ] || printf '[reaper]\n' > "$REAPER_INI"
+    reaper_ini_set() {
+      if ${pkgs.gnugrep}/bin/grep -q "^$1=" "$REAPER_INI"; then
+        ${pkgs.gnused}/bin/sed -i "s/^$1=.*/$1=$2/" "$REAPER_INI"
+      else
+        ${pkgs.gnused}/bin/sed -i "/^\[reaper\]$/I a $1=$2" "$REAPER_INI"
+      fi
+    }
+    reaper_ini_set linux_audio_mode 0
+    reaper_ini_set jack_midiins 0
+    reaper_ini_set jack_midiouts 0
+    for key in midiins midiouts; do
+      ${pkgs.gnugrep}/bin/grep -qE "^$key=[1-9]" "$REAPER_INI" || reaper_ini_set "$key" 3
+    done
+
     ${lib.optionalString (cfg.wineTrack == "modern") ''
       # First launch on the modern (wine 11) track: wine upgrades the prefix in place and
       # there is no way back. Refuse to start until the user has taken a backup.

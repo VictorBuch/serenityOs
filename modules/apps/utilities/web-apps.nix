@@ -27,19 +27,6 @@ mkModule {
               StartupWMClass = "ik";
             };
           };
-          reaper = {
-            name = "Reaper";
-            genericName = "Digital audio workstation";
-            exec = "reaper";
-            icon = "reaper";
-            categories = [
-              "AudioVideo"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "reaper";
-            };
-          };
           youtube = {
             name = "YouTube";
             genericName = "Video Platform";

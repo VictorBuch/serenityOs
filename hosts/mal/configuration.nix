@@ -399,6 +399,7 @@ in
     fileflows.enable = true;
     streaming.enable = true;
     rreading-glasses.enable = true;
+    romm.enable = true;
     immich.enable = true;
     qbittorrent-vpn = {
       enable = true;

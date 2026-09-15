@@ -857,6 +857,12 @@ in
                           check-url = "${local}:5001";
                         }
                         {
+                          title = "RomM";
+                          url = "https://romm.${hl.domain}";
+                          icon = "sh:romm";
+                          check-url = "${local}:8093";
+                        }
+                        {
                           title = "Ntfy";
                           url = "https://ntfy.${hl.domain}";
                           icon = "sh:ntfy";

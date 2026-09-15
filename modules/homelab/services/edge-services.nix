@@ -254,6 +254,12 @@
         https = false;
         protected = true;
       };
+      romm = {
+        # RomM ROM manager
+        url = "http://127.0.0.1:8093";
+        https = false;
+        protected = false;
+      };
       learn = {
         # tv-learn immersion language-learning app
         url = "http://127.0.0.1:3006";

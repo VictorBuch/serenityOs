@@ -306,6 +306,24 @@ let
     exec ${pkgs-stable.winetricks}/bin/winetricks "$@"
   '';
 
+  savidThemeRev = "c44a56b398e992cc232968ad43876137daf24a77";
+  savidThemes = {
+    "ReaperTips_Dark_Savid_Mod" = "sha256-ngBauk0nMaJthFI2XQzMxKJc+jhlYg8ZZM4pkkKgk8Y=";
+    "ReaperTips_Savid_Mod" = "sha256-GHt7wHV/lKMXbNlEnAC/jWsqErd2IflsASTRL4IuGOE=";
+  };
+  linkSavidThemes = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (
+      name: hash:
+      let
+        zip = pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/Savid-Got-The-Sauce/ReaperTipsTheme_Savid_Mod/${savidThemeRev}/${name}.ReaperThemeZip";
+          inherit hash;
+        };
+      in
+      ''ln -sf ${zip} "$REAPER_THEMES/${name}.ReaperThemeZip"''
+    ) savidThemes
+  );
+
   # REAPER wrapper.
   #
   # Everything wine-related lives here rather than in environment.sessionVariables:
@@ -320,6 +338,11 @@ let
     # Always recreate symlinks to handle nix store path changes after system updates
     ln -sf ${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so "$REAPER_USER_PLUGINS/reaper_reapack-x86_64.so"
     ln -sf ${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so "$REAPER_USER_PLUGINS/reaper_sws-x86_64.so"
+    ln -sf ${./reaper-dark.colortheme} "$HOME/.config/REAPER/libSwell-user.colortheme"
+
+    REAPER_THEMES="$HOME/.config/REAPER/ColorThemes"
+    mkdir -p "$REAPER_THEMES"
+    ${linkSavidThemes}
 
     REAPER_INI="$HOME/.config/REAPER/reaper.ini"
     [ -f "$REAPER_INI" ] || printf '[reaper]\n' > "$REAPER_INI"
@@ -478,6 +501,11 @@ in
       extraConfig = {
         # Enable JACK audio emulation via PipeWire
         services.pipewire.jack.enable = true;
+
+        fonts.packages = [
+          pkgs.fira-sans
+          pkgs.roboto
+        ];
 
         # Configure PAM limits for realtime audio.
         # musnix (audio-performance.enable) sets memlock/rtprio identically plus nofile;

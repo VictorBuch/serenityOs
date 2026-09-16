@@ -13,7 +13,7 @@ let
   cursor = {
     package = pkgs.colloid-cursors;
     name = "Colloid-cursors";
-    size = 16;
+    size = 24;
   };
 
   icons = {

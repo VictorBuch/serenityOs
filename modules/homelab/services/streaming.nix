@@ -34,8 +34,8 @@ in
       "d ${mediaDir}/tv 0770 ${uid} multimedia"
       "d ${mediaDir}/movies 0770 ${uid} multimedia"
       "d ${mediaDir}/books 0770 ${uid} multimedia"
-      "d ${mediaDir}/books/audio 0770 ${uid} multimedia"
-      "d ${mediaDir}/books/analog 0770 ${uid} multimedia"
+      "d ${mediaDir}/books/audiobooks 0770 ${uid} multimedia"
+      "d ${mediaDir}/books/ebooks 0770 ${uid} multimedia"
       "d ${mediaDir}/music 0770 ${uid} multimedia"
     ];
 

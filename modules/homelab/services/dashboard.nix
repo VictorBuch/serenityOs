@@ -711,6 +711,12 @@ in
                           check-url = "${local}:8787";
                         }
                         {
+                          title = "Chaptarr";
+                          url = "https://chaptarr.${hl.domain}";
+                          icon = "sh:chaptarr";
+                          check-url = "${local}:8789";
+                        }
+                        {
                           title = "Prowlarr";
                           url = "https://prowlarr.${hl.domain}";
                           icon = "sh:prowlarr";
@@ -727,6 +733,12 @@ in
                           url = "https://audiobooks.${hl.domain}";
                           icon = "sh:audiobookshelf";
                           check-url = "${local}:8004";
+                        }
+                        {
+                          title = "Calibre-Web";
+                          url = "https://ebooks.${hl.domain}";
+                          icon = "sh:calibre-web";
+                          check-url = "${local}:8083";
                         }
                         {
                           title = "Music Assistant";

@@ -132,6 +132,12 @@
         protected = true;
         private = true;
       };
+      chaptarr = {
+        url = "http://127.0.0.1:8789";
+        https = false;
+        protected = true;
+        private = true;
+      };
       prowlarr = {
         url = "http://127.0.0.1:9696";
         https = false;
@@ -203,6 +209,13 @@
         url = "http://127.0.0.1:8004";
         https = false;
         protected = false;
+      };
+      ebooks = {
+        # Calibre-Web
+        url = "http://127.0.0.1:8083";
+        https = false;
+        protected = true;
+        private = true;
       };
       git = {
         url = "http://127.0.0.1:3004";

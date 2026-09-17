@@ -3,7 +3,6 @@
   lib,
   options,
   config,
-  expiring,
   ...
 }:
 let
@@ -181,20 +180,6 @@ in
       enable = true;
       port = 28981;
       address = "0.0.0.0";
-
-      # Override package to disable all test phases
-      package =
-        expiring.onBump pkgs.paperless-ngx "3.0.5"
-          "retest paperless-ngx with its own test phases before keeping them disabled"
-          (
-            pkgs.paperless-ngx.overrideAttrs (oldAttrs: {
-              doCheck = false;
-              doInstallCheck = false;
-              checkPhase = "";
-              installCheckPhase = "";
-              pytestCheckPhase = "";
-            })
-          );
 
       dataDir = "${paperlessDir}/data";
       mediaDir = "${paperlessDir}/media";

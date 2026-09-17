@@ -2,7 +2,6 @@
   lib,
   config,
   pkgs,
-  expiring,
   ...
 }:
 
@@ -103,13 +102,6 @@ in
 
     services.home-assistant = {
       enable = true;
-      package =
-        expiring.onBump pkgs.home-assistant "2026.8.3"
-          "retest home-assistant's install check before keeping it disabled"
-          (pkgs.home-assistant.overrideAttrs (oldAttrs: {
-            doInstallCheck = false;
-          }));
-
       # Components to enable
       extraComponents = [
         # Required for onboarding

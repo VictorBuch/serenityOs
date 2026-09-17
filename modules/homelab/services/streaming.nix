@@ -59,10 +59,6 @@ in
       after = [ "mnt-pool.mount" ];
       requires = [ "mnt-pool.mount" ];
     };
-    systemd.services.readarr = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
     systemd.services.lidarr = {
       after = [ "mnt-pool.mount" ];
       requires = [ "mnt-pool.mount" ];
@@ -114,14 +110,6 @@ in
         # port 7878
         enable = true;
         package = pkgs.radarr;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      readarr = {
-        # port 8787
-        enable = true;
-        package = pkgs.readarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";

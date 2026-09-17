@@ -125,13 +125,6 @@
         protected = true;
         private = true;
       };
-      books = {
-        # Readarr
-        url = "http://127.0.0.1:8787";
-        https = false;
-        protected = true;
-        private = true;
-      };
       chaptarr = {
         url = "http://127.0.0.1:8789";
         https = false;

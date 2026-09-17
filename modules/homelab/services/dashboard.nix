@@ -705,12 +705,6 @@ in
                           check-url = "${local}:8686";
                         }
                         {
-                          title = "Readarr";
-                          url = "https://books.${hl.domain}";
-                          icon = "sh:readarr";
-                          check-url = "${local}:8787";
-                        }
-                        {
                           title = "Chaptarr";
                           url = "https://chaptarr.${hl.domain}";
                           icon = "sh:chaptarr";

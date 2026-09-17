@@ -176,11 +176,6 @@ in
         owner = "root";
         group = "root";
       };
-      "rreading-glasses/postgres-password" = {
-        mode = "0400";
-        owner = "root";
-        group = "root";
-      };
       "immich/db_password" = {
         mode = "0400";
         owner = "root";
@@ -281,6 +276,12 @@ in
       features = {
         cdi = true;
       };
+    };
+    docker.autoPrune = {
+      enable = true;
+      dates = "weekly";
+      flags = [ "--all" ];
+      allVolumes.enable = true;
     };
     docker.rootless = {
       enable = true;
@@ -400,7 +401,6 @@ in
     # Media
     fileflows.enable = true;
     streaming.enable = true;
-    rreading-glasses.enable = true;
     calibre-web.enable = true;
     chaptarr.enable = true;
     romm.enable = true;

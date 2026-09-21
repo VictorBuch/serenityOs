@@ -104,9 +104,6 @@ in
   environment.systemPackages = with pkgs; [
     networkmanager-openvpn
     openvpn
-
-    # Nocturne desktop app (own flake, Linux-only package).
-    inputs.nocturne.packages.${pkgs.stdenv.hostPlatform.system}.nocturne
   ];
 
   # Desktop environments

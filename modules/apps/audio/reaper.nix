@@ -324,6 +324,23 @@ let
     ) savidThemes
   );
 
+  reaperExtensionLibs = lib.makeLibraryPath [
+    pkgs.stdenv.cc.cc.lib
+    pkgs.gtk3
+    pkgs.glib
+    pkgs.cairo
+    pkgs.pango
+    pkgs.gdk-pixbuf
+    pkgs.harfbuzz
+    pkgs.libepoxy
+    pkgs.fontconfig
+    pkgs.freetype
+    pkgs.libpng
+    pkgs.zlib
+    pkgs.libGL
+    pkgs.libx11
+  ];
+
   # REAPER wrapper.
   #
   # Everything wine-related lives here rather than in environment.sessionVariables:
@@ -397,6 +414,8 @@ let
       export DXVK_LOG_PATH="none"
       export DXVK_STATE_CACHE_PATH="$HOME/.cache/dxvk"
     ''}
+
+    export LD_LIBRARY_PATH="${reaperExtensionLibs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
     export YABRIDGE_DEBUG_LEVEL="''${YABRIDGE_DEBUG_LEVEL:-0}"
 

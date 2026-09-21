@@ -112,6 +112,7 @@ mkModule {
         theme = {
           name = "terminal";
         };
+        onboarding = false;
         keys = {
           prefix = "ctrl+space";
           command = [

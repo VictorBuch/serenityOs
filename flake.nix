@@ -20,10 +20,6 @@
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
-    quickshell = {
-      url = "github:outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     noctalia = {
       url = "github:noctalia-dev/noctalia";
@@ -54,11 +50,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # catppuccin = {
-    #   url = "github:catppuccin/nix"; # Main branch for unstable nixpkgs compatibility
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,11 +60,13 @@
       url = "github:BirdeeHub/nix-wrapper-modules";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     # Lazy-loader + helpers. Auto-picked up by pluginsFromPrefix "plugins-".
     plugins-lze = {
       url = "github:BirdeeHub/lze";
       flake = false;
     };
+
     plugins-lzextras = {
       url = "github:BirdeeHub/lzextras";
       flake = false;
@@ -90,16 +83,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Herdr: mouse-first terminal multiplexer (tmux/zellij alternative).
-    #
-    # Pinned. ffc4e26 (2026-08-18) broke keyboard input to TUI applications
-    # running inside herdr -- ghostty on its own is unaffected, so it is herdr's
-    # terminal layer, not the emulator. 29 commits land between this rev and
-    # that one, several touching terminal input; "fix(perf): eliminate
-    # redundant terminal wake work" (#2962) is the most likely culprit.
-    # Unpin once that is confirmed fixed upstream.
     herdr = {
-      url = "github:ogulcancelik/herdr/51b7064ef0a02642393bab1d2eea0f4dbd8414d2";
+      url = "github:ogulcancelik/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -133,32 +118,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Doom Emacs built declaratively (no straight.el, no `doom sync`).
-    # Don't `follows` nixpkgs: the module uses its own pinned emacs-overlay,
-    # and upstream warns against updating its inputs. follows="" just avoids
-    # downloading a second nixpkgs (the module reads pkgs from our config).
-    nix-doom-emacs-unstraightened = {
-      url = "github:marienz/nix-doom-emacs-unstraightened";
-      inputs.nixpkgs.follows = "";
-    };
-
     # peon-ping: agent sound notifications
     peon-ping.url = "github:PeonPing/peon-ping";
 
     # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
-    # TEMPORARY: homelab.wannashare.environmentFile only exists on this branch.
-    # Drop the ?ref= once it lands on main.
-    wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git?ref=feat/351-receipt-scan";
+    wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
 
     # tv-learn: immersion language-learning media app (learn.victorbuch.com)
     tv-learn = {
       url = "git+https://git.victorbuch.com/VictorBuch/tv-learn";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Nocturne: plain-text notes + tasks + agenda (Tauri desktop app).
-    nocturne = {
-      url = "git+https://git.victorbuch.com/VictorBuch/Nocturne";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -65,3 +65,20 @@ every Compositor. Which key the slot sits on stays with the Compositor, whose
 modifier budget and tag model differ.
 _Option_: `home.desktop.apps.<name>` (`modules/nixos/desktop-environments/_home/common/apps.nix`)
 _Avoid_: launcher entry, shortcut
+
+**Service Record**:
+One endpoint a homelab service exposes: its subdomain, domain, port, scheme,
+exposure, and dashboard tile. Declared by the service's own module inside its
+enable gate, so disabling or deleting the module removes its route, tile, and
+firewall opening together. A module may declare several (streaming.nix does).
+Keyed by service name (`sonarr`), not subdomain (`shows`). Caddy, newt/Pangolin
+and the dashboard derive from Service Records; none restates a port.
+_Option_: `homelab.records.<name>`
+_Avoid_: edge service, route, vhost
+
+**Port Reservation**:
+A port a homelab module claims on mal, whether or not it is exposed. Every
+Service Record reserves its port automatically; modules reserve internal ports
+(Redis, hyperhdr's 8090/8092) by hand. Two owners of one port is an eval error.
+_Option_: `homelab.ports.<owner>`
+_Avoid_: port registry, port map

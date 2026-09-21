@@ -144,7 +144,7 @@ mkModule {
           };
 
           custom.jj = {
-            command = "starship-jj --ignore-working-copy starship prompt";
+            command = "starship-jj starship prompt";
             when = "starship-jj root --ignore-working-copy";
             shell = [ "sh" ];
             format = "$output";

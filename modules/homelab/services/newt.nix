@@ -7,18 +7,18 @@ let
   cfg = config.homelab.newt;
   hl = config.homelab;
 
-  # One Pangolin resource per edge service (see edge-services.nix — shared
-  # with caddy.nix so the tunnel path and the LAN path can never drift).
-  # Every resource targets Caddy on this host, which fans out by Host header;
-  # `protected` becomes Pangolin's SSO auth screen on the public path.
-  mkResource = domain: name: service: {
+  # One Pangolin resource per Service Record (records.nix — shared with
+  # caddy.nix so the tunnel path and the LAN path can never drift).
+  # Every public resource targets Caddy on this host, which fans out by Host
+  # header; exposure = sso becomes Pangolin's SSO auth screen.
+  mkResource = name: r: {
     inherit name;
     protocol = "http";
-    full-domain = "${name}.${domain}";
+    full-domain = "${name}.${r.domain}";
     # Caddy routes by Host and needs a matching SNI to complete the TLS
     # handshake — traefik would otherwise dial SNI-less (tunnel IP target)
     # and Caddy rejects that.
-    tls-server-name = "${name}.${domain}";
+    tls-server-name = "${name}.${r.domain}";
     targets = [
       {
         hostname = "localhost";
@@ -26,7 +26,7 @@ let
         port = 443;
       }
     ];
-    auth.sso-enabled = service.protected or false;
+    auth.sso-enabled = r.exposure == "sso";
   };
 
   # Private resources bypass Caddy and hit the service port directly —
@@ -41,21 +41,23 @@ let
   #             either way, and a plaintext upstream answering a ClientHello
   #             is exactly SSL_ERROR_RX_RECORD_TOO_LONG.
   #   scheme -> how Pangolin dials the upstream on mal.
-  urlPort = url: lib.toInt (builtins.head (builtins.match ".*:([0-9]+)" url));
-  mkPrivateResource = domain: name: service: {
+  mkPrivateResource = name: r: {
     inherit name;
     mode = "http";
     enabled = true;
     destination = "localhost";
-    destination-port = urlPort service.url;
-    scheme = if service.https or false then "https" else "http";
+    destination-port = r.port;
+    inherit (r) scheme;
     ssl = true;
-    full-domain = "${name}.${domain}";
+    full-domain = "${name}.${r.domain}";
   };
 
-  isPrivate = _: s: s.private or false;
-  publicOf = svcs: lib.filterAttrs (n: s: !(isPrivate n s)) svcs;
-  privateOf = svcs: lib.filterAttrs isPrivate svcs;
+  # Keyed by subdomain: that is the resource's name in Pangolin.
+  withExposure =
+    exposures:
+    lib.mapAttrs' (_: r: lib.nameValuePair r.subdomain r) (
+      lib.filterAttrs (_: r: lib.elem r.exposure exposures) hl.records
+    );
 in
 {
   options.homelab.newt = {
@@ -91,15 +93,11 @@ in
       environmentFile = config.sops.templates."newt.env".path;
 
       blueprint = {
-        proxy-resources =
-          lib.mapAttrs (mkResource hl.domain) (publicOf config.homelab.edge.services)
-          // lib.mapAttrs (mkResource hl.smoothlessDomain) (
-            publicOf config.homelab.edge.wannashareServices
-          );
-
-        private-resources = lib.mapAttrs (mkPrivateResource hl.domain) (
-          privateOf config.homelab.edge.services
-        );
+        proxy-resources = lib.mapAttrs mkResource (withExposure [
+          "public"
+          "sso"
+        ]);
+        private-resources = lib.mapAttrs mkPrivateResource (withExposure [ "private" ]);
       };
     };
   };

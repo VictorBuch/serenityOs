@@ -6,7 +6,7 @@
 
 let
   cfg = config.homelab.ntfy-sh;
-  domain = config.homelab.domain;
+  ntfy = config.homelab.records.ntfy;
 in
 {
   options.homelab.ntfy-sh = {
@@ -14,15 +14,25 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    services.ntfy-sh = {
-      enable = true;
-      settings = {
-        base-url = "https://ntfy.${domain}";
-        listen-http = ":8033";
-        behind-proxy = true;
+    # Push clients must reach it without an auth screen.
+    homelab.records.ntfy = {
+      port = 8033;
+      exposure = "public";
+      openFirewall = true;
+      tile = {
+        title = "Ntfy";
+        icon = "sh:ntfy";
+        group = "productivity";
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 8033 ];
+    services.ntfy-sh = {
+      enable = true;
+      settings = {
+        base-url = ntfy.url;
+        listen-http = ":${toString ntfy.port}";
+        behind-proxy = true;
+      };
+    };
   };
 }

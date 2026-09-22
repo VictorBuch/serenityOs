@@ -16,7 +16,16 @@ in
   options.homelab.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
 
   config = lib.mkIf config.homelab.uptime-kuma.enable {
-    networking.firewall.allowedTCPPorts = [ 3001 ];
+    homelab.records.uptime-kuma = {
+      subdomain = "status";
+      port = 3001;
+      openFirewall = true;
+      tile = {
+        title = "Uptime Kuma";
+        icon = "sh:uptime-kuma";
+        group = "infrastructure";
+      };
+    };
 
     systemd.tmpfiles.rules = [
       "d /home/${user.userName}/uptime-kuma 775 ${user.userName} ${user.group}"
@@ -24,7 +33,7 @@ in
 
     virtualisation.oci-containers.containers.uptime-kuma = {
       image = "louislam/uptime-kuma:latest";
-      ports = [ "3001:3001" ];
+      ports = [ "${toString config.homelab.records.uptime-kuma.port}:3001" ];
       volumes = [
         "/home/${user.userName}/uptime-kuma:/app/data/"
       ];

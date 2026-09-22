@@ -8,6 +8,7 @@
 let
   cfg = config.homelab.qbittorrent-vpn;
   user = config.user;
+  records = config.homelab.records;
 in
 
 {
@@ -23,32 +24,21 @@ in
       default = "de_berlin";
       description = "PIA locations (comma-separated, port-forward capable regions only)";
     };
-
-    ports = {
-      webui = lib.mkOption {
-        type = lib.types.port;
-        default = 8081;
-        description = "Host port for qBittorrent WebUI (mapped from pia-tun container:8080). Default 8081 because glance owns 8080.";
-      };
-      qui = lib.mkOption {
-        type = lib.types.port;
-        default = 7476;
-        description = "Host port for qui WebUI";
-      };
-      mousehole = lib.mkOption {
-        type = lib.types.port;
-        default = 5010;
-        description = "Host port for mousehole web UI (published via pia-tun since mousehole shares its netns).";
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
     {
-      networking.firewall.allowedTCPPorts =
-        [ cfg.ports.webui ]
-        ++ lib.optional cfg.qui.enable cfg.ports.qui
-        ++ lib.optional cfg.mousehole.enable cfg.ports.mousehole;
+      # Host port 8081 is mapped to pia-tun's container:8080.
+      homelab.records.qbittorrent = {
+        port = 8081;
+        exposure = "private";
+        openFirewall = true;
+        tile = {
+          title = "qBittorrent";
+          icon = "sh:qbittorrent";
+          group = "media";
+        };
+      };
 
       sops.templates."pia-tun-env" = {
         content = ''
@@ -67,11 +57,11 @@ in
         autoStart = true;
 
         # Internal port stays 8080 (matches pia-tun's PS_URL default).
-        # Host port is configurable via cfg.ports.webui.
+        # Host port comes from the qbittorrent Service Record.
         # mousehole shares this netns, so its port is published here too.
         ports =
-          [ "${toString cfg.ports.webui}:8080" ]
-          ++ lib.optional cfg.mousehole.enable "${toString cfg.ports.mousehole}:5010";
+          [ "${toString records.qbittorrent.port}:8080" ]
+          ++ lib.optional cfg.mousehole.enable "${toString records.mousehole.port}:5010";
 
         environment = {
           PIA_LOCATIONS = cfg.pia.locations;
@@ -139,6 +129,18 @@ in
     }
 
     (lib.mkIf cfg.qui.enable {
+      homelab.records.qui = {
+        port = 7476;
+        # OIDC handled by qui itself via pocket-id
+        exposure = "private";
+        openFirewall = true;
+        tile = {
+          title = "qui";
+          icon = "sh:qbittorrent";
+          group = "media";
+        };
+      };
+
       sops.secrets = {
         "qui/oidc_client_id" = {
           owner = "root";
@@ -167,7 +169,7 @@ in
         dependsOn = [ "qbittorrent" ];
 
         ports = [
-          "${toString cfg.ports.qui}:7476"
+          "${toString records.qui.port}:7476"
         ];
 
         volumes = [
@@ -181,8 +183,8 @@ in
 
           # OIDC via pocket-id. Client ID/secret come from sops via environmentFiles.
           QUI__OIDC_ENABLED = "true";
-          QUI__OIDC_ISSUER = "https://id.${config.homelab.domain}";
-          QUI__OIDC_REDIRECT_URL = "https://qui.${config.homelab.domain}/api/auth/oidc/callback";
+          QUI__OIDC_ISSUER = records.pocket-id.url;
+          QUI__OIDC_REDIRECT_URL = "${records.qui.url}/api/auth/oidc/callback";
           QUI__OIDC_DISABLE_BUILT_IN_LOGIN = "true";
         };
 
@@ -190,7 +192,7 @@ in
           config.sops.templates."qui-oidc-env".path
         ];
 
-        # qui reaches qBittorrent via host bridge -> host:cfg.ports.webui -> pia-tun -> qbittorrent
+        # qui reaches qBittorrent via host bridge -> host:records.qbittorrent.port -> pia-tun -> qbittorrent
         extraOptions = [
           "--add-host=host.docker.internal:host-gateway"
         ];
@@ -207,6 +209,18 @@ in
     })
 
     (lib.mkIf cfg.mousehole.enable {
+      # Published via pia-tun, since mousehole shares its netns.
+      homelab.records.mousehole = {
+        port = 5010;
+        exposure = "private";
+        openFirewall = true;
+        tile = {
+          title = "Mousehole";
+          icon = "sh:mousehole";
+          group = "media";
+        };
+      };
+
       # mousehole runs inside pia-tun's netns so it sees the PIA exit IP/ASN.
       # Cookie is set via mousehole's own web UI on first boot (not via sops);
       # state persists in /var/lib/mousehole across restarts.

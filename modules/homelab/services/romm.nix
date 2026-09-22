@@ -7,8 +7,11 @@
 let
   cfg = config.homelab.romm;
   hl = config.homelab;
-  domain = hl.domain;
-  vhost = "romm.${domain}";
+  romm = hl.records.romm;
+  vhost = "${romm.subdomain}.${romm.domain}";
+  # Behind nginx, loopback only
+  apiPort = 8094;
+  redisPort = 6383;
   mountPoint = "${config.services.romm.dataDir}/library";
   units = [
     "romm"
@@ -20,24 +23,6 @@ in
 {
   options.homelab.romm = {
     enable = lib.mkEnableOption "RomM ROM manager on romm.<domain>";
-
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8093;
-      description = "Loopback port of the nginx vhost serving RomM. Kept in sync with the `romm` entry in edge-services.nix.";
-    };
-
-    apiPort = lib.mkOption {
-      type = lib.types.port;
-      default = 8094;
-      description = "Loopback port of the RomM API behind nginx (8080 belongs to glance, 8090 and 8092 to hyperhdr).";
-    };
-
-    redisPort = lib.mkOption {
-      type = lib.types.port;
-      default = 6383;
-      description = "Port of RomM's dedicated Redis instance.";
-    };
 
     libraryDir = lib.mkOption {
       type = lib.types.str;
@@ -70,6 +55,20 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    homelab.records.romm = {
+      port = 8093;
+      exposure = "public";
+      tile = {
+        title = "RomM";
+        icon = "sh:romm";
+        group = "productivity";
+      };
+    };
+    homelab.ports.romm = [
+      apiPort
+      redisPort
+    ];
+
     sops.secrets = lib.mkIf cfg.igdb.enable {
       "romm/igdb_client_id" = { };
       "romm/igdb_client_secret" = { };
@@ -86,12 +85,12 @@ in
 
     services.romm = {
       enable = true;
-      port = cfg.apiPort;
-      redis.port = cfg.redisPort;
+      port = apiPort;
+      redis.port = redisPort;
       nginx.virtualHost = vhost;
       environmentFile = lib.mkIf cfg.igdb.enable config.sops.templates."romm.env".path;
       extraEnvironment = {
-        ROMM_BASE_URL = "https://${vhost}";
+        ROMM_BASE_URL = romm.url;
         ROMM_SESSION_SECURE_COOKIE = "true";
         ENABLE_SCHEDULED_RESCAN = "true";
       };
@@ -100,7 +99,7 @@ in
     services.nginx.virtualHosts.${vhost}.listen = [
       {
         addr = "127.0.0.1";
-        port = cfg.port;
+        inherit (romm) port;
       }
     ];
 

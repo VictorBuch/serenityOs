@@ -38,8 +38,17 @@ in
       "d /home/${user.userName}/mealie 0770 mealie mealie"
     ];
 
-    networking.firewall.allowedTCPPorts = [ 9000 ];
-    networking.firewall.allowedUDPPorts = [ 9000 ];
+    homelab.records.mealie = {
+      subdomain = "cooking";
+      port = 9000;
+      exposure = "public";
+      openFirewall = true;
+      tile = {
+        title = "Mealie";
+        icon = "sh:mealie";
+        group = "productivity";
+      };
+    };
 
     sops.templates."mealie" = {
       content = ''
@@ -57,7 +66,7 @@ in
     services.mealie = {
       enable = true;
       package = pkgs.mealie;
-      port = 9000;
+      inherit (config.homelab.records.mealie) port;
       listenAddress = "0.0.0.0";
       settings = {
         PUID = 998;

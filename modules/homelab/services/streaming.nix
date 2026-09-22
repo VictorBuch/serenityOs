@@ -10,6 +10,7 @@ let
   mediaDir = config.homelab.mediaDir;
   user = config.user;
   uid = toString config.user.uid;
+  records = config.homelab.records;
 in
 
 {
@@ -76,6 +77,91 @@ in
       requires = [ "mnt-pool.mount" ];
     };
 
+    homelab.records = {
+      plex = {
+        port = 32400;
+        exposure = "public";
+      };
+      jellyfin = {
+        port = 8096;
+        exposure = "public";
+        tile = {
+          title = "Jellyfin";
+          icon = "sh:jellyfin";
+          group = "media";
+        };
+      };
+      jellyseerr = {
+        subdomain = "request";
+        port = 5055;
+        exposure = "public";
+        tile = {
+          title = "Jellyseerr";
+          icon = "sh:jellyseerr";
+          group = "media";
+        };
+      };
+      sonarr = {
+        subdomain = "shows";
+        port = 8989;
+        exposure = "private";
+        tile = {
+          title = "Sonarr";
+          icon = "sh:sonarr";
+          group = "media";
+        };
+      };
+      radarr = {
+        subdomain = "movies";
+        port = 7878;
+        exposure = "private";
+        tile = {
+          title = "Radarr";
+          icon = "sh:radarr";
+          group = "media";
+        };
+      };
+      lidarr = {
+        subdomain = "music";
+        port = 8686;
+        exposure = "private";
+        tile = {
+          title = "Lidarr";
+          icon = "sh:lidarr";
+          group = "media";
+        };
+      };
+      prowlarr = {
+        port = 9696;
+        exposure = "private";
+        tile = {
+          title = "Prowlarr";
+          icon = "sh:prowlarr";
+          group = "media";
+        };
+      };
+      bazarr = {
+        subdomain = "subtitles";
+        port = 6767;
+        exposure = "private";
+        tile = {
+          title = "Bazarr";
+          icon = "sh:bazarr";
+          group = "media";
+        };
+      };
+      audiobookshelf = {
+        subdomain = "audiobooks";
+        port = 8004;
+        exposure = "public";
+        tile = {
+          title = "AudioBookshelf";
+          icon = "sh:audiobookshelf";
+          group = "media";
+        };
+      };
+    };
+
     # Streaming services
     services = {
       plex = {
@@ -85,7 +171,7 @@ in
         group = "multimedia";
       };
       jellyfin = {
-        # port 8096
+        # Listens on records.jellyfin.port; the module has no port option
         enable = true;
         package = pkgs.jellyfin;
         openFirewall = true;
@@ -93,44 +179,44 @@ in
         group = "multimedia";
       };
       seerr = {
-        # port 5055
         enable = true;
+        inherit (records.jellyseerr) port;
         package = pkgs.seerr;
         openFirewall = true;
       };
       sonarr = {
-        # port 8989
         enable = true;
+        settings.server.port = records.sonarr.port;
         package = pkgs.sonarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
       };
       radarr = {
-        # port 7878
         enable = true;
+        settings.server.port = records.radarr.port;
         package = pkgs.radarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
       };
       lidarr = {
-        #port 8686
         enable = true;
+        settings.server.port = records.lidarr.port;
         package = pkgs.lidarr;
         openFirewall = true;
         user = "${user.userName}";
         group = "multimedia";
       };
       prowlarr = {
-        # port 9696
         enable = true;
+        settings.server.port = records.prowlarr.port;
         package = pkgs.prowlarr;
         openFirewall = true;
       };
       bazarr = {
-        # port 6767
         enable = true;
+        listenPort = records.bazarr.port;
         package = pkgs.bazarr;
         openFirewall = true;
         user = "${user.userName}";
@@ -139,7 +225,7 @@ in
       audiobookshelf = {
         enable = true;
         package = pkgs.audiobookshelf;
-        port = 8004;
+        inherit (records.audiobookshelf) port;
         host = "127.0.0.1";
         openFirewall = true;
         user = "${user.userName}";
@@ -165,7 +251,7 @@ in
               api_key = {
                 _secret = config.sops.secrets."sonarr_api_key".path;
               };
-              base_url = "http://localhost:8989";
+              base_url = records.sonarr.upstream;
 
               # Sizes are MB per minute, so a 50 minute episode lands near
               # preferred * 50. `max` is a HARD REJECT, not a quality band --
@@ -254,7 +340,7 @@ in
               api_key = {
                 _secret = config.sops.secrets."radarr_api_key".path;
               };
-              base_url = "http://localhost:7878";
+              base_url = records.radarr.upstream;
 
               # trash's `movie` sizes leave preferred at 1999 MB/min --
               # effectively unbounded, so Radarr always takes the largest

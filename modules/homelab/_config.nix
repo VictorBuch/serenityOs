@@ -47,6 +47,11 @@ in
       type = lib.types.str;
       default = "192.168.0.243";
     };
+    washIp = lib.mkOption {
+      type = lib.types.str;
+      default = "89.58.12.15";
+      description = "Public IP of wash, the Netcup VPS running Pangolin";
+    };
   };
 
   config = {

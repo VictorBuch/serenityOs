@@ -8,7 +8,6 @@
 let
   cfg = config.homelab.copyparty;
   hl = config.homelab;
-  domain = hl.domain;
   filesDir = hl.filesDir;
 
   # Static half of the config: everything that is not a secret, so it can live
@@ -16,9 +15,9 @@ let
   # section header is significant.
   mainConf = pkgs.writeText "copyparty.conf" ''
     [global]
-      # Loopback only — Caddy fronts this on files.${domain} (see edge-services.nix)
+      # Loopback only — Caddy fronts this (see the copyparty Service Record)
       i: ${cfg.address}
-      p: ${toString cfg.port}
+      p: ${toString config.homelab.records.copyparty.port}
       name: ${cfg.serverName}
 
       # Index files + media tags so search and thumbnails work
@@ -36,7 +35,7 @@ let
       # shr-site pins the public origin so links are copyable as-is.
       shr: /share
       shr-who: auth
-      shr-site: https://files.${domain}/
+      shr-site: ${config.homelab.records.copyparty.url}/
 
       # Trust the closest proxy (Caddy on loopback) for the client IP. Caddy's
       # serviceBody sets X-Forwarded-For to {client_ip}, replacing rather than
@@ -83,12 +82,6 @@ in
       description = "Address to bind. Loopback by default; Caddy reverse-proxies it.";
     };
 
-    port = lib.mkOption {
-      type = lib.types.int;
-      default = 3923;
-      description = "Port copyparty listens on. Kept in sync with the `files` entry in edge-services.nix.";
-    };
-
     user = lib.mkOption {
       type = lib.types.str;
       default = "copyparty";
@@ -118,6 +111,15 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Public on purpose: copyparty authenticates users itself, and its /share
+    # links must be reachable by people who have no SSO account. A Pangolin
+    # auth screen would stop the recipient before copyparty sees the request.
+    homelab.records.copyparty = {
+      subdomain = "files";
+      port = 3923;
+      exposure = "public";
+    };
+
     # Password is rendered into a second config file at runtime so it never
     # reaches the nix store. Listed before mainConf on the command line so the
     # account exists by the time the volume's accs block references it.

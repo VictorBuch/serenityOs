@@ -25,7 +25,7 @@ let
       trap 'rm -rf "$HOME"' EXIT
 
       reconnect() {
-        curl -fsS "http://127.0.0.1:${toString cfg.port}/reconnect" >/dev/null || true
+        curl -fsS "${config.homelab.records.calibre-web.upstream}/reconnect" >/dev/null || true
       }
 
       if [ "$#" -gt 0 ]; then
@@ -62,12 +62,6 @@ in
   options.homelab.calibre-web = {
     enable = lib.mkEnableOption "Calibre-Web ebook library with OPDS for KOReader";
 
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8083;
-      description = "Port Calibre-Web listens on. Kept in sync with the `ebooks` entry in edge-services.nix.";
-    };
-
     libraryDir = lib.mkOption {
       type = lib.types.str;
       default = "${dataDir}/library";
@@ -82,13 +76,24 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    homelab.records.calibre-web = {
+      subdomain = "ebooks";
+      port = 8083;
+      exposure = "private";
+      tile = {
+        title = "Calibre-Web";
+        icon = "sh:calibre-web";
+        group = "media";
+      };
+    };
+
     services.calibre-web = {
       enable = true;
       user = user.userName;
       group = "multimedia";
       listen = {
         ip = "0.0.0.0";
-        port = cfg.port;
+        inherit (config.homelab.records.calibre-web) port;
       };
       openFirewall = true;
       options = {

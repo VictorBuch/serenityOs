@@ -14,7 +14,6 @@ let
   home = "/home/${user}";
   notesDir = "${home}/notes";
   quartzDir = "${home}/quartz";
-  # Kept in sync with the `notes` static-files vhost in services/caddy.nix.
   publishDir = "/var/www/notes";
 in
 {
@@ -24,9 +23,8 @@ in
   #   2. Hourly git auto-commit for history (you never run git by hand)
   #   3. Quartz build that publishes notes tagged `publish: true`
   #
-  # Serving is handled by Caddy (notes.<domain>), NOT nginx — see
-  # services/caddy.nix. External access rides the existing wildcard
-  # *.${domain} Cloudflare tunnel + origin cert, so nothing to add there.
+  # Serving is handled by Caddy (notes.<domain>) through the notes Service
+  # Record, NOT nginx.
   ###########################################################################
   options.homelab.notes = {
     enable = mkEnableOption "plain-Markdown notes vault (Syncthing + git history + Quartz wiki)";
@@ -53,6 +51,14 @@ in
   };
 
   config = mkIf cfg.enable {
+    homelab.records = mkIf cfg.publishWiki {
+      notes = {
+        kind = "static";
+        root = publishDir;
+        exposure = "public";
+      };
+    };
+
     #########################################################################
     # 1. Syncthing — continuous, silent sync to laptop and phone.
     #    mkDefault so the apps/utilities/syncthing.nix module wins if it is

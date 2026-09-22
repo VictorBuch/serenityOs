@@ -558,8 +558,8 @@ succeeds; check `systemctl show syncthing-init -p Result` before investigating.
 
 ### Exposure
 
-`files` is a **public** Pangolin resource (`protected = false` in
-`modules/homelab/services/edge-services.nix`). This is deliberate: copyparty
+`files` is a **public** Pangolin resource (`exposure = "public"` on the
+copyparty Service Record in `modules/homelab/services/copyparty.nix`). This is deliberate: copyparty
 authenticates users itself, and its share links (`/share/<key>`, with expiry
 and optional password) must be reachable by recipients who have no SSO account.
 An SSO wall would block them before copyparty ever saw the request.
@@ -592,7 +592,7 @@ sudo chmod -R g+rwX /mnt/pool/files
 # 3. Verify at https://files.victorbuch.com, then retire Nextcloud in
 #    hosts/mal/configuration.nix:
 #      nextcloud.enable = false;
-#    and remove the `nextcloud` entry from edge-services.nix.
+#    (its Service Record goes with the module).
 
 # 4. Only once you are certain, reclaim the space:
 sudo rm -rf /mnt/pool/nextcloud

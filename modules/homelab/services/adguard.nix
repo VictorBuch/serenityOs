@@ -5,11 +5,28 @@
   config,
   ...
 }:
-
+let
+  hl = config.homelab;
+in
 {
   options.homelab.adguard.enable = lib.mkEnableOption "Enables AdGuard Home DNS filtering service with Unbound";
 
   config = lib.mkIf config.homelab.adguard.enable {
+    homelab.records.adguard = {
+      subdomain = "ad";
+      port = 3000;
+      exposure = "private";
+      openFirewall = true;
+      tile = {
+        title = "AdGuard Home";
+        icon = "sh:adguard-home";
+        group = "infrastructure";
+      };
+    };
+    homelab.ports.adguard = [
+      53
+      5335
+    ];
 
     # Configure Unbound as the recursive DNS resolver
     services.unbound = {
@@ -47,7 +64,7 @@
     services.adguardhome = {
       enable = true;
       host = "0.0.0.0";
-      port = 3000;
+      inherit (hl.records.adguard) port;
       settings = {
         dns = {
           bind_hosts = [ "0.0.0.0" ];
@@ -86,17 +103,17 @@
           #
           # Keep BOTH entries enabled together: caddy.nix's wildcard vhost ends
           # in `handle { abort }` and there is no `pangolin` entry in
-          # edge-services.nix, so the wildcard on its own would point the
+          # the Service Records, so the wildcard on its own would point the
           # Pangolin dashboard at mal and get the connection dropped.
           rewrites = [
             {
-              domain = "*.victorbuch.com";
-              answer = "192.168.0.243";
+              domain = "*.${hl.domain}";
+              answer = hl.nixosIp;
               enabled = true;
             }
             {
-              domain = "pangolin.victorbuch.com";
-              answer = "89.58.12.15"; # wash (Netcup VPS)
+              domain = "pangolin.${hl.domain}";
+              answer = hl.washIp;
               enabled = true;
             }
             {
@@ -105,7 +122,7 @@
               # www vhost, so the site is broken on the LAN and fine everywhere
               # else. Answering with the Pages hostname rather than an IP keeps
               # it correct if GitHub renumbers.
-              domain = "www.victorbuch.com";
+              domain = "www.${hl.domain}";
               answer = "victorbuch.github.io";
               enabled = true;
             }
@@ -138,10 +155,7 @@
     };
 
     # Open firewall ports
-    networking.firewall.allowedTCPPorts = [
-      3000
-      53
-    ];
+    networking.firewall.allowedTCPPorts = [ 53 ];
     networking.firewall.allowedUDPPorts = [ 53 ];
 
     # Ensure Unbound starts before AdGuard Home

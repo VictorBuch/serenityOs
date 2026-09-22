@@ -8,8 +8,24 @@
 let
   hl = config.homelab;
   user = config.user;
-  nixosIp = hl.nixosIp;
-  local = "http://127.0.0.1";
+
+  # One monitor site per Service Record whose tile is in `group`, by title.
+  monitorSites =
+    group:
+    map
+      (
+        r:
+        {
+          inherit (r.tile) title icon;
+          inherit (r) url;
+        }
+        // lib.optionalAttrs (r.tile.check && r.port != null) { check-url = r.upstream; }
+      )
+      (
+        lib.sort (a: b: lib.toLower a.tile.title < lib.toLower b.tile.title) (
+          lib.filter (r: r.tile != null && r.tile.group == group) (lib.attrValues hl.records)
+        )
+      );
 
   # Shared template for Sonarr/Radarr/Lidarr widgets
   servarrTemplate = ''
@@ -473,6 +489,29 @@ in
       };
     })
     (lib.mkIf config.homelab.dashboard.glance.enable {
+      homelab.records.glance = {
+        subdomain = "dashboard";
+        port = 8080;
+        # Glance's Sonarr/Radarr widgets emit poster <img> tags that the
+        # *browser* loads, so they cannot point at the arrs' loopback ports.
+        # These same-origin paths proxy the covers and inject the API key
+        # server-side, which also keeps the keys out of the dashboard HTML.
+        # Paired with `cover-proxy` below; keys come from caddy.nix.
+        caddy.extraRoutes = ''
+          handle_path /covers/sonarr/* {
+            rewrite * /api/v3/mediacover{path}
+            reverse_proxy ${hl.records.sonarr.upstream} {
+              header_up X-Api-Key {env.SONARR_API_KEY}
+            }
+          }
+          handle_path /covers/radarr/* {
+            rewrite * /api/v3/mediacover{path}
+            reverse_proxy ${hl.records.radarr.upstream} {
+              header_up X-Api-Key {env.RADARR_API_KEY}
+            }
+          }
+        '';
+      };
       systemd.tmpfiles.rules = [
         "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
         "d /home/${user.userName}/dashboard/glance 0770 ${toString user.uid} ${user.group} -"
@@ -484,7 +523,7 @@ in
         settings = {
           server = {
             host = "127.0.0.1";
-            port = 8080;
+            inherit (hl.records.glance) port;
           };
           theme = {
             backgroundColor = [
@@ -527,10 +566,10 @@ in
                     {
                       type = "custom-api";
                       title = "Immich Stats";
-                      title-url = "https://photos.${hl.domain}";
+                      title-url = hl.records.immich.url;
                       cache = "5m";
                       options = {
-                        api-base-url = "http://localhost:2283";
+                        api-base-url = hl.records.immich.upstream;
                         key = {
                           _secret = "/run/credentials/glance.service/immich-api_key";
                         };
@@ -605,7 +644,7 @@ in
                     {
                       type = "custom-api";
                       title = "TV Shows";
-                      title-url = "https://shows.${hl.domain}";
+                      title-url = hl.records.sonarr.url;
                       cache = "30m";
                       options = {
                         service = "sonarr";
@@ -615,15 +654,15 @@ in
                         show-grabbed = false;
                         timezone = "-04";
                         interval = 20;
-                        api-base-url = "http://localhost:8989";
+                        api-base-url = hl.records.sonarr.upstream;
                         # Posters are fetched by the browser, not by glance, so
                         # they go through Caddy's same-origin cover proxy
-                        # instead of api-base-url (see edge-services.nix).
+                        # instead of api-base-url (see the glance record above).
                         cover-proxy = "/covers/sonarr";
                         key = {
                           _secret = "/run/credentials/glance.service/sonarr-api_key";
                         };
-                        url = "https://shows.${hl.domain}";
+                        url = hl.records.sonarr.url;
                       };
                       template = servarrTemplate;
                     }
@@ -631,7 +670,7 @@ in
                     {
                       type = "custom-api";
                       title = "Movies";
-                      title-url = "https://movies.${hl.domain}";
+                      title-url = hl.records.radarr.url;
                       cache = "30m";
                       options = {
                         service = "radarr";
@@ -641,14 +680,14 @@ in
                         show-grabbed = false;
                         timezone = "-04";
                         interval = 20;
-                        api-base-url = "http://localhost:7878";
+                        api-base-url = hl.records.radarr.upstream;
                         # Same as the Sonarr widget above — browser-loaded
                         # posters go through the same-origin cover proxy.
                         cover-proxy = "/covers/radarr";
                         key = {
                           _secret = "/run/credentials/glance.service/radarr-api_key";
                         };
-                        url = "https://movies.${hl.domain}";
+                        url = hl.records.radarr.url;
                       };
                       template = servarrTemplate;
                     }
@@ -673,208 +712,21 @@ in
                       type = "monitor";
                       cache = "1m";
                       title = "Media Stack";
-                      sites = [
-                        {
-                          title = "Jellyfin";
-                          url = "https://jellyfin.${hl.domain}";
-                          icon = "sh:jellyfin";
-                          check-url = "${local}:8096";
-                        }
-                        {
-                          title = "Jellyseerr";
-                          url = "https://request.${hl.domain}";
-                          icon = "sh:jellyseerr";
-                          check-url = "${local}:5055";
-                        }
-                        {
-                          title = "Sonarr";
-                          url = "https://shows.${hl.domain}";
-                          icon = "sh:sonarr";
-                          check-url = "${local}:8989";
-                        }
-                        {
-                          title = "Radarr";
-                          url = "https://movies.${hl.domain}";
-                          icon = "sh:radarr";
-                          check-url = "${local}:7878";
-                        }
-                        {
-                          title = "Lidarr";
-                          url = "https://music.${hl.domain}";
-                          icon = "sh:lidarr";
-                          check-url = "${local}:8686";
-                        }
-                        {
-                          title = "Chaptarr";
-                          url = "https://chaptarr.${hl.domain}";
-                          icon = "sh:chaptarr";
-                          check-url = "${local}:8789";
-                        }
-                        {
-                          title = "Prowlarr";
-                          url = "https://prowlarr.${hl.domain}";
-                          icon = "sh:prowlarr";
-                          check-url = "${local}:9696";
-                        }
-                        {
-                          title = "Bazarr";
-                          url = "https://subtitles.${hl.domain}";
-                          icon = "sh:bazarr";
-                          check-url = "${local}:6767";
-                        }
-                        {
-                          title = "AudioBookshelf";
-                          url = "https://audiobooks.${hl.domain}";
-                          icon = "sh:audiobookshelf";
-                          check-url = "${local}:8004";
-                        }
-                        {
-                          title = "Calibre-Web";
-                          url = "https://ebooks.${hl.domain}";
-                          icon = "sh:calibre-web";
-                          check-url = "${local}:8083";
-                        }
-                        {
-                          title = "Music Assistant";
-                          url = "https://ma.${hl.domain}";
-                          icon = "sh:music-assistant";
-                          check-url = "${local}:8095";
-                        }
-                        {
-                          title = "qBittorrent";
-                          url = "https://qbittorrent.${hl.domain}";
-                          icon = "sh:qbittorrent";
-                          check-url = "${local}:8081";
-                        }
-                        {
-                          title = "qui";
-                          url = "https://qui.${hl.domain}";
-                          icon = "sh:qbittorrent";
-                          check-url = "${local}:7476";
-                        }
-                        {
-                          title = "Mousehole";
-                          url = "https://mousehole.${hl.domain}";
-                          icon = "sh:mousehole";
-                          check-url = "${local}:5010";
-                        }
-                      ];
+                      sites = monitorSites "media";
                     }
                     # Infrastructure Monitor Group
                     {
                       type = "monitor";
                       cache = "1m";
                       title = "Infrastructure";
-                      sites = [
-                        {
-                          title = "Home Assistant";
-                          url = "https://home.${hl.domain}";
-                          icon = "sh:home-assistant";
-                          check-url = "http://192.168.0.243:8124/";
-                        }
-                        {
-                          title = "Uptime Kuma";
-                          url = "https://status.${hl.domain}";
-                          icon = "sh:uptime-kuma";
-                          check-url = "${local}:3001";
-                        }
-                        {
-                          title = "AdGuard Home";
-                          url = "https://ad.${hl.domain}";
-                          icon = "sh:adguard-home";
-                          check-url = "${local}:1411";
-                        }
-                        {
-                          title = "Gitea";
-                          url = "https://git.${hl.domain}/";
-                          icon = "sh:gitea";
-                          check-url = "${local}:3004";
-                        }
-                        {
-                          title = "HyperHDR";
-                          url = "http://${nixosIp}:8090";
-                          icon = "sh:hyperhdr";
-                          check-url = "${local}:8090";
-                        }
-                      ];
+                      sites = monitorSites "infrastructure";
                     }
                     # Productivity & Tools Monitor Group
                     {
                       type = "monitor";
                       cache = "1m";
                       title = "Productivity & Tools";
-                      sites = [
-                        {
-                          title = "Immich";
-                          url = "https://photos.${hl.domain}/";
-                          icon = "sh:immich";
-                          check-url = "${local}:2283";
-                        }
-                        {
-                          title = "Mealie";
-                          url = "https://cooking.${hl.domain}/";
-                          icon = "sh:mealie";
-                          check-url = "${local}:9000";
-                        }
-                        {
-                          title = "Paperless";
-                          url = "https://paperless.${hl.domain}/";
-                          icon = "sh:paperless-ngx";
-                        }
-                        {
-                          title = "Wallos";
-                          url = "https://subscriptions.${hl.domain}";
-                          icon = "sh:wallos";
-                          check-url = "${local}:8282";
-                        }
-                        {
-                          title = "It-Tools";
-                          url = "https://tools.${hl.domain}";
-                          icon = "sh:it-tools";
-                        }
-                        {
-                          title = "Crafty";
-                          url = "https://crafty.${hl.domain}";
-                          icon = "sh:minecraft";
-                          check-url = "https://127.0.0.1:8443";
-                        }
-                        {
-                          title = "InvoicePlane";
-                          url = "https://invoice.${hl.domain}";
-                          icon = "sh:invoice-ninja";
-                          check-url = "${local}:8380";
-                        }
-                        {
-                          title = "FileFlows";
-                          url = "https://fileflows.${hl.domain}";
-                          icon = "sh:fileflows";
-                          check-url = "${local}:19200";
-                        }
-                        {
-                          title = "Reactive Resume";
-                          url = "https://cv.${hl.domain}";
-                          icon = "sh:reactive-resume";
-                          check-url = "${local}:3200";
-                        }
-                        {
-                          title = "Lute";
-                          url = "https://lute.${hl.domain}";
-                          icon = "sh:book-open";
-                          check-url = "${local}:5001";
-                        }
-                        {
-                          title = "RomM";
-                          url = "https://romm.${hl.domain}";
-                          icon = "sh:romm";
-                          check-url = "${local}:8093";
-                        }
-                        {
-                          title = "Ntfy";
-                          url = "https://ntfy.${hl.domain}";
-                          icon = "sh:ntfy";
-                          check-url = "${local}:8033";
-                        }
-                      ];
+                      sites = monitorSites "productivity";
                     }
                     # Bookmarks
                     {

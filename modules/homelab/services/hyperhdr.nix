@@ -88,9 +88,21 @@ in
       hyperhdr
     ];
 
-    # Open firewall ports
+    homelab.records.hyperhdr = {
+      port = 8090;
+      exposure = "lan";
+      tile = {
+        title = "HyperHDR";
+        icon = "sh:hyperhdr";
+        group = "infrastructure";
+      };
+    };
+    homelab.ports.hyperhdr = [
+      8092
+      19444
+      19445
+    ];
     networking.firewall.allowedTCPPorts = [
-      8090 # Web interface
       19444 # JSON API for Home Assistant integration
       19445
     ];

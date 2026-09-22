@@ -9,7 +9,6 @@
 let
   user = config.user;
   uid = toString config.user.uid;
-  domain = config.homelab.domain;
   stateDir = "/var/lib/invoice-ninja";
 
   # Nginx config files for the Invoice Ninja sidecar
@@ -70,7 +69,17 @@ in
   options.homelab.invoice-ninja.enable = lib.mkEnableOption "Enables the Invoice Ninja invoicing application";
 
   config = lib.mkIf config.homelab.invoice-ninja.enable {
-    networking.firewall.allowedTCPPorts = [ 8380 ];
+    homelab.records.invoice-ninja = {
+      subdomain = "invoice";
+      port = 8380;
+      exposure = "public";
+      openFirewall = true;
+      tile = {
+        title = "InvoicePlane";
+        icon = "sh:invoice-ninja";
+        group = "productivity";
+      };
+    };
 
     systemd.tmpfiles.rules = [
       "d ${stateDir} 755 root root"
@@ -221,7 +230,7 @@ in
         "${stateDir}/storage:/var/www/html/storage"
       ];
       environment = {
-        APP_URL = "https://invoice.${domain}";
+        APP_URL = config.homelab.records.invoice-ninja.url;
         APP_ENV = "production";
         APP_DEBUG = "false";
         REQUIRE_HTTPS = "false";
@@ -265,7 +274,7 @@ in
     # --- Nginx Sidecar ---
     virtualisation.oci-containers.containers.invoiceninja-nginx = {
       image = "nginx:alpine";
-      ports = [ "8380:80" ];
+      ports = [ "${toString config.homelab.records.invoice-ninja.port}:80" ];
       volumes = [
         "${stateDir}/nginx:/etc/nginx/conf.d:ro"
         "${stateDir}/public:/var/www/html/public:ro"

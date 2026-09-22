@@ -9,7 +9,6 @@ with lib;
 
 let
   cfg = config.homelab.home-assistant;
-  domain = config.homelab.domain;
   haConfigDir = config.services.home-assistant.configDir;
 
   # Idempotent repair of serenity's ACL on the HA state dir. Something (still
@@ -30,7 +29,7 @@ let
   # before repairing, so a startup-time chmod has already happened.
   aclStartPost = pkgs.writeShellScript "hass-acl-startpost" ''
     ${pkgs.coreutils}/bin/timeout 120 ${pkgs.bash}/bin/bash -c \
-      'until ${pkgs.curl}/bin/curl -sf -o /dev/null http://127.0.0.1:8124/manifest.json; do ${pkgs.coreutils}/bin/sleep 2; done' || true
+      'until ${pkgs.curl}/bin/curl -sf -o /dev/null ${config.homelab.records.home-assistant.upstream}/manifest.json; do ${pkgs.coreutils}/bin/sleep 2; done' || true
     exec ${aclRepair}
   '';
 in
@@ -161,7 +160,7 @@ in
 
         # HTTP configuration for Nabu Casa remote access
         http = {
-          server_port = 8124;
+          server_port = config.homelab.records.home-assistant.port;
           use_x_forwarded_for = true;
           trusted_proxies = [
             "127.0.0.1"
@@ -200,9 +199,18 @@ in
       };
     };
 
-    # Open firewall ports
-    networking.firewall.allowedTCPPorts = [
-      8124 # Home Assistant web interface
-    ];
+    # Own auth; the companion app and API need direct access.
+    # 8123 belongs to crafty.
+    homelab.records.home-assistant = {
+      subdomain = "home";
+      port = 8124;
+      exposure = "public";
+      openFirewall = true;
+      tile = {
+        title = "Home Assistant";
+        icon = "sh:home-assistant";
+        group = "infrastructure";
+      };
+    };
   };
 }

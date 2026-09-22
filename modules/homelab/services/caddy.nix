@@ -10,13 +10,14 @@ let
   domain = hl.domain;
   smoothlessDomain = hl.smoothlessDomain;
 
-  # Service definitions live in edge-services.nix — shared with newt.nix so
-  # the LAN path (Caddy) and tunnel path (Pangolin resources) never drift.
-  edge = config.homelab.edge;
+  # Every routed Service Record (records.nix), keyed by subdomain per domain.
+  recordsOn =
+    hostDomain:
+    lib.mapAttrs' (_: r: lib.nameValuePair r.subdomain r) (
+      lib.filterAttrs (_: r: r.exposure != "lan" && r.domain == hostDomain) hl.records
+    );
 
   # --- HELPER FUNCTIONS ---
-  # Request-handling body for one service, independent of domain/TLS.
-  #
   # Client IP: use {client_ip}, never {remote_host}. newt targets Caddy at
   # localhost:443, so {remote_host} is 127.0.0.1 for every tunnelled request —
   # it would stamp the loopback address onto all internet traffic and defeat
@@ -25,15 +26,27 @@ let
   # `trusted_proxies` allowlist below, so it yields the real client from the
   # tunnel and the peer address for LAN-direct requests, and a LAN client
   # cannot forge it because its own address is not in the allowlist.
+  proxy = r: transport: ''
+    reverse_proxy ${r.upstream} {
+      header_up Host ${r.caddy.upstreamHost}
+      ${lib.optionalString (r.caddy.upstreamOrigin != null) "header_up Origin ${r.caddy.upstreamOrigin}"}
+      header_up X-Real-IP {client_ip}
+      header_up X-Forwarded-For {client_ip}
+      header_up X-Forwarded-Proto {scheme}
+      ${lib.optionalString (transport != "") "transport http {\n    ${transport}\n  }"}
+    }
+  '';
+
+  # Request-handling body for one record, independent of domain/TLS.
   serviceBody =
-    service:
-    if service.isStaticFiles or false then
+    r:
+    if r.kind == "static" then
       ''
         # Serve static files
-        root * ${service.staticPath}
+        root * ${r.root}
         file_server
       ''
-    else if service.isPocketBase or false then
+    else if r.kind == "pocketbase" then
       ''
         request_body {
           max_size 10M
@@ -41,85 +54,50 @@ let
 
         # Route /api/* directly to backend
         handle /api/* {
-          reverse_proxy ${service.url} {
-            header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {client_ip}
-            header_up X-Forwarded-For {client_ip}
-            header_up X-Forwarded-Proto {scheme}
-            transport http {
-              read_timeout 360s
-            }
-          }
+          ${proxy r "read_timeout 360s"}
         }
 
         # Route /_/* directly to backend (PocketBase admin UI)
         handle /_/* {
-          reverse_proxy ${service.url} {
-            header_up Host ${service.upstreamHost or "{host}"}
-            header_up X-Real-IP {client_ip}
-            header_up X-Forwarded-For {client_ip}
-            header_up X-Forwarded-Proto {scheme}
-            transport http {
-              read_timeout 360s
-            }
-          }
+          ${proxy r "read_timeout 360s"}
         }
 
         # Redirect root to /_/
         redir / /_/ permanent
       ''
-    else if service.https then
-      ''
-        reverse_proxy ${service.url} {
-          header_up Host ${service.upstreamHost or "{host}"}
-          header_up X-Real-IP {client_ip}
-          header_up X-Forwarded-For {client_ip}
-          header_up X-Forwarded-Proto {scheme}
-          transport http {
-            tls_insecure_skip_verify
-          }
-        }
-      ''
     else
-      ''
-        reverse_proxy ${service.url} {
-          header_up Host ${service.upstreamHost or "{host}"}
-          ${lib.optionalString (service ? upstreamOrigin) "header_up Origin ${service.upstreamOrigin}"}
-          header_up X-Real-IP {client_ip}
-          header_up X-Forwarded-For {client_ip}
-          header_up X-Forwarded-Proto {scheme}
-        }
-      '';
+      proxy r (lib.optionalString (r.scheme == "https") "tls_insecure_skip_verify");
 
-  # One named matcher + handle block per service inside a wildcard vhost.
-  # `extraRoutes` is raw Caddyfile placed ahead of the service's own body, so a
-  # service can claim specific paths before the catch-all proxy. The body then
-  # moves into a nested `handle` so a request can only ever take one of the two.
+  # One named matcher + handle block per record inside a wildcard vhost.
+  # `caddy.extraRoutes` is raw Caddyfile placed ahead of the record's own body,
+  # so a service can claim specific paths before the catch-all proxy. The body
+  # then moves into a nested `handle` so a request can only ever take one of
+  # the two.
   mkHandle =
-    hostDomain: name: service:
+    hostDomain: subdomain: r:
     let
       body =
-        if service ? extraRoutes then
+        if r.caddy.extraRoutes != null then
           ''
-            ${service.extraRoutes}
+            ${r.caddy.extraRoutes}
             handle {
-              ${serviceBody service}
+              ${serviceBody r}
             }
           ''
         else
-          serviceBody service;
+          serviceBody r;
     in
     ''
-      @${name} host ${name}.${hostDomain}
-      handle @${name} {
+      @${subdomain} host ${subdomain}.${hostDomain}
+      handle @${subdomain} {
         ${body}
       }
     '';
 
-  mkWildcardHost = hostDomain: svcs: {
+  mkWildcardHost = hostDomain: {
     useACMEHost = hostDomain;
     extraConfig =
-      lib.concatStrings (lib.mapAttrsToList (mkHandle hostDomain) svcs)
+      lib.concatStrings (lib.mapAttrsToList (mkHandle hostDomain) (recordsOn hostDomain))
       + ''
         # Unknown subdomain: close the connection
         handle {
@@ -144,7 +122,7 @@ in
     };
 
     # Sonarr/Radarr keys for the dashboard cover-proxy routes (see the
-    # `dashboard` entry in edge-services.nix). Caddy reads them as
+    # `glance` record in dashboard.nix). Caddy reads them as
     # {env.SONARR_API_KEY} / {env.RADARR_API_KEY} so they stay out of the Nix
     # store and out of the dashboard HTML.
     sops.templates."caddy.env" = {
@@ -197,8 +175,8 @@ in
         }
       '';
       virtualHosts = {
-        "*.${domain}" = mkWildcardHost domain edge.services;
-        "*.${smoothlessDomain}" = mkWildcardHost smoothlessDomain edge.wannashareServices;
+        "*.${domain}" = mkWildcardHost domain;
+        "*.${smoothlessDomain}" = mkWildcardHost smoothlessDomain;
       };
     };
   };

@@ -7,7 +7,8 @@
 }:
 
 let
-  domain = config.homelab.domain;
+  gitea = config.homelab.records.gitea;
+  fqdn = "${gitea.subdomain}.${gitea.domain}";
   user = config.user;
   giteaDir = "/var/lib/gitea";
   giteaUser = "gitea";
@@ -18,6 +19,18 @@ in
   options.homelab.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
   config = lib.mkIf config.homelab.gitea.enable {
+    homelab.records.gitea = {
+      subdomain = "git";
+      port = 3004;
+      exposure = "public";
+      tile = {
+        title = "Gitea";
+        icon = "sh:gitea";
+        group = "infrastructure";
+      };
+    };
+    homelab.ports.gitea = [ 2222 ];
+
 
     #catppuccin.gitea.enable = true;
 
@@ -60,14 +73,14 @@ in
           SHOW_FOOTER_POWERED_BY = false;
         };
         server = {
-          DOMAIN = "git.${domain}";
-          ROOT_URL = "https://git.${domain}/";
+          DOMAIN = fqdn;
+          ROOT_URL = "${gitea.url}/";
           HTTP_ADDR = "127.0.0.1";
-          HTTP_PORT = 3004;
+          HTTP_PORT = gitea.port;
 
           # SSH configuration
           DISABLE_SSH = false;
-          SSH_DOMAIN = "git.${domain}";
+          SSH_DOMAIN = fqdn;
           SSH_PORT = 2222;
           START_SSH_SERVER = true;
           SSH_LISTEN_HOST = "0.0.0.0";
@@ -123,7 +136,7 @@ in
         docker = {
           enable = true;
           name = "docker-runner";
-          url = "https://git.${domain}";
+          url = gitea.url;
           # Token needs to be generated in Gitea UI after first setup
           # Go to Site Administration -> Actions -> Runners -> Create new runner
           tokenFile = config.sops.templates."gitea-runner-env".path;
@@ -142,7 +155,7 @@ in
         nix = {
           enable = true;
           name = "nix-runner";
-          url = "https://git.${domain}";
+          url = gitea.url;
           tokenFile = config.sops.templates."gitea-runner-env".path;
           labels = [
             "nix:host"

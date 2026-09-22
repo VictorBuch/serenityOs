@@ -7,7 +7,6 @@
 }:
 let
   immichDir = config.homelab.immichDir;
-  domain = config.homelab.domain;
   user = config.user;
   uid = toString config.user.uid; # serenity user UID
   gid = "immich"; # immich group
@@ -16,6 +15,19 @@ in
   options.homelab.immich.enable = lib.mkEnableOption "Enables Immich photo backup service";
 
   config = lib.mkIf config.homelab.immich.enable {
+    # Mobile app talks to the API directly; Immich has its own auth.
+    homelab.records.immich = {
+      subdomain = "photos";
+      port = 2283;
+      exposure = "public";
+      tile = {
+        title = "Immich";
+        icon = "sh:immich";
+        group = "productivity";
+      };
+    };
+    homelab.ports.immich = [ 6381 ];
+
     users = {
       # Create dedicated immich group
       groups.immich = {
@@ -140,6 +152,7 @@ in
       user = "immich";
       group = "immich";
       host = "0.0.0.0"; # Allow external access
+      inherit (config.homelab.records.immich) port;
       openFirewall = true;
       machine-learning.enable = true;
 
@@ -154,7 +167,7 @@ in
       mediaLocation = immichDir;
 
       settings = {
-        server.externalDomain = "https://photos.${domain}"; # Domain for publicly shared links, including http(s)://
+        server.externalDomain = config.homelab.records.immich.url; # Domain for publicly shared links, including http(s)://
         newVersionCheck.enabled = true; # Check for new versions. This feature relies on periodic communication with github.com.
 	ffmpeg = {
           accel = "nvenc";

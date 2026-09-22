@@ -9,24 +9,11 @@
 let
   cfg = config.homelab.pocket-id;
   hl = config.homelab;
-  domain = hl.domain;
 in
 
 {
   options.homelab.pocket-id = {
     enable = lib.mkEnableOption "Enables Pocket ID authentication service";
-
-    appUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "https://id.${domain}";
-      description = "The URL where Pocket ID will be accessible (must be HTTPS)";
-    };
-
-    port = lib.mkOption {
-      type = lib.types.int;
-      default = 1411;
-      description = "Port for Pocket ID service";
-    };
 
     trustProxy = lib.mkOption {
       type = lib.types.bool;
@@ -43,8 +30,14 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    # Firewall rules - allow access to Pocket ID service
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    # The OIDC IdP itself: must never sit behind an auth screen or
+    # Pangolin/qui/fileflows logins deadlock.
+    homelab.records.pocket-id = {
+      subdomain = "id";
+      port = 1411;
+      exposure = "public";
+      openFirewall = true;
+    };
 
     # Create data directory for Pocket ID
     systemd.tmpfiles.rules = [
@@ -62,9 +55,9 @@ in
       environmentFile = config.sops.templates."pocket-id-env".path;
 
       settings = {
-        APP_URL = cfg.appUrl;
+        APP_URL = hl.records.pocket-id.url;
         TRUST_PROXY = true;
-        PORT = 1411;
+        PORT = toString hl.records.pocket-id.port;
         TZ = "Europe/Copenhagen";
         # Analytics disabled by default for privacy
         ANALYTICS_DISABLED = true;

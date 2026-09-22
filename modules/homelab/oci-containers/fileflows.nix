@@ -7,7 +7,6 @@
 
 let
   mediaDir = config.homelab.mediaDir;
-  domain = config.homelab.domain;
   user = config.user;
   uid = toString config.user.uid;
 in
@@ -19,6 +18,17 @@ in
   };
 
   config = lib.mkIf config.homelab.fileflows.enable {
+    homelab.records.fileflows = {
+      port = 19200;
+      # OIDC handled by FileFlows itself
+      exposure = "private";
+      tile = {
+        title = "FileFlows";
+        icon = "sh:fileflows";
+        group = "productivity";
+      };
+    };
+
 
     # Persistent data directories
     systemd.tmpfiles.rules = [
@@ -38,7 +48,7 @@ in
       # on 0.0.0.0 would also bypass the NixOS firewall entirely, since docker
       # installs its own nat/DOCKER-USER rules.
       ports = [
-        "127.0.0.1:19200:5000" # Web UI
+        "127.0.0.1:${toString config.homelab.records.fileflows.port}:5000" # Web UI
       ];
 
       environment = {
@@ -47,8 +57,8 @@ in
         "PGID" = "994"; # multimedia group
         "NVIDIA_DRIVER_CAPABILITIES" = "compute,video,utility";
         "NVIDIA_VISIBLE_DEVICES" = "all";
-        "OidcAuthority" = "https://id.${domain}";
-        "OidcCallbackAddress" = "https://fileflows.${domain}";
+        "OidcAuthority" = config.homelab.records.pocket-id.url;
+        "OidcCallbackAddress" = config.homelab.records.fileflows.url;
       };
 
       environmentFiles = [

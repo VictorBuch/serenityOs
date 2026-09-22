@@ -9,7 +9,7 @@ let
   dataDir = "/var/lib/lute";
   user = "lute";
   group = "lute";
-  port = 5001;
+  port = config.homelab.records.lute.port;
   configFile = pkgs.writeText "lute-config.yml" ''
     ENV: prod
     DBNAME: lute.db
@@ -32,7 +32,15 @@ in
       "d ${dataDir} 0750 ${user} ${group}"
     ];
 
-    networking.firewall.allowedTCPPorts = [ port ];
+    homelab.records.lute = {
+      port = 5001;
+      openFirewall = true;
+      tile = {
+        title = "Lute";
+        icon = "sh:book-open";
+        group = "productivity";
+      };
+    };
 
     systemd.services.lute = {
       description = "Lute v3 Language Learning";

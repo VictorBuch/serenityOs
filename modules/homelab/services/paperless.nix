@@ -8,6 +8,7 @@
 let
   paperlessDir = config.homelab.paperlessDir;
   domain = config.homelab.domain;
+  paperless = config.homelab.records.paperless;
   user = config.user;
 in
 {
@@ -159,7 +160,17 @@ in
       wants = [ "paperless-scheduler.service" ];
     };
 
-    networking.firewall.allowedTCPPorts = [ 28981 ];
+    homelab.records.paperless = {
+      port = 28981;
+      openFirewall = true;
+      tile = {
+        title = "Paperless";
+        icon = "sh:paperless-ngx";
+        group = "productivity";
+        check = false;
+      };
+    };
+    homelab.ports.paperless = [ 6382 ];
 
     # SOPS secrets for paperless
     sops.templates."paperless-env" = {
@@ -178,7 +189,7 @@ in
 
     services.paperless = {
       enable = true;
-      port = 28981;
+      inherit (paperless) port;
       address = "0.0.0.0";
 
       dataDir = "${paperlessDir}/data";
@@ -202,9 +213,9 @@ in
         PAPERLESS_OCR_SKIP_ARCHIVE_FILE = "with_text"; # Skip OCR for files that already have text
 
         # URL settings
-        PAPERLESS_URL = "https://paperless.${domain}";
-        PAPERLESS_ALLOWED_HOSTS = "paperless.${domain},${config.homelab.nixosIp}";
-        PAPERLESS_CORS_ALLOWED_HOSTS = "https://paperless.${domain}";
+        PAPERLESS_URL = paperless.url;
+        PAPERLESS_ALLOWED_HOSTS = "${paperless.subdomain}.${paperless.domain},${config.homelab.nixosIp}";
+        PAPERLESS_CORS_ALLOWED_HOSTS = paperless.url;
 
         # Features
         PAPERLESS_TIME_ZONE = config.time.timeZone;

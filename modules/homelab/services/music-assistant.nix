@@ -41,6 +41,15 @@ in
     # services.music-assistant.openFirewall only opens the stream port (8097)
     # and the airplay/squeezelite UDP ports — not the web/API port. LAN clients
     # (desktop app, mobile app) need 8095 reachable directly.
-    networking.firewall.allowedTCPPorts = [ 8095 ];
+    homelab.records.music-assistant = {
+      subdomain = "ma";
+      port = 8095;
+      openFirewall = true;
+      tile = {
+        title = "Music Assistant";
+        icon = "sh:music-assistant";
+        group = "media";
+      };
+    };
   };
 }

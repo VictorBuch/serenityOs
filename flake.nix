@@ -282,6 +282,13 @@
       # Export overlay
       overlays.default = overlayWithInputs;
 
+      # Evaluating mal's system forces its assertions, among them the Service
+      # Record and Port Reservation invariants (modules/homelab/records.nix).
+      # Only the eval runs; the system itself is not built.
+      checks.x86_64-linux.mal-records = (pkgsFor "x86_64-linux").writeText "mal-records" (
+        builtins.unsafeDiscardStringContext self.nixosConfigurations.mal.config.system.build.toplevel.drvPath
+      );
+
       nixosConfigurations = builtins.listToAttrs (
         map (host: {
           inherit (host) name;

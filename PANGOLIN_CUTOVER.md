@@ -109,19 +109,20 @@ Pangolin resources exist and DNS is flipped. Do Phases 2–5 in one evening.
 
 ## Phase 5 — Full resource inventory (declarative, already in repo)
 
-Resources are **generated from `modules/homelab/services/edge-services.nix`**
-via the newt blueprint (`modules/homelab/services/newt.nix`) — the same list
-that drives Caddy, so LAN path and tunnel path cannot drift. 39 resources,
-all targeting `localhost:443` https on site "mal"; `protected = true` maps
-to Pangolin's SSO auth screen.
+Resources are **generated from the Service Records** (`homelab.records`, see
+`modules/homelab/records.nix`) via the newt blueprint
+(`modules/homelab/services/newt.nix`) — the same records that drive Caddy, so
+LAN path and tunnel path cannot drift. Public resources target
+`localhost:443` https on site "mal"; `exposure = "sso"` maps to Pangolin's
+SSO auth screen.
 
 They are pushed when newt connects (the Phase 2 rebuild). In this phase just
 **verify in the Pangolin UI** that all 39 appear with the right auth flags,
 and that they coexist cleanly with the two hand-made Phase 3 resources
 (`id`, `status`) — delete the hand-made ones if the blueprint duplicated them.
 
-Adding a service later: one entry in edge-services.nix, rebuild mal. Done —
-both paths.
+Adding a service later: declare its Service Record in its own module, rebuild
+mal. Done — both paths.
 
 Not recreated: `auth.victorbuch.com` (TinyAuth is gone).
 

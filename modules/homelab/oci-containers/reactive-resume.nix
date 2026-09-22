@@ -11,7 +11,6 @@
 let
   cfg = config.homelab.reactive-resume;
   hl = config.homelab;
-  domain = hl.domain;
 
   # Browserless token for printer service
   browserlessToken = "rxresume-printer-token";
@@ -20,21 +19,20 @@ in
 {
   options.homelab.reactive-resume = {
     enable = lib.mkEnableOption "Enables Reactive Resume - open-source resume builder";
-
-    port = lib.mkOption {
-      type = lib.types.int;
-      default = 3200;
-      description = "Host port for Reactive Resume web UI";
-    };
-
-    appUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "https://cv.${domain}";
-      description = "Public URL where Reactive Resume will be accessible";
-    };
   };
 
   config = lib.mkIf cfg.enable {
+    homelab.records.reactive-resume = {
+      subdomain = "cv";
+      port = 3200;
+      exposure = "public";
+      tile = {
+        title = "Reactive Resume";
+        icon = "sh:reactive-resume";
+        group = "productivity";
+      };
+    };
+
 
     # Create data directories
     systemd.tmpfiles.rules = [
@@ -225,7 +223,7 @@ in
       ];
 
       ports = [
-        "${toString cfg.port}:3000"
+        "${toString hl.records.reactive-resume.port}:3000"
       ];
 
       volumes = [
@@ -240,7 +238,7 @@ in
         # Server
         "TZ" = "Europe/Copenhagen";
         "NODE_ENV" = "production";
-        "APP_URL" = cfg.appUrl;
+        "APP_URL" = hl.records.reactive-resume.url;
         "PRINTER_APP_URL" = "http://reactive-resume:3000";
         # Printer
         "PRINTER_ENDPOINT" = "ws://rxresume-browserless:3000?token=${browserlessToken}";

@@ -19,10 +19,19 @@ in
   };
 
   config = lib.mkIf config.homelab.crafty.enable {
-    networking.firewall.allowedTCPPorts = [
-      8443
-      8123
-    ];
+    homelab.records.crafty = {
+      port = 8443;
+      scheme = "https";
+      exposure = "private";
+      openFirewall = true;
+      tile = {
+        title = "Crafty";
+        icon = "sh:minecraft";
+        group = "productivity";
+      };
+    };
+    homelab.ports.crafty = [ 8123 ];
+    networking.firewall.allowedTCPPorts = [ 8123 ];
     networking.firewall.allowedTCPPortRanges = [
       {
         from = 25500;
@@ -47,7 +56,7 @@ in
       };
       user = "${uid}:${user.group}";
       ports = [
-        "8443:8443"
+        "${toString config.homelab.records.crafty.port}:8443"
         "8123:8123"
         "25500-25600:25500-25600"
       ];

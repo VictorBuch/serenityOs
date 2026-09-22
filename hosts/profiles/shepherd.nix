@@ -52,6 +52,24 @@
   };
 
   desktop.compositor.niri.enable = true;
+  desktop.session = {
+    fileManager = "nautilus";
+    outputs = [
+      {
+        name = "Virtual-1";
+        width = 2560;
+        height = 1600;
+        refresh = 59.972;
+        scale = 1.1;
+      }
+    ];
+    autostartApps = [
+      "zen"
+      "ghostty"
+      "slack"
+      "discord"
+    ];
+  };
 
   hardware.graphics.enable = true;
   services.xserver = {

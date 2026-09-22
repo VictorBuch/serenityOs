@@ -42,6 +42,23 @@ in
   # Desktop environments
   desktop = {
     compositor.niri.enable = true;
+    session = {
+      fileManager = "nautilus";
+      outputs = [
+        {
+          name = "DP-1";
+          width = 2560;
+          height = 1440;
+          refresh = 119.998;
+        }
+      ];
+      autostartApps = [
+        "zen"
+        "ghostty"
+        "slack"
+        "discord"
+      ];
+    };
     environment.gnome.enable = true;
   };
 

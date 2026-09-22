@@ -12,15 +12,14 @@ let
     runtimeInputs = with pkgs; [ jq ];
     text = ''
       if [ $# -lt 2 ]; then
-          echo "Usage: focus-or-run <app-id> <command> [args...]" >&2
+          echo "Usage: focus-or-run <app-id-regex> <command> [args...]" >&2
           exit 1
       fi
 
-      app_id="$1"
+      app_id_regex="$1"
       shift
 
-      # Find window info using niri IPC
-      window_info=$(niri msg --json windows | jq -r ".[] | select(.app_id == \"$app_id\") | {id: .id, workspace_id: .workspace_id} | @json" | head -n1)
+      window_info=$(niri msg --json windows | jq -r --arg re "$app_id_regex" '.[] | select(.app_id // "" | test($re)) | {id: .id, workspace_id: .workspace_id} | @json' | head -n1)
 
       if [ -n "$window_info" ]; then
           workspace_id=$(echo "$window_info" | jq -r '.workspace_id')

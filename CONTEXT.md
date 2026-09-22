@@ -7,9 +7,11 @@ the option paths are the only names hosts should use.
 ## Language
 
 **Compositor**:
-The Wayland (or X11) program that owns windows, outputs, and input. `mango`,
-`niri`, and `hyprland` are compositors. It draws no bar, launcher, or lock
-screen of its own.
+The Wayland (or X11) program that owns windows, outputs, and input. `mango` and
+`niri` are compositors. It draws no bar, launcher, or lock screen of its own,
+and it states no Session facts: it is an adapter that renders the Session's
+outputs, input, autostart and Window Rules in its own syntax, and keeps only
+keybind placement, layout tuning, and where apps land.
 _Option_: `desktop.compositor.<name>.enable`
 _Avoid_: window manager, WM, desktop environment
 
@@ -42,7 +44,9 @@ One selectable entry at the login manager. A Session names a Compositor and a
 Shell, or names a Desktop Environment. Exactly one Session is preselected at
 login; a second module claiming the default is an evaluation error.
 _Option_: `desktop.session.*` for the standalone Wayland Session, whose module
-carries everything a Session needs regardless of Compositor.
+carries everything a Session needs regardless of Compositor: the host's
+outputs, input, autostart, default file manager, and the keyring and Wayland
+environment.
 _Avoid_: desktop, login option
 
 **Theme Authority**:
@@ -74,6 +78,14 @@ every Compositor. Which key the slot sits on stays with the Compositor, whose
 modifier budget and tag model differ.
 _Option_: `home.desktop.apps.<name>` (`modules/nixos/desktop-environments/_home/common/apps.nix`)
 _Avoid_: launcher entry, shortcut
+
+**Window Rule**:
+How an app's windows open -- floating or tiled, and at what size -- matched by
+app_id or title. Stated by the module that owns the app (REAPER's rules live in
+`reaper.nix`), rendered by every Compositor. Where a window lands (tag,
+workspace) is not a Window Rule; that stays with the Compositor.
+_Option_: `home.desktop.windowRules` (`home/window-rules.nix`)
+_Avoid_: windowrule, window-rule (the Compositors' own syntax)
 
 **Service Record**:
 One endpoint a homelab service exposes: its subdomain, domain, port, scheme,

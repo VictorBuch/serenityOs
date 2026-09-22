@@ -11,7 +11,7 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 ### Host Configurations
 
 **NixOS Hosts:**
-- **jayne**: Primary desktop system with full desktop environment (Hyprland)
+- **jayne**: Primary desktop system (KDE Plasma by default, mango also installed)
 - **kaylee**: Lightweight desktop configuration
 - **mal**: Homelab server with services and static IP (192.168.0.243)
 - **shepherd**: Base configuration template (x86_64)

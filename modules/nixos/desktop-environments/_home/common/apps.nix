@@ -30,13 +30,6 @@ let
           '';
         };
 
-        appId = lib.mkOption {
-          type = lib.types.str;
-          readOnly = true;
-          default = lib.head config.windowIds;
-          description = "Derived: the canonical window identifier, for exact-match IPC.";
-        };
-
         alternatives = lib.mkOption {
           type = lib.types.str;
           readOnly = true;
@@ -100,8 +93,6 @@ in
     };
     slack = {
       command = "slack";
-      # Capital S first: it is what the Electron app reports as its app_id, and
-      # niri's focus helper matches exactly rather than by regex.
       windowIds = [
         "Slack"
         "slack"

@@ -50,7 +50,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/VictorBuch/serenityOs/main/in
 
 ### NixOS (Linux)
 
-- **jayne** - Primary desktop with Hyprland and full desktop environment
+- **jayne** - Primary desktop with KDE Plasma (default) and mango
 - **kaylee** - Lightweight desktop configuration
 - **mal** - Homelab server with services and static IP
 - **shepherd** - Base configuration template for new systems

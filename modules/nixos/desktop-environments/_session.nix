@@ -13,6 +13,8 @@
 }:
 let
   cfg = config.desktop.session;
+  argv = lib.types.listOf lib.types.str;
+  number = lib.types.either lib.types.int lib.types.float;
 in
 {
   options.desktop.session = {
@@ -48,6 +50,94 @@ in
       '';
     };
 
+    outputs = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.submodule {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "Connector name, e.g. DP-2.";
+            };
+            width = lib.mkOption { type = lib.types.int; };
+            height = lib.mkOption { type = lib.types.int; };
+            refresh = lib.mkOption {
+              type = number;
+              description = "Refresh rate in Hz, as the output reports it.";
+            };
+            scale = lib.mkOption {
+              type = number;
+              default = 1;
+            };
+            x = lib.mkOption {
+              type = lib.types.int;
+              default = 0;
+            };
+            y = lib.mkOption {
+              type = lib.types.int;
+              default = 0;
+            };
+          };
+        }
+      );
+      default = [ ];
+      description = "The host's monitors. Outputs not listed are left to the Compositor.";
+    };
+
+    input = {
+      layouts = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [
+          "us"
+          "dk"
+          "cz"
+        ];
+        description = "XKB layouts, cycled in this order.";
+      };
+      repeatDelay = lib.mkOption {
+        type = lib.types.int;
+        default = 200;
+      };
+      repeatRate = lib.mkOption {
+        type = lib.types.int;
+        default = 35;
+      };
+      touchpad = {
+        tap = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+        };
+        naturalScroll = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+        };
+        accelSpeed = lib.mkOption {
+          type = number;
+          default = 0.2;
+        };
+      };
+    };
+
+    autostart = lib.mkOption {
+      type = lib.types.listOf argv;
+      default = [ ];
+      description = "Commands started with the Session, after the Shell.";
+    };
+
+    autostartApps = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "App Slots (home.desktop.apps names) started with the Session, after `autostart`.";
+    };
+
+    fileManager = lib.mkOption {
+      type = lib.types.enum [
+        "dolphin"
+        "nautilus"
+      ];
+      default = "dolphin";
+      description = "The app that owns inode/directory and answers org.freedesktop.FileManager1.";
+    };
+
     homeModule = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
@@ -61,7 +151,24 @@ in
 
     services.displayManager.defaultSession = lib.mkIf cfg.makeDefault cfg.name;
 
-    home-manager.sharedModules = lib.optional (cfg.homeModule != null) cfg.homeModule;
+    home-manager.sharedModules = [
+      ./_home/common/session.nix
+    ]
+    ++ lib.optional (cfg.homeModule != null) cfg.homeModule;
+
+    desktop.session.autostart = [
+      [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]
+      [
+        "easyeffects"
+        "--gapplication-service"
+      ]
+      [
+        "wl-paste"
+        "--watch"
+        "cliphist"
+        "store"
+      ]
+    ];
 
     i18n.inputMethod.enable = cfg.inputMethod;
 

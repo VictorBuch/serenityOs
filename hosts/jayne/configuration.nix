@@ -109,7 +109,30 @@ in
   # Desktop environments
   desktop = {
     compositor.mango.enable = true;
-    session.makeDefault = false;
+    session = {
+      makeDefault = false;
+      outputs = [
+        {
+          name = "DP-2";
+          width = 2560;
+          height = 1440;
+          refresh = 143.912;
+        }
+        {
+          name = "Virtual-1";
+          width = 2560;
+          height = 1600;
+          refresh = 60;
+          scale = 1.1;
+        }
+      ];
+      autostart = [ [ "skwd-daemon" ] ];
+      autostartApps = [
+        "zen"
+        "ghostty"
+        "figma"
+      ];
+    };
     environment.gnome.enable = false;
     environment.kde.enable = true;
   };

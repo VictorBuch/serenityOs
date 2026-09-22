@@ -1,7 +1,7 @@
 {
   config,
   options,
-  pkgs,
+  osConfig,
   lib,
   ...
 }:
@@ -35,8 +35,9 @@ let
     slack
   ];
 
-  # Portals and dialog-only helpers: float on the current tag.
-  dialogApps = [
+  # Anything matching these keeps whatever tag it inherits; everything else
+  # is swept to tag 2 by the catch-all rule.
+  noSweep = map (app: app.alternatives) (tag1 ++ scratchpads) ++ [
     "xdg-desktop-portal.*"
     "org\\.freedesktop\\.impl\\.portal\\..*"
     "zenity"
@@ -47,16 +48,40 @@ let
     "file-roller"
     "nwg-look"
     "qt[56]ct"
+    "steam"
   ];
 
-  # Anything matching these keeps whatever tag it inherits; everything else
-  # is swept to tag 2 by the catch-all rule.
-  noSweep =
-    map (app: app.alternatives) (tag1 ++ scratchpads)
-    ++ dialogApps
-    ++ [ "steam" ];
-
   alternation = lib.concatStringsSep "|";
+
+  session = osConfig.desktop.session;
+
+  num =
+    x:
+    if builtins.isInt x then
+      toString x
+    else
+      let
+        trim = str: if lib.hasSuffix "0" str then trim (lib.removeSuffix "0" str) else str;
+      in
+      lib.removeSuffix "." (trim (toString x));
+  flag = b: if b then "1" else "0";
+
+  windowRule =
+    r:
+    lib.concatStringsSep "," (
+      lib.optional (r.appId != null) "appid:${r.appId}"
+      ++ lib.optional (r.title != null) "title:${r.title}"
+      ++ [ "isfloating:${flag r.float}" ]
+      ++ lib.optionals r.float (
+        lib.optional (r.width != null) "width:${num r.width}"
+        ++ lib.optional (r.height != null) "height:${num r.height}"
+      )
+    );
+
+  autostart =
+    [ config.home.desktop.shell.start ]
+    ++ session.autostart
+    ++ map (name: [ apps.${name}.command ]) session.autostartApps;
 in
 
 {
@@ -65,55 +90,6 @@ in
   };
 
   config = lib.mkIf config.home.desktop.compositor.mango.enable {
-
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
-
-    home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
-
-    # First declared default in this repo. Without it "open containing folder"
-    # from any app was undefined, because nothing claimed inode/directory.
-    # NOTE: this makes ~/.config/mimeapps.list a read-only store symlink, so
-    # "set as default" from an application's own settings will fail -- defaults
-    # have to be declared here instead.
-    xdg.mimeApps = {
-      enable = true;
-      defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
-    };
-    xdg.configFile."mimeapps.list".force = true;
-
-    xdg.dataFile."dbus-1/services/org.freedesktop.FileManager1.service".text = ''
-      [D-BUS Service]
-      Name=org.freedesktop.FileManager1
-      Exec=${pkgs.kdePackages.dolphin}/bin/dolphin --daemon
-    '';
-    xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
-      [Desktop Entry]
-      Type=Application
-      Hidden=true
-    '';
-
-    # KDE apps resolve their icon theme through KIconTheme, which reads
-    # ~/.config/kdeglobals -- not qt6ct.conf. Without this Dolphin falls back to
-    # Breeze regardless of what qt6ct says. kdeglobals cannot be HM-owned: the
-    # shell's kcolorscheme template merges the palette into it at runtime and
-    # needs it writable, so seed the key idempotently instead.
-    home.activation.kdeIconTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            ${pkgs.python3}/bin/python3 - "$HOME/.config/kdeglobals" ${config.stylix.icons.dark} <<'PYICON'
-      import os, sys, re
-      path, theme = sys.argv[1], sys.argv[2]
-      os.makedirs(os.path.dirname(path), exist_ok=True)
-      text = open(path).read() if os.path.exists(path) else ""
-      if re.search(r"^\[Icons\]", text, re.M):
-          new = re.sub(r"(^\[Icons\][^\[]*?^Theme=).*$", r"\g<1>" + theme, text, flags=re.M)
-          if new == text and "Theme=" not in text.split("[Icons]")[1].split("[")[0]:
-              new = text.replace("[Icons]", "[Icons]\nTheme=" + theme, 1)
-      else:
-          new = text.rstrip("\n") + "\n\n[Icons]\nTheme=" + theme + "\n"
-      if new != text:
-          open(path, "w").write(new)
-          print("kdeglobals: icon theme set to " + theme)
-      PYICON
-    '';
 
     home.liveSeams.mango = {
       path = ".config/mango/local.conf";
@@ -138,30 +114,21 @@ in
         source=~/.config/mango/local.conf
       '';
 
-      autostart_sh = ''
-        ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
-        ${lib.escapeShellArgs config.home.desktop.shell.start} &
-        easyeffects --gapplication-service &
-        wl-paste --watch cliphist store &
-        ${apps.zen.command} &
-        ${apps.ghostty.command} &
-        ${apps.figma.command} &
-        skwd-daemon &
-      '';
+      autostart_sh = lib.concatMapStrings (cmd: "${lib.escapeShellArgs cmd} &\n") autostart;
 
       settings = {
         # === Input ===
-        repeat_delay = 200;
-        repeat_rate = 35;
-        xkb_rules_layout = "us,dk,cz";
+        repeat_delay = session.input.repeatDelay;
+        repeat_rate = session.input.repeatRate;
+        xkb_rules_layout = lib.concatStringsSep "," session.input.layouts;
         sloppyfocus = 1;
         warpcursor = 0;
         focus_on_activate = 1;
 
         # Touchpad
-        tap_to_click = 1;
-        trackpad_natural_scrolling = 1;
-        trackpad_accel_speed = 0.2;
+        tap_to_click = if session.input.touchpad.tap then 1 else 0;
+        trackpad_natural_scrolling = if session.input.touchpad.naturalScroll then 1 else 0;
+        trackpad_accel_speed = session.input.touchpad.accelSpeed;
 
         # === Layout / appearance ===
         gappih = 4;
@@ -225,10 +192,10 @@ in
         ];
 
         # === Monitors ===
-        monitorrule = [
-          "name:^DP-2$,width:2560,height:1440,refresh:143.912,x:0,y:0,scale:1"
-          "name:^Virtual-1$,width:2560,height:1600,refresh:60,x:0,y:0,scale:1.1"
-        ];
+        monitorrule = map (
+          o:
+          "name:^${o.name}$,width:${toString o.width},height:${toString o.height},refresh:${num o.refresh},x:${toString o.x},y:${toString o.y},scale:${num o.scale}"
+        ) session.outputs;
 
         # === Tag rules: layouts per tag ===
         # Tag 1 = scroller (zen/ghostty/figma side-by-side via SUPER+H/L)
@@ -248,21 +215,8 @@ in
           # No width/height → fall back to scratchpad_width_ratio / scratchpad_height_ratio (1.0 = full screen).
           # windowrule width/height are PIXELS, not ratios — setting them here would override the ratio.
           ++ map (app: "isnamedscratchpad:1,appid:${app.regex}") scratchpads
+          ++ map windowRule (lib.filter (r: r.float != null) config.home.desktop.windowRules)
           ++ [
-          # Dialog-style helpers — float on the tag in view.
-          "appid:^(${alternation dialogApps})$,isfloating:1,width:0.6,height:0.6"
-
-          # Audio/Wine sizing
-          "appid:^REAPER$|^reaper$,isfloating:0"
-          "title:^iLok|PACE|License,isfloating:1,width:0.6,height:0.6"
-          "title:^IK Product Manager|IK Multimedia,isfloating:1,width:0.6,height:0.6"
-
-          # Picture-in-Picture floating
-          "title:^Picture-in-Picture$,isfloating:1,width:345,height:200"
-
-          # DaVinci convert helper terminal
-          "appid:^davinci-convert$,isfloating:1,width:640,height:400"
-
           # Catch-all: full application windows land on tag 2. Negative
           # lookahead built from noSweep — a `tags:` rule always beats the
           # parent-tag fallback in mango, so exempted appids must be listed.

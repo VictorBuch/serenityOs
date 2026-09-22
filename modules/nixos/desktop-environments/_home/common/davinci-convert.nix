@@ -497,6 +497,15 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    home.desktop.windowRules = [
+      {
+        appId = "^davinci-convert$";
+        float = true;
+        width = 640;
+        height = 400;
+      }
+    ];
+
     # Install the scripts to PATH
     home.packages = [
       davinciConvertScript

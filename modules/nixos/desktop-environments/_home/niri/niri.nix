@@ -1,21 +1,57 @@
 {
   config,
-  pkgs,
+  osConfig,
   lib,
   ...
 }:
 
 let
   apps = config.home.desktop.apps;
-  terminal = "ghostty";
-  fileManager = "nautilus";
-  browser = "zen-beta";
-  wallpaperDaemon = "awww";
+  session = osConfig.desktop.session;
   kdlArgs = lib.concatMapStringsSep " " builtins.toJSON;
   shell = lib.mapAttrs (_: kdlArgs) config.home.desktop.shell.actions;
-  applicationLauncher = "fuzzel";
   # Stylix colors for niri (no upstream Stylix target for niri)
   colors = config.lib.stylix.colors.withHashtag;
+
+  num =
+    x:
+    if builtins.isInt x then
+      toString x
+    else
+      let
+        trim = str: if lib.hasSuffix "0" str then trim (lib.removeSuffix "0" str) else str;
+      in
+      lib.removeSuffix "." (trim (toString x));
+  size = x: if x <= 1 then "proportion ${num x}" else "fixed ${num x}";
+
+  outputs = lib.concatMapStrings (o: ''
+    output "${o.name}" {
+        mode "${toString o.width}x${toString o.height}@${num o.refresh}"
+        scale ${num o.scale}
+        position x=${toString o.x} y=${toString o.y}
+    }
+  '') session.outputs;
+
+  windowRules = lib.concatMapStrings (
+    r:
+    let
+      body = lib.concatStrings (
+        lib.optional (r.float != null) "    open-floating ${lib.boolToString r.float}\n"
+        ++ lib.optional (r.width != null) "    default-column-width { ${size r.width}; }\n"
+        ++ lib.optional (r.height != null) "    default-window-height { ${size r.height}; }\n"
+      );
+      match = lib.concatStringsSep " " (
+        lib.optional (r.appId != null) "app-id=r#\"${r.appId}\"#"
+        ++ lib.optional (r.title != null) "title=r#\"${r.title}\"#"
+      );
+    in
+    lib.optionalString (body != "") "window-rule {\n    match ${match}\n${body}}\n"
+  ) config.home.desktop.windowRules;
+
+  autostart =
+    [ config.home.desktop.shell.start ]
+    ++ session.autostart
+    ++ map (name: [ apps.${name}.command ]) session.autostartApps;
 in
 
 {
@@ -25,57 +61,28 @@ in
 
   config = lib.mkIf config.home.desktop.compositor.niri.enable {
 
-    # Set Wayland environment variable
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
-
-    # Disable GNOME Keyring's SSH agent — it can't handle FIDO2/SK key signing
-    # This lets the real OpenSSH ssh-agent (programs.ssh.startAgent) handle SSH_AUTH_SOCK
-    home.sessionVariables.GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
-    xdg.configFile."autostart/gnome-keyring-ssh.desktop".text = ''
-      [Desktop Entry]
-      Type=Application
-      Hidden=true
-    '';
-
 
     # Write niri config.kdl to ~/.config/niri/
     xdg.configFile."niri/config.kdl".text = ''
-      // Input configuration
       input {
-          // Focus windows automatically when moving the mouse into them.
-          // max-scroll-amount="95%" means focus won't switch if it requires scrolling more than 95%
-          // (i.e., only focus windows that are at least 5% visible)
-          // focus-follows-mouse max-scroll-amount="75%"
-
           keyboard {
               xkb {
-                  layout "us,dk,cz"
+                  layout "${lib.concatStringsSep "," session.input.layouts}"
               }
-              repeat-delay 200
-              repeat-rate 35
+              repeat-delay ${toString session.input.repeatDelay}
+              repeat-rate ${toString session.input.repeatRate}
           }
 
-            touchpad {
-                tap
-                natural-scroll
-                accel-speed 0.2
-            }
+          touchpad {
+              ${lib.optionalString session.input.touchpad.tap "tap"}
+              ${lib.optionalString session.input.touchpad.naturalScroll "natural-scroll"}
+              accel-speed ${num session.input.touchpad.accelSpeed}
+          }
 
-            // Use Super as the modifier key
-            mod-key "Super"
-        }
+          mod-key "Super"
+      }
 
-        // Output configuration (monitor setup)
-        // Adjust as needed for your specific setup
-        // Commented out to allow auto-detection (especially important for VMs)
-        output "DP-1" {
-            mode "2560x1440@119.998"
-            scale 1
-        }
-        output "Virtual-1" {
-            mode "2560x1600@59.972"
-            scale 1.1
-        } 
+        ${outputs}
 
         // Layout configuration
         layout {
@@ -119,16 +126,16 @@ in
         // Key bindings
         binds {
             // Application launchers
-            Mod+Return { spawn "${terminal}"; }
-            Mod+B { spawn "${browser}"; }
-            Mod+F { spawn "${fileManager}"; }
+            Mod+Return { spawn "${apps.ghostty.command}"; }
+            Mod+B { spawn "${apps.zen.command}"; }
+            Mod+F { spawn "${session.fileManager}"; }
 
             // Raycast-style focus-or-run bindings (Alt + numbers)
-            Mod+1 { spawn "focus-or-run" "${apps.zen.appId}" "${apps.zen.command}"; }
-            Mod+2 { spawn "focus-or-run" "${apps.ghostty.appId}" "${apps.ghostty.command}"; }
-            Mod+3 { spawn "focus-or-run" "${apps.slack.appId}" "${apps.slack.command}"; }
-            Mod+T { spawn "focus-or-run" "${apps.tidal.appId}" "${apps.tidal.command}"; }
-            Mod+D { spawn "focus-or-run" "${apps.discord.appId}" "${apps.discord.command}"; }
+            Mod+1 { spawn ${kdlArgs [ "focus-or-run" apps.zen.regex apps.zen.command ]}; }
+            Mod+2 { spawn ${kdlArgs [ "focus-or-run" apps.ghostty.regex apps.ghostty.command ]}; }
+            Mod+3 { spawn ${kdlArgs [ "focus-or-run" apps.slack.regex apps.slack.command ]}; }
+            Mod+T { spawn ${kdlArgs [ "focus-or-run" apps.tidal.regex apps.tidal.command ]}; }
+            Mod+D { spawn ${kdlArgs [ "focus-or-run" apps.discord.regex apps.discord.command ]}; }
 
             // Noctalia shell controls
             Mod+Space { spawn ${shell.launcher}; }
@@ -239,51 +246,9 @@ in
             open-on-workspace "scratchpad"
         }
 
-        // === Wine/Audio Application Rules ===
-        // Wine applications should float properly for installers and dialogs
-        window-rule {
-            match app-id=r#"^wine$|^Wine$|^\.exe$"#
-            default-column-width { proportion 0.5; }
-        }
-
-        // iLok License Manager - needs floating for authorization dialogs
-        window-rule {
-            match title=r#"iLok|PACE|License"#
-            default-column-width { proportion 0.6; }
-        }
-
-        // IK Product Manager - software authorization
-        window-rule {
-            match title=r#"IK Product Manager|IK Multimedia"#
-            default-column-width { proportion 0.6; }
-        }
-
-        // REAPER DAW - give it more space
-        window-rule {
-            match app-id=r#"^REAPER$|^reaper$"#
-            default-column-width { proportion 0.85; }
-        }
-
-        // VST Plugin windows (typically spawned by REAPER)
-        // These often have specific size requirements
-        window-rule {
-            match title=r#"Amplitube|SSD5|Steven Slate"#
-            default-column-width { proportion 0.6; }
-        }
-
-        // DaVinci Convert - float the conversion script terminal
-        window-rule {
-            match app-id=r#"^davinci-convert$"#
-            open-floating true
-            default-column-width { fixed 640; }
-            default-window-height { fixed 400; }
-        }
-
+        ${windowRules}
         window-rule {
           match title=r#"^Picture-in-Picture$"#
-          open-floating true
-          default-column-width { fixed 345; }
-          default-window-height { fixed 200; }
           default-floating-position x=0 y=40 relative-to="top"
         }
 
@@ -307,14 +272,7 @@ in
           }
       }
 
-        // Spawn at startup
-        spawn-at-startup ${kdlArgs config.home.desktop.shell.start}
-        spawn-at-startup "${browser}"
-        spawn-at-startup "${terminal}"
-        spawn-at-startup "slack"
-        spawn-at-startup "discord"
-        spawn-at-startup "easyeffects" "--gapplication-service"
-        spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+        ${lib.concatMapStrings (cmd: "spawn-at-startup ${kdlArgs cmd}\n") autostart}
 
         // Animations
         animations {

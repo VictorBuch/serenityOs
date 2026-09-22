@@ -8,6 +8,7 @@
     ./home.nix
     ./wallpaper-pool.nix
     ./live-seams.nix
+    ./window-rules.nix
   ];
 
   options = {

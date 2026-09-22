@@ -518,6 +518,26 @@ in
       description = "Reaper DAW with Windows VST support, DXVK, and copy protection compatibility (Linux only)";
 
       extraConfig = {
+        home-manager.sharedModules = [
+          {
+            home.desktop.windowRules = [
+              {
+                appId = "^REAPER$|^reaper$";
+                float = false;
+                width = 0.85;
+              }
+              {
+                appId = "^wine$|^Wine$|^\\.exe$";
+                width = 0.5;
+              }
+              {
+                title = "Amplitube|SSD5|Steven Slate";
+                width = 0.6;
+              }
+            ];
+          }
+        ];
+
         # Enable JACK audio emulation via PipeWire
         services.pipewire.jack.enable = true;
 

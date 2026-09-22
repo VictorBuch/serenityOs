@@ -11,7 +11,8 @@ let
   fileManager = "nautilus";
   browser = "zen-beta";
   wallpaperDaemon = "awww";
-  shell = "noctalia-shell";
+  kdlArgs = lib.concatMapStringsSep " " builtins.toJSON;
+  shell = lib.mapAttrs (_: kdlArgs) config.home.desktop.shell.actions;
   applicationLauncher = "fuzzel";
   # Stylix colors for niri (no upstream Stylix target for niri)
   colors = config.lib.stylix.colors.withHashtag;
@@ -130,10 +131,10 @@ in
             Mod+D { spawn "focus-or-run" "${apps.discord.appId}" "${apps.discord.command}"; }
 
             // Noctalia shell controls
-            Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
-            Mod+Comma { spawn "noctalia-shell" "ipc" "call" "settings" "toggle"; }
-            Mod+Escape { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
-            Mod+Shift+Escape { spawn "noctalia-shell" "ipc" "call" "sessionMenu" "lockAndSuspend";}
+            Mod+Space { spawn ${shell.launcher}; }
+            Mod+Comma { spawn ${shell.settings}; }
+            Mod+Escape { spawn ${shell.lock}; }
+            Mod+Shift+Escape { spawn ${shell.lock-and-suspend}; }
 
             // Handy's own global hotkey uses the Tauri plugin, which is X11-only —
             // the compositor has to drive it over the CLI instead.
@@ -186,17 +187,17 @@ in
             Mod+Shift+Space { switch-layout "next"; }
 
             // Screenshots
-            Alt+Shift+4 { screenshot; }
-            Alt+Shift+5 { screenshot-window; }
+            Alt+Shift+4 { spawn ${shell.screenshot-region}; }
+            Alt+Shift+5 { spawn ${shell.screenshot-fullscreen}; }
 
 
-            // Media keys (noctalia IPC)
-            XF86AudioRaiseVolume { spawn "noctalia-shell" "ipc" "call" "audio" "volumeUp"; }
-            XF86AudioLowerVolume { spawn "noctalia-shell" "ipc" "call" "audio" "volumeDown"; }
-            XF86AudioMute { spawn "noctalia-shell" "ipc" "call" "audio" "toggleMute"; }
+            // Media keys
+            XF86AudioRaiseVolume { spawn ${shell.volume-up}; }
+            XF86AudioLowerVolume { spawn ${shell.volume-down}; }
+            XF86AudioMute { spawn ${shell.volume-mute}; }
             XF86AudioMicMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-            XF86MonBrightnessUp { spawn "noctalia-shell" "ipc" "call" "brightness" "up"; }
-            XF86MonBrightnessDown { spawn "noctalia-shell" "ipc" "call" "brightness" "down"; }
+            XF86MonBrightnessUp { spawn ${shell.brightness-up}; }
+            XF86MonBrightnessDown { spawn ${shell.brightness-down}; }
             XF86AudioNext { spawn "playerctl" "next"; }
             XF86AudioPause { spawn "playerctl" "play-pause"; }
             XF86AudioPlay { spawn "playerctl" "play-pause"; }
@@ -307,7 +308,7 @@ in
       }
 
         // Spawn at startup
-        spawn-at-startup "${shell}"
+        spawn-at-startup ${kdlArgs config.home.desktop.shell.start}
         spawn-at-startup "${browser}"
         spawn-at-startup "${terminal}"
         spawn-at-startup "slack"
@@ -332,9 +333,6 @@ in
         }
 
         // Environment variables
-        environment {
-            XCURSOR_SIZE "16"
-        }
 
         // Xwayland support (integrated since niri 25.08)
         xwayland-satellite {

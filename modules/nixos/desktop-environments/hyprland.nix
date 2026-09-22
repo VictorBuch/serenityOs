@@ -46,7 +46,6 @@
       hyprpolkitagent
       dunst # Notification manager
       nautilus
-      hyprshot # Screenshot tool
       wlogout
     ];
   };

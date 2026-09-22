@@ -29,8 +29,17 @@ let
   # Derived from the Theme Authority table in modules/common/theme-authority.nix.
   # The fallback keeps this module evaluable under bare home-manager.
   builtinTemplateIds = lib.attrByPath [ "theme" "authority" "noctalia" "builtinIds" ] [ ] osConfig;
+
+  bin = "${config.programs.noctalia.package}/bin/noctalia";
+  msg = args: [
+    bin
+    "msg"
+  ]
+  ++ args;
 in
 {
+  imports = [ ./shell.nix ];
+
   options = lib.setAttrByPath (optPath ++ [ "enable" ]) (
     lib.mkEnableOption "Noctalia shell - A modern Wayland shell for niri"
   );
@@ -395,6 +404,71 @@ in
         };
       };
 
+    };
+
+    home.desktop.shell = {
+      start = [ bin ];
+
+      actions = {
+        launcher = msg [
+          "panel-toggle"
+          "launcher"
+        ];
+        launcher-calc = msg [
+          "panel-toggle"
+          "launcher"
+          "/calc"
+        ];
+        launcher-windows = msg [
+          "panel-toggle"
+          "launcher"
+          "/win"
+        ];
+        launcher-emoji = msg [
+          "panel-toggle"
+          "launcher"
+          "/emo"
+        ];
+        session-menu = msg [
+          "panel-toggle"
+          "session"
+        ];
+        settings = msg [ "settings-toggle" ];
+        lock = msg [
+          "session"
+          "lock"
+        ];
+        lock-and-suspend = msg [
+          "session"
+          "lock-and-suspend"
+        ];
+        screenshot-region = msg [ "screenshot-region" ];
+        screenshot-fullscreen = msg [ "screenshot-fullscreen" ];
+        volume-up = msg [ "volume-up" ];
+        volume-down = msg [ "volume-down" ];
+        volume-mute = msg [ "volume-mute" ];
+        brightness-up = msg [ "brightness-up" ];
+        brightness-down = msg [ "brightness-down" ];
+      };
+
+      check = pkgs.runCommand "noctalia-shell-actions" { } ''
+        HOME=$TMPDIR
+        fail=0
+        ${lib.concatStrings (
+          lib.mapAttrsToList (verb: action: ''
+            set -- ${lib.escapeShellArgs (lib.drop 2 action)}
+            if ! help=$(${bin} msg "$1" --help 2>&1); then
+              echo "Shell Action ${verb}: noctalia has no msg command '$1'"; fail=1
+            elif [ -n "''${2-}" ] && choices=$(echo "$help" | grep -o 'one of: .*'); then
+              case " $(echo "''${choices#one of: }" | tr -d ,) " in
+                *" $2 "*) ;;
+                *) echo "Shell Action ${verb}: '$2' is not $choices"; fail=1 ;;
+              esac
+            fi
+          '') config.home.desktop.shell.actions
+        )}
+        [ $fail = 0 ] && touch $out
+      '';
     };
 
     # Adopt new HM default (was `config.gtk.theme` prior to 26.05)

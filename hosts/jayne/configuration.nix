@@ -109,6 +109,7 @@ in
   # Desktop environments
   desktop = {
     compositor.mango.enable = true;
+    session.makeDefault = false;
     environment.gnome.enable = false;
     environment.kde.enable = true;
   };

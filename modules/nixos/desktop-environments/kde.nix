@@ -55,7 +55,7 @@ in
       displayManager.sddm.wayland.enable = true;
       desktopManager.plasma6.enable = true;
       displayManager.sddm.settings.General.DisplayServer = "wayland";
-      displayManager.defaultSession = lib.mkForce "plasma";
+      displayManager.defaultSession = "plasma";
     };
 
     environment.plasma6.excludePackages = with pkgs.kdePackages; [

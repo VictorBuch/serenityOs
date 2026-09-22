@@ -20,6 +20,16 @@ Shell today. Exactly one Shell is active per session.
 _Option_: `home.desktop.shell.<name>.enable`
 _Avoid_: bar, panel, widget system, status bar
 
+**Shell Action**:
+A verb the Shell performs on request -- open the launcher, lock, take a region
+screenshot, raise the volume. The Shell states each as a command and how it
+starts; Compositors bind keys to verbs and never name the Shell's binary. The
+verb set is fixed, and a check rejects any verb whose command the Shell does not
+accept.
+_Option_: `home.desktop.shell.actions.<verb>`, `home.desktop.shell.start`
+(`modules/nixos/desktop-environments/_home/common/shell.nix`)
+_Avoid_: IPC call, shell command, keybind
+
 **Desktop Environment**:
 A prepackaged Compositor + Shell + application suite shipped as one unit —
 `gnome`, `kde`. Mutually exclusive with running a standalone Compositor+Shell
@@ -29,11 +39,10 @@ _Avoid_: DE (when a Compositor is what is meant)
 
 **Session**:
 One selectable entry at the login manager. A Session names a Compositor and a
-Shell, or names a Desktop Environment. `xorg-audio` is a Session, not a
-Compositor.
+Shell, or names a Desktop Environment. Exactly one Session is preselected at
+login; a second module claiming the default is an evaluation error.
 _Option_: `desktop.session.*` for the standalone Wayland Session, whose module
-carries everything a Session needs regardless of Compositor;
-`desktop.extraSessions.<name>.enable` for an additional login entry.
+carries everything a Session needs regardless of Compositor.
 _Avoid_: desktop, login option
 
 **Theme Authority**:

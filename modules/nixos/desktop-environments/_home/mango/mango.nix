@@ -7,7 +7,7 @@
 }:
 
 let
-  shell = "noctalia";
+  shell = lib.mapAttrs (_: lib.escapeShellArgs) config.home.desktop.shell.actions;
   # Window-decoration colors are no longer set here: noctalia's `mango`
   # template writes them to ~/.config/mango/noctalia.conf from the wallpaper
   # palette and reloads mango live. See the `source=` include in extraConfig
@@ -140,7 +140,7 @@ in
 
       autostart_sh = ''
         ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
-        ${shell} &
+        ${lib.escapeShellArgs config.home.desktop.shell.start} &
         easyeffects --gapplication-service &
         wl-paste --watch cliphist store &
         ${apps.zen.command} &
@@ -221,7 +221,6 @@ in
 
         # === Environment ===
         env = [
-          "XCURSOR_SIZE,16"
           "QT_QPA_PLATFORMTHEME,qt6ct"
         ];
 
@@ -302,14 +301,14 @@ in
           "SUPER+SHIFT,Return,spawn,${apps.ghostty.command}"
           "SUPER,B,spawn_shell,${focusOrRun apps.zen 1}"
           "SUPER,E,spawn_shell,${focusOrRun apps.dolphin 1}"
-          "SUPER,space,spawn,${shell} msg panel-toggle launcher"
+          "SUPER,space,spawn,${shell.launcher}"
 
           # Friction-free note capture: rofi one-liner -> today's daily note.
           "SUPER,C,spawn,notes-capture"
-          "SUPER+SHIFT,C,spawn,${shell} msg panel-toggle launcher /calc"
-          "SUPER,Z,spawn,${shell} msg panel-toggle launcher /win"
-          "SUPER+SHIFT,E,spawn,${shell} msg panel-toggle launcher /emo"
-          "SUPER+SHIFT,P,spawn,${shell} msg panel-toggle session"
+          "SUPER+SHIFT,C,spawn,${shell.launcher-calc}"
+          "SUPER,Z,spawn,${shell.launcher-windows}"
+          "SUPER+SHIFT,E,spawn,${shell.launcher-emoji}"
+          "SUPER+SHIFT,P,spawn,${shell.session-menu}"
           "SUPER,P,spawn_shell,skwd wall toggle"
           "SUPER,N,spawn,rofi-vpn"
           "SUPER,y,spawn_shell,handy --toggle-transcription"
@@ -370,16 +369,16 @@ in
           "SUPER+ALT,SPACE,switch_keyboard_layout"
 
           # --- Lock / session ---
-          "SUPER,Escape,spawn_shell,${shell} msg session lock"
-          "SUPER+SHIFT,Escape,spawn_shell,${shell} msg session lock-and-suspend"
+          "SUPER,Escape,spawn_shell,${shell.lock}"
+          "SUPER+SHIFT,Escape,spawn_shell,${shell.lock-and-suspend}"
 
           # --- Reload / quit ---
           "SUPER+SHIFT,R,reload_config"
           "SUPER+SHIFT,BackSpace,quit"
 
           # --- Screenshots ---
-          "ALT+SHIFT,4,spawn,${shell} msg screenshot-region"
-          "ALT+SHIFT,5,spawn,${shell} msg screenshot-fullscreen"
+          "ALT+SHIFT,4,spawn,${shell.screenshot-region}"
+          "ALT+SHIFT,5,spawn,${shell.screenshot-fullscreen}"
 
           # --- Media keys ---
           "NONE,XF86AudioRaiseVolume,spawn,wpctl set-volume @DEFAULT_SINK@ 5%+"

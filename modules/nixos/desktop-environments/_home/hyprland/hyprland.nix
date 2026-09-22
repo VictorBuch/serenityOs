@@ -11,7 +11,7 @@ let
   fileManager = "nautilus";
   browser = "zen-beta";
   wallpaperDaemon = "awww";
-  shell = "noctalia-shell";
+  shell = lib.mapAttrs (_: lib.escapeShellArgs) config.home.desktop.shell.actions;
 in
 
 {
@@ -42,11 +42,6 @@ in
           "DP-1,2560x1440@144,auto,1.5"
           "Virtual-1,2560x1600@60,auto,1.1"
           ",preferred,auto,1"
-        ];
-
-        env = [
-          "XCURSOR_SIZE,16"
-          "HYPRCURSOR_SIZE,16"
         ];
 
         general = {
@@ -135,10 +130,10 @@ in
           "$mainMod, D, exec, focus-or-run-hypr ${apps.discord.appId} ${apps.discord.command}"
 
           # Noctalia shell controls
-          "$mainMod, Space, exec, ${shell} ipc call launcher toggle"
-          "$mainMod, Comma, exec, ${shell} ipc call settings toggle"
-          "$mainMod, Escape, exec, ${shell} ipc call lockScreen lock"
-          "$mainMod SHIFT, Escape, exec, ${shell} ipc call sessionMenu lockAndSuspend"
+          "$mainMod, Space, exec, ${shell.launcher}"
+          "$mainMod, Comma, exec, ${shell.settings}"
+          "$mainMod, Escape, exec, ${shell.lock}"
+          "$mainMod SHIFT, Escape, exec, ${shell.lock-and-suspend}"
 
           # Window management
           "$mainMod, Tab, workspace, previous"
@@ -170,16 +165,16 @@ in
           "$mainMod SHIFT, Space, exec, hyprctl switchxkblayout all next"
 
           # Screenshots
-          "ALT SHIFT, 4, exec, hyprshot -m region"
-          "ALT SHIFT, 5, exec, hyprshot -m window"
+          "ALT SHIFT, 4, exec, ${shell.screenshot-region}"
+          "ALT SHIFT, 5, exec, ${shell.screenshot-fullscreen}"
 
-          # Media keys → noctalia IPC
-          ", XF86AudioRaiseVolume, exec, ${shell} ipc call audio volumeUp"
-          ", XF86AudioLowerVolume, exec, ${shell} ipc call audio volumeDown"
-          ", XF86AudioMute, exec, ${shell} ipc call audio toggleMute"
+          # Media keys
+          ", XF86AudioRaiseVolume, exec, ${shell.volume-up}"
+          ", XF86AudioLowerVolume, exec, ${shell.volume-down}"
+          ", XF86AudioMute, exec, ${shell.volume-mute}"
           ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-          ", XF86MonBrightnessUp, exec, ${shell} ipc call brightness up"
-          ", XF86MonBrightnessDown, exec, ${shell} ipc call brightness down"
+          ", XF86MonBrightnessUp, exec, ${shell.brightness-up}"
+          ", XF86MonBrightnessDown, exec, ${shell.brightness-down}"
           ", XF86AudioNext, exec, playerctl next"
           ", XF86AudioPause, exec, playerctl play-pause"
           ", XF86AudioPlay, exec, playerctl play-pause"
@@ -230,7 +225,7 @@ in
 
         exec-once = [
           "${wallpaperDaemon}-daemon"
-          "${shell}"
+          (lib.escapeShellArgs config.home.desktop.shell.start)
           "${terminal}"
           "${browser}"
           "slack"

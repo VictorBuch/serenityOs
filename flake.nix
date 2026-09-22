@@ -289,6 +289,9 @@
         builtins.unsafeDiscardStringContext self.nixosConfigurations.mal.config.system.build.toplevel.drvPath
       );
 
+      checks.x86_64-linux.shell-actions =
+        self.nixosConfigurations.jayne.config.home-manager.users.jayne.home.desktop.shell.check;
+
       nixosConfigurations = builtins.listToAttrs (
         map (host: {
           inherit (host) name;

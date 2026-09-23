@@ -10,8 +10,7 @@
 }:
 let
   username = "wash";
-  domain = "victorbuch.com";
-  wannaShareDomain = "smoothless.org";
+  inherit (config.homelab) domain smoothlessDomain;
 
   # Pangolin only offers the "Country" match type in resource rules once it can
   # resolve IPs to countries; with no maxmind_db_path in config.yml the Match
@@ -221,7 +220,7 @@ in
       domains = {
         domain1.prefer_wildcard_cert = true;
         domain2 = {
-          base_domain = wannaShareDomain;
+          base_domain = smoothlessDomain;
           prefer_wildcard_cert = true;
         };
       };
@@ -520,18 +519,6 @@ in
     # in ipset, matched from CROWDSEC_CHAIN, not in the iptables rules themselves.
     ipset
   ];
-
-  home-manager = {
-    backupFileExtension = "hm-backup";
-    extraSpecialArgs = {
-      inherit
-        username
-        inputs
-        pkgs-stable
-        ;
-    };
-    users."${username}" = import ../../home/default.nix;
-  };
 
   apps.cli = {
     enable = true;

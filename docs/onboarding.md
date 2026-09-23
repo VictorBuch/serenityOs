@@ -35,24 +35,18 @@ NVMe disk.
      pkgs-stable,
      ...
    }:
-   let
-     username = "mal";
-   in
    {
      imports = [
        ./hardware-configuration.nix
        ./disko.nix
        ../profiles/shepherd.nix
-       inputs.home-manager.nixosModules.default
      ];
 
      networking.hostName = "mal";
-     user.userName = username;
 
-     home-manager = {
-       extraSpecialArgs = { inherit username; };
-       users."${username}" = import ../../home/default.nix;
-     };
+     # Names the system account and the Home Manager user; the
+     # home-manager wiring follows from it (modules/common/home-manager.nix).
+     user.userName = "mal";
 
      system.stateVersion = "25.05";
    }
@@ -71,19 +65,18 @@ NVMe disk.
    - SD card (Raspberry Pi etc.): `/dev/mmcblk0`
    - Virtio (QEMU/KVM): `/dev/vda`
 
-4. Register the host in `flake.nix` by adding an entry to `nixosHosts`:
+4. Register the host in `flake.nix` by adding an entry to `hosts`:
 
    ```nix
    {
      name = "mal";
-     extraModules = [
-       (import-tree ./modules/nixos)
-       inputs.disko.nixosModules.disko
-     ];
+     extraModules = [ inputs.disko.nixosModules.disko ];
    }
    ```
 
-   For ARM hosts also set `system = "aarch64-linux";`.
+   For ARM hosts also set `system = "aarch64-linux";`. macOS hosts set
+   `class = "darwin";`. A server that should not take the desktop module
+   tree sets `platformModules = false;`.
 
 5. `git add hosts/mal flake.nix` (flakes only see Git-tracked files).
 

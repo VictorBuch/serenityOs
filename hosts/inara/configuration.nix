@@ -9,24 +9,9 @@ let
   username = "victorbuch";
 in
 {
-  # Enable Home Manager
-  home-manager = {
-    useGlobalPkgs = true; # Use system nixpkgs (saves evaluation, adds consistency)
-    useUserPackages = true; # Install packages to user profile
-    backupFileExtension = "hm-backup";
-    extraSpecialArgs = {
-      inherit
-        username
-        inputs
-        pkgs-stable
-        ;
-    };
-    users = {
-      "${username}" = import ../../home/default.nix;
-    };
+  user.userName = username;
 
-    sharedModules = [ ];
-  };
+  home-manager.useUserPackages = true;
 
   # User configuration
   users.users."${username}" = {

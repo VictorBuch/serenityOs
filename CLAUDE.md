@@ -14,6 +14,7 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 - **jayne**: Primary desktop system (KDE Plasma by default, mango also installed)
 - **kaylee**: Lightweight desktop configuration
 - **mal**: Homelab server with services and static IP (192.168.0.243)
+- **wash**: Public Netcup VPS running Pangolin (edge for *.victorbuch.com)
 - **shepherd**: Base configuration template (x86_64)
 - **shepherd-arm**: Base configuration template (aarch64)
 
@@ -44,14 +45,26 @@ Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`).
 
 ### How Modules Are Composed in flake.nix
 
+One builder, `mkHost` in `flake.nix`, assembles every host — NixOS and macOS
+alike. A host is one entry in the `hosts` list: `name`, plus `class = "darwin"`
+for macOS, `system` for non-x86_64, `platformModules = false` to skip the
+platform tree, and `extraModules` for anything else.
+
 Each host gets these module layers:
 1. `modules/common/` (auto-discovered) + `_defaults.nix` (explicit)
 2. `modules/apps/` (auto-discovered) + `_categories.nix` (explicit)
 3. Host-specific config from `hosts/<name>/configuration.nix`
-4. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
-5. Home Manager + SOPS-nix integration modules
+4. Home Manager + SOPS-nix integration modules (the platform's own variant)
+5. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
+6. `extraModules` from the host entry
 
-Mal is special — it gets `modules/homelab/` instead of `modules/nixos/` (no desktop modules).
+Mal and wash set `platformModules = false` — no desktop tree. Mal takes
+`modules/homelab/` instead; wash takes only `_config.nix` for the domains.
+
+**Home Manager wiring is not written per host.** `modules/common/home-manager.nix`
+derives it from `user.userName`: the HM user, `extraSpecialArgs` (`username`,
+`inputs`, `pkgs-stable`) and `backupFileExtension`. A host sets
+`user.userName` and nothing else; an unset one fails an assertion.
 
 ### Category System
 

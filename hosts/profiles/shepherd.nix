@@ -6,7 +6,6 @@
 # Hosts importing this profile must set:
 #   - networking.hostName
 #   - user.userName
-#   - home-manager.users.<name>
 #   - hardware-configuration.nix import
 #   - disko layout import (hosts/profiles/disko-btrfs.nix { device = ...; })
 #   - system.stateVersion
@@ -78,10 +77,6 @@
   };
 
   home-manager = {
-    backupFileExtension = "hm-backup";
-    extraSpecialArgs = {
-      inherit inputs pkgs-stable;
-    };
     # noctalia is NOT in this list, for the same reason it is absent from
     # hosts/profiles/desktop-home.nix: home-manager ships its own
     # programs.noctalia module, and importing both makes the option collide.

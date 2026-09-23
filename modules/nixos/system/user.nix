@@ -8,21 +8,6 @@ let
   user = config.user;
 in
 {
-  options.user = {
-    userName = lib.mkOption {
-      default = "default";
-      description = ''
-        username
-      '';
-    };
-    uid = lib.mkOption {
-      default = 1000;
-    };
-    group = lib.mkOption {
-      default = "users";
-    };
-  };
-
   config = {
     users.users."${user.userName}" = {
       isNormalUser = true;

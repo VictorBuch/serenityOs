@@ -15,27 +15,11 @@ in
     ./hardware-configuration.nix
     ../profiles/desktop.nix
     ../profiles/desktop-home.nix
-    inputs.home-manager.nixosModules.default
   ];
 
   networking.hostName = "jayne";
 
   user.userName = username;
-
-  # Home Manager setup
-  home-manager = {
-    backupFileExtension = "hm-backup";
-    extraSpecialArgs = {
-      inherit
-        username
-        inputs
-        pkgs-stable
-        ;
-    };
-    users.${username} = import ../../home/default.nix;
-
-    sharedModules = [ ];
-  };
 
   # Jayne-specific boot configuration
   boot = {

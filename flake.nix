@@ -20,7 +20,6 @@
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
-
     noctalia = {
       url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -142,21 +141,69 @@
     # `nix flake update` bumps every plugin — the hashes live in flake.lock, not
     # in the module. `type = "file"` keeps each asset a raw file (no unpacking);
     # `flake = false` because they're plain assets, not flakes.
-    obsidian-tasks-main = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/main.js"; };
-    obsidian-tasks-manifest = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/manifest.json"; };
-    obsidian-tasks-styles = { type = "file"; flake = false; url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/styles.css"; };
+    obsidian-tasks-main = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/main.js";
+    };
+    obsidian-tasks-manifest = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/manifest.json";
+    };
+    obsidian-tasks-styles = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/obsidian-tasks-group/obsidian-tasks/releases/latest/download/styles.css";
+    };
 
-    obsidian-task-genius-main = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/main.js"; };
-    obsidian-task-genius-manifest = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/manifest.json"; };
-    obsidian-task-genius-styles = { type = "file"; flake = false; url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/styles.css"; };
+    obsidian-task-genius-main = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/main.js";
+    };
+    obsidian-task-genius-manifest = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/manifest.json";
+    };
+    obsidian-task-genius-styles = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/taskgenius/taskgenius-plugin/releases/latest/download/styles.css";
+    };
 
-    obsidian-omnisearch-main = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/main.js"; };
-    obsidian-omnisearch-manifest = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/manifest.json"; };
-    obsidian-omnisearch-styles = { type = "file"; flake = false; url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/styles.css"; };
+    obsidian-omnisearch-main = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/main.js";
+    };
+    obsidian-omnisearch-manifest = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/manifest.json";
+    };
+    obsidian-omnisearch-styles = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/scambier/obsidian-omnisearch/releases/latest/download/styles.css";
+    };
 
-    obsidian-templater-main = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/main.js"; };
-    obsidian-templater-manifest = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/manifest.json"; };
-    obsidian-templater-styles = { type = "file"; flake = false; url = "https://github.com/SilentVoid13/Templater/releases/latest/download/styles.css"; };
+    obsidian-templater-main = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/SilentVoid13/Templater/releases/latest/download/main.js";
+    };
+    obsidian-templater-manifest = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/SilentVoid13/Templater/releases/latest/download/manifest.json";
+    };
+    obsidian-templater-styles = {
+      type = "file";
+      flake = false;
+      url = "https://github.com/SilentVoid13/Templater/releases/latest/download/styles.css";
+    };
   };
 
   outputs =
@@ -202,20 +249,66 @@
           };
         };
 
-      # Host definitions with their specific configurations
-      # All hosts now use unstable nixpkgs as base, with pkgs-stable available as escape hatch
-      nixosHosts = [
+      # One builder for every host. `class` picks the platform: the system
+      # builder, the module tree, and the home-manager and sops variants.
+      mkHost =
         {
-          name = "jayne";
-          extraModules = [ (import-tree ./modules/nixos) ];
-        }
-        {
-          name = "kaylee";
-          extraModules = [ (import-tree ./modules/nixos) ];
-        }
+          name,
+          class ? "nixos",
+          system ? if class == "darwin" then "aarch64-darwin" else "x86_64-linux",
+          hostConfig ? ./hosts/${name}/configuration.nix,
+          # Servers set this false and name the modules they want instead.
+          platformModules ? true,
+          extraModules ? [ ],
+        }:
+        let
+          darwin = class == "darwin";
+          builder = if darwin then nix-darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
+          platformTree =
+            if darwin then
+              [ (import-tree ./modules/darwin) ]
+            else
+              nixpkgs.lib.optional platformModules (import-tree ./modules/nixos);
+        in
+        builder {
+          inherit system;
+          pkgs = pkgsFor system;
+          specialArgs = {
+            inherit inputs system;
+            inherit (customLib) mkModule expiring;
+            pkgs = pkgsFor system;
+            pkgs-stable = stablePkgsFor system;
+          };
+          modules = [
+            # Common modules (auto-discovered)
+            (import-tree ./modules/common)
+            ./modules/common/_defaults.nix
+            # App modules (auto-discovered)
+            (import-tree ./modules/apps)
+            ./modules/apps/_categories.nix
+            # Host-specific configuration
+            hostConfig
+            (
+              if darwin then
+                inputs.home-manager.darwinModules.default
+              else
+                inputs.home-manager.nixosModules.default
+            )
+            (if darwin then inputs.sops-nix.darwinModules.sops else inputs.sops-nix.nixosModules.sops)
+          ]
+          ++ platformTree
+          ++ extraModules;
+        };
+
+      # Host definitions. Unstable nixpkgs is the base everywhere, with
+      # pkgs-stable as the escape hatch.
+      hosts = [
+        { name = "jayne"; }
+        { name = "kaylee"; }
         {
           name = "mal";
-          # Homelab server: uses homelab modules instead of desktop modules
+          # Homelab server: homelab modules instead of the desktop tree.
+          platformModules = false;
           extraModules = [
             (import-tree ./modules/homelab)
             ./modules/homelab/_config.nix
@@ -226,36 +319,38 @@
         }
         {
           name = "wash";
-          # Public VPS running Pangolin: no desktop, no homelab modules
+          # Public VPS running Pangolin: homelab facts only, no desktop tree.
+          platformModules = false;
           extraModules = [
+            ./modules/homelab/_config.nix
             ./modules/nixos/system/user.nix
             inputs.disko.nixosModules.disko
           ];
         }
         {
           name = "shepherd";
-          extraModules = [
-            (import-tree ./modules/nixos)
-            inputs.disko.nixosModules.disko
-          ];
+          extraModules = [ inputs.disko.nixosModules.disko ];
         }
         {
           name = "shepherd-arm";
           system = "aarch64-linux";
           hostConfig = ./hosts/shepherd/configuration.nix;
-          extraModules = [
-            (import-tree ./modules/nixos)
-            inputs.disko.nixosModules.disko
-          ];
+          extraModules = [ inputs.disko.nixosModules.disko ];
+        }
+        {
+          name = "inara";
+          class = "darwin";
         }
       ];
 
-      darwinHosts = [
-        {
-          name = "inara";
-          system = "aarch64-darwin";
-        }
-      ];
+      hostsOfClass =
+        class:
+        builtins.listToAttrs (
+          map (host: {
+            inherit (host) name;
+            value = mkHost host;
+          }) (builtins.filter (host: (host.class or "nixos") == class) hosts)
+        );
 
       # Export custom packages for all systems
       packages = builtins.listToAttrs (
@@ -292,76 +387,7 @@
       checks.x86_64-linux.shell-actions =
         self.nixosConfigurations.jayne.config.home-manager.users.jayne.home.desktop.shell.check;
 
-      nixosConfigurations = builtins.listToAttrs (
-        map (host: {
-          inherit (host) name;
-          value =
-            let
-              system = host.system or "x86_64-linux"; # Default to x86_64-linux
-            in
-            nixpkgs.lib.nixosSystem {
-              inherit system;
-              pkgs = pkgsFor system;
-              specialArgs = {
-                inherit inputs system;
-                inherit (customLib) mkModule expiring;
-                pkgs = pkgsFor system;
-                pkgs-stable = stablePkgsFor system;
-              };
-              modules = [
-                # Common modules (auto-discovered)
-                (import-tree ./modules/common)
-                ./modules/common/_defaults.nix
-                # App modules (auto-discovered)
-                (import-tree ./modules/apps)
-                ./modules/apps/_categories.nix
-                # Host-specific configuration
-                (host.hostConfig or ./hosts/${host.name}/configuration.nix)
-                # Standard modules for all NixOS hosts
-                inputs.home-manager.nixosModules.default
-                inputs.sops-nix.nixosModules.sops
-                { home-manager.useGlobalPkgs = true; }
-              ]
-              ++ (host.extraModules or [ ]);
-            };
-        }) nixosHosts
-      );
-
-      darwinConfigurations = builtins.listToAttrs (
-        map (host: {
-          inherit (host) name;
-          value = nix-darwin.lib.darwinSystem (
-            let
-              system = host.system; # Darwin hosts must specify system
-            in
-            {
-              inherit system;
-              pkgs = pkgsFor system;
-              specialArgs = {
-                inherit inputs system;
-                inherit (customLib) mkModule expiring;
-                pkgs = pkgsFor system;
-                pkgs-stable = stablePkgsFor system;
-              };
-              modules = [
-                # Common modules (auto-discovered)
-                (import-tree ./modules/common)
-                ./modules/common/_defaults.nix
-                # App modules (auto-discovered)
-                (import-tree ./modules/apps)
-                ./modules/apps/_categories.nix
-                # Host-specific configuration
-                (host.hostConfig or ./hosts/${host.name}/configuration.nix)
-                # Darwin-specific modules
-                (import-tree ./modules/darwin)
-                inputs.home-manager.darwinModules.default
-                inputs.sops-nix.darwinModules.sops
-                { home-manager.useGlobalPkgs = true; }
-              ]
-              ++ (host.extraModules or [ ]);
-            }
-          );
-        }) darwinHosts
-      );
+      nixosConfigurations = hostsOfClass "nixos";
+      darwinConfigurations = hostsOfClass "darwin";
     };
 }

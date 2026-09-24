@@ -541,6 +541,11 @@ in
         # Enable JACK audio emulation via PipeWire
         services.pipewire.jack.enable = true;
 
+        boot.kernelModules = lib.optionals (cfg.wineTrack == "modern") [ "ntsync" ];
+        services.udev.extraRules = lib.optionalString (cfg.wineTrack == "modern") ''
+          KERNEL=="ntsync", MODE="0660", GROUP="audio"
+        '';
+
         fonts.packages = [
           pkgs.fira-sans
           pkgs.roboto

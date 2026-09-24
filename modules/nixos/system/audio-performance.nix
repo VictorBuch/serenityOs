@@ -35,5 +35,7 @@
     # Raise the audio interface's IRQ thread above the rest. Defaults cover the
     # "snd usb i8042" IRQ names, which is what an onboard/USB interface shows up as.
     musnix.rtirq.enable = true;
+
+    services.power-profiles-daemon.enable = lib.mkForce false;
   };
 }

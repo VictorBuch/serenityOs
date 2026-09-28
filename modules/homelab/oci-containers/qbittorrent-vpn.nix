@@ -21,7 +21,9 @@ in
 
     pia.locations = lib.mkOption {
       type = lib.types.str;
-      default = "de_berlin";
+      # Two regions so one briefly vanishing from PIA's server list (as
+      # de_berlin did on 2026-09-27) doesn't leave nothing to connect to.
+      default = "de_berlin,de-frankfurt";
       description = "PIA locations (comma-separated, port-forward capable regions only)";
     };
   };
@@ -114,6 +116,19 @@ in
         extraOptions = [
           "--network=container:pia-tun"
         ];
+      };
+
+      # pia-tun exits fatally on transient PIA-side failures (region missing
+      # from the server list, auth API down). The default start limit gave
+      # up after ~1h and left the whole torrent stack down for days. Retry
+      # forever instead, backing off from 10s to 5min between attempts.
+      systemd.services.docker-pia-tun = {
+        startLimitIntervalSec = 0;
+        serviceConfig = {
+          RestartSec = "10s";
+          RestartSteps = 10;
+          RestartMaxDelaySec = "5min";
+        };
       };
 
       systemd.services.docker-qbittorrent = {

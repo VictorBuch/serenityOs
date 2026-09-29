@@ -75,7 +75,7 @@ in
           LOCAL_NETWORKS = "192.168.0.0/24,10.0.0.0/24,100.64.0.0/10";
           PF_ENABLED = "true";
           DNS = "pia";
-          LOG_LEVEL = "debug";
+          LOG_LEVEL = "info";
           TZ = "Europe/Copenhagen";
         };
 
@@ -140,6 +140,10 @@ in
         # stops; PartOf restarts it whenever pia-tun is restarted.
         bindsTo = [ "docker-pia-tun.service" ];
         partOf = [ "docker-pia-tun.service" ];
+        # Neither of those ever starts qbittorrent again: after pia-tun
+        # failed and auto-restarted, qbittorrent stayed down until the next
+        # deploy (days, in 2026-09). Upholds starts it whenever pia-tun is up.
+        upheldBy = [ "docker-pia-tun.service" ];
       };
     }
 
@@ -220,6 +224,8 @@ in
         # Follow qbittorrent's lifecycle so a pia-tun restart cascades
         # cleanly: pia-tun -> qbittorrent (BindsTo/PartOf) -> qui (PartOf).
         partOf = [ "docker-qbittorrent.service" ];
+        # Come back with qbittorrent (see docker-qbittorrent's upheldBy).
+        upheldBy = [ "docker-qbittorrent.service" ];
       };
     })
 
@@ -263,6 +269,8 @@ in
         # disappears whenever pia-tun restarts.
         bindsTo = [ "docker-pia-tun.service" ];
         partOf = [ "docker-pia-tun.service" ];
+        # Come back with pia-tun (see docker-qbittorrent's upheldBy).
+        upheldBy = [ "docker-pia-tun.service" ];
       };
     })
   ]);

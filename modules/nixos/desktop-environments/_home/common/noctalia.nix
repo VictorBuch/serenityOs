@@ -498,8 +498,6 @@ in
       # must sort AFTER config.toml -- the filename the home-manager module
       # writes -- hence zz-, or it would load first and lose.
       path = ".config/noctalia/zz-local.toml";
-      precedence = "Merged after config.toml, so keys here win.";
-      reload = "`noctalia msg config-reload`";
     };
 
     # The shell overlays ~/.local/state/noctalia/settings.toml on top of

@@ -1,0 +1,2 @@
+# Live Seam -- tracked in serenityOs/dotfiles, symlinked here. Loaded after the generated
+# config, so settings here win. Reload with ctrl+shift+comma.

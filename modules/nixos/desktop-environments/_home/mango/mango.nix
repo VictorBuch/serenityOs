@@ -93,8 +93,6 @@ in
 
     home.liveSeams.mango = {
       path = ".config/mango/local.conf";
-      precedence = "Sourced after the generated config, so settings here win.";
-      reload = "SUPER+SHIFT+R";
     };
 
     wayland.windowManager.mango = {

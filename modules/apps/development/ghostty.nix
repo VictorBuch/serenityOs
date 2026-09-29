@@ -79,7 +79,6 @@ mkModule {
       # Both platforms: the Darwin config written below names the same seam.
       home.liveSeams.ghostty = {
         path = ".config/ghostty/local";
-        reload = "SIGUSR2 or ctrl+shift+comma";
       };
 
       xdg.configFile."ghostty/config" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {

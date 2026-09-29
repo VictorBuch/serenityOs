@@ -1,6 +1,7 @@
 # Jayne - Primary desktop workstation (AMD GPU)
 # Full workstation with audio production, video editing, gaming, etc.
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -191,7 +192,15 @@ in
     defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/jayne/.config/sops/age/keys.txt";
+    secrets.github-token = { };
+    templates."nix-access-tokens" = {
+      content = "access-tokens = github.com=${config.sops.placeholder.github-token}";
+      owner = username;
+      mode = "0400";
+    };
   };
+
+  nix.extraOptions = "!include ${config.sops.templates."nix-access-tokens".path}";
 
   nix.settings.trusted-users = [
     "root"

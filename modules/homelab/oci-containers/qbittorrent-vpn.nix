@@ -75,7 +75,7 @@ in
           LOCAL_NETWORKS = "192.168.0.0/24,10.0.0.0/24,100.64.0.0/10";
           PF_ENABLED = "true";
           DNS = "pia";
-          LOG_LEVEL = "info";
+          LOG_LEVEL = "debug";
           TZ = "Europe/Copenhagen";
         };
 

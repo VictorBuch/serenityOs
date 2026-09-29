@@ -10,14 +10,6 @@ in
   # AI coding agents from numtide/llm-agents.nix
   llm-agents = inputs.llm-agents.packages.${final.stdenv.hostPlatform.system};
 
-  # nixCats-style wrapped neovim. Module + lua live in modules/apps/neovim/_nixcats/.
-  nixcatsNeovim =
-    let
-      module = final.lib.modules.importApply ../modules/apps/neovim/_nixcats/module.nix inputs;
-      wrapper = inputs.nix-wrapper-modules.lib.evalModule module;
-    in
-    wrapper.config.wrap { pkgs = final; };
-
   # Herdr: mouse-first terminal multiplexer (flake ships only a package)
   herdr = inputs.herdr.packages.${final.stdenv.hostPlatform.system}.default;
 

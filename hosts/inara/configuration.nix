@@ -60,7 +60,7 @@ in
     };
 
     neovim = {
-      nixcats.enable = true;
+      lazyvim.enable = true;
       nixvim.enable = false;
     };
 

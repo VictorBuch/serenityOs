@@ -54,23 +54,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixCats-style neovim wrapper (lua config stays native, nix provides binaries/plugins)
-    nix-wrapper-modules = {
-      url = "github:BirdeeHub/nix-wrapper-modules";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Lazy-loader + helpers. Auto-picked up by pluginsFromPrefix "plugins-".
-    plugins-lze = {
-      url = "github:BirdeeHub/lze";
-      flake = false;
-    };
-
-    plugins-lzextras = {
-      url = "github:BirdeeHub/lzextras";
-      flake = false;
-    };
-
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";

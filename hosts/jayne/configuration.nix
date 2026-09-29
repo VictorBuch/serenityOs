@@ -170,7 +170,7 @@ in
     utilities.enable = true;
 
     neovim = {
-      nixcats.enable = true;
+      lazyvim.enable = true;
       nixvim.enable = false;
     };
 

@@ -377,6 +377,7 @@ in
     fileflows.enable = true;
     streaming.enable = true;
     calibre-web.enable = true;
+    bookorbit.enable = true;
     chaptarr.enable = true;
     romm.enable = true;
     immich.enable = true;

@@ -166,7 +166,6 @@ in
           "hl.workspace_rule(${
             lua {
               workspace = s.ws;
-              layout = "monocle";
               on_created_empty = s.app.command;
             }
           })"

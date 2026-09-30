@@ -94,6 +94,7 @@ in
   # Desktop environments
   desktop = {
     compositor.mango.enable = true;
+    compositor.hyprland.enable = true;
     session = {
       makeDefault = false;
       outputs = [

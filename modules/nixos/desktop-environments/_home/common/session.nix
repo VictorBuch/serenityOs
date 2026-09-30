@@ -91,6 +91,12 @@ in
 
   home.desktop.windowRules = [
     {
+      appId = config.home.desktop.apps.${session.fileManager}.regex;
+      float = true;
+      width = 0.7;
+      height = 0.7;
+    }
+    {
       appId = "^(${lib.concatStringsSep "|" dialogApps})$";
       float = true;
       width = 0.6;

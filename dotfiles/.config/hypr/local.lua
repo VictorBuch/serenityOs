@@ -1,0 +1,2 @@
+-- Live Seam -- tracked in serenityOs/dotfiles, symlinked here. Loaded last,
+-- so settings here win. Hyprland reloads on save.

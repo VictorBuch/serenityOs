@@ -17,7 +17,7 @@
     desktop.session = {
       enable = true;
       name = "mango";
-      homeModule = ./_home/mango;
+      homeModules = [ ./_home/mango ];
     };
 
     # nixpkgs upstreamed this module (programs/wayland/mango.nix); the login

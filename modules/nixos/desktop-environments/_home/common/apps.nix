@@ -109,6 +109,21 @@ in
         "Tidal-hifi"
       ];
     };
+    android-studio = {
+      command = "android-studio";
+      windowIds = [ "jetbrains-studio" ];
+    };
+    reaper = {
+      command = "reaper";
+      windowIds = [
+        "REAPER"
+        "reaper"
+      ];
+    };
+    nautilus = {
+      command = "nautilus";
+      windowIds = [ "org.gnome.Nautilus" ];
+    };
     dolphin = {
       command = "dolphin";
       windowIds = [

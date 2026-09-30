@@ -116,6 +116,12 @@ in
         noctaliaTemplates = [ "mango" ];
         note = "Window decorations, reloaded live via `mmsg reload_config`. stylix has no mango target.";
       };
+      hyprland = {
+        colors = "noctalia";
+        noctaliaTemplates = [ "hyprland" ];
+        stylixTargets = [ "hyprland" ];
+        note = "Border and group colors; the conf sources ~/.config/hypr/noctalia.conf so the template's apply step is a no-op.";
+      };
       ghostty = {
         colors = "noctalia";
         noctaliaTemplates = [ "ghostty" ];

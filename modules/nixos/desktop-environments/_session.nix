@@ -138,10 +138,10 @@ in
       description = "The app that owns inode/directory and answers org.freedesktop.FileManager1.";
     };
 
-    homeModule = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = "Home Manager module carrying the Compositor's own config.";
+    homeModules = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+      description = "Home Manager modules carrying each enabled Compositor's own config.";
     };
   };
 
@@ -151,10 +151,7 @@ in
 
     services.displayManager.defaultSession = lib.mkIf cfg.makeDefault cfg.name;
 
-    home-manager.sharedModules = [
-      ./_home/common/session.nix
-    ]
-    ++ lib.optional (cfg.homeModule != null) cfg.homeModule;
+    home-manager.sharedModules = [ ./_home/common/session.nix ] ++ cfg.homeModules;
 
     desktop.session.autostart = [
       [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]

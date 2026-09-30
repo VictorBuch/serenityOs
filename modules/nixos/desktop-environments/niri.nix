@@ -17,7 +17,7 @@
     desktop.session = {
       enable = true;
       name = "niri";
-      homeModule = ./_home/niri;
+      homeModules = [ ./_home/niri ];
     };
 
     programs.niri = {

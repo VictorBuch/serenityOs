@@ -12,38 +12,18 @@ let
   session = osConfig.desktop.session;
   lua = lib.generators.toLua { };
 
-  slots = [
-    {
-      key = "1";
-      ws = "1";
-      app = apps.zen;
-    }
-    {
-      key = "2";
-      ws = "2";
-      app = apps.ghostty;
-    }
-    {
-      key = "3";
-      ws = "3";
-      app = apps.figma;
-    }
-    {
-      key = "4";
-      ws = "4";
-      app = apps.obsidian;
-    }
-    {
-      key = "A";
-      ws = "5";
-      app = apps.android-studio;
-    }
-    {
-      key = "R";
-      ws = "6";
-      app = apps.reaper;
-    }
-  ];
+  slots = lib.imap1 (i: app: { ws = toString i; inherit app; }) (
+    with apps;
+    [
+      zen
+      ghostty
+      obsidian
+      android-studio
+      reaper
+      davinci-resolve
+      steam
+    ]
+  );
 
   scratchpads = {
     M = apps.sone;
@@ -169,8 +149,8 @@ in
               on_created_empty = s.app.command;
             }
           })"
-          (bind "SUPER + ${s.key}" "hl.dsp.focus(${lua { workspace = s.ws; }})")
-          (bind "SUPER + SHIFT + ${s.key}" "hl.dsp.window.move(${lua { workspace = s.ws; }})")
+          (bind "SUPER + ${s.ws}" "hl.dsp.focus(${lua { workspace = s.ws; }})")
+          (bind "SUPER + SHIFT + ${s.ws}" "hl.dsp.window.move(${lua { workspace = s.ws; }})")
         ]) slots
 
         ++ lib.concatLists (

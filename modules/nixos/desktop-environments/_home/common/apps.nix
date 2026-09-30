@@ -120,6 +120,14 @@ in
         "reaper"
       ];
     };
+    davinci-resolve = {
+      command = "davinci-resolve-studio";
+      windowIds = [ "resolve" ];
+    };
+    steam = {
+      command = "steam";
+      windowIds = [ "steam" ];
+    };
     nautilus = {
       command = "nautilus";
       windowIds = [ "org.gnome.Nautilus" ];

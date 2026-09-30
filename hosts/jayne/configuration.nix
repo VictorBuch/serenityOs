@@ -116,7 +116,6 @@ in
       autostartApps = [
         "zen"
         "ghostty"
-        "figma"
       ];
     };
     environment.gnome.enable = false;

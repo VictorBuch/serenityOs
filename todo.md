@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Noctalia colors and wallpapers also refresh layouts every hour... not great
 - [x] Easier live update dotfiles for Jayne
 - [x] Icons, file managers and other services seem very scattered and not very unified. Lets fix that for Jayne
 - [x] Install / configure crowd sec on wash

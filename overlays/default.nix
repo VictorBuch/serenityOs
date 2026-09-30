@@ -115,6 +115,35 @@ in
         );
   };
 
+  # recode is broken on darwin: every invocation prints
+  #   Charset WINDOWS-874 already exists and is not CP874
+  # and then segfaults. Its own test suite catches this (10 failures, then
+  # "check-local: Segmentation fault: 11"), which is what makes the build fail
+  # rather than silently ship a dead binary. It takes fortune-mod down with it
+  # (librecode is a buildInput), and with it the tmux status-right fortune.
+  #
+  # Cause: recode has no charset list of its own for its iconv module. tables.py
+  # shells out to `iconv -l` at build time and reads one charset plus its aliases
+  # per line. That parse assumes GNU libiconv's output, but on darwin nixpkgs'
+  # `libiconv` is Apple's fork (115.100.1), whose `iconv -l` groups by conversion
+  # module rather than by charset: WINDOWS-874 appears in both the CP1162 and the
+  # CP874 lines, and one line runs ISO-8859-1 straight through ISO-8859-16. Every
+  # repeated name hits recode_declare_alias's contradiction check in src/names.c,
+  # which calls recode_error and returns NULL, and module_iconv's caller does not
+  # survive the aborted table build.
+  #
+  # Fix: put GNU libiconv's `iconv` first on the build PATH so tables.py reads the
+  # format it was written for. Table generation only -- the library still links
+  # Apple's libiconv, which accepts these names at runtime. Linux already has a
+  # GNU-compatible `iconv -l`, so leave it alone and avoid a mass rebuild there.
+  recode =
+    if prev.stdenv.hostPlatform.isDarwin then
+      prev.recode.overrideAttrs (old: {
+        nativeBuildInputs = [ final.libiconvReal ] ++ (old.nativeBuildInputs or [ ]);
+      })
+    else
+      prev.recode;
+
   # DaVinci Resolve Studio: byte-level patches to the shipped binaries.
   #
   # bin/resolve lives in the inner `stdenv.mkDerivation` that package.nix binds

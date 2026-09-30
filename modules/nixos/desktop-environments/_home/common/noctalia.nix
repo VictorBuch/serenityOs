@@ -32,11 +32,13 @@ let
   userTemplates = lib.attrByPath [ "theme" "authority" "noctalia" "userTemplates" ] { } osConfig;
 
   bin = "${config.programs.noctalia.package}/bin/noctalia";
-  msg = args: [
-    bin
-    "msg"
-  ]
-  ++ args;
+  msg =
+    args:
+    [
+      bin
+      "msg"
+    ]
+    ++ args;
 in
 {
   imports = [ ./shell.nix ];
@@ -54,49 +56,75 @@ in
         bar.order = [ "main" ];
         bar.main = {
           position = "left";
-          thickness = 40;
-          background_opacity = 0.3;
-          radius = 12;
-          padding = 12;
-          widget_spacing = 6;
+          thickness = 50;
+          background_opacity = 0.30;
+          margin_ends = 0;
+          radius = 16;
+          border = "#FFFFFF1F";
+          border_width = 1;
+          padding = 10;
+          widget_spacing = 4;
           font_weight = 500;
           concave_edge_corners = true;
           hover_highlight = true;
           show_on_workspace_switch = true;
 
-          # Solid pills on a glass strip: the capsules carry the contrast, the
-          # bar itself stays transparent.
+          # A full-height translucent strip carrying capsule-group islands. Only primary/secondary/tertiary/surface/surface_variant/
+          # on_*/outline/error validate as fills -- no *_container roles.
           capsule = false;
-          capsule_fill = "surface_variant";
-          capsule_opacity = 1.0;
-          capsule_padding = 6;
-          capsule_thickness = 0.76;
+          capsule_group =
+            let
+              island =
+                id: members: extra:
+                {
+                  inherit id members;
+                  fill = "surface_variant";
+                  opacity = 0.38;
+                  padding = 6;
+                  radius = 20;
+                  border = "#FFFFFF24";
+                  border_width = 1;
+                }
+                // extra;
+            in
+            [
+              (island "system" (
+                [
+                  "control-center"
+                  "status" # pozzoo/hassio widget
+                  "nix-monitor" # avivbintangaringga/nix-monitor widget
+                  "eyecare" # apex077/eyecare widget
+                ]
+                ++ lib.optional davinci.enable "davinci-convert" # local plugin widget
+              ) { })
+              (island "time" [ "clock" ] {
+                foreground = "primary";
+                padding = 8;
+              })
+              (island "media" [ "media" ] { })
+              (island "tray" [ "tray" ] { })
+              (island "status" [
+                "notifications"
+                "volume"
+                "network"
+                "bluetooth"
+                "cpu"
+                "session"
+              ] { })
+            ];
 
           shadow = false;
           contact_shadow = false;
 
           start = [
-            "control-center"
-            "status" # pozzoo/hassio widget
-            "nix-monitor" # avivbintangaringga/nix-monitor widget
-          ]
-          ++ lib.optional davinci.enable "davinci-convert" # local plugin widget
-          ++ [
-            "spacer_2"
-            "clock"
+            "group:system"
+            "group:time"
           ];
           center = [ "workspaces" ];
           end = [
-            "media"
-            "spacer_2"
-            "tray"
-            "spacer_2"
-            "notifications"
-            "network"
-            "bluetooth"
-            "volume"
-            "spacer_2"
-            "session"
+            "group:media"
+            "group:tray"
+            "group:status"
           ];
         };
 
@@ -370,6 +398,7 @@ in
 
           enabled = [
             "avivbintangaringga/nix-monitor"
+            "apex077/eyecare"
             "pozzoo/hassio" # the `status` bar widget + plugin_settings below
           ]
           ++ lib.optional davinci.enable davinci.pluginId;
@@ -390,7 +419,20 @@ in
           # verbatim on one line (src/shell/bar/widgets/clock_widget.cpp:41).
           # Leaving it unset makes the fallback stack `format` on space/colon,
           # giving hour / minute / date on three lines.
-          clock.format = "{:%H:%M %d/%m}";
+          clock = {
+            format = "{:%H:%M}";
+            font_weight = 700;
+          };
+          workspaces = {
+            style = "regular";
+            show_labels = true;
+            labels_only_when_occupied = true;
+            show_icons = false;
+            focused_color = "primary";
+            occupied_color = "surface_variant";
+            empty_color = "outline";
+            active_pill_size = 1.5;
+          };
           control-center.glyph = "󱄅";
           media.hide_when_no_media = true;
           network.show_label = false;
@@ -401,6 +443,7 @@ in
             show_text = false;
           };
           status.type = "pozzoo/hassio:status";
+          eyecare.type = "apex077/eyecare:eyecare-widget";
           spacer_2.type = "spacer";
         }
         // lib.optionalAttrs davinci.enable {
@@ -505,7 +548,8 @@ in
     };
 
     # The shell overlays ~/.local/state/noctalia/settings.toml on top of
-    # everything, so a theme.mode key there outranks the pinned dark mode above.
+    # everything, so keys there (theme.mode, theme.wallpaper_scheme, the clock
+    # and workspaces widgets) outrank what nix declares above.
     # That is drift, not configuration. The wallpaper path, monitor overrides and
     # plugins.auto_update in the same file are app-owned and deliberately left
     # alone. tomlkit preserves formatting and comments, so the file comes back
@@ -518,11 +562,17 @@ in
       import sys, tomlkit
       path = sys.argv[1]
       doc = tomlkit.parse(open(path).read())
-      theme = doc.get("theme")
-      if theme is not None and "mode" in theme:
-          del theme["mode"]
+      removed = []
+      for table, key in [("theme", "mode"), ("theme", "wallpaper_scheme"), ("widget", "clock"), ("widget", "workspaces")]:
+          parent = doc.get(table)
+          if parent is not None and key in parent:
+              del parent[key]
+              removed.append(f"{table}.{key}")
+              if not parent:
+                  del doc[table]
+      if removed:
           open(path, "w").write(tomlkit.dumps(doc))
-          print("noctalia: removed theme.mode override from settings.toml")
+          print("noctalia: removed overrides from settings.toml: " + ", ".join(removed))
       PYSTRIP
             fi
     '';

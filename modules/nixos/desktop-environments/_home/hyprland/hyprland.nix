@@ -145,9 +145,9 @@ in
                 };
                 blur = {
                   enabled = true;
-                  size = 8;
+                  size = 10;
                   passes = 3;
-                  vibrancy = 0.2;
+                  vibrancy = 0.4;
                   popups = true;
                 };
               };
@@ -175,7 +175,7 @@ in
               match.namespace = "^noctalia-(bar|panel|attached-panel|notification).*";
               blur = true;
               blur_popups = true;
-              ignore_alpha = 0.2;
+              ignore_alpha = 0.1;
             }
           })"
           ''hl.on("hyprland.start", function()''

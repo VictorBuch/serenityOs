@@ -106,7 +106,7 @@ in
 
   # Desktop environments
   desktop = {
-    compositor.mango.enable = true;
+    compositor.mango.enable = false;
     compositor.hyprland.enable = true;
     session = {
       makeDefault = false;

@@ -54,6 +54,19 @@ in
         '';
       };
     };
+    plymouth = {
+      enable = true;
+      theme = "rings";
+      themePackages = [ (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "rings" ]; }) ];
+    };
+    consoleLogLevel = 3;
+    initrd.verbose = false;
+    kernelParams = [
+      "quiet"
+      "splash"
+      "udev.log_level=3"
+      "systemd.show_status=auto"
+    ];
     # Enable NTFS support for mounting Windows drives
     supportedFilesystems = [ "ntfs" ];
     # Kernel performance optimizations

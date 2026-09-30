@@ -29,6 +29,7 @@ let
   # Derived from the Theme Authority table in modules/common/theme-authority.nix.
   # The fallback keeps this module evaluable under bare home-manager.
   builtinTemplateIds = lib.attrByPath [ "theme" "authority" "noctalia" "builtinIds" ] [ ] osConfig;
+  userTemplates = lib.attrByPath [ "theme" "authority" "noctalia" "userTemplates" ] { } osConfig;
 
   bin = "${config.programs.noctalia.package}/bin/noctalia";
   msg = args: [
@@ -86,6 +87,8 @@ in
           ];
           center = [ "workspaces" ];
           end = [
+            "media"
+            "spacer_2"
             "tray"
             "spacer_2"
             "notifications"
@@ -212,6 +215,7 @@ in
             enable_builtin_templates = true;
             builtin_ids = builtinTemplateIds;
             enable_community_templates = false;
+            user = userTemplates;
           };
         };
 

@@ -1,109 +1,52 @@
 {
   config,
-  pkgs,
   lib,
-  options,
+  inputs,
   ...
 }:
+let
+  silent = config.programs.silentSDDM;
+  wallpaper = "bg8.jpg";
+in
 {
+  imports = [ inputs.silentSDDM.nixosModules.default ];
 
   options = {
     desktop.loginManager.sddm.enable = lib.mkEnableOption "SDDM as the login manager";
   };
 
   config = lib.mkIf config.desktop.loginManager.sddm.enable {
-    services.displayManager.sddm = {
+    programs.silentSDDM = {
       enable = true;
-      wayland.enable = true;
-      package = lib.mkDefault pkgs.kdePackages.sddm;
-      theme = "sddm-astronaut-theme";
+      theme = "default";
+      wayland = {
+        enable = true;
+        compositor = "kwin";
+      };
+      backgrounds.night = "${inputs.wallpapers-nord}/${wallpaper}";
       settings = {
-        General = {
-          GreeterEnvironment = "QT_WAYLAND_DISABLE_WINDOWDECORATION=1";
+        LockScreen = {
+          background = wallpaper;
+          blur = 48;
+          brightness = -0.1;
+        };
+        "LockScreen.Clock".font-family = config.fonts.mono.familyMono;
+        "LockScreen.Date".font-family = config.fonts.mono.familyMono;
+        "LockScreen.Message".font-family = config.fonts.mono.familyMono;
+        LoginScreen = {
+          background = wallpaper;
+          blur = 64;
+          brightness = -0.15;
         };
       };
     };
 
-    services.displayManager.sddm.extraPackages = with pkgs.kdePackages; [
-      qtsvg
-      qtmultimedia
-      qtvirtualkeyboard
-    ];
-
-    environment.systemPackages = [
-      (pkgs.sddm-astronaut.override {
-        embeddedTheme = "japanese_aesthetic";
-        themeConfig = {
-          # Background
-          Background = "${../../../home/wallpapers/dark-hole.png}";
-          CropBackground = "true";
-          DimBackground = "0.2";
-
-          # General
-          FormPosition = "center";
-          Font = config.fonts.mono.familyMono;
-          FontSize = "13";
-          RoundCorners = "16";
-          HourFormat = "HH:mm";
-          DateFormat = "dddd d MMMM";
-
-          # Panel / form colors (gruvbox-dark)
-          FormBackgroundColor = "#282828";
-          BackgroundColor = "#282828";
-          DimBackgroundColor = "#1d2021";
-
-          # Input fields
-          LoginFieldBackgroundColor = "#3c3836";
-          PasswordFieldBackgroundColor = "#3c3836";
-          LoginFieldTextColor = "#ebdbb2";
-          PasswordFieldTextColor = "#ebdbb2";
-          UserIconColor = "#ebdbb2";
-          PasswordIconColor = "#ebdbb2";
-
-          # Text colors
-          HeaderTextColor = "#ebdbb2";
-          DateTextColor = "#928374";
-          TimeTextColor = "#ebdbb2";
-          PlaceholderTextColor = "#665c54";
-
-          # Buttons
-          LoginButtonTextColor = "#ebdbb2";
-          LoginButtonBackgroundColor = "#458588";
-          SystemButtonsIconsColor = "#ebdbb2";
-          SessionButtonTextColor = "#ebdbb2";
-          VirtualKeyboardButtonTextColor = "#ebdbb2";
-          WarningColor = "#cc241d";
-
-          # Dropdowns
-          DropdownTextColor = "#ebdbb2";
-          DropdownSelectedBackgroundColor = "#458588";
-          DropdownBackgroundColor = "#3c3836";
-
-          # Highlights
-          HighlightTextColor = "#ebdbb2";
-          HighlightBackgroundColor = "#504945";
-          HighlightBorderColor = "#458588";
-
-          # Hover states (gruvbox aqua accent)
-          HoverUserIconColor = "#689d6a";
-          HoverPasswordIconColor = "#689d6a";
-          HoverSystemButtonsIconsColor = "#689d6a";
-          HoverSessionButtonTextColor = "#689d6a";
-          HoverVirtualKeyboardButtonTextColor = "#689d6a";
-
-          # Form blur
-          FullBlur = "true";
-          BlurMax = "64";
-          Blur = "1.0";
-          HaveFormBackground = "true";
-
-          # Behavior
-          ForceLastUser = "true";
-          PasswordFocus = "true";
-          HideVirtualKeyboard = "true";
-          HideLoginButton = "false";
-        };
-      })
-    ];
+    services.displayManager.sddm.settings.General.GreeterEnvironment = lib.mkForce (
+      lib.concatStringsSep "," [
+        "QML2_IMPORT_PATH=${silent.package'}/share/sddm/themes/silent/components/"
+        "QT_IM_MODULE=qtvirtualkeyboard"
+        "QT_WAYLAND_DISABLE_WINDOWDECORATION=1"
+      ]
+    );
   };
 }

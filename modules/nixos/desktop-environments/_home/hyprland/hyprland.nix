@@ -3,6 +3,7 @@
   options,
   osConfig,
   lib,
+  pkgs,
   ...
 }:
 
@@ -12,18 +13,24 @@ let
   session = osConfig.desktop.session;
   lua = lib.generators.toLua { };
 
-  slots = lib.imap1 (i: app: { ws = toString i; inherit app; }) (
-    with apps;
-    [
-      zen
-      ghostty
-      obsidian
-      android-studio
-      reaper
-      davinci-resolve
-      steam
-    ]
-  );
+  slots =
+    lib.imap1
+      (i: app: {
+        ws = toString i;
+        inherit app;
+      })
+      (
+        with apps;
+        [
+          zen
+          ghostty
+          obsidian
+          android-studio
+          reaper
+          davinci-resolve
+          steam
+        ]
+      );
 
   scratchpads = {
     M = apps.sone;
@@ -58,12 +65,13 @@ let
   bind = keys: dispatch: "hl.bind(${lua keys}, ${dispatch})";
   exec = cmd: "hl.dsp.exec_cmd(${lua cmd})";
 
-  autostart =
-    [ config.home.desktop.shell.start ]
-    ++ session.autostart
-    ++ map (name: [ apps.${name}.command ]) (
-      lib.filter (name: apps.${name}.command != (lib.head slots).app.command) session.autostartApps
-    );
+  autostart = [
+    config.home.desktop.shell.start
+  ]
+  ++ session.autostart
+  ++ map (name: [ apps.${name}.command ]) (
+    lib.filter (name: apps.${name}.command != (lib.head slots).app.command) session.autostartApps
+  );
 in
 {
   options.home.desktop.compositor.hyprland.enable = lib.mkEnableOption "Hyprland home config";
@@ -77,6 +85,10 @@ in
       configType = "lua";
       package = null;
       portalPackage = null;
+      plugins = with pkgs.hyprlandPlugins; [
+        hypr-dynamic-cursors
+        hyprfocus
+      ];
       systemd.variables = options.wayland.windowManager.hyprland.systemd.variables.default ++ [
         "QT_QPA_PLATFORMTHEME"
       ];
@@ -85,6 +97,9 @@ in
         [
           ''hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")''
         ]
+        ++ lib.optional (osConfig.environment.sessionVariables ? LD_LIBRARY_PATH) ''hl.env("LD_LIBRARY_PATH", ${
+          lua (lib.concatStringsSep ":" (lib.toList osConfig.environment.sessionVariables.LD_LIBRARY_PATH))
+        })''
         ++ map (
           o:
           "hl.monitor(${
@@ -111,24 +126,56 @@ in
                 };
               };
               general = {
-                gaps_in = 4;
-                gaps_out = 4;
+                gaps_in = 6;
+                gaps_out = 12;
                 border_size = 2;
                 layout = "dwindle";
               };
               decoration = {
-                rounding = 8;
+                rounding = 14;
+                rounding_power = 2;
                 inactive_opacity = 0.9;
+                dim_inactive = true;
+                dim_strength = 0.05;
+                shadow = {
+                  enabled = true;
+                  range = 20;
+                  render_power = 3;
+                  color = "rgba(00000066)";
+                };
                 blur = {
                   enabled = true;
-                  size = 4;
-                  passes = 2;
+                  size = 8;
+                  passes = 3;
+                  vibrancy = 0.2;
+                  popups = true;
                 };
               };
+              animations.enabled = true;
               misc = {
                 disable_hyprland_logo = true;
                 focus_on_activate = true;
               };
+            }
+          })"
+          ''hl.curve("smooth", { type = "bezier", points = { {0.22, 1}, {0.36, 1} } })''
+          ''hl.curve("pop", { type = "bezier", points = { {0.175, 0.885}, {0.32, 1.275} } })''
+          ''hl.curve("linear", { type = "bezier", points = { {0, 0}, {1, 1} } })''
+          ''hl.animation({ leaf = "windows", enabled = true, speed = 2.5, bezier = "smooth" })''
+          ''hl.animation({ leaf = "windowsIn", enabled = true, speed = 2.5, bezier = "pop", style = "popin 80%" })''
+          ''hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.5, bezier = "smooth", style = "popin 80%" })''
+          ''hl.animation({ leaf = "fade", enabled = true, speed = 2, bezier = "smooth" })''
+          ''hl.animation({ leaf = "layers", enabled = true, speed = 2, bezier = "smooth", style = "slide" })''
+          ''hl.animation({ leaf = "workspaces", enabled = true, speed = 2.5, bezier = "smooth", style = "slidefadevert 20%" })''
+          ''hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.5, bezier = "pop", style = "slidevert" })''
+          ''hl.animation({ leaf = "border", enabled = true, speed = 3, bezier = "smooth" })''
+          ''hl.animation({ leaf = "borderangle", enabled = true, speed = 80, bezier = "linear", style = "loop" })''
+          "hl.layer_rule(${
+            lua {
+              match.namespace = "^noctalia-(bar|panel|attached-panel|notification).*";
+              blur = true;
+              blur_popups = true;
+              ignore_alpha = 0.2;
             }
           })"
           ''hl.on("hyprland.start", function()''
@@ -227,7 +274,10 @@ in
           ''hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })''
 
           ''local ok, noctalia = pcall(function() return require("noctalia") end)''
-          "if ok then noctalia.apply_theme() end"
+          "if ok then"
+          "  noctalia.apply_theme()"
+          "  hl.config({ general = { col = { active_border = { colors = { noctalia.colors.primary, noctalia.colors.secondary }, angle = 45 } } } })"
+          "end"
           ''pcall(require, "local")''
         ]
       );

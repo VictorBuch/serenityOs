@@ -1,5 +1,6 @@
 {
   lib,
+  inputs,
   ...
 }:
 
@@ -18,7 +19,7 @@
       # base16 source image, wlogout's background). The live desktop wallpaper
       # and palette come from noctalia's pool in ./wallpapers, which rotates at
       # runtime and never passes through this option.
-      default = ./wallpapers/cloudsnight.jpg;
+      default = "${inputs.wallpapers-nord}/bg8.jpg";
       description = "Path to the wallpaper used across modules.";
     };
   };

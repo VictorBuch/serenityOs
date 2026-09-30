@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  inputs,
   ...
 }:
 let
@@ -27,6 +28,11 @@ let
           type = lib.types.listOf lib.types.str;
           default = [ ];
           description = "noctalia builtin template ids that render ${name}'s palette.";
+        };
+        noctaliaUserTemplates = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
+          default = { };
+          description = "noctalia user templates (theme.templates.user.<id>) that render ${name}'s palette.";
         };
         stylixTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -88,6 +94,15 @@ in
         )
       );
       description = "Derived: programs.noctalia.settings.theme.templates.builtin_ids.";
+    };
+
+    noctalia.userTemplates = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
+      readOnly = true;
+      default = lib.mergeAttrsList (
+        map (app: app.noctaliaUserTemplates) (lib.attrValues (appsWith (a: a.colors == "noctalia")))
+      );
+      description = "Derived: programs.noctalia.settings.theme.templates.user.";
     };
 
     stylix.disabledTargets = lib.mkOption {
@@ -172,6 +187,38 @@ in
         ];
         note = "The Shell derives its own Material You palette from the wallpaper; stylix must not feed it one.";
       };
+      zen = {
+        colors = "noctalia";
+        noctaliaUserTemplates = lib.listToAttrs (
+          map
+            (sheet: {
+              name = "zen_${sheet}";
+              value = {
+                input_path = "${inputs.noctalia-templates}/zen-browser/zen-${sheet}.css";
+                output_path = "$XDG_CACHE_HOME/noctalia/zen-browser/zen-${sheet}.css";
+              };
+            })
+            [
+              "userChrome"
+              "userContent"
+            ]
+        );
+        stylixTargets = [ "zen-browser" ];
+        reDeclared = [
+          "font.name.*"
+          "zen.view.window.scheme"
+        ];
+        note = "Zen imports the rendered sheets from its userChrome/userContent; a new palette shows after a Zen restart.";
+      };
+      sone = {
+        colors = "noctalia";
+        noctaliaUserTemplates.sone = {
+          input_path = "${inputs.noctalia-templates}/sone/theme.json";
+          output_path = "$XDG_CONFIG_HOME/sone/theme.json";
+        };
+        note = "Sone watches theme.json live once Settings > Themes is set to Custom.";
+      };
+
       starship = {
         colors = "app";
         stylixTargets = [ "starship" ];
@@ -181,11 +228,13 @@ in
 
     assertions =
       lib.mapAttrsToList (name: app: {
-        assertion = app.colors != "noctalia" -> app.noctaliaTemplates == [ ];
-        message = "theme.authority.apps.${name}: colors are written by ${app.colors}, so it must not also list noctaliaTemplates.";
+        assertion =
+          app.colors != "noctalia" -> app.noctaliaTemplates == [ ] && app.noctaliaUserTemplates == { };
+        message = "theme.authority.apps.${name}: colors are written by ${app.colors}, so it must not also list noctalia templates.";
       }) apps
       ++ lib.mapAttrsToList (name: app: {
-        assertion = app.colors != "noctalia" || app.noctaliaTemplates != [ ];
+        assertion =
+          app.colors != "noctalia" || app.noctaliaTemplates != [ ] || app.noctaliaUserTemplates != { };
         message = "theme.authority.apps.${name}: colors are assigned to noctalia but no template renders them, so nothing writes them at all.";
       }) apps;
   };

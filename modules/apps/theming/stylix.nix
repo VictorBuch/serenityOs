@@ -72,8 +72,8 @@ mkModule {
                 name = osConfig.fonts.mono.familyMono;
               };
               sansSerif = {
-                package = pkgs.dejavu_fonts;
-                name = "DejaVu Sans";
+                package = pkgs.inter;
+                name = "Inter";
               };
               serif = {
                 package = pkgs.dejavu_fonts;
@@ -91,10 +91,6 @@ mkModule {
               # HM context, which conflicts with home-manager.useGlobalPkgs.
               nixos-icons.enable = false;
               gtksourceview.enable = false;
-
-              zen-browser.profileNames = lib.mkIf (config.programs.zen-browser.enable or false) [
-                config.home.username
-              ];
             };
           };
 

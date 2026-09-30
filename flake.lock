@@ -609,6 +609,22 @@
         "type": "github"
       }
     },
+    "noctalia-templates": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790731964,
+        "narHash": "sha256-lXV1isU9HWMhBt1ZLlDqBNC8sBjHaa5IZ2rgIdGMubk=",
+        "owner": "noctalia-dev",
+        "repo": "community-templates",
+        "rev": "931ad2ce1719298fdd0110ff7bc196f5b94076c8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "community-templates",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -834,6 +850,7 @@
         "nixpkgs-wine920": "nixpkgs-wine920",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
+        "noctalia-templates": "noctalia-templates",
         "obsidian-omnisearch-main": "obsidian-omnisearch-main",
         "obsidian-omnisearch-manifest": "obsidian-omnisearch-manifest",
         "obsidian-omnisearch-styles": "obsidian-omnisearch-styles",
@@ -847,6 +864,7 @@
         "obsidian-templater-manifest": "obsidian-templater-manifest",
         "obsidian-templater-styles": "obsidian-templater-styles",
         "peon-ping": "peon-ping",
+        "silentSDDM": "silentSDDM",
         "skwd-wall": "skwd-wall",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
@@ -897,6 +915,26 @@
       "original": {
         "owner": "wlrfx",
         "repo": "scenefx",
+        "type": "github"
+      }
+    },
+    "silentSDDM": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790785664,
+        "narHash": "sha256-TNGAElCnjIA4OzTtn0VuCk6pXKd92kBkz+5NjHLwbkM=",
+        "owner": "uiriansan",
+        "repo": "SilentSDDM",
+        "rev": "d32ebc060ee0f832cf2a2ea4c91d96582d3f31ce",
+        "type": "github"
+      },
+      "original": {
+        "owner": "uiriansan",
+        "repo": "SilentSDDM",
         "type": "github"
       }
     },

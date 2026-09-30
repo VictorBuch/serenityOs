@@ -54,6 +54,7 @@ in
       "bookorbit/jwt_secret" = { };
       "bookorbit/podcast_encryption_key" = { };
       "bookorbit/setup_bootstrap_token" = { };
+      "bookorbit/book_request_encryption_key" = { };
     };
 
     sops.templates."bookorbit-env" = {
@@ -62,6 +63,7 @@ in
         JWT_SECRET=${config.sops.placeholder."bookorbit/jwt_secret"}
         PODCAST_ENCRYPTION_KEY=${config.sops.placeholder."bookorbit/podcast_encryption_key"}
         SETUP_BOOTSTRAP_TOKEN=${config.sops.placeholder."bookorbit/setup_bootstrap_token"}
+        BOOK_REQUEST_ENCRYPTION_KEY=${config.sops.placeholder."bookorbit/book_request_encryption_key"}
       '';
       mode = "0400";
     };

@@ -7,6 +7,7 @@
   #   nix build .#feedback-desktop
   # It reaches NixOS configs through overlays/default.nix, not through here.
   feedback-desktop = pkgs.feedback-desktop;
+  psarc2feedpak = pkgs.psarc2feedpak;
 
   # Exposed so the risky wine-11 yabridge can be iterated on standalone:
   #   nix build .#yabridge-wine10

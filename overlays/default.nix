@@ -30,6 +30,9 @@ in
   # fee[dB]ack - guitar practice app, wrapped from the upstream AppImage
   feedback-desktop = final.callPackage ../packages/feedback-desktop { };
 
+  # Rocksmith .psarc -> fee[dB]ack .feedpak converter, installed alongside the app
+  psarc2feedpak = final.callPackage ../packages/psarc2feedpak { };
+
   # rtirq: raises the priority of the audio interface's IRQ threads. Used by
   # modules/nixos/system/audio-performance.nix via musnix.rtirq.
   #

@@ -77,6 +77,27 @@ in
   yabridge-wine10 = final.callPackage ../packages/yabridge-wine10 { };
   yabridgectl-wine10 = final.yabridge-wine10.yabridgectl;
 
+  # gcc 16 defaults to C++20. Both REAPER extensions only declare a minimum standard
+  # (cxx_std_17 / cxx_std_11), so they now compile as C++20 and break: reapack on
+  # -Werror=deprecated implicit `this` capture, SWS on ContextAction no longer being
+  # an aggregate (deleted copy ctor). Pin both back to C++17.
+  reaper-reapack-extension =
+    expiring.onBump prev.reaper-reapack-extension "1.2.5"
+      "retest the build without the C++17 pin, then delete this override"
+      (
+        prev.reaper-reapack-extension.overrideAttrs (old: {
+          cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_CXX_STANDARD=17" ];
+        })
+      );
+  reaper-sws-extension =
+    expiring.onBump prev.reaper-sws-extension "2.14.0.7"
+      "retest the build without the C++17 pin, then delete this override"
+      (
+        prev.reaper-sws-extension.overrideAttrs (old: {
+          cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_CXX_STANDARD=17" ];
+        })
+      );
+
   # xdg-desktop-portal-wlr 0.8.3 stalls screencasts after the first frame: sharing a
   # screen shows a frozen still, sharing a window stays black. Upstream's own 0.8.3
   # release notes say "This version will sometimes stall screen recording. Please wait

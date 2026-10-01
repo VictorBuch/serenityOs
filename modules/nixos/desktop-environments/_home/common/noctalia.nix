@@ -93,7 +93,6 @@ in
                   "control-center"
                   "status" # pozzoo/hassio widget
                   "nix-monitor" # avivbintangaringga/nix-monitor widget
-                  "eyecare" # apex077/eyecare widget
                 ]
                 ++ lib.optional davinci.enable "davinci-convert" # local plugin widget
               ) { })
@@ -101,8 +100,10 @@ in
                 foreground = "primary";
                 padding = 8;
               })
+              "eyecare" # apex077/eyecare widget
               (island "media" [ "media" ] { })
               (island "tray" [ "tray" ] { })
+              (island "workspaces" [ "workspaces" ] { padding = 5; })
               (island "status" [
                 "notifications"
                 "volume"
@@ -120,7 +121,7 @@ in
             "group:system"
             "group:time"
           ];
-          center = [ "workspaces" ];
+          center = [ "group:workspaces" ];
           end = [
             "group:media"
             "group:tray"
@@ -432,8 +433,13 @@ in
             occupied_color = "surface_variant";
             empty_color = "outline";
             active_pill_size = 1.5;
+            scale = 1.8;
           };
-          control-center.glyph = "󱄅";
+          control-center = {
+            glyph = "󱄅";
+            custom_image = "${config.home.homeDirectory}/.face";
+            custom_image_colorize = false;
+          };
           media.hide_when_no_media = true;
           network.show_label = false;
           tray.hidden = [ "nm-applet" ];

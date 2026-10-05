@@ -1,6 +1,7 @@
 # TODO
 
-- [ ] Noctalia colors and wallpapers also refresh layouts every hour... not great
+- [ ] Home assistant automation clean up
+- [ ] SMART tests on Mal - send summary to ntfy
 - [x] Easier live update dotfiles for Jayne
 - [x] Icons, file managers and other services seem very scattered and not very unified. Lets fix that for Jayne
 - [x] Install / configure crowd sec on wash

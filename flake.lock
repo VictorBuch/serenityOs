@@ -139,6 +139,27 @@
         "type": "github"
       }
     },
+    "edit360": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791201412,
+        "narHash": "sha256-rHJ2N5EYMePqEYsIWChB3p2N6/BHPE7BR/v9RtV5ubA=",
+        "ref": "master",
+        "rev": "e53188c2e47eb1ac2866614e478e5f36d3853eec",
+        "revCount": 6,
+        "type": "git",
+        "url": "file:///home/jayne/Documents/github/edit-360"
+      },
+      "original": {
+        "rev": "e53188c2e47eb1ac2866614e478e5f36d3853eec",
+        "type": "git",
+        "url": "file:///home/jayne/Documents/github/edit-360"
+      }
+    },
     "firefox-gnome-theme": {
       "flake": false,
       "locked": {
@@ -836,6 +857,7 @@
     "root": {
       "inputs": {
         "disko": "disko",
+        "edit360": "edit360",
         "herdr": "herdr",
         "home-manager": "home-manager",
         "import-tree": "import-tree",

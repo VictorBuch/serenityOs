@@ -102,6 +102,7 @@ in
   environment.systemPackages = with pkgs; [
     networkmanager-openvpn
     openvpn
+    inputs.edit360.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # Desktop environments

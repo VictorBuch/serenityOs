@@ -245,8 +245,7 @@ in
   # of it: pin the source in the store and load it as a local plugin (no Go
   # deps, so no vendoring). Keep in step with the version the pangolin module
   # pins in experimental.plugins.badger.
-  services.traefik.staticConfigOptions.experimental = {
-    plugins = lib.mkForce { };
+  services.traefik.staticConfigOptions.experimental = lib.mkForce {
     localPlugins.badger.moduleName = "github.com/fosrl/badger";
   };
   # Traefik resolves plugins-local/ against WorkingDirectory (its dataDir).

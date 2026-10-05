@@ -98,6 +98,23 @@ in
         })
       );
 
+  # mod_zip 1.3.0 sets `pieces_sent` but never reads it. nginx compiles its addons
+  # with -Werror, and gcc 16 now flags that as -Wunused-but-set-variable, so the
+  # whole nginx build fails. Pulled in on mal by services.romm.
+  nginxModules = prev.nginxModules // {
+    zip =
+      expiring.onBump prev.nginxModules.zip "1.3.0"
+        "retest the nginx build without the unused-variable patch, then delete this override"
+        (
+          prev.nginxModules.zip.overrideAttrs (old: {
+            postPatch = (old.postPatch or "") + ''
+              substituteInPlace ngx_http_zip_module.c \
+                --replace-fail "pieces_sent = 0;" "pieces_sent = 0; (void) pieces_sent;"
+            '';
+          })
+        );
+  };
+
   # xdg-desktop-portal-wlr 0.8.3 stalls screencasts after the first frame: sharing a
   # screen shows a frozen still, sharing a window stays black. Upstream's own 0.8.3
   # release notes say "This version will sometimes stall screen recording. Please wait

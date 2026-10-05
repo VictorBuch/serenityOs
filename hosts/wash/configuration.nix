@@ -182,6 +182,22 @@ in
   # traefik.service.requires/, which mkForce on traefik.requires cannot reach.
   systemd.services.gerbil.requiredBy = lib.mkForce [ ];
 
+  # gerbil only assigns wg0's address when it creates the interface. Finding
+  # one left over from its last run ("WireGuard interface wg0 already exists"),
+  # it re-adds the peers and skips the address -- so a wg0 that has lost its
+  # address stays that way across every restart. With no address there is no
+  # 100.89.128.0/24 route: traffic for newt leaves via ens3, rp_filter drops
+  # what newt sends in, and the handshake still completes, so nothing on
+  # either side reports an error. That was a 63 minute outage on 2026-10-05,
+  # after the flake-update deploy bounced pangolin and gerbil at 07:25.
+  #
+  # Delete it before every start so gerbil always builds it from scratch;
+  # peers come back from pangolin's get-config. `+` runs this as root (the
+  # unit is User=gerbil), `-` tolerates there being no wg0 to delete.
+  systemd.services.gerbil.serviceConfig.ExecStartPre = [
+    "-+${pkgs.iproute2}/bin/ip link delete wg0"
+  ];
+
   systemd.services.traefik = {
     requires = lib.mkForce [ ];
     partOf = lib.mkForce [ ];
@@ -517,6 +533,8 @@ in
     # Inspecting what the crowdsec bouncer actually enforces: the ban sets live
     # in ipset, matched from CROWDSEC_CHAIN, not in the iptables rules themselves.
     ipset
+    # `wg show`: whether the tunnel to mal has handshaken and is passing traffic.
+    wireguard-tools
   ];
 
   apps.cli = {

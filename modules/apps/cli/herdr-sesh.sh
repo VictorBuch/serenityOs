@@ -15,12 +15,48 @@ set -euo pipefail
 CONFIG="${HERDR_SESH_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/sesh-spaces.json}"
 ZOXIDE_LIMIT="${HERDR_SESH_ZOXIDE_LIMIT:-20}"
 STAR="★ "  # marks configured spaces in the picker, vs. plain zoxide paths
+DOT="● "   # marks running ad-hoc workspaces
+LAST_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-sesh-last"
 TILDE='~'  # kept in a var so shellcheck doesn't mistake it for an expansion
 
 die() { printf 'herdr-sesh: %s\n' "$*" >&2; exit 1; }
 
-# Strip the leading star marker a configured space carries in the picker list.
-strip_star() { printf '%s' "${1#"$STAR"}"; }
+# Strip the leading marker a picker entry carries.
+strip_star() { local s="${1#"$STAR"}"; printf '%s' "${s#"$DOT"}"; }
+
+focused_ws() {
+  herdr workspace list 2>/dev/null | jq -r 'first(.result.workspaces[] | select(.focused) | .workspace_id) // empty'
+}
+
+# Remember the workspace we are leaving, for `herdr-sesh last`.
+remember_current() {
+  local cur
+  cur=$(focused_ws)
+  [ -n "$cur" ] || return 0
+  mkdir -p "${LAST_FILE%/*}"
+  printf '%s\n' "$cur" >"$LAST_FILE"
+}
+
+# Swap back to the previously remembered workspace (tmux switch-client -l).
+last() {
+  local target
+  target=$(cat "$LAST_FILE" 2>/dev/null || true)
+  [ -n "$target" ] || exit 0
+  [ "$target" = "$(focused_ws)" ] && exit 0
+  remember_current
+  herdr workspace focus "$target" >/dev/null 2>&1 || true
+}
+
+# True if every pane in the workspace sits at an idle shell, i.e. the server was
+# restored from disk and the space's startup commands are gone.
+is_stale() {
+  local ws="$1" pane
+  for pane in $(herdr pane list | jq -r --arg w "$ws" '.result.panes[] | select(.workspace_id == $w) | .pane_id'); do
+    herdr pane process-info --pane "$pane" 2>/dev/null \
+      | jq -e '.result.process_info | .foreground_process_group_id == .shell_pid' >/dev/null || return 1
+  done
+  return 0
+}
 
 expand_tilde() {
   local p="$1"
@@ -95,6 +131,12 @@ wait_ready() {
 # The picker list: configured spaces first, then top zoxide dirs (deduped
 # against the spaces' own paths, existing dirs only, home-shortened).
 list_items() {
+  # Running workspaces that aren't configured spaces, like sesh's tmux sessions.
+  herdr workspace list 2>/dev/null | jq -r --arg dot "$DOT" --slurpfile cfg "$CONFIG" '
+    ($cfg[0].spaces | map(.name)) as $names
+    | .result.workspaces[] | select(.focused | not) | .label
+    | select(. as $l | $names | index($l) | not) | $dot + .' || true
+
   jq -r --arg star "$STAR" '.spaces[] | $star + .name' "$CONFIG"
 
   command -v zoxide >/dev/null 2>&1 || return 0
@@ -198,11 +240,15 @@ build_space() {
   herdr workspace focus "$ws" >/dev/null 2>&1 || true
 }
 
+find_ws() {
+  herdr workspace list 2>/dev/null \
+    | jq -r --arg n "$1" 'first(.result.workspaces[] | select(.label == $n) | .workspace_id) // empty'
+}
+
 # Focus the workspace with this label if one exists. 0 = focused, 1 = none.
 focus_existing() {
-  local name="$1" existing
-  existing=$(herdr workspace list 2>/dev/null \
-    | jq -r --arg n "$name" 'first(.result.workspaces[] | select(.label == $n) | .workspace_id) // empty')
+  local existing
+  existing=$(find_ws "$1")
   [ -n "$existing" ] || return 1
   herdr workspace focus "$existing" >/dev/null 2>&1 || true
   return 0
@@ -221,10 +267,22 @@ open_dir() {
 
 # Route a picked item: a configured space, otherwise a directory path.
 dispatch() {
-  local item="$1"
-  if [ -n "$(get_space "$item")" ]; then
-    focus_existing "$item" && return 0
+  local item="$1" space ws
+  remember_current
+  space=$(get_space "$item")
+  if [ -n "$space" ]; then
+    ws=$(find_ws "$item")
+    if [ -n "$ws" ]; then
+      if jq -e '[.. | .command? // empty] | length > 0' <<<"$space" >/dev/null && is_stale "$ws"; then
+        herdr workspace close "$ws" >/dev/null 2>&1 || true
+      else
+        herdr workspace focus "$ws" >/dev/null 2>&1 || true
+        return 0
+      fi
+    fi
     build_space "$item"
+  elif [ -n "$(find_ws "$item")" ]; then
+    focus_existing "$item"
   else
     open_dir "$item"
   fi
@@ -271,6 +329,7 @@ main() {
     --list)    list_items; exit 0 ;;
     --preview) preview "${2:-}"; exit 0 ;;
     connect)   dispatch "${2:?usage: herdr-sesh connect <name|dir>}"; exit 0 ;;
+    last)      last; exit 0 ;;
   esac
 
   local sel

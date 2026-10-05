@@ -39,11 +39,7 @@ let
         }
         {
           name = "jj";
-          panes = [
-            {
-              command = "jjui";
-            }
-          ];
+          panes = [ { command = "jj pull; jjui"; } ];
         }
       ];
     }
@@ -65,7 +61,7 @@ let
         }
         {
           name = "jj";
-          panes = [ { command = "jjui"; } ];
+          panes = [ { command = "jj pull; jjui"; } ];
         }
         {
           name = "dev";
@@ -80,6 +76,10 @@ let
       command = "ssh serenity@mal";
     }
   ];
+
+  fortune = pkgs.writeShellScript "herdr-fortune" ''
+    ${pkgs.fortune}/bin/fortune -n 50 -s | tr -s '\n\t' ' '
+  '';
 
   seshConfig = (pkgs.formats.json { }).generate "herdr-sesh-spaces.json" {
     inherit spaces;
@@ -113,8 +113,30 @@ mkModule {
           name = "terminal";
         };
         onboarding = false;
+        ui = {
+          prompt_new_tab_name = false;
+          pane_outer_borders = false;
+          pane_gaps = false;
+          sidebar_start_collapsed = true;
+          tab_bar_right = [
+            {
+              type = "command";
+              command = "${fortune}";
+              interval_seconds = 1800;
+            }
+          ];
+        };
         keys = {
           prefix = "ctrl+space";
+          split_vertical = "prefix+v";
+          split_horizontal = "prefix+h";
+          focus_pane_left = "";
+          move_tab_previous = "prefix+<";
+          move_tab_next = "prefix+>";
+          previous_tab = "prefix+space";
+          settings = "prefix+comma";
+          detach = "prefix+d";
+          close_workspace = "prefix+ctrl+d";
           command = [
             # prefix+s: sesh-style space picker (fzf popup).
             {
@@ -137,8 +159,15 @@ mkModule {
               command = "nathanflurry.jj-workspace.new";
               description = "new jj workspace";
             }
+            # prefix+shift+l: previous workspace (tmux switch-client -l / prefix+L).
             {
-              key = "prefix+d";
+              key = "prefix+shift+l";
+              type = "shell";
+              command = "${herdr-sesh}/bin/herdr-sesh last";
+              description = "previous workspace";
+            }
+            {
+              key = "prefix+shift+d";
               type = "plugin_action";
               command = "nathanflurry.jj-workspace.remove";
               description = "remove jj workspace";

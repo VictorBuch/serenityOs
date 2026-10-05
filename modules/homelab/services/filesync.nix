@@ -23,10 +23,6 @@ in
   # These folders live under homelab.filesDir, so anything Syncthing pulls up
   # from a laptop is immediately browsable and shareable in copyparty, and
   # anything dropped into copyparty's web UI syncs back down.
-  #
-  # Syncthing itself is already enabled by services/notes.nix for the notes
-  # vault; the options below are set to the same values so the two module
-  # definitions merge instead of fighting.
   ###########################################################################
   options.homelab.filesync = {
     enable = mkEnableOption "two-way Syncthing sync of shared folders under homelab.filesDir";

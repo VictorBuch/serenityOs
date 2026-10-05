@@ -422,14 +422,6 @@ in
     paperless.enable = true;
     reactive-resume.enable = true;
     invoice-ninja.enable = true;
-    notes = {
-      enable = true;
-      devices = {
-        inara = "<ID>";
-        pixel = "UO25ZHR-D45ZAP6-BHXAOHE-TGBE4XX-GPI5TC4-34OVOFB-WA44M3C-GUZS7AM";
-        jayne = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";
-      };
-    };
 
     # Sharing
     wannashare = {

@@ -8,9 +8,7 @@ args@{ config, pkgs, lib, mkModule, ... }:
 #   - Retrieval is search (ripgrep + fzf), never folders. The vault is flat;
 #     the only subdir is daily/.
 #
-# Vault lives at ~/notes (matches the mal homelab node in
-# modules/homelab/services/notes.nix — Syncthing + git history + Quartz).
-# Sync is Syncthing, NOT git — the vault is user data and is deliberately
+# Vault lives at ~/notes. Sync is Syncthing, NOT git — the vault is user data and is deliberately
 # NOT managed declaratively (home-manager would make it read-only). Run
 # `notes-init` once to scaffold it; every script self-heals missing files.
 #

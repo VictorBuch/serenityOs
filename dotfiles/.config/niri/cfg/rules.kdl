@@ -1,7 +1,8 @@
     window-rule {
         geometry-corner-radius 20 // Set every window radius to 20
         clip-to-geometry true
-        open-maximized false // Ignore apps (zen) that restore a maximized state
+        open-maximized-to-edges false
+        default-column-width { proportion 1.0; }
     }
 
     window-rule {

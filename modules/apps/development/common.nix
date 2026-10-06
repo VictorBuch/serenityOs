@@ -24,7 +24,6 @@ mkModule {
       pkgs.llm-agents.claude-code
       pkgs.gitea-mcp-server
       pkgs.yazi
-      pkgs.superfile
       pkgs.devenv
       pkgs.jujutsu
       pkgs.jjui
@@ -37,5 +36,15 @@ mkModule {
       pkgs.tea
       pkgs.bat
     ];
+  homeConfig = {
+    programs.superfile = {
+      enable = true;
+      settings = {
+        editor = "nvim";
+        zoxide_support = true;
+        ignore_missing_fields = true;
+      };
+    };
+  };
   description = "Common development tools";
 } args

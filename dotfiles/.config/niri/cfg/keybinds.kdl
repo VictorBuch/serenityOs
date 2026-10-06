@@ -167,10 +167,7 @@ binds {
     CTRL+Shift+2                        { screenshot-screen; }
     CTRL+Shift+3                        { screenshot-window; }
 
-    // ─── Emergency Escape Key ───
-    // Use this when a fullscreen app blocks your keybinds.
-    // It disables any active keyboard shortcut inhibitor, restoring control.
-    Mod+Shift+ESCAPE                          allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+ESCAPE                    hotkey-overlay-title="Lock and Sleep" { spawn-sh "noctalia msg session lock && sleep 1 && systemctl suspend"; }
 
     // ─── Keyboard Layout ───
     Mod+Shift+Space                     { switch-layout "next"; }

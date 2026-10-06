@@ -154,7 +154,6 @@ in
     home-manager.sharedModules = [ ./_home/common/session.nix ] ++ cfg.homeModules;
 
     desktop.session.autostart = [
-      [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]
       [
         "easyeffects"
         "--gapplication-service"

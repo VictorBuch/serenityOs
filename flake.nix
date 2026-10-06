@@ -40,14 +40,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Wallpaper selector + its daemon. Owns picking; noctalia applies and themes.
-    skwd-wall = {
-      url = "github:liixini/skwd-wall/v1";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.inputs.nixpkgs.follows = "nixpkgs";
-      inputs.skwd-daemon.inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Wallpaper packs, merged into the pool by home/wallpaper-pool.nix.
     wallpapers-nord = {
       url = "github:ChrisTitusTech/nord-background";

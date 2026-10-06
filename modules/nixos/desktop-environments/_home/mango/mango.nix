@@ -261,7 +261,7 @@ in
           "SUPER,Z,spawn,${shell.launcher-windows}"
           "SUPER+SHIFT,E,spawn,${shell.launcher-emoji}"
           "SUPER+SHIFT,P,spawn,${shell.session-menu}"
-          "SUPER,P,spawn_shell,skwd wall toggle"
+          "SUPER,P,spawn_shell,noctalia msg panel-toggle wallpaper"
           "SUPER,N,spawn,rofi-vpn"
           "SUPER,y,spawn_shell,handy --toggle-transcription"
 

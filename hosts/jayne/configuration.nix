@@ -109,6 +109,7 @@ in
   desktop = {
     compositor.mango.enable = false;
     compositor.hyprland.enable = true;
+    compositor.niri.enable = true;
     session = {
       makeDefault = false;
       outputs = [
@@ -126,7 +127,6 @@ in
           scale = 1.1;
         }
       ];
-      autostart = [ [ "skwd-daemon" ] ];
       autostartApps = [
         "zen"
         "ghostty"
@@ -187,10 +187,6 @@ in
       lazyvim.enable = true;
       nixvim.enable = false;
     };
-
-    # Wallpaper picker. noctalia still draws the wallpaper and derives the
-    # palette from it; skwd just chooses which one.
-    theming.skwd-wall.enable = true;
   };
 
   # YubiKey: PAM U2F sudo + screen lock on removal

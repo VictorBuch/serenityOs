@@ -39,12 +39,7 @@
 
     environment.systemPackages =
       (with pkgs; [
-        hyprlock # Lock screen (compatible with niri)
-        dunst # Notification manager
         nautilus
-        waybar # Status bar with niri support
-        wlogout
-
         xwayland-satellite # X11 compatibility layer for niri
       ])
       ++ [

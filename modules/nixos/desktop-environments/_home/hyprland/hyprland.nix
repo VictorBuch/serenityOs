@@ -231,7 +231,7 @@ in
           (bind "SUPER + Z" (exec shell.launcher-windows))
           (bind "SUPER + SHIFT + E" (exec shell.launcher-emoji))
           (bind "SUPER + SHIFT + P" (exec shell.session-menu))
-          (bind "SUPER + P" (exec "skwd wall toggle"))
+          (bind "SUPER + P" (exec "noctalia msg panel-toggle wallpaper"))
           (bind "SUPER + N" (exec "rofi-vpn"))
           (bind "SUPER + Y" (exec "handy --toggle-transcription"))
 

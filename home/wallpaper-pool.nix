@@ -1,5 +1,5 @@
 # One writable wallpaper directory, filled with symlinks from the packs below.
-# skwd-wall picks from it, noctalia draws whatever skwd picks.
+# noctalia picks from it, draws it and themes the desktop from it.
 {
   config,
   lib,

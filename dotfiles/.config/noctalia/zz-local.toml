@@ -1,2 +1,0 @@
-# Live Seam -- tracked in serenityOs/dotfiles, symlinked here. Merged after config.toml, so
-# keys here win. Apply with `noctalia msg config-reload`.

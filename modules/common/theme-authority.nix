@@ -131,6 +131,11 @@ in
         noctaliaTemplates = [ "mango" ];
         note = "Window decorations, reloaded live via `mmsg reload_config`. stylix has no mango target.";
       };
+      niri = {
+        colors = "noctalia";
+        noctaliaTemplates = [ "niri" ];
+        note = "Focus ring, border and tab colors in ~/.config/niri/noctalia.kdl, included last from config.kdl.";
+      };
       hyprland = {
         colors = "noctalia";
         noctaliaTemplates = [ "hyprland" ];

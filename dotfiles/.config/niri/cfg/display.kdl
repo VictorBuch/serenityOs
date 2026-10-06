@@ -1,0 +1,22 @@
+// ────────────── Output Configuration ──────────────
+// You can run `niri msg outputs` to get the correct name for your displays.
+// Outputs that aren't connected are ignored, so every host can share this file.
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+
+// jayne
+output "DP-2" {
+    mode "2560x1440@143.912"
+    scale 1
+}
+
+// kaylee
+output "DP-1" {
+    mode "2560x1440@119.998"
+    scale 1
+}
+
+// VMs
+output "Virtual-1" {
+    mode "2560x1600@60"
+    scale 1.1
+}

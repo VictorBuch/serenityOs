@@ -108,7 +108,7 @@ in
   # Desktop environments
   desktop = {
     compositor.mango.enable = false;
-    compositor.hyprland.enable = true;
+    compositor.hyprland.enable = false;
     compositor.niri.enable = true;
     session = {
       makeDefault = false;
@@ -133,7 +133,7 @@ in
       ];
     };
     environment.gnome.enable = false;
-    environment.kde.enable = true;
+    environment.kde.enable = false;
   };
 
   # Apps - full workstation

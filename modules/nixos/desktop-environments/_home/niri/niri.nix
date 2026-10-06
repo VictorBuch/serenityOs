@@ -23,6 +23,11 @@ in
     };
     home.packages = [ nirirun ];
 
+    xdg.configFile."niri-mimeapps.list".text = ''
+      [Default Applications]
+      inode/directory=org.gnome.Nautilus.desktop
+    '';
+
     home.activation.niriNoctaliaColors = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run touch ${config.xdg.configHome}/niri/noctalia.kdl
     '';

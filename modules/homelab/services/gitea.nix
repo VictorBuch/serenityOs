@@ -73,7 +73,6 @@ in
           SHOW_FOOTER_POWERED_BY = false;
         };
         server = {
-          DOMAIN = fqdn;
           ROOT_URL = "${gitea.url}/";
           HTTP_ADDR = "127.0.0.1";
           HTTP_PORT = gitea.port;

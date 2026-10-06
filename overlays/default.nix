@@ -115,39 +115,6 @@ in
         );
   };
 
-  # xdg-desktop-portal-wlr 0.8.3 stalls screencasts after the first frame: sharing a
-  # screen shows a frozen still, sharing a window stays black. Upstream's own 0.8.3
-  # release notes say "This version will sometimes stall screen recording. Please wait
-  # for the next patch release before upgrading."
-  #
-  # 0.8.3 contains exactly one functional commit, c613a8b "screencast: drive the
-  # Pipewire graph by ourselves", which is the regression. Traced on jayne/mango as:
-  # one frame exported, then `pipewire: out of buffers` / `unable to export buffer`
-  # and no further capture. Not compositor-specific — grim and wf-recorder are fine
-  # because they use wlr-screencopy, while the portal takes the ext-image-copy-capture
-  # path that 0.8.3 broke, and there is no config switch between the two.
-  #
-  # Pin to v0.8.2, the last release before that commit. It still carries 896cee8
-  # "Fix screensharing on pipewire 1.6.x", which we need (system runs PipeWire 1.6.8).
-  # master (544e114) only adds a guard on top of the regression instead of reverting
-  # it, so it is not a safe target yet.
-  #
-  # Drop this once nixpkgs ships the upstream patch release that fixes the stall.
-  xdg-desktop-portal-wlr =
-    expiring.atVersion prev.xdg-desktop-portal-wlr "0.8.4"
-      "retest screensharing without the pin, then delete this override"
-      (
-        prev.xdg-desktop-portal-wlr.overrideAttrs (_old: {
-          version = "0.8.2";
-          src = final.fetchFromGitHub {
-            owner = "emersion";
-            repo = "xdg-desktop-portal-wlr";
-            rev = "01171a150b705cf07066ebc0fb7e1ff537027bec";
-            hash = "sha256-HITf/hgiASWvn/z49mzS8IS1vuyXwdk1JiAOOHRSQMo=";
-          };
-        })
-      );
-
   # DaVinci Resolve Studio: byte-level patches to the shipped binaries.
   #
   # bin/resolve lives in the inner `stdenv.mkDerivation` that package.nix binds

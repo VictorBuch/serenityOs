@@ -71,7 +71,7 @@ derives it from `user.userName`: the HM user, `extraSpecialArgs` (`username`,
 `modules/apps/_categories.nix` auto-discovers all subdirectories under `modules/apps/` and creates enable options:
 - `apps.browsers.enable = true` enables all browser modules (zen, firefox, etc.)
 - Individual modules can be overridden: `apps.browsers.zen.enable = false`
-- Per-category overrides in `_categories.nix` control which modules default to disabled (e.g., `gaming.ps3 = false`, `neovim.nixvim = false`)
+- Per-category overrides in `_categories.nix` control which modules default to disabled (e.g., `gaming.ps3 = false`)
 
 ### Key Dependencies
 
@@ -84,7 +84,6 @@ derives it from `user.userName`: the HM user, `extraSpecialArgs` (`username`,
 - **disko**: Declarative disk partitioning (used with nixos-anywhere for onboarding)
 - **stylix**: System-wide theming
 - **nvf**: Neovim flake
-- **nixvim**: Neovim configuration
 - **sops-nix**: Secret management using SOPS
 - **zen-browser**: Custom browser package
 - **llm-agents**: AI coding agents (claude-code, etc.) from numtide

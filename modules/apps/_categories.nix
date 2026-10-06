@@ -40,7 +40,6 @@ let
     gaming = {
     };
     neovim = {
-      nixvim = false;
       nvf = false;
     };
     theming = {

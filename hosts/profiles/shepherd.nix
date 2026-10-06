@@ -42,7 +42,7 @@
 
   apps = {
     cli.enable = true;
-    neovim.nixvim.enable = true;
+    neovim.lazyvim.enable = true;
     theming.stylix.enable = true;
     browsers = {
       enable = true;

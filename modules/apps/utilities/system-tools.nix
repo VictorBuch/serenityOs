@@ -13,7 +13,6 @@ mkModule {
     { pkgs, ... }:
     [
       pkgs.gcc
-      pkgs.filezilla
       pkgs.chromium
       pkgs.lm_sensors
       pkgs.pciutils

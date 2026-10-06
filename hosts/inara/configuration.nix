@@ -61,7 +61,6 @@ in
 
     neovim = {
       lazyvim.enable = true;
-      nixvim.enable = false;
     };
 
     browsers = {

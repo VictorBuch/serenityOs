@@ -149,10 +149,13 @@ in
 
     browsers = {
       enable = true;
+      firefox.enable = false;
     };
 
     communication = {
       enable = true;
+      signal.enable = false;
+      zoom.enable = false;
     };
 
     development = {
@@ -164,10 +167,14 @@ in
     emulation = {
       enable = true;
       podman.enable = false;
+      virtmanager.enable = false;
+      virtualbox.enable = false;
     };
 
     gaming = {
       enable = true;
+      corectrl.enable = false;
+      mangohud.enable = false;
     };
 
     hardware.logitech.enable = true;
@@ -185,7 +192,6 @@ in
 
     neovim = {
       lazyvim.enable = true;
-      nixvim.enable = false;
     };
   };
 

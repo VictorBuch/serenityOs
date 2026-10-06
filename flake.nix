@@ -198,7 +198,6 @@
             ./modules/common/_defaults.nix
             # App modules (auto-discovered)
             (import-tree ./modules/apps)
-            ./modules/apps/_categories.nix
             # Host-specific configuration
             hostConfig
             (
@@ -217,7 +216,6 @@
       # pkgs-stable as the escape hatch.
       hosts = [
         { name = "jayne"; }
-        { name = "kaylee"; }
         {
           name = "mal";
           # Homelab server: homelab modules instead of the desktop tree.
@@ -239,16 +237,6 @@
             ./modules/nixos/system/user.nix
             inputs.disko.nixosModules.disko
           ];
-        }
-        {
-          name = "shepherd";
-          extraModules = [ inputs.disko.nixosModules.disko ];
-        }
-        {
-          name = "shepherd-arm";
-          system = "aarch64-linux";
-          hostConfig = ./hosts/shepherd/configuration.nix;
-          extraModules = [ inputs.disko.nixosModules.disko ];
         }
         {
           name = "inara";
@@ -290,11 +278,8 @@
       # Export overlay
       overlays.default = overlayWithInputs;
 
-      # Evaluating mal's system forces its assertions, among them the Service
-      # Record and Port Reservation invariants (modules/homelab/records.nix).
-      # Only the eval runs; the system itself is not built.
-      checks.x86_64-linux.mal-records = (pkgsFor "x86_64-linux").writeText "mal-records" (
-        builtins.unsafeDiscardStringContext self.nixosConfigurations.mal.config.system.build.toplevel.drvPath
+      checks.x86_64-linux.inara = (pkgsFor "x86_64-linux").writeText "inara" (
+        builtins.unsafeDiscardStringContext self.darwinConfigurations.inara.system.drvPath
       );
 
       checks.x86_64-linux.shell-actions =

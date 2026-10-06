@@ -12,11 +12,8 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 
 **NixOS Hosts:**
 - **jayne**: Primary desktop system (KDE Plasma by default, mango also installed)
-- **kaylee**: Lightweight desktop configuration
 - **mal**: Homelab server with services and static IP (192.168.0.243)
 - **wash**: Public Netcup VPS running Pangolin (edge for *.victorbuch.com)
-- **shepherd**: Base configuration template (x86_64)
-- **shepherd-arm**: Base configuration template (aarch64)
 
 **macOS Hosts:**
 - **inara**: macOS system using nix-darwin with Home Manager integration (aarch64-darwin)
@@ -25,7 +22,7 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 
 Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`). This replaces manual import lists — just drop a `.nix` file in the right directory and it's automatically imported.
 
-**Key convention:** Files prefixed with `_` (e.g., `_categories.nix`, `_defaults.nix`, `_config.nix`) are **excluded** from import-tree auto-discovery. They are imported explicitly in `flake.nix` when needed.
+**Key convention:** Files prefixed with `_` (e.g., `_defaults.nix`, `_config.nix`) are **excluded** from import-tree auto-discovery. They are imported explicitly in `flake.nix` when needed.
 
 ### Module Structure
 
@@ -34,11 +31,10 @@ Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`).
 - `modules/nixos/` - NixOS-specific modules (desktop environments, system configs)
 - `modules/darwin/` - macOS-specific modules (homebrew config)
 - `modules/apps/` - Cross-platform application modules organized by category (auto-discovered)
-- `modules/apps/_categories.nix` - Auto-discovers categories and creates per-category enable options (imported explicitly)
 - `modules/homelab/` - Mal host services (auto-discovered, plus `_config.nix` imported explicitly)
 - `home/` - Minimal Home Manager entry point (default.nix, home.nix, wallpapers)
 - `hosts/` - Host-specific configurations and hardware profiles
-- `hosts/profiles/` - Reusable host profiles (shepherd.nix, desktop.nix, desktop-home.nix, disko-btrfs.nix)
+- `hosts/profiles/disko-btrfs.nix` - Shared btrfs disk layout (used by wash)
 - `lib/` - Custom helpers (only `mkModule`)
 - `overlays/` - Nixpkgs overlays (llm-agents, pam-cli, lute-v3, wine921)
 - `packages/` - Custom Nix packages (pam-cli, lute-v3)
@@ -52,7 +48,7 @@ platform tree, and `extraModules` for anything else.
 
 Each host gets these module layers:
 1. `modules/common/` (auto-discovered) + `_defaults.nix` (explicit)
-2. `modules/apps/` (auto-discovered) + `_categories.nix` (explicit)
+2. `modules/apps/` (auto-discovered)
 3. Host-specific config from `hosts/<name>/configuration.nix`
 4. Home Manager + SOPS-nix integration modules (the platform's own variant)
 5. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
@@ -66,12 +62,11 @@ derives it from `user.userName`: the HM user, `extraSpecialArgs` (`username`,
 `inputs`, `pkgs-stable`) and `backupFileExtension`. A host sets
 `user.userName` and nothing else; an unset one fails an assertion.
 
-### Category System
+### Enabling Apps
 
-`modules/apps/_categories.nix` auto-discovers all subdirectories under `modules/apps/` and creates enable options:
-- `apps.browsers.enable = true` enables all browser modules (zen, firefox, etc.)
-- Individual modules can be overridden: `apps.browsers.zen.enable = false`
-- Per-category overrides in `_categories.nix` control which modules default to disabled (e.g., `gaming.ps3 = false`)
+Every app is off until a host turns it on by name:
+`apps.<category>.<name>.enable = true;`. There is no category-wide switch, so
+adding a file to `modules/apps/<category>/` never puts it on a host by itself.
 
 ### Key Dependencies
 
@@ -183,7 +178,7 @@ The mal host runs as a homelab server with the following characteristics:
 - See `modules/homelab/STORAGE.md` for commands reference
 
 **Maintenance:**
-- Automatic updates enabled (daily at 02:00)
+- Automatic updates: weekly (Sunday 02:00) rebuild of `github:VictorBuch/serenityOs` main. Inputs only move when an updated flake.lock is pushed; a manual deploy of unpushed work is reverted on the next run
 - Automatic garbage collection runs weekly
 - SOPS for secret management (secrets in `secrets/secrets.yaml`)
 
@@ -193,8 +188,12 @@ The mal host runs as a homelab server with the following characteristics:
 # Test any CLI tool without installing
 nix-shell -p <packageName>
 
-# Test flake evaluation
-nix flake check
+# Evaluate every host (jayne, mal, wash, inara). Must stay green.
+nix flake check --no-build
+
+# Did my refactor change anything? Record drvPaths before and after, then diff:
+nix eval --json .#nixosConfigurations --apply 'cs: builtins.mapAttrs (_: c: c.config.system.build.toplevel.drvPath) cs'
+# A changed host: `nix run nixpkgs#nix-diff -- <old.drv> <new.drv>` says why.
 
 # Build without switching (NixOS)
 sudo nixos-rebuild build --flake .
@@ -222,13 +221,6 @@ Uses SOPS-nix for secret management:
 **Primary method:** nixos-anywhere + disko (one command, no manual partitioning). See `docs/onboarding.md` for the full walkthrough.
 
 **Fallback:** `install.sh` for cases where nixos-anywhere isn't an option.
-
-### Host Profiles
-
-Reusable profiles in `hosts/profiles/`:
-- `shepherd.nix` - Base profile for all shepherd-derived hosts (locale, desktop env, base apps)
-- `desktop.nix` / `desktop-home.nix` - Desktop host configuration
-- `disko-btrfs.nix` - Shared btrfs partitioning layout with `@` / `@home` / `@nix` / `@log` subvolumes (parameterized by device path)
 
 ## Configuration Guidelines
 
@@ -333,10 +325,9 @@ mkModule {
 
 1. Create `modules/apps/<category>/<name>.nix` using `mkModule`
 2. The file is auto-discovered by import-tree — no need to edit any imports
-3. Enable the category in host config: `apps.<category>.enable = true;` (enables all modules in category)
-4. Or enable individually: `apps.<category>.<name>.enable = true;`
-5. `git add` the new file (flakes only see Git-tracked files)
-6. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
+3. Enable it on each host that wants it: `apps.<category>.<name>.enable = true;`
+4. `git add` the new file (flakes only see Git-tracked files)
+5. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
 
 ### Enabling Homelab Services
 
@@ -409,7 +400,7 @@ nix flake show github:owner/repo
 
 ## Platform-Specific Notes
 
-### NixOS (jayne, kaylee, mal, shepherd)
+### NixOS (jayne, mal, wash)
 - All configurations use `nixos-unstable` channel
 - Home Manager integrated via `inputs.home-manager.nixosModules.default`
 - Mal host does NOT use desktop modules (homelab modules instead)
@@ -429,7 +420,7 @@ nix flake show github:owner/repo
 ## Maintenance
 
 - **Automatic garbage collection**: Runs weekly on all systems
-- **Mal host automatic updates**: Daily at 02:00
+- **Mal and wash automatic updates**: Weekly, Sunday 02:00, from GitHub main
 - **Manual garbage collection**: `nix-collect-garbage -d`
 - **Optimize Nix store**: `nix-store --optimize`
 

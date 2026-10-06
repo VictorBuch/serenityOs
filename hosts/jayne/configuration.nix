@@ -14,13 +14,64 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    ../profiles/desktop.nix
-    ../profiles/desktop-home.nix
   ];
 
   networking.hostName = "jayne";
 
   user.userName = username;
+
+  time.timeZone = "Europe/Copenhagen";
+  i18n.defaultLocale = "en_DK.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "da_DK.UTF-8";
+    LC_IDENTIFICATION = "da_DK.UTF-8";
+    LC_MEASUREMENT = "da_DK.UTF-8";
+    LC_MONETARY = "da_DK.UTF-8";
+    LC_NAME = "da_DK.UTF-8";
+    LC_NUMERIC = "da_DK.UTF-8";
+    LC_PAPER = "da_DK.UTF-8";
+    LC_TELEPHONE = "da_DK.UTF-8";
+    LC_TIME = "da_DK.UTF-8";
+  };
+  console.keyMap = "dk-latin1";
+
+  # Force Electron apps to use Wayland
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
+  zramSwap.enable = true;
+
+  security.rtkit.enable = true;
+  services.pulseaudio.enable = false;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
+  services.printing.enable = true;
+  services.power-profiles-daemon.enable = true;
+  services.upower.enable = true;
+
+  networking.networkmanager.enable = true;
+
+  programs.zsh.enable = true;
+
+  # Binary compatibility for unpackaged programs
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [ libz ];
+
+  maintenance.enable = true;
+
+  # Flake HM modules that define options our modules use. noctalia is not
+  # here: home-manager ships its own programs.noctalia module, and importing
+  # the flake's as well makes the option collide.
+  home-manager.sharedModules = [ inputs.zen-browser.homeModules.default ];
 
   # Jayne-specific boot configuration
   boot = {
@@ -136,62 +187,99 @@ in
     environment.kde.enable = false;
   };
 
-  # Apps - full workstation
   apps = {
-
     audio = {
-      enable = true;
-
+      audacity.enable = true;
+      decent-sampler.enable = true;
+      easyeffects.enable = true;
       feedback.enable = true;
-
+      mass.enable = true;
+      reaper.enable = true;
       reaper.wineTrack = "modern";
+      sone.enable = true;
+      spotify.enable = true;
+      vlc.enable = true;
+      yabridge.enable = true;
     };
 
-    browsers = {
-      enable = true;
-      firefox.enable = false;
+    browsers.zen.enable = true;
+
+    cli = {
+      fzf.enable = true;
+      git.enable = true;
+      herdr.enable = true;
+      jujutsu.enable = true;
+      notes.enable = true;
+      nushell.enable = true;
+      opencode.enable = true;
+      sesh.enable = true;
+      starship.enable = true;
+      zsh.enable = true;
     };
 
     communication = {
-      enable = true;
-      signal.enable = false;
-      zoom.enable = false;
+      discord.enable = true;
+      slack.enable = true;
     };
 
     development = {
-      enable = true;
+      agent-browser.enable = true;
+      android-studio.enable = true;
+      common.enable = true;
+      devenv-init.enable = true;
+      docker.enable = true;
+      ghostty.enable = true;
+      kitty.enable = true;
+      neovim.enable = true;
+      tmux.enable = true;
+      vscode.enable = true;
+      zed.enable = true;
     };
 
-    emacs.enable = false;
-
     emulation = {
-      enable = true;
-      podman.enable = false;
-      virtmanager.enable = false;
-      virtualbox.enable = false;
+      bottles.enable = true;
+      qemu.enable = true;
     };
 
     gaming = {
-      enable = true;
-      corectrl.enable = false;
-      mangohud.enable = false;
+      gamemode.enable = true;
+      heroic.enable = true;
+      minecraft.enable = true;
+      ps2.enable = true;
+      ps3.enable = true;
+      ps4.enable = true;
+      steam.enable = true;
+      sunshine.enable = true;
+      wine.enable = true;
     };
 
     hardware.logitech.enable = true;
 
     media = {
-      enable = true;
+      blender.enable = true;
+      davinci-resolve.enable = true;
+      ffmpeg.enable = true;
+      handbrake.enable = true;
     };
+
+    neovim.lazyvim.enable = true;
 
     productivity = {
-      enable = true;
-      logseq.enable = false;
+      calibre.enable = true;
+      figma.enable = true;
+      language-learning.enable = true;
+      obsidian.enable = true;
     };
 
-    utilities.enable = true;
+    theming.stylix.enable = true;
 
-    neovim = {
-      lazyvim.enable = true;
+    utilities = {
+      cli-tools.enable = true;
+      handy.enable = true;
+      localsend.enable = true;
+      syncthing.enable = true;
+      system-tools.enable = true;
+      web-apps.enable = true;
     };
   };
 
@@ -205,7 +293,7 @@ in
   '';
 
   sops = {
-    defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
+    defaultSopsFile = ../../secrets/secrets.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/jayne/.config/sops/age/keys.txt";
     secrets.github-token = { };

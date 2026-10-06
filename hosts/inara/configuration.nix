@@ -52,45 +52,44 @@ in
 
   maintenance.enable = true;
   apps = {
-
-    # CLI tools
     cli = {
-      enable = true;
-      zsh.enable = false;
-    };
-
-    neovim = {
-      lazyvim.enable = true;
-    };
-
-    browsers = {
-      # Zen is still too experimental on macOS with nix
-      enable = false;
+      fzf.enable = true;
+      git.enable = true;
+      herdr.enable = true;
+      jujutsu.enable = true;
+      notes.enable = true;
+      nushell.enable = true;
+      opencode.enable = true;
+      sesh.enable = true;
+      starship.enable = true;
     };
 
     communication = {
-      enable = true;
+      discord.enable = true;
+      signal.enable = true;
+      slack.enable = true;
+      zoom.enable = true;
     };
 
+    # zed comes from the homebrew cask instead, to avoid compiling it.
     development = {
-      enable = true;
-      # Flattened paths (were under terminals/, editors/)
-      ghostty.enable = false;
-      kitty.enable = false;
-      zed.enable = false; # Use homebrew cask instead to avoid compilation
+      agent-browser.enable = true;
+      android-studio.enable = true;
+      common.enable = true;
+      devenv-init.enable = true;
+      docker.enable = true;
+      neovim.enable = true;
+      tmux.enable = true;
+      vscode.enable = true;
     };
 
-    # Doom Emacs (light declarative) — emacs + deps + daemon via nix;
-    # config stays imperative in ~/.config/doom.
-    emacs.enable = true;
+    media.ffmpeg.enable = true;
 
-    media = {
-      ffmpeg.enable = true;
-    };
+    neovim.lazyvim.enable = true;
 
     productivity = {
-      obsidian.enable = true;
       logseq.enable = true;
+      obsidian.enable = true;
     };
 
     utilities = {
@@ -209,7 +208,7 @@ in
   security.pam.services.sudo_local.touchIdAuth = true;
 
   sops = {
-    defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
+    defaultSopsFile = ../../secrets/secrets.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/Users/${username}/.config/sops/age/age-yubikey-identity-907e6f67.txt";
     age.sshKeyPaths = [ ]; # Don't try SSH keys, use YubiKey identity only

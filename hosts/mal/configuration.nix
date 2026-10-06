@@ -120,7 +120,7 @@ in
 
   # Sops configuration
   sops = {
-    defaultSopsFile = "${inputs.self}/secrets/secrets.yaml";
+    defaultSopsFile = ../../secrets/secrets.yaml;
     defaultSopsFormat = "yaml";
 
     age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
@@ -324,20 +324,12 @@ in
   # Server: enable tmux
   apps.development.tmux.enable = true;
 
-  # Server CLI tools (selective enables)
   apps.cli = {
-    enable = true;
-    git.enable = true;
-    # Personal notes vault; nothing on this host reads or writes it.
-    notes.enable = false;
     fzf.enable = true;
+    git.enable = true;
     nushell.enable = true;
-    zsh.enable = false;
-    starship.enable = true;
     sesh.enable = true;
-    jujutsu.enable = false;
-    opencode.enable = false;
-    herdr.enable = false;
+    starship.enable = true;
   };
 
   homelab = {

@@ -110,7 +110,7 @@ in
 
   # Sops configuration — wash only gets secrets/vps.yaml, not the homelab vault
   sops = {
-    defaultSopsFile = "${inputs.self}/secrets/vps.yaml";
+    defaultSopsFile = ../../secrets/vps.yaml;
     defaultSopsFormat = "yaml";
 
     # Staged by nixos-anywhere --extra-files before first boot
@@ -538,18 +538,10 @@ in
   ];
 
   apps.cli = {
-    enable = true;
-    git.enable = true;
-    # Personal notes vault; nothing on this host reads or writes it.
-    notes.enable = false;
     fzf.enable = true;
+    git.enable = true;
     nushell.enable = true;
-    zsh.enable = false;
     starship.enable = true;
-    sesh.enable = false;
-    jujutsu.enable = false;
-    opencode.enable = false;
-    herdr.enable = false;
   };
 
   system.stateVersion = "25.11";

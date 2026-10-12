@@ -12,6 +12,8 @@ mkModule {
       ...
     }:
     {
+      home.packages = [ pkgs.difftastic ];
+
       programs.jujutsu = {
         enable = true;
         package = pkgs.jujutsu;
@@ -43,6 +45,13 @@ mkModule {
             diff-expected-exit-codes = [
               0
               1
+            ];
+          };
+          merge-tools.difft = {
+            diff-args = [
+              "--color=always"
+              "$left"
+              "$right"
             ];
           };
           template-aliases = {
@@ -100,6 +109,11 @@ mkModule {
               "--interactive"
             ];
             d = [ "desc" ];
+            dft = [
+              "diff"
+              "--tool"
+              "difft"
+            ];
             pp = [
               "git"
               "push"

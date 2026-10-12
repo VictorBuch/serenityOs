@@ -24,9 +24,11 @@ mkModule {
       pkgs.llm-agents.claude-code
       pkgs.gitea-mcp-server
       pkgs.yazi
+      pkgs.superfile
       pkgs.devenv
       pkgs.jujutsu
       pkgs.jjui
+      pkgs.lazyjj
       pkgs.go
       pkgs.opencode
       pkgs.bun

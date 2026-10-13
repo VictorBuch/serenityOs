@@ -75,6 +75,7 @@ in
     development = {
       agent-browser.enable = true;
       android-studio.enable = true;
+      claude.enable = true;
       common.enable = true;
       devenv-init.enable = true;
       docker.enable = true;

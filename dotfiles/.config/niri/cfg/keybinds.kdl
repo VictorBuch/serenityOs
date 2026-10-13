@@ -37,7 +37,7 @@ binds {
     // Please set the text editor of your choice.
     // Mod+Shift+E                               hotkey-overlay-title="Open Text Editor: Zed" { spawn "zed"; }
 
-    Mod+E                               hotkey-overlay-title="File Manager: Nautilus" { spawn "nautilus"; }
+    Mod+E                               hotkey-overlay-title="File Manager: Nautilus" { spawn "nirirun" "-c" "^nautilus" "--" "nautilus"; }
     Mod+Y                               hotkey-overlay-title="Handy: Toggle Transcription" { spawn "handy" "--toggle-transcription"; }
 
     // ─── Media Controls ───
@@ -143,7 +143,8 @@ binds {
     Mod+CTRL+8                          { move-column-to-workspace 8; }
     Mod+CTRL+9                          { move-column-to-workspace 9; }
 
-    Mod+TAB                             { focus-workspace-previous; }
+    // Mod+TAB                             { focus-workspace-previous; }
+    Mod+TAB                               repeat=false { toggle-overview; }
 
     // ─── Layout Controls ───
     Mod+CTRL+F                          { expand-column-to-available-width; }
@@ -175,5 +176,4 @@ binds {
     // ─── Exit / Power ───
     CTRL+ALT+Delete                     { quit; } // Also quits Niri
     Mod+Shift+P                         { power-off-monitors; } // Turn off screens (useful for OLED or privacy)
-    Mod+O                               repeat=false { toggle-overview; }
 }

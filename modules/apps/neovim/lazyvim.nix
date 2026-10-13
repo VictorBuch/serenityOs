@@ -22,6 +22,7 @@ mkModule {
     stylua
     nixd
     nixfmt
+    statix
     bash-language-server
     shfmt
     typescript-language-server

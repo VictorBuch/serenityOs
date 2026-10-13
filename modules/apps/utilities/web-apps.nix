@@ -102,6 +102,21 @@ mkModule {
             };
           };
 
+          linear = {
+            name = "Linear";
+            genericName = "Issue Tracker";
+            exec = "${browser} --app=https://linear.app --no-first-run --disable-default-apps";
+            icon = "linear";
+            categories = [
+              "Development"
+              "Office"
+            ];
+            terminal = false;
+            settings = {
+              StartupWMClass = "linear.app";
+            };
+          };
+
           nixpkgs = {
             name = "NixOS Packages";
             genericName = "Package Search";

@@ -59,7 +59,10 @@ in
   services.upower.enable = true;
 
   networking.networkmanager.enable = true;
-  networking.resolvconf.extraOptions = [ "timeout:1" "attempts:2" ];
+  networking.resolvconf.extraOptions = [
+    "timeout:1"
+    "attempts:2"
+  ];
   systemd.services.nscd.environment.NSNCD_WORKER_COUNT = "64";
 
   programs.zsh.enable = true;
@@ -263,6 +266,7 @@ in
       davinci-resolve.enable = true;
       ffmpeg.enable = true;
       handbrake.enable = true;
+      fladder.enable = true;
     };
 
     neovim.lazyvim.enable = true;
@@ -282,7 +286,7 @@ in
       localsend.enable = true;
       syncthing.enable = true;
       system-tools.enable = true;
-      web-apps.enable = true;
+      web-apps.enable = false;
     };
   };
 

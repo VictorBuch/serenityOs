@@ -25,7 +25,7 @@ let
     # here or the window renders fully opaque. Sorts before `theme` in the
     # generated config, which is fine: the theme file never sets an opacity key,
     # so there is nothing to clobber it.
-    background-opacity = 0.85;
+    background-opacity = 0.4;
     alpha-blending = "native";
     window-decoration = "none";
     confirm-close-surface = false;
@@ -43,7 +43,12 @@ mkModule {
   name = "ghostty";
   category = "development";
   packages =
-    { pkgs, lib, platform, ... }:
+    {
+      pkgs,
+      lib,
+      platform,
+      ...
+    }:
     lib.optionals (platform == "linux") [ pkgs.ghostty ];
   casks = [ "ghostty" ];
   description = "Ghostty terminal emulator";

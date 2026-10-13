@@ -59,6 +59,8 @@ in
   services.upower.enable = true;
 
   networking.networkmanager.enable = true;
+  networking.resolvconf.extraOptions = [ "timeout:1" "attempts:2" ];
+  systemd.services.nscd.environment.NSNCD_WORKER_COUNT = "64";
 
   programs.zsh.enable = true;
 

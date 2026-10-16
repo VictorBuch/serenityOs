@@ -17,6 +17,7 @@ ZOXIDE_LIMIT="${HERDR_SESH_ZOXIDE_LIMIT:-20}"
 STAR="★ "  # marks configured spaces in the picker, vs. plain zoxide paths
 DOT="● "   # marks running ad-hoc workspaces
 LAST_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-sesh-last"
+CMDS_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-sesh/cmds"  # read by the shell hook in herdr.nix
 TILDE='~'  # kept in a var so shellcheck doesn't mistake it for an expansion
 
 die() { printf 'herdr-sesh: %s\n' "$*" >&2; exit 1; }
@@ -47,17 +48,6 @@ last() {
   herdr workspace focus "$target" >/dev/null 2>&1 || true
 }
 
-# True if every pane in the workspace sits at an idle shell, i.e. the server was
-# restored from disk and the space's startup commands are gone.
-is_stale() {
-  local ws="$1" pane
-  for pane in $(herdr pane list | jq -r --arg w "$ws" '.result.panes[] | select(.workspace_id == $w) | .pane_id'); do
-    herdr pane process-info --pane "$pane" 2>/dev/null \
-      | jq -e '.result.process_info | .foreground_process_group_id == .shell_pid' >/dev/null || return 1
-  done
-  return 0
-}
-
 expand_tilde() {
   local p="$1"
   if [ "$p" = "~" ]; then
@@ -84,48 +74,6 @@ shorten_home() {
 # Extract a single space object by name.
 get_space() {
   jq -c --arg n "$1" '.spaces[] | select(.name == $n)' "$CONFIG"
-}
-
-# True if $1 (or any ancestor dir) has a .envrc, i.e. direnv will activate a
-# (possibly slow) environment when a shell starts there.
-has_direnv() {
-  local d
-  d=$(expand_tilde "$1")
-  while [ -n "$d" ] && [ "$d" != "/" ]; do
-    [ -e "$d/.envrc" ] && return 0
-    d="${d%/*}"
-  done
-  return 1
-}
-
-# Block until the pane's shell is at an idle prompt accepting clean input.
-#
-# We can't just sleep before typing a startup command: with direnv + a nix
-# devshell the shell needs a few seconds to activate, and its loading output
-# has quiet stretches that fool a "wait until output stops changing" heuristic —
-# so keystrokes sent too early get swallowed by the loader and never run.
-# Instead we round-trip a unique marker: once the shell echoes it back as its
-# own output line, it is provably ready. Dirs with a .envrc get a longer
-# deadline (override with HERDR_SESH_READY_TIMEOUT_MS).
-wait_ready() {
-  local pane="$1" cwd="$2" token="__herdr_sesh_rdy_$$__" max_ms
-  if has_direnv "$cwd"; then
-    max_ms="${HERDR_SESH_READY_TIMEOUT_MS:-30000}"
-  else
-    max_ms="${HERDR_SESH_READY_TIMEOUT_MS:-8000}"
-  fi
-  local deadline_polls=$(( max_ms / 200 )) i=0 j out
-  sleep 0.3
-  while (( i < deadline_polls )); do
-    herdr pane run "$pane" "echo $token" >/dev/null 2>&1 || true
-    for (( j = 0; j < 6; j++ )); do   # ~1.2s to observe the echo before resending
-      sleep 0.2
-      i=$(( i + 1 ))
-      out=$(herdr pane read "$pane" --source recent 2>/dev/null || true)
-      grep -qE "^${token}[[:space:]]*$" <<<"$out" && return 0
-    done
-  done
-  return 0   # deadline hit: send anyway rather than hang
 }
 
 # The picker list: configured spaces first, then top zoxide dirs (deduped
@@ -159,6 +107,39 @@ list_items() {
   done < <(zoxide query --list 2>/dev/null)
 }
 
+# Start commands are never typed into a pane. Each pane is created with
+# HERDR_SESH_CMD in its env, and the shell hook in herdr.nix runs it at the
+# first prompt (after direnv). The command is also saved under the pane id:
+# herdr's restore keeps pane ids but drops env, so the hook falls back to the
+# saved file and restored panes start their commands again.
+# ponytail: a workspace id reused after a manual close + server restart could
+# inherit stale files; gc_cmds and clear_ws_cmds narrow that to rare.
+ENV_ARGS=()
+with_cmd() {
+  ENV_ARGS=()
+  [ -n "$1" ] && ENV_ARGS=(--env "HERDR_SESH_CMD=$1")
+  return 0
+}
+
+save_cmd() {
+  [ -n "$2" ] || return 0
+  mkdir -p "$CMDS_DIR"
+  printf '%s' "$2" >"$CMDS_DIR/$1"
+}
+
+clear_ws_cmds() { rm -f "$CMDS_DIR/$1:"*; }
+
+# Drop saved commands for panes that no longer exist.
+gc_cmds() {
+  local live f
+  live=$(herdr pane list 2>/dev/null | jq -r '.result.panes[].pane_id') || return 0
+  [ -n "$live" ] || return 0
+  for f in "$CMDS_DIR"/*; do
+    [ -e "$f" ] || continue
+    grep -qxF "${f##*/}" <<<"$live" || rm -f "$f"
+  done
+}
+
 # Build a configured space from scratch: workspace -> tabs -> panes -> commands.
 build_space() {
   local name="$1" space
@@ -168,22 +149,24 @@ build_space() {
   local path
   path=$(expand_tilde "$(jq -r '.path // "~"' <<<"$space")")
 
-  # Creating a workspace also creates its first tab and root pane.
-  local created ws first_tab first_pane
-  created=$(herdr workspace create --cwd "$path" --label "$name" --focus)
-  ws=$(jq -r '.result.workspace.workspace_id' <<<"$created")
-  first_tab=$(jq -r '.result.tab.tab_id' <<<"$created")
-  first_pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
-
   # A space is a list of tabs. If none given, synthesize one from a top-level
   # `command` (single-shot spaces like an ssh session), else a bare shell.
   local tabs ntabs
   tabs=$(jq -c '.tabs // (if .command then [{panes:[{command:.command}]}] else [{}] end)' <<<"$space")
   ntabs=$(jq 'length' <<<"$tabs")
 
+  # Creating a workspace also creates its first tab and root pane.
+  local created ws first_tab first_pane
+  with_cmd "$(jq -r '.[0].panes[0].command // empty' <<<"$tabs")"
+  created=$(herdr workspace create --cwd "$path" --label "$name" --focus "${ENV_ARGS[@]}")
+  ws=$(jq -r '.result.workspace.workspace_id' <<<"$created")
+  first_tab=$(jq -r '.result.tab.tab_id' <<<"$created")
+  first_pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+  clear_ws_cmds "$ws"
+
   local ti
   for (( ti = 0; ti < ntabs; ti++ )); do
-    local tab tabname tabcwd tab_id root_pane
+    local tab tabname tabcwd root_pane
     tab=$(jq -c ".[$ti]" <<<"$tabs")
     tabname=$(jq -r '.name // empty' <<<"$tab")
     tabcwd=$(jq -r '.path // empty' <<<"$tab")
@@ -191,17 +174,14 @@ build_space() {
 
     if [ "$ti" -eq 0 ]; then
       # Reuse the workspace's first tab/pane.
-      tab_id="$first_tab"
       root_pane="$first_pane"
-      [ -n "$tabname" ] && herdr tab rename "$tab_id" "$tabname" >/dev/null
+      [ -n "$tabname" ] && herdr tab rename "$first_tab" "$tabname" >/dev/null
     else
-      local tcreated
-      if [ -n "$tabname" ]; then
-        tcreated=$(herdr tab create --workspace "$ws" --cwd "$tabcwd" --label "$tabname" --no-focus)
-      else
-        tcreated=$(herdr tab create --workspace "$ws" --cwd "$tabcwd" --no-focus)
-      fi
-      root_pane=$(jq -r '.result.root_pane.pane_id' <<<"$tcreated")
+      local label=()
+      [ -n "$tabname" ] && label=(--label "$tabname")
+      with_cmd "$(jq -r '.panes[0].command // empty' <<<"$tab")"
+      root_pane=$(herdr tab create --workspace "$ws" --cwd "$tabcwd" "${label[@]}" --no-focus "${ENV_ARGS[@]}" \
+        | jq -r '.result.root_pane.pane_id')
     fi
 
     # Lay out panes within the tab. The first pane is the tab's root; each
@@ -213,26 +193,17 @@ build_space() {
     for (( pj = 0; pj < npanes; pj++ )); do
       local pane target cmd
       pane=$(jq -c ".[$pj]" <<<"$panes")
+      cmd=$(jq -r '.command // empty' <<<"$pane")
       if [ "$pj" -eq 0 ]; then
         target="$root_pane"
       else
-        local dir ratio scmd
-        dir=$(jq -r '.direction // "right"' <<<"$pane")
-        ratio=$(jq -r '.ratio // empty' <<<"$pane")
-        if [ -n "$ratio" ]; then
-          scmd=$(herdr pane split "$prev" --direction "$dir" --ratio "$ratio" --no-focus)
-        else
-          scmd=$(herdr pane split "$prev" --direction "$dir" --no-focus)
-        fi
-        target=$(jq -r '.result.pane.pane_id' <<<"$scmd")
+        local ratio=()
+        [ "$(jq -r '.ratio // empty' <<<"$pane")" ] && ratio=(--ratio "$(jq -r '.ratio' <<<"$pane")")
+        with_cmd "$cmd"
+        target=$(herdr pane split "$prev" --direction "$(jq -r '.direction // "right"' <<<"$pane")" \
+          --cwd "$tabcwd" "${ratio[@]}" --no-focus "${ENV_ARGS[@]}" | jq -r '.result.pane.pane_id')
       fi
-      cmd=$(jq -r '.command // empty' <<<"$pane")
-      if [ -n "$cmd" ]; then
-        # Wait until the pane's shell is actually ready (direnv/devshell may take
-        # seconds) before typing, or the command gets swallowed during load.
-        wait_ready "$target" "$tabcwd"
-        herdr pane run "$target" "$cmd" >/dev/null 2>&1 || true
-      fi
+      save_cmd "$target" "$cmd"
       prev="$target"
     done
   done
@@ -262,25 +233,22 @@ open_dir() {
   name=$(basename "$dir")
   if command -v zoxide >/dev/null 2>&1; then zoxide add "$dir" 2>/dev/null || true; fi
   focus_existing "$name" && return 0
-  herdr workspace create --cwd "$dir" --label "$name" --focus >/dev/null
+  clear_ws_cmds "$(herdr workspace create --cwd "$dir" --label "$name" --focus | jq -r '.result.workspace.workspace_id')"
 }
 
 # Route a picked item: a configured space, otherwise a directory path.
 dispatch() {
   local item="$1" space ws
   remember_current
+  gc_cmds
   space=$(get_space "$item")
   if [ -n "$space" ]; then
     ws=$(find_ws "$item")
     if [ -n "$ws" ]; then
-      if jq -e '[.. | .command? // empty] | length > 0' <<<"$space" >/dev/null && is_stale "$ws"; then
-        herdr workspace close "$ws" >/dev/null 2>&1 || true
-      else
-        herdr workspace focus "$ws" >/dev/null 2>&1 || true
-        return 0
-      fi
+      herdr workspace focus "$ws" >/dev/null 2>&1 || true
+    else
+      build_space "$item"
     fi
-    build_space "$item"
   elif [ -n "$(find_ws "$item")" ]; then
     focus_existing "$item"
   else
@@ -332,6 +300,17 @@ main() {
     last)      last; exit 0 ;;
   esac
 
+  # Outside herdr (the `s` alias in a plain terminal) start the server if
+  # needed, then attach after picking, like `sesh connect` outside tmux.
+  if [ -z "${HERDR_ENV:-}" ] && ! herdr workspace list >/dev/null 2>&1; then
+    setsid -f herdr server >/dev/null 2>&1
+    local i
+    for (( i = 0; i < 50; i++ )); do
+      herdr workspace list >/dev/null 2>&1 && break
+      sleep 0.1
+    done
+  fi
+
   local sel
   sel=$(list_items | fzf \
     --prompt="herdr ⚡ " \
@@ -341,6 +320,7 @@ main() {
     --preview-window=right:55%) || exit 0
   [ -n "$sel" ] || exit 0
   dispatch "$(strip_star "$sel")"
+  [ -n "${HERDR_ENV:-}" ] || exec herdr
 }
 
 main "$@"

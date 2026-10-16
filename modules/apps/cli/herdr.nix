@@ -4,7 +4,7 @@ let
   # herdr-sesh: a sesh-style space picker for herdr (see ./herdr-sesh.sh).
   herdr-sesh = pkgs.writeShellApplication {
     name = "herdr-sesh";
-    runtimeInputs = [ pkgs.herdr pkgs.jq pkgs.fzf pkgs.figlet pkgs.bash pkgs.zoxide pkgs.coreutils pkgs.gnugrep ];
+    runtimeInputs = [ pkgs.herdr pkgs.jq pkgs.fzf pkgs.figlet pkgs.bash pkgs.zoxide pkgs.coreutils pkgs.gnugrep pkgs.util-linux ];
     text = builtins.readFile ./herdr-sesh.sh;
   };
 
@@ -106,6 +106,37 @@ mkModule {
   homeConfig = { pkgs, lib, ... }: {
     # Space definitions consumed by herdr-sesh at runtime.
     xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
+
+    # `s` opens the space picker, attaching to herdr first when outside it.
+    programs.nushell.shellAliases.s = lib.mkForce "herdr-sesh";
+    programs.zsh.shellAliases.s = "herdr-sesh";
+
+    # Run a pane's start command (see herdr-sesh.sh) once, at the first prompt,
+    # as if typed. HERDR_SESH_DONE keeps nested shells from running it again.
+    programs.nushell.extraConfig = ''
+      $env.config.hooks.pre_prompt = ($env.config.hooks.pre_prompt? | default [] | append {||
+        if ($env.HERDR_PANE_ID? | is-empty) or ($env.HERDR_SESH_DONE? | is-not-empty) { return }
+        $env.HERDR_SESH_DONE = 1
+        let f = ($env.XDG_STATE_HOME? | default ($env.HOME | path join .local/state) | path join herdr-sesh cmds $env.HERDR_PANE_ID)
+        let c = ($env.HERDR_SESH_CMD? | default (if ($f | path exists) { open --raw $f } else { "" }))
+        if ($c | is-not-empty) { commandline edit --replace --accept $c }
+      })
+    '';
+    programs.zsh.initContent = lib.mkOrder 1500 ''
+      _herdr_sesh_run() {
+        add-zle-hook-widget -d line-init _herdr_sesh_run
+        [[ -n $HERDR_PANE_ID && -z $HERDR_SESH_DONE ]] || return 0
+        export HERDR_SESH_DONE=1
+        local f=''${XDG_STATE_HOME:-$HOME/.local/state}/herdr-sesh/cmds/$HERDR_PANE_ID
+        local c=''${HERDR_SESH_CMD:-$(cat $f 2>/dev/null)}
+        [[ -n $c ]] || return 0
+        BUFFER=$c
+        zle accept-line
+      }
+      autoload -Uz add-zle-hook-widget
+      zle -N _herdr_sesh_run
+      add-zle-hook-widget line-init _herdr_sesh_run
+    '';
 
     xdg.configFile."herdr/config.toml".source =
       (pkgs.formats.toml { }).generate "herdr-config.toml" {

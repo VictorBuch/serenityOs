@@ -309,11 +309,21 @@ in
     autoUpdateService = true;
 
     settings = {
-      # Standalone engine, so it runs its own LAPI (module defaults it off) and
-      # registers itself against the community API for the blocklists.
-      general.api.server.enable = true;
-      lapi.credentialsFile = "/var/lib/crowdsec/local_api_credentials.yaml";
-      capi.credentialsFile = "/var/lib/crowdsec/online_api_credentials.yaml";
+      config.config_paths.data_dir = "/var/lib/crowdsec";
+      config.api.server.online_client.credentials_path = "/var/lib/crowdsec/online_api_credentials.yaml";
+
+      acquisitions = [
+        {
+          source = "journalctl";
+          journalctl_filter = [ "_SYSTEMD_UNIT=sshd.service" ];
+          labels.type = "syslog";
+        }
+        {
+          source = "journalctl";
+          journalctl_filter = [ "_SYSTEMD_UNIT=traefik.service" ];
+          labels.type = "traefik";
+        }
+      ];
     };
 
     hub.collections = [
@@ -321,19 +331,6 @@ in
       "crowdsecurity/traefik"
       "crowdsecurity/http-cve"
       "crowdsecurity/base-http-scenarios"
-    ];
-
-    localConfig.acquisitions = [
-      {
-        source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=sshd.service" ];
-        labels.type = "syslog";
-      }
-      {
-        source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=traefik.service" ];
-        labels.type = "traefik";
-      }
     ];
   };
 
@@ -379,14 +376,6 @@ in
       RestartSec = "15s";
     };
   };
-
-  # The register unit shells out to the raw cscli, which reads
-  # /etc/crowdsec/config.yaml — a path the module never populates, since its own
-  # cscli wrapper passes `-c <store path>` instead. Publish the same generated
-  # config there so every raw invocation (this unit, an interactive one) works.
-  environment.etc."crowdsec/config.yaml".source =
-    (pkgs.formats.yaml { }).generate "crowdsec.yaml"
-      config.services.crowdsec.settings.general;
 
   # First-run bootstrap deadlock: the setup script runs `cscli machine add`
   # before `cscli capi register`, but naming capi.credentialsFile puts the path

@@ -42,12 +42,13 @@ python3.pkgs.buildPythonApplication {
   nativeBuildInputs = [ copyDesktopItems ];
 
   makeWrapperArgs = [
-    "--prefix PATH : ${
-      lib.makeBinPath [
-        vgmstream
-        ffmpeg
-      ]
-    }"
+    "--prefix"
+    "PATH"
+    ":"
+    (lib.makeBinPath [
+      vgmstream
+      ffmpeg
+    ])
   ];
 
   desktopItems = [

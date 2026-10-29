@@ -1,9 +1,19 @@
+    workspace "main"
+    workspace "apps"
+
     window-rule {
+        open-on-workspace "apps"
         geometry-corner-radius 4
         clip-to-geometry true
         draw-border-with-background false
         open-maximized-to-edges false
         default-column-width { proportion 1.0; }
+    }
+
+    window-rule {
+        match app-id=r#"^zen"#
+        match app-id=r#"^com\.mitchellh\.ghostty$"#
+        open-on-workspace "main"
     }
 
     window-rule {
@@ -24,8 +34,8 @@
     window-rule {
         match app-id=r#"^org\.gnome\.Nautilus$"#
         open-floating true
-        default-column-width { proportion 0.4; }
-        default-window-height { proportion 0.4; }
+        default-column-width { proportion 0.6; }
+        default-window-height { proportion 0.6; }
     }
 
     // if you use steam you will probably like these

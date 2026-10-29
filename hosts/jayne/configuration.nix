@@ -116,7 +116,6 @@ in
       themePackages = [ (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "rings" ]; }) ];
     };
     consoleLogLevel = 3;
-    initrd.verbose = false;
     kernelParams = [
       "quiet"
       "splash"
@@ -253,7 +252,7 @@ in
       minecraft.enable = true;
       ps2.enable = true;
       ps3.enable = true;
-      ps4.enable = true;
+      retroarch.enable = true;
       steam.enable = true;
       sunshine.enable = true;
       wine.enable = true;

@@ -1,4 +1,10 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+args@{
+  config,
+  pkgs,
+  lib,
+  mkModule,
+  ...
+}:
 
 mkModule {
   name = "ps3";

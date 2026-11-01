@@ -253,6 +253,7 @@ in
       ps2.enable = true;
       ps3.enable = true;
       retroarch.enable = true;
+      eden.enable = true;
       steam.enable = true;
       sunshine.enable = true;
       wine.enable = true;

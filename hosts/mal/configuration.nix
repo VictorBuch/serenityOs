@@ -404,6 +404,7 @@ in
     mealie.enable = true;
     lab.enable = false;
     lute.enable = true;
+    sparkyfitness.enable = true;
     tv-learn.enable = true;
 
     # Development

@@ -44,6 +44,7 @@ let
       ''
         # Serve static files
         root * ${r.root}
+        try_files {path} /index.html
         file_server
       ''
     else if r.kind == "pocketbase" then

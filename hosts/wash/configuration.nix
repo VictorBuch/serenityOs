@@ -357,8 +357,6 @@ in
       DynamicUser = lib.mkForce false;
       SupplementaryGroups = [ "systemd-journal" ];
       PrivateUsers = lib.mkForce false;
-      # Otherwise one unreachable hub CDN at boot leaves the agent down for good.
-      Restart = "on-failure";
     };
   };
 

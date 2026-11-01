@@ -100,6 +100,11 @@
     # WannaShare: PocketBase backend + Nuxt SSR site NixOS module
     wannashare.url = "git+https://git.victorbuch.com/Smoothless/WannaShare.git";
 
+    sparkyfitness = {
+      url = "github:CodeWithCJ/SparkyFitness";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # tv-learn: immersion language-learning media app (learn.victorbuch.com)
     tv-learn = {
       url = "git+https://git.victorbuch.com/VictorBuch/tv-learn";
@@ -225,6 +230,7 @@
             ./modules/homelab/_config.nix
             ./modules/nixos/system/user.nix
             inputs.wannashare.nixosModules.default
+            inputs.sparkyfitness.nixosModules.sparkyfitness
             inputs.tv-learn.nixosModules.tv-learn
           ];
         }

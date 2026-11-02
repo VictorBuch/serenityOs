@@ -406,6 +406,7 @@ in
     lute.enable = true;
     sparkyfitness.enable = true;
     tv-learn.enable = true;
+    trek.enable = true;
 
     # Development
     gitea.enable = true;

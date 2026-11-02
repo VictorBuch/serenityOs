@@ -139,6 +139,11 @@ in
     security.acme = {
       acceptTerms = true;
       defaults.email = "victorbuch@protonmail.com";
+      # lego's propagation self-check must skip mal's own resolver: AdGuard's
+      # `*.victorbuch.com` rewrite (adguard.nix) also matches
+      # _acme-challenge.victorbuch.com and answers its TXT query empty, so the
+      # check never passes. Cloudflare's resolver sees the zone update directly.
+      defaults.dnsResolver = "1.1.1.1:53";
       certs."${domain}" = {
         domain = "*.${domain}";
         extraDomainNames = [ domain ];

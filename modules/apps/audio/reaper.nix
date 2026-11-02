@@ -420,7 +420,7 @@ let
     export YABRIDGE_DEBUG_LEVEL="''${YABRIDGE_DEBUG_LEVEL:-0}"
 
     # Low latency for REAPER only -- the desktop keeps its 1024 quantum.
-    export PIPEWIRE_LATENCY="''${PIPEWIRE_LATENCY:-128/48000}"
+    export PIPEWIRE_LATENCY="''${PIPEWIRE_LATENCY:-256/48000}"
 
     # Keep bridged plugins in step with whatever is installed in the prefix.
     # Idempotent and fast; home-manager activation does the same on rebuild.
@@ -603,17 +603,17 @@ in
         services.pipewire.wireplumber.extraConfig."51-daw-capture" = {
           "monitor.alsa.rules" = [
             {
-              matches = [ { "device.name" = "alsa_card.usb-Focusrite_Scarlett_Solo_USB-00"; } ];
+              matches = [ { "device.name" = "~alsa_card.usb-Focusrite_Scarlett_Solo.*"; } ];
               actions.update-props = {
                 "api.acp.auto-profile" = false;
                 "device.profile" = "pro-audio";
               };
             }
             {
-              matches = [ { "node.name" = "~alsa_input.usb-046d_081b.*"; } ];
+              matches = [ { "node.name" = "~alsa_input.usb-Focusrite_Scarlett_Solo.*"; } ];
               actions.update-props = {
-                "priority.session" = 100;
-                "priority.driver" = 100;
+                "priority.session" = 3000;
+                "priority.driver" = 3000;
               };
             }
           ];

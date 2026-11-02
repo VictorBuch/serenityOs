@@ -89,6 +89,19 @@ in
           cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_CXX_STANDARD=17" ];
         })
       );
+  # patchelf 0.19.2 grows 7.83's .dynstr into a LOAD segment that overlaps the text
+  # segment, and glibc's loader segfaults in dl_main. 0.15.2 (stable) patches it clean.
+  reaper =
+    expiring.when (prev.patchelf.version != "0.19.2" || prev.reaper.version != "7.83")
+      "reaper ${prev.reaper.version} / patchelf ${prev.patchelf.version}: retest reaper with the default patchelf, then delete this override"
+      (
+        prev.reaper.overrideAttrs (old: {
+          nativeBuildInputs = [
+            inputs.nixpkgs-stable.legacyPackages.${final.stdenv.hostPlatform.system}.patchelf
+          ]
+          ++ old.nativeBuildInputs;
+        })
+      );
   reaper-sws-extension =
     expiring.onBump prev.reaper-sws-extension "2.14.0.7"
       "retest the build without the C++17 pin, then delete this override"

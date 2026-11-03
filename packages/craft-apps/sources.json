@@ -1,0 +1,26 @@
+{
+  "photocraft": {
+    "version": "0.20.1",
+    "hash": "sha256-OYeH1Y/kaRnpnJ9W41VFVJ7wqqsAf4aakr7/fZ/lIjQ="
+  },
+  "filmcraft": {
+    "version": "0.17.0",
+    "hash": "sha256-3z+KsjSBoo7vt8n9jTiZ+9lLsUPhlwaLRhP+BQKXv78="
+  },
+  "lightcraft": {
+    "version": "0.18.0",
+    "hash": "sha256-8tyqKH1RD5ElJz2dFgiecTlDrvAFvQPZhI2VrFXYdQ8="
+  },
+  "pdfcraft": {
+    "version": "0.18.0",
+    "hash": "sha256-yzZlzEXMeqa6AchouffGncTYAL71LUHP/qi/UDfE620="
+  },
+  "figcraft": {
+    "version": "0.15.0",
+    "hash": "sha256-Hl6OC5tKGBHzHOggSpvFPIUfIItv5F4ChzAvcLxqCNY="
+  },
+  "vectorcraft": {
+    "version": "0.21.0",
+    "hash": "sha256-L/0A+zSTGOfpLpevN3z/2BjxcmRRt/IYnpLyJn6zTCE="
+  }
+}

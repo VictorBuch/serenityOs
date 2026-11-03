@@ -22,6 +22,10 @@ in
   # fee[dB]ack - guitar practice app, wrapped from the upstream AppImage
   feedback-desktop = final.callPackage ../packages/feedback-desktop { };
 
+  # storytold Craft apps (PhotoCraft, FilmCraft, ...) from release tarballs; bump with
+  # packages/craft-apps/update.sh
+  craft-apps = final.callPackage ../packages/craft-apps { };
+
   # Rocksmith .psarc -> fee[dB]ack .feedpak converter, installed alongside the app
   psarc2feedpak = final.callPackage ../packages/psarc2feedpak { };
 

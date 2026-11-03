@@ -265,16 +265,41 @@ in
     assert assertMsg (all (p: builtins.match "[a-z0-9-]+" p.name != null)
       patches
     ) "davinci-resolve-studio: patch names must be kebab-case (they are spliced into a perl string)";
-    resolvePkgs.davinci-resolve-studio.override {
-      stdenv = resolvePkgs.stdenv // {
-        mkDerivation =
-          attrs:
-          (resolvePkgs.stdenv.mkDerivation attrs).overrideAttrs (old: {
-            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ resolvePkgs.perl ];
-            postFixup =
-              (old.postFixup or "")
-              + concatStrings (mapAttrsToList patchFile (groupBy (p: p.file or "bin/resolve") patches));
-          });
+    let
+      patched = resolvePkgs.davinci-resolve-studio.override {
+        stdenv = resolvePkgs.stdenv // {
+          mkDerivation =
+            attrs:
+            (resolvePkgs.stdenv.mkDerivation attrs).overrideAttrs (old: {
+              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ resolvePkgs.perl ];
+              postFixup =
+                (old.postFixup or "")
+                + concatStrings (mapAttrsToList patchFile (groupBy (p: p.file or "bin/resolve") patches));
+            });
+        };
       };
+    in
+    # The FHS sandbox runs on resolvePkgs' glibc, but by default it loads the
+    # host's GL driver and OpenCL ICD from /run/opengl-driver, which are built
+    # against our rolling nixpkgs. Once the two glibcs drift apart (2.42 vs 2.44
+    # in Nov 2026) every GL/CL call dies with "stack smashing detected" and
+    # Resolve aborts at startup. So hand it mesa and the ROCm ICD from the same
+    # pinned nixpkgs. The session's Qt env is for Qt 6 on Wayland; Resolve's
+    # bundled Qt 5 has no wayland plugin and crashes on host Qt plugins.
+    final.symlinkJoin {
+      name = "davinci-resolve-studio-${patched.version}";
+      inherit (patched) version meta;
+      paths = [ patched ];
+      nativeBuildInputs = [ final.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/davinci-resolve-studio \
+          --set QT_QPA_PLATFORM xcb \
+          --unset QT_PLUGIN_PATH \
+          --unset QT_QPA_PLATFORMTHEME \
+          --set LD_LIBRARY_PATH ${resolvePkgs.mesa}/lib \
+          --set LIBGL_DRIVERS_PATH ${resolvePkgs.mesa}/lib/dri \
+          --set __EGL_VENDOR_LIBRARY_DIRS ${resolvePkgs.mesa}/share/glvnd/egl_vendor.d \
+          --set OCL_ICD_VENDORS ${resolvePkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors
+      '';
     };
 }

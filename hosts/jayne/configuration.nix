@@ -263,6 +263,7 @@ in
 
     media = {
       blender.enable = true;
+      craft-apps.enable = true;
       davinci-resolve.enable = true;
       ffmpeg.enable = true;
       handbrake.enable = true;

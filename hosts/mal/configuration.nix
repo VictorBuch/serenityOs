@@ -219,33 +219,38 @@ in
   # better memory management
   zramSwap.enable = true;
 
-  # Server Settings - NVIDIA GPU Support for Jellyfin Transcoding
-  # Enable OpenGL and 32-bit support
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # Add 32-bit support for better compatibility
-  };
+  hardware = {
+    # Server Settings - NVIDIA GPU Support for Jellyfin Transcoding
+    # Enable OpenGL and 32-bit support
+    graphics = {
+      enable = true;
+      enable32Bit = true; # Add 32-bit support for better compatibility
+    };
 
-  hardware.nvidia = {
-    # Modesetting is required
-    modesetting.enable = true;
+    nvidia = {
+      # Modesetting is required
+      modesetting.enable = true;
 
-    # Use proprietary drivers (better performance for transcoding)
-    open = false;
+      # Use proprietary drivers (better performance for transcoding)
+      open = false;
 
-    # GTX 960 (Maxwell) requires legacy_580 - dropped from stable (595+)
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+      # GTX 960 (Maxwell) requires legacy_580 - dropped from stable (595+)
+      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
 
-    # Power management - keep GPU always on for server use
-    powerManagement.enable = false;
-    powerManagement.finegrained = false;
+      # Power management - keep GPU always on for server use
+      powerManagement.enable = false;
+      powerManagement.finegrained = false;
 
-    # CRITICAL: Enable persistence daemon for headless transcoding
-    # This keeps the GPU initialized even without a display
-    nvidiaPersistenced = true;
+      # CRITICAL: Enable persistence daemon for headless transcoding
+      # This keeps the GPU initialized even without a display
+      nvidiaPersistenced = true;
 
-    # Enable nvidia-settings tool (optional but useful for debugging)
-    nvidiaSettings = true;
+      # Enable nvidia-settings tool (optional but useful for debugging)
+      nvidiaSettings = true;
+    };
+
+    # Enable NVIDIA Container Toolkit for GPU passthrough to Docker containers (NVENC)
+    nvidia-container-toolkit.enable = true;
   };
 
   # Fix nvidia-persistenced race condition during nixos-rebuild switch
@@ -258,34 +263,27 @@ in
     requires = [ "nvidia-persistenced.service" ];
   };
 
-  # Enable NVIDIA Container Toolkit for GPU passthrough to Docker containers (NVENC)
-  hardware.nvidia-container-toolkit.enable = true;
-
   virtualisation = {
-    docker.enable = true;
-    docker.daemon.settings = {
-      features = {
-        cdi = true;
+
+    docker = {
+      enable = true;
+      daemon.settings = {
+        features = {
+          cdi = true;
+        };
+      };
+      autoPrune = {
+        enable = true;
+        dates = "weekly";
+        flags = [ "--all" ];
+        allVolumes.enable = true;
+      };
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
       };
     };
-    docker.autoPrune = {
-      enable = true;
-      dates = "weekly";
-      flags = [ "--all" ];
-      allVolumes.enable = true;
-    };
-    docker.rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
     oci-containers.backend = "docker";
-  };
-
-  services.ollama = {
-    enable = false;
-    package = pkgs.ollama-cuda;
-    host = "0.0.0.0";
-    loadModels = [ "gemma3:4b" ];
   };
 
   nix.settings.trusted-users = [ username ];
@@ -313,8 +311,6 @@ in
     jq
 
     claude-code
-    opencode
-    # mcp-nixos
     nodejs
 
     # NVIDIA VAAPI driver for hardware acceleration

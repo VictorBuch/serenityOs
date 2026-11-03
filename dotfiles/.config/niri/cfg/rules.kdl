@@ -7,7 +7,6 @@
         clip-to-geometry true
         draw-border-with-background false
         open-maximized-to-edges false
-        default-column-width { proportion 1.0; }
     }
 
     window-rule {

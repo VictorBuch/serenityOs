@@ -6,6 +6,7 @@
 // jayne
 output "DP-2" {
     mode "2560x1440@143.912"
+    // mode "2560x1440@59.94"
     scale 1
 }
 

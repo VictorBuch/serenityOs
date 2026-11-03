@@ -371,6 +371,7 @@ let
       fi
     }
     reaper_ini_set linux_audio_mode 0
+    reaper_ini_set linux_audio_nch_in 4
     reaper_ini_set jack_midiins 0
     reaper_ini_set jack_midiouts 0
     for key in midiins midiouts; do

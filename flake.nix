@@ -113,7 +113,7 @@
 
     # edit360: Insta360 360° reframing editor (local checkout, no remote yet)
     edit360 = {
-      url = "git+file:///home/jayne/Documents/github/edit-360";
+      url = "git+file:///home/jayne/Documents/github/edit-360?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

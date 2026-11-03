@@ -145,12 +145,12 @@ in
 
       customComponents = with pkgs.home-assistant-custom-components; [
         adaptive_lighting
+        uix
       ];
 
       customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
           mushroom
           mini-graph-card   #  graphs like the reference image
-          card-mod          #  rounded-corner / theme tweaks
 	  bubble-card
        ];
 

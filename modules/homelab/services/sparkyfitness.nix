@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
@@ -12,7 +13,6 @@ in
 {
   options.homelab.sparkyfitness = {
     enable = lib.mkEnableOption "SparkyFitness nutrition/fitness tracker";
-    public = lib.mkEnableOption "public Pangolin access (also closes signups)";
   };
 
   config = lib.mkIf cfg.enable {
@@ -21,7 +21,7 @@ in
       kind = "static";
       root = "${sf.frontendPackage}";
       inherit (sf) port;
-      exposure = if cfg.public then "public" else "private";
+      exposure = "public";
       caddy.extraRoutes = ''
         handle /health-data* {
           rewrite * /api{uri}
@@ -66,7 +66,14 @@ in
       environmentFile = config.sops.templates."sparkyfitness.env".path;
       database.package = pkgs.postgresql_17;
       nginx.enable = false;
-      extraEnvironment.SPARKY_FITNESS_DISABLE_SIGNUP = lib.boolToString cfg.public;
+      extraEnvironment.SPARKY_FITNESS_DISABLE_SIGNUP = "true";
+      backendPackage = lib.mkForce (
+        inputs.sparkyfitness.packages.${pkgs.stdenv.hostPlatform.system}.sparkyfitness-server.overrideAttrs (old: {
+          pnpmDeps = old.pnpmDeps.overrideAttrs {
+            outputHash = "sha256-8rWfvkY7bH4U95K3x1gbBCI4zoDBJGbnGcFEXxoPBCQ=";
+          };
+        })
+      );
     };
 
     services.postgresql.package = lib.mkForce sf.database.package;

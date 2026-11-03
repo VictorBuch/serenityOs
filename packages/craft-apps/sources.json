@@ -1,26 +1,30 @@
 {
   "photocraft": {
-    "version": "0.20.1",
-    "hash": "sha256-OYeH1Y/kaRnpnJ9W41VFVJ7wqqsAf4aakr7/fZ/lIjQ="
+    "version": "0.20.2",
+    "hash": "sha256-CeAT1o2DE+sLHNbyRhL1tf0NmT//46fBLOzf5c0TGkY="
   },
   "filmcraft": {
-    "version": "0.17.0",
-    "hash": "sha256-3z+KsjSBoo7vt8n9jTiZ+9lLsUPhlwaLRhP+BQKXv78="
+    "version": "0.17.1",
+    "hash": "sha256-OXrp/s5VmzeGO0sHavRqY7bkOHw194Fwnk760U/nHr4="
   },
   "lightcraft": {
-    "version": "0.18.0",
-    "hash": "sha256-8tyqKH1RD5ElJz2dFgiecTlDrvAFvQPZhI2VrFXYdQ8="
+    "version": "0.18.1",
+    "hash": "sha256-B4+OT+9sqIr6JXpwIoYwsU4hOAzqWAMfu1xaGUK0BvA="
   },
   "pdfcraft": {
-    "version": "0.18.0",
-    "hash": "sha256-yzZlzEXMeqa6AchouffGncTYAL71LUHP/qi/UDfE620="
+    "version": "0.18.2",
+    "hash": "sha256-MjutezczkgdkYeLK1dtjsi9HoDK6AFpsSjXzSD0F2uQ="
   },
   "figcraft": {
-    "version": "0.15.0",
-    "hash": "sha256-Hl6OC5tKGBHzHOggSpvFPIUfIItv5F4ChzAvcLxqCNY="
+    "version": "0.15.1",
+    "hash": "sha256-1Xde+tyLtnOgt0HM2iicHr7Kb7P4J4laQM1X/wnEdNE="
   },
   "vectorcraft": {
-    "version": "0.21.0",
-    "hash": "sha256-L/0A+zSTGOfpLpevN3z/2BjxcmRRt/IYnpLyJn6zTCE="
+    "version": "0.21.1",
+    "hash": "sha256-ODu6BvvefLh8fhN5N61RappYVJHFqSfYYx7lS78dTpM="
+  },
+  "effectcraft": {
+    "version": "0.22.0",
+    "hash": "sha256-X+mwrldGrCm2H33qEL1ntx6ZbB4BiIJMT4GpZiPDvuk="
   }
 }

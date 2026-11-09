@@ -107,10 +107,6 @@ mkModule {
     # Space definitions consumed by herdr-sesh at runtime.
     xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
 
-    # `s` opens the space picker, attaching to herdr first when outside it.
-    programs.nushell.shellAliases.s = lib.mkForce "herdr-sesh";
-    programs.zsh.shellAliases.s = "herdr-sesh";
-
     # Run a pane's start command (see herdr-sesh.sh) once, at the first prompt,
     # as if typed. HERDR_SESH_DONE keeps nested shells from running it again.
     programs.nushell.extraConfig = ''

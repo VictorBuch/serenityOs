@@ -20,12 +20,21 @@
 let
   mkCraftApp =
     pname:
-    { version, hash }:
+    {
+      version,
+      assetId,
+      hash,
+    }:
     stdenv.mkDerivation {
       inherit pname version;
 
       src = fetchurl {
-        url = "https://github.com/storytold/${pname}/releases/download/v${version}/${pname}-${version}-linux-x86_64.tar.gz";
+        name = "${pname}-${version}-linux-x86_64.tar.gz";
+        url = "https://api.github.com/repos/storytold/${pname}/releases/assets/${toString assetId}";
+        curlOptsList = [
+          "-H"
+          "Accept: application/octet-stream"
+        ];
         inherit hash;
       };
 

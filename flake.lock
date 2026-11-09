@@ -126,11 +126,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792526520,
-        "narHash": "sha256-3hSJlv8mUVnZPMWK2+CM7a9O+nR6Z4mCh27NfLCmTPc=",
+        "lastModified": 1794328522,
+        "narHash": "sha256-h2BYMW4nTFpIqnMd8gwAPFmJAp/1wWLQ6vT0NfL5qt4=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "cedd626e11b635470fa6f9fdb8ad79b0075dd7f9",
+        "rev": "1dd30c29c88d99ce295f15e27f93c49bc5fbae07",
         "type": "github"
       },
       "original": {
@@ -146,11 +146,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793867884,
-        "narHash": "sha256-gpI33YueugHvsurkDMDnlNErkkO8Ys1dRdv+7oFSAHs=",
+        "lastModified": 1794214283,
+        "narHash": "sha256-5HL9d/aiJW2PrW6z9IZvFhzX9lXphD9+lLOSQSIAZF4=",
         "ref": "main",
-        "rev": "89a8e224b84469c45d33d08d51426fb89ccec64f",
-        "revCount": 31,
+        "rev": "4f8bb72f7ec6f3d016b8af7638eba38e911805c1",
+        "revCount": 37,
         "type": "git",
         "url": "file:///home/jayne/Documents/github/edit-360"
       },
@@ -339,11 +339,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793979366,
-        "narHash": "sha256-7OoWDsYO9teiPxl0QdlS5lYE20Pue8/5mpscSL32FUA=",
+        "lastModified": 1794278858,
+        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "2c0c1f01521469cf0271180c453c79782d53c2f6",
+        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
         "type": "github"
       },
       "original": {
@@ -379,11 +379,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794201582,
-        "narHash": "sha256-ejT2Q+iCRP2/oL+58pb5/UGZ53cWVLqU5ob58EucyZk=",
+        "lastModified": 1794397294,
+        "narHash": "sha256-ldRd1UWymZ+B1ngo5vNM2WYUbUYE0p8yTY6XIZJoc7A=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "3327b7d82f31f2444533e935f06caf1a1b4da18c",
+        "rev": "3c4f3e7ccf54c7279659536160f9c58de38073c1",
         "type": "github"
       },
       "original": {
@@ -401,11 +401,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1794102501,
-        "narHash": "sha256-7GSMjCN0pWgc3C/a/jJAY/SbrZUHXVw92iiPEdTcgds=",
+        "lastModified": 1794369467,
+        "narHash": "sha256-KAuHbnn6JMxflx2oA7J+fRZIs9qrR6CGpNqGBVgUDoE=",
         "owner": "mangowm",
         "repo": "mango",
-        "rev": "5040bc34536e7b1aeaba5deee4c44fcea66abf3c",
+        "rev": "6f1e48e22e633edcc803f91af0b55b299a71e65b",
         "type": "github"
       },
       "original": {
@@ -558,11 +558,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794197256,
-        "narHash": "sha256-LnFK8subIWojL0z1myzt5bzijKynlbbh71WPJVV+1sQ=",
+        "lastModified": 1794400433,
+        "narHash": "sha256-eXrRtc3JmF6wT6bC34LTZXQ8In36NNR94xUWoW2dT9c=",
         "owner": "noctalia-dev",
         "repo": "noctalia",
-        "rev": "8e848bc0076853d775cfb43d41b46d986ec6b36d",
+        "rev": "750418a7d58825a90b077bce0efe5410f217ace8",
         "type": "github"
       },
       "original": {
@@ -574,11 +574,11 @@
     "noctalia-templates": {
       "flake": false,
       "locked": {
-        "lastModified": 1794192247,
-        "narHash": "sha256-/piHbokGp41qtHJzWJ7Ng/FHSo89+FZKwwq8+QuqIU8=",
+        "lastModified": 1794230602,
+        "narHash": "sha256-I46uOxik1r+v4G837phsm86tG0MgfiqphzUJwSh0TC0=",
         "owner": "noctalia-dev",
         "repo": "community-templates",
-        "rev": "3c2f587425b4f9e8b91ad3d5cc1982cd0cb4650a",
+        "rev": "3e8c7c19dae53b28e64bbb07cd704ca9e925b5bb",
         "type": "github"
       },
       "original": {
@@ -711,11 +711,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793995029,
-        "narHash": "sha256-ZlE4BtMjWhfC6rFXLO9Qimn36Ene1INqCgKDDvazjhc=",
+        "lastModified": 1794261845,
+        "narHash": "sha256-Ivif/kuD68yEOKcZZG3zSwNMFUuIgzUgeJuzcHrQy+8=",
         "owner": "Mic92",
         "repo": "sops-nix",
-        "rev": "89a234ce2daf6e568a7d4b4fe250afdd23d84e20",
+        "rev": "fe7b4228405aeac2ce7192c2049a6e2bc8637082",
         "type": "github"
       },
       "original": {
@@ -732,11 +732,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794198965,
-        "narHash": "sha256-/tRuQqo/t1f7ROPh6cN43XbkmjT1chiiR41ixvR82nU=",
+        "lastModified": 1794367530,
+        "narHash": "sha256-Om7JWc5itlzCiOH/FQ4edV8KeuAuzN5lqM5ORH+bxps=",
         "owner": "CodeWithCJ",
         "repo": "SparkyFitness",
-        "rev": "afe80d74120b98feb4d14ecd07b3281f57951398",
+        "rev": "30530aa93a395a89dbc86f6c124e29b462dcbe27",
         "type": "github"
       },
       "original": {
@@ -962,11 +962,11 @@
     },
     "wannashare": {
       "locked": {
-        "lastModified": 1793957316,
-        "narHash": "sha256-Vj1vjZ634f9WWCPB1ArQ8JRHNL+V0z7zjWTSFUH7rlw=",
+        "lastModified": 1794214771,
+        "narHash": "sha256-0FUdu8+rBVzUvBKEIbYvh4rrmzmFAF2jKS8j7Fhlh5U=",
         "ref": "refs/heads/main",
-        "rev": "2f07efb6e5289e3723090a1207b8d1113db1827e",
-        "revCount": 830,
+        "rev": "9525c9208c3af9174a8f5e3c730e2208d16d4a24",
+        "revCount": 831,
         "type": "git",
         "url": "https://git.victorbuch.com/Smoothless/WannaShare.git"
       },
@@ -985,11 +985,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794113319,
-        "narHash": "sha256-zQgtR/G5j0eZayjrb6fpBVmy1fkOGlCHyLxW4Tboy2M=",
+        "lastModified": 1794387353,
+        "narHash": "sha256-Ql0U7BKTyl6Wxc1U4u35xe9jEBJ6M5T6uPxQM/1WnGQ=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "5f45f55b9f6f2de78504a95b372e13951793be3a",
+        "rev": "ac0155d88f51742337bed39a2dba8d3eef17d403",
         "type": "github"
       },
       "original": {

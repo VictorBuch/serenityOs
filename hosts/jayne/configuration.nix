@@ -275,7 +275,7 @@ in
     productivity = {
       calibre.enable = true;
       figma.enable = true;
-      language-learning.enable = true;
+      language-learning.enable = false;
       obsidian.enable = true;
     };
 

@@ -1,15 +1,13 @@
 # YubiKey support -- cross-platform packages and Linux services
 let
   module =
+    isLinux:
     {
       config,
       pkgs,
       lib,
       ...
     }:
-    let
-      isLinux = pkgs.stdenv.hostPlatform.isLinux;
-    in
     {
       options.yubikey.enable = lib.mkEnableOption "YubiKey support";
 
@@ -49,6 +47,6 @@ let
     };
 in
 {
-  flake.modules.nixos.base = module;
-  flake.modules.darwin.base = module;
+  flake.modules.nixos.base = module true;
+  flake.modules.darwin.base = module false;
 }

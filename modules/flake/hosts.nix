@@ -7,7 +7,6 @@
 }:
 let
   inherit (inputs) nixpkgs nix-darwin;
-  customLib = import ../../lib { inherit (nixpkgs) lib; };
 
   mkHost =
     {
@@ -34,17 +33,9 @@ let
       { pkgs, pkgs-stable, ... }:
       builder {
         inherit system pkgs;
-        specialArgs = {
-          inherit
-            inputs
-            system
-            pkgs
-            pkgs-stable
-            ;
-          inherit (customLib) expiring;
-        };
         modules = [
           modules.${class}.base
+          { _module.args = { inherit inputs pkgs-stable; }; }
           { imports = nixpkgs.lib.concatMap feature features; }
           hostConfig
           (

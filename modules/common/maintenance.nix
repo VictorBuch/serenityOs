@@ -1,5 +1,6 @@
 let
   module =
+    isLinux:
     {
       config,
       pkgs,
@@ -8,7 +9,6 @@ let
     }:
     let
       cfg = config;
-      isLinux = pkgs.stdenv.hostPlatform.isLinux;
     in
     {
 
@@ -100,6 +100,6 @@ let
     };
 in
 {
-  flake.modules.nixos.base = module;
-  flake.modules.darwin.base = module;
+  flake.modules.nixos.base = module true;
+  flake.modules.darwin.base = module false;
 }

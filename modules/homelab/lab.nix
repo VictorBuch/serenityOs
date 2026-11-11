@@ -1,23 +1,26 @@
 {
-  lib,
-  config,
-  pkgs,
-  ...
-}:
+  flake.modules.nixos.homelab =
+    {
+      lib,
+      config,
+      pkgs,
+      ...
+    }:
 
-with lib;
+    with lib;
 
-{
+    {
 
-  options.homelab.lab = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
+      options.homelab.lab = {
+        enable = mkOption {
+          type = types.bool;
+          default = false;
+        };
+      };
+
+      config = mkIf config.homelab.lab.enable {
+
+      };
+
     };
-  };
-
-  config = mkIf config.homelab.lab.enable {
-
-  };
-
 }

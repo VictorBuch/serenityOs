@@ -1,0 +1,64 @@
+{
+  flake.modules.nixos.homelab-facts =
+    {
+      pkgs,
+      lib,
+      config,
+      options,
+      ...
+    }:
+    let
+      hl = config.homelab;
+    in
+    {
+      options.homelab = {
+        mediaDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/mnt/pool/media";
+          description = "Directory for media files (movies, TV shows, downloads)";
+        };
+        immichDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/mnt/pool/immich";
+          description = "Directory for Immich photo storage";
+        };
+        filesDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/mnt/pool/files";
+          description = "Shared user-files root served by copyparty and synced by Syncthing";
+        };
+        paperlessDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/mnt/pool/paperless";
+          description = "Directory for Paperless-ngx document storage";
+        };
+        domain = lib.mkOption {
+          type = lib.types.str;
+          default = "victorbuch.com";
+        };
+        smoothlessDomain = lib.mkOption {
+          type = lib.types.str;
+          default = "smoothless.org";
+          description = "Domain for smoothless work";
+        };
+        domain-local = lib.mkOption {
+          type = lib.types.str;
+          default = "local.victorbuch.com";
+        };
+        nixosIp = lib.mkOption {
+          type = lib.types.str;
+          default = "192.168.0.243";
+        };
+        washIp = lib.mkOption {
+          type = lib.types.str;
+          default = "89.58.12.15";
+          description = "Public IP of wash, the Netcup VPS running Pangolin";
+        };
+      };
+
+      config = {
+        # No additional packages or configuration needed
+        # Storage configuration is handled by storage.nix
+      };
+    };
+}

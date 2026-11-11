@@ -1,445 +1,448 @@
 {
-  config,
-  lib,
-  pkgs,
-  options,
-  ...
-}:
+  flake.modules.nixos.homelab =
+    {
+      config,
+      lib,
+      pkgs,
+      options,
+      ...
+    }:
 
-let
-  mediaDir = config.homelab.mediaDir;
-  user = config.user;
-  uid = toString config.user.uid;
-  records = config.homelab.records;
-in
+    let
+      mediaDir = config.homelab.mediaDir;
+      user = config.user;
+      uid = toString config.user.uid;
+      records = config.homelab.records;
+    in
 
-{
+    {
 
-  options = {
-    homelab.streaming.enable = lib.mkEnableOption "Enables streaming services";
-  };
-
-  config = lib.mkIf config.homelab.streaming.enable {
-    users = {
-      groups.multimedia = {
-        name = "multimedia";
-        members = [ "${user.userName}" ];
-        gid = 994;
+      options = {
+        homelab.streaming.enable = lib.mkEnableOption "Enables streaming services";
       };
-      users."${user.userName}".extraGroups = [ "multimedia" ];
-    };
 
-    systemd.tmpfiles.rules = [
-      "d ${mediaDir} 0770 ${uid} multimedia"
-      "d ${mediaDir}/downloads 0770 ${uid} multimedia"
-      "d ${mediaDir}/tv 0770 ${uid} multimedia"
-      "d ${mediaDir}/movies 0770 ${uid} multimedia"
-      "d ${mediaDir}/books 0770 ${uid} multimedia"
-      "d ${mediaDir}/books/audiobooks 0770 ${uid} multimedia"
-      "d ${mediaDir}/books/ebooks 0770 ${uid} multimedia"
-      "d ${mediaDir}/music 0770 ${uid} multimedia"
-    ];
-
-    environment.systemPackages = with pkgs; [
-      jellyfin
-      jellyfin-web
-      jellyfin-ffmpeg
-      recyclarr
-    ];
-
-    # Ensure all streaming services wait for storage mounts
-    systemd.services.jellyfin = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.sonarr = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.radarr = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.lidarr = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.bazarr = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.audiobookshelf = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-    systemd.services.plex = {
-      after = [ "mnt-pool.mount" ];
-      requires = [ "mnt-pool.mount" ];
-    };
-
-    homelab.records = {
-      plex = {
-        port = 32400;
-        exposure = "public";
-      };
-      jellyfin = {
-        port = 8096;
-        exposure = "public";
-        tile = {
-          title = "Jellyfin";
-          icon = "sh:jellyfin";
-          group = "media";
+      config = lib.mkIf config.homelab.streaming.enable {
+        users = {
+          groups.multimedia = {
+            name = "multimedia";
+            members = [ "${user.userName}" ];
+            gid = 994;
+          };
+          users."${user.userName}".extraGroups = [ "multimedia" ];
         };
-      };
-      jellyseerr = {
-        subdomain = "request";
-        port = 5055;
-        exposure = "public";
-        tile = {
-          title = "Jellyseerr";
-          icon = "sh:jellyseerr";
-          group = "media";
-        };
-      };
-      sonarr = {
-        subdomain = "shows";
-        port = 8989;
-        exposure = "private";
-        tile = {
-          title = "Sonarr";
-          icon = "sh:sonarr";
-          group = "media";
-        };
-      };
-      radarr = {
-        subdomain = "movies";
-        port = 7878;
-        exposure = "private";
-        tile = {
-          title = "Radarr";
-          icon = "sh:radarr";
-          group = "media";
-        };
-      };
-      lidarr = {
-        subdomain = "music";
-        port = 8686;
-        exposure = "private";
-        tile = {
-          title = "Lidarr";
-          icon = "sh:lidarr";
-          group = "media";
-        };
-      };
-      prowlarr = {
-        port = 9696;
-        exposure = "private";
-        tile = {
-          title = "Prowlarr";
-          icon = "sh:prowlarr";
-          group = "media";
-        };
-      };
-      bazarr = {
-        subdomain = "subtitles";
-        port = 6767;
-        exposure = "private";
-        tile = {
-          title = "Bazarr";
-          icon = "sh:bazarr";
-          group = "media";
-        };
-      };
-      audiobookshelf = {
-        subdomain = "audiobooks";
-        port = 8004;
-        exposure = "public";
-        tile = {
-          title = "AudioBookshelf";
-          icon = "sh:audiobookshelf";
-          group = "media";
-        };
-      };
-    };
 
-    # Streaming services
-    services = {
-      plex = {
-        enable = true;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      jellyfin = {
-        # Listens on records.jellyfin.port; the module has no port option
-        enable = true;
-        package = pkgs.jellyfin;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      seerr = {
-        enable = true;
-        inherit (records.jellyseerr) port;
-        package = pkgs.seerr;
-        openFirewall = true;
-      };
-      sonarr = {
-        enable = true;
-        settings.server.port = records.sonarr.port;
-        package = pkgs.sonarr;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      radarr = {
-        enable = true;
-        settings.server.port = records.radarr.port;
-        package = pkgs.radarr;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      lidarr = {
-        enable = true;
-        settings.server.port = records.lidarr.port;
-        package = pkgs.lidarr;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      prowlarr = {
-        enable = true;
-        settings.server.port = records.prowlarr.port;
-        package = pkgs.prowlarr;
-        openFirewall = true;
-      };
-      bazarr = {
-        enable = true;
-        listenPort = records.bazarr.port;
-        package = pkgs.bazarr;
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      audiobookshelf = {
-        enable = true;
-        package = pkgs.audiobookshelf;
-        inherit (records.audiobookshelf) port;
-        host = "127.0.0.1";
-        openFirewall = true;
-        user = "${user.userName}";
-        group = "multimedia";
-      };
-      # Written against the v8 config schema. Upstream's config-templates repo
-      # dropped includes.json and every `*-quality-profile-*` fragment id on
-      # 2026-08-07, so the old `include: { template = ...; }` style no longer
-      # resolves. Guide content is pulled in by trash_id instead, which also
-      # keeps this self-contained -- nothing here depends on a template id that
-      # upstream may rename again.
-      recyclarr = {
-        enable = true;
-        configuration = {
+        systemd.tmpfiles.rules = [
+          "d ${mediaDir} 0770 ${uid} multimedia"
+          "d ${mediaDir}/downloads 0770 ${uid} multimedia"
+          "d ${mediaDir}/tv 0770 ${uid} multimedia"
+          "d ${mediaDir}/movies 0770 ${uid} multimedia"
+          "d ${mediaDir}/books 0770 ${uid} multimedia"
+          "d ${mediaDir}/books/audiobooks 0770 ${uid} multimedia"
+          "d ${mediaDir}/books/ebooks 0770 ${uid} multimedia"
+          "d ${mediaDir}/music 0770 ${uid} multimedia"
+        ];
+
+        environment.systemPackages = with pkgs; [
+          jellyfin
+          jellyfin-web
+          jellyfin-ffmpeg
+          recyclarr
+        ];
+
+        # Ensure all streaming services wait for storage mounts
+        systemd.services.jellyfin = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.sonarr = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.radarr = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.lidarr = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.bazarr = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.audiobookshelf = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+        systemd.services.plex = {
+          after = [ "mnt-pool.mount" ];
+          requires = [ "mnt-pool.mount" ];
+        };
+
+        homelab.records = {
+          plex = {
+            port = 32400;
+            exposure = "public";
+          };
+          jellyfin = {
+            port = 8096;
+            exposure = "public";
+            tile = {
+              title = "Jellyfin";
+              icon = "sh:jellyfin";
+              group = "media";
+            };
+          };
+          jellyseerr = {
+            subdomain = "request";
+            port = 5055;
+            exposure = "public";
+            tile = {
+              title = "Jellyseerr";
+              icon = "sh:jellyseerr";
+              group = "media";
+            };
+          };
           sonarr = {
-            sonarr_main = {
-              # Point _secret straight at the sops path. The NixOS module
-              # derives its own LoadCredential entries from these values via
-              # genJqSecretsReplacement, so naming /run/credentials/... here
-              # makes it load a credential from a path that only exists once
-              # the credential has been loaded -- the unit then dies at step
-              # CREDENTIALS and recyclarr never runs at all.
-              api_key = {
-                _secret = config.sops.secrets."sonarr_api_key".path;
-              };
-              base_url = records.sonarr.upstream;
-
-              # Sizes are MB per minute, so a 50 minute episode lands near
-              # preferred * 50. `max` is a HARD REJECT, not a quality band --
-              # steering happens through `preferred`, which is what Sonarr
-              # scores release proximity against. Numbers below are calibrated
-              # against the existing library: WEB episodes measured min 16.6 /
-              # mean 51.1 / max 81.7 MB/min, so preferred 55 sits on the mean
-              # and nothing real gets rejected. Bluray measured p10 85 / p50 111
-              # / max 186 -- it is the fallback tier, used only when no WEB
-              # release exists, so its ceiling is deliberately generous. An
-              # earlier max of 90 here would have rejected 158 of 191 Bluray
-              # episodes in this library.
-              quality_definition = {
-                type = "series";
-                qualities = [
-                  {
-                    name = "WEBDL-1080p";
-                    min = 15;
-                    preferred = 55;
-                    max = 130;
-                  }
-                  {
-                    name = "WEBRip-1080p";
-                    min = 15;
-                    preferred = 55;
-                    max = 130;
-                  }
-                  {
-                    name = "Bluray-1080p";
-                    min = 20;
-                    preferred = 80;
-                    max = 200;
-                  }
-                ];
-              };
-
-              # The guide's WEB-1080p profile enables *only* WEBDL/WEBRip
-              # 1080p and marks every other tier allowed:false, so a show that
-              # never got a WEB release can never be grabbed at all. Override
-              # `qualities` to enable fallback tiers underneath the WEB target;
-              # the profile's own cutoff stays WEB 1080p, so the lower tiers
-              # act as a floor rather than a habit.
-              quality_profiles = [
-                {
-                  trash_id = "72dae194fc92bf828f32cde7744e51a1"; # WEB-1080p
-                  reset_unmatched_scores.enabled = true;
-                  quality_sort = "top";
-                  qualities = [
-                    {
-                      name = "WEB 1080p";
-                      qualities = [
-                        "WEBDL-1080p"
-                        "WEBRip-1080p"
-                      ];
-                    }
-                    { name = "Bluray-1080p"; }
-                    {
-                      name = "WEB 720p";
-                      qualities = [
-                        "WEBDL-720p"
-                        "WEBRip-720p"
-                      ];
-                    }
-                    { name = "HDTV-1080p"; }
-                  ];
-                }
-              ];
-
-              # The groups the upstream web-1080p template enables, plus the DV
-              # blocker. See the Radarr instance below for why the x265 swap.
-              custom_format_groups.add = [
-                {
-                  trash_id = "158188097a58d7687dee647e04af0da3"; # [Optional] Golden Rule HD
-                  exclude = [ "47435ece6b99a0b477caf360e79ba0bb" ]; # x265 (HD)
-                  select = [ "9b64dff695c2115facf1b6ea59c9bd07" ]; # x265 (no HDR/DV)
-                }
-                { trash_id = "74aff4168620ed49dcc67e92b2c2a5b4"; } # [Optional] Language Profiles
-                { trash_id = "85fae4a2294965b75710ef2989c850eb"; } # [Streaming Services] HD/UHD boost
-                { trash_id = "59c3af66780d08332fdc64e68297098f"; } # [Unwanted] Unwanted Formats
-                { trash_id = "d776a1ea912a117d66d83b880ff2055d"; } # [HDR Formats] DV (w/o HDR fallback)
-              ];
+            subdomain = "shows";
+            port = 8989;
+            exposure = "private";
+            tile = {
+              title = "Sonarr";
+              icon = "sh:sonarr";
+              group = "media";
             };
           };
           radarr = {
-            radarr_main = {
-              api_key = {
-                _secret = config.sops.secrets."radarr_api_key".path;
-              };
-              base_url = records.radarr.upstream;
+            subdomain = "movies";
+            port = 7878;
+            exposure = "private";
+            tile = {
+              title = "Radarr";
+              icon = "sh:radarr";
+              group = "media";
+            };
+          };
+          lidarr = {
+            subdomain = "music";
+            port = 8686;
+            exposure = "private";
+            tile = {
+              title = "Lidarr";
+              icon = "sh:lidarr";
+              group = "media";
+            };
+          };
+          prowlarr = {
+            port = 9696;
+            exposure = "private";
+            tile = {
+              title = "Prowlarr";
+              icon = "sh:prowlarr";
+              group = "media";
+            };
+          };
+          bazarr = {
+            subdomain = "subtitles";
+            port = 6767;
+            exposure = "private";
+            tile = {
+              title = "Bazarr";
+              icon = "sh:bazarr";
+              group = "media";
+            };
+          };
+          audiobookshelf = {
+            subdomain = "audiobooks";
+            port = 8004;
+            exposure = "public";
+            tile = {
+              title = "AudioBookshelf";
+              icon = "sh:audiobookshelf";
+              group = "media";
+            };
+          };
+        };
 
-              # trash's `movie` sizes leave preferred at 1999 MB/min --
-              # effectively unbounded, so Radarr always takes the largest
-              # release it can find, which is why the library averaged 12.2 GiB
-              # a film. Sizes are MB per minute: preferred 82 puts a two hour
-              # film around 9.6 GB.
-              #
-              # `max` is a HARD REJECT and does no steering, so it is set as a
-              # backstop against remux-tier bloat rather than as a quality band.
-              # Measured against the existing library, a max of 120 rejected 8
-              # of 31 Bluray films -- including the UHD-source HDR x265
-              # downscales this config specifically wants (Dune 187, Hot Fuzz
-              # 147, Wicked 142 MB/min) and grainy catalogue titles that
-              # genuinely need the bitrate (Monty Python 1974 at 169). The guide
-              # min of 50.8 is calibrated for x264 and rejected 4 more, among
-              # them efficient encodes at 39-49 MB/min; lowering it is what lets
-              # HEVC through at all.
-              quality_definition = {
-                type = "movie";
-                qualities = [
-                  {
-                    name = "Bluray-1080p";
-                    min = 20;
-                    preferred = 82;
-                    max = 220;
-                  }
-                  {
-                    name = "WEBDL-1080p";
-                    min = 12.5;
-                    preferred = 60;
-                    max = 150;
-                  }
-                  {
-                    name = "WEBRip-1080p";
-                    min = 12.5;
-                    preferred = 60;
-                    max = 150;
-                  }
-                ];
-              };
+        # Streaming services
+        services = {
+          plex = {
+            enable = true;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          jellyfin = {
+            # Listens on records.jellyfin.port; the module has no port option
+            enable = true;
+            package = pkgs.jellyfin;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          seerr = {
+            enable = true;
+            inherit (records.jellyseerr) port;
+            package = pkgs.seerr;
+            openFirewall = true;
+          };
+          sonarr = {
+            enable = true;
+            settings.server.port = records.sonarr.port;
+            package = pkgs.sonarr;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          radarr = {
+            enable = true;
+            settings.server.port = records.radarr.port;
+            package = pkgs.radarr;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          lidarr = {
+            enable = true;
+            settings.server.port = records.lidarr.port;
+            package = pkgs.lidarr;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          prowlarr = {
+            enable = true;
+            settings.server.port = records.prowlarr.port;
+            package = pkgs.prowlarr;
+            openFirewall = true;
+          };
+          bazarr = {
+            enable = true;
+            listenPort = records.bazarr.port;
+            package = pkgs.bazarr;
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          audiobookshelf = {
+            enable = true;
+            package = pkgs.audiobookshelf;
+            inherit (records.audiobookshelf) port;
+            host = "127.0.0.1";
+            openFirewall = true;
+            user = "${user.userName}";
+            group = "multimedia";
+          };
+          # Written against the v8 config schema. Upstream's config-templates repo
+          # dropped includes.json and every `*-quality-profile-*` fragment id on
+          # 2026-08-07, so the old `include: { template = ...; }` style no longer
+          # resolves. Guide content is pulled in by trash_id instead, which also
+          # keeps this self-contained -- nothing here depends on a template id that
+          # upstream may rename again.
+          recyclarr = {
+            enable = true;
+            configuration = {
+              sonarr = {
+                sonarr_main = {
+                  # Point _secret straight at the sops path. The NixOS module
+                  # derives its own LoadCredential entries from these values via
+                  # genJqSecretsReplacement, so naming /run/credentials/... here
+                  # makes it load a credential from a path that only exists once
+                  # the credential has been loaded -- the unit then dies at step
+                  # CREDENTIALS and recyclarr never runs at all.
+                  api_key = {
+                    _secret = config.sops.secrets."sonarr_api_key".path;
+                  };
+                  base_url = records.sonarr.upstream;
 
-              # Guide order, plus a WEB 720p tier at the bottom. The guide
-              # profile stops at Bluray-720p; with a small indexer set an
-              # obscure title can have neither a 1080p nor a Bluray-720p
-              # release, and the cost of one more fallback rung is nothing
-              # because it only ever wins when everything above it is absent.
-              quality_profiles = [
-                {
-                  trash_id = "d1d67249d3890e49bc12e275d989a7e9"; # HD Bluray + WEB
-                  reset_unmatched_scores.enabled = true;
-                  quality_sort = "top";
-                  qualities = [
-                    { name = "Bluray-1080p"; }
+                  # Sizes are MB per minute, so a 50 minute episode lands near
+                  # preferred * 50. `max` is a HARD REJECT, not a quality band --
+                  # steering happens through `preferred`, which is what Sonarr
+                  # scores release proximity against. Numbers below are calibrated
+                  # against the existing library: WEB episodes measured min 16.6 /
+                  # mean 51.1 / max 81.7 MB/min, so preferred 55 sits on the mean
+                  # and nothing real gets rejected. Bluray measured p10 85 / p50 111
+                  # / max 186 -- it is the fallback tier, used only when no WEB
+                  # release exists, so its ceiling is deliberately generous. An
+                  # earlier max of 90 here would have rejected 158 of 191 Bluray
+                  # episodes in this library.
+                  quality_definition = {
+                    type = "series";
+                    qualities = [
+                      {
+                        name = "WEBDL-1080p";
+                        min = 15;
+                        preferred = 55;
+                        max = 130;
+                      }
+                      {
+                        name = "WEBRip-1080p";
+                        min = 15;
+                        preferred = 55;
+                        max = 130;
+                      }
+                      {
+                        name = "Bluray-1080p";
+                        min = 20;
+                        preferred = 80;
+                        max = 200;
+                      }
+                    ];
+                  };
+
+                  # The guide's WEB-1080p profile enables *only* WEBDL/WEBRip
+                  # 1080p and marks every other tier allowed:false, so a show that
+                  # never got a WEB release can never be grabbed at all. Override
+                  # `qualities` to enable fallback tiers underneath the WEB target;
+                  # the profile's own cutoff stays WEB 1080p, so the lower tiers
+                  # act as a floor rather than a habit.
+                  quality_profiles = [
                     {
-                      name = "WEB 1080p";
+                      trash_id = "72dae194fc92bf828f32cde7744e51a1"; # WEB-1080p
+                      reset_unmatched_scores.enabled = true;
+                      quality_sort = "top";
                       qualities = [
-                        "WEBDL-1080p"
-                        "WEBRip-1080p"
-                      ];
-                    }
-                    { name = "Bluray-720p"; }
-                    {
-                      name = "WEB 720p";
-                      qualities = [
-                        "WEBDL-720p"
-                        "WEBRip-720p"
+                        {
+                          name = "WEB 1080p";
+                          qualities = [
+                            "WEBDL-1080p"
+                            "WEBRip-1080p"
+                          ];
+                        }
+                        { name = "Bluray-1080p"; }
+                        {
+                          name = "WEB 720p";
+                          qualities = [
+                            "WEBDL-720p"
+                            "WEBRip-720p"
+                          ];
+                        }
+                        { name = "HDTV-1080p"; }
                       ];
                     }
                   ];
-                }
-              ];
 
-              # Golden Rule HD blocks all 1080p x265 by default, because 1080p
-              # x265 is usually a double-compressed re-encode of an x264 source.
-              # That default assumes mixed clients; playback here is a Shield
-              # Pro, which direct-plays HEVC/HDR/DV and TrueHD with no transcode,
-              # so the blanket block only costs us. Swap it for the narrower
-              # `x265 (no HDR/DV)`, which still rejects the SDR re-encodes but
-              # lets 1080p-downscaled-from-UHD HDR x265 through -- the best
-              # quality-per-byte available at this resolution, and the only way
-              # HDR reaches the TV from a 1080p library at all. The two formats
-              # are declared conflicting in the guide's conflicts.json, so this
-              # has to be an exclude+select swap, not just a select.
-              custom_format_groups.add = [
-                {
-                  trash_id = "f8bf8eab4617f12dfdbd16303d8da245"; # [Optional] Golden Rule HD
-                  exclude = [ "dc98083864ea246d05a42df0d05f81cc" ]; # x265 (HD)
-                  select = [ "839bea857ed2c0a8e084f3cbdbd65ecb" ]; # x265 (no HDR/DV)
-                }
-                { trash_id = "a3ac6af01d78e4f21fcb75f601ac96df"; } # [Unwanted] Unwanted Formats
-                # The TV is HDR but not confirmed Dolby Vision. A DV release
-                # with no HDR10 fallback renders grey and washed out on a
-                # non-DV display, so block that specific case.
-                { trash_id = "7fc2751eef7e6bdc70b74136e5e35c76"; } # [HDR Formats] DV (w/o HDR fallback)
-              ];
+                  # The groups the upstream web-1080p template enables, plus the DV
+                  # blocker. See the Radarr instance below for why the x265 swap.
+                  custom_format_groups.add = [
+                    {
+                      trash_id = "158188097a58d7687dee647e04af0da3"; # [Optional] Golden Rule HD
+                      exclude = [ "47435ece6b99a0b477caf360e79ba0bb" ]; # x265 (HD)
+                      select = [ "9b64dff695c2115facf1b6ea59c9bd07" ]; # x265 (no HDR/DV)
+                    }
+                    { trash_id = "74aff4168620ed49dcc67e92b2c2a5b4"; } # [Optional] Language Profiles
+                    { trash_id = "85fae4a2294965b75710ef2989c850eb"; } # [Streaming Services] HD/UHD boost
+                    { trash_id = "59c3af66780d08332fdc64e68297098f"; } # [Unwanted] Unwanted Formats
+                    { trash_id = "d776a1ea912a117d66d83b880ff2055d"; } # [HDR Formats] DV (w/o HDR fallback)
+                  ];
+                };
+              };
+              radarr = {
+                radarr_main = {
+                  api_key = {
+                    _secret = config.sops.secrets."radarr_api_key".path;
+                  };
+                  base_url = records.radarr.upstream;
+
+                  # trash's `movie` sizes leave preferred at 1999 MB/min --
+                  # effectively unbounded, so Radarr always takes the largest
+                  # release it can find, which is why the library averaged 12.2 GiB
+                  # a film. Sizes are MB per minute: preferred 82 puts a two hour
+                  # film around 9.6 GB.
+                  #
+                  # `max` is a HARD REJECT and does no steering, so it is set as a
+                  # backstop against remux-tier bloat rather than as a quality band.
+                  # Measured against the existing library, a max of 120 rejected 8
+                  # of 31 Bluray films -- including the UHD-source HDR x265
+                  # downscales this config specifically wants (Dune 187, Hot Fuzz
+                  # 147, Wicked 142 MB/min) and grainy catalogue titles that
+                  # genuinely need the bitrate (Monty Python 1974 at 169). The guide
+                  # min of 50.8 is calibrated for x264 and rejected 4 more, among
+                  # them efficient encodes at 39-49 MB/min; lowering it is what lets
+                  # HEVC through at all.
+                  quality_definition = {
+                    type = "movie";
+                    qualities = [
+                      {
+                        name = "Bluray-1080p";
+                        min = 20;
+                        preferred = 82;
+                        max = 220;
+                      }
+                      {
+                        name = "WEBDL-1080p";
+                        min = 12.5;
+                        preferred = 60;
+                        max = 150;
+                      }
+                      {
+                        name = "WEBRip-1080p";
+                        min = 12.5;
+                        preferred = 60;
+                        max = 150;
+                      }
+                    ];
+                  };
+
+                  # Guide order, plus a WEB 720p tier at the bottom. The guide
+                  # profile stops at Bluray-720p; with a small indexer set an
+                  # obscure title can have neither a 1080p nor a Bluray-720p
+                  # release, and the cost of one more fallback rung is nothing
+                  # because it only ever wins when everything above it is absent.
+                  quality_profiles = [
+                    {
+                      trash_id = "d1d67249d3890e49bc12e275d989a7e9"; # HD Bluray + WEB
+                      reset_unmatched_scores.enabled = true;
+                      quality_sort = "top";
+                      qualities = [
+                        { name = "Bluray-1080p"; }
+                        {
+                          name = "WEB 1080p";
+                          qualities = [
+                            "WEBDL-1080p"
+                            "WEBRip-1080p"
+                          ];
+                        }
+                        { name = "Bluray-720p"; }
+                        {
+                          name = "WEB 720p";
+                          qualities = [
+                            "WEBDL-720p"
+                            "WEBRip-720p"
+                          ];
+                        }
+                      ];
+                    }
+                  ];
+
+                  # Golden Rule HD blocks all 1080p x265 by default, because 1080p
+                  # x265 is usually a double-compressed re-encode of an x264 source.
+                  # That default assumes mixed clients; playback here is a Shield
+                  # Pro, which direct-plays HEVC/HDR/DV and TrueHD with no transcode,
+                  # so the blanket block only costs us. Swap it for the narrower
+                  # `x265 (no HDR/DV)`, which still rejects the SDR re-encodes but
+                  # lets 1080p-downscaled-from-UHD HDR x265 through -- the best
+                  # quality-per-byte available at this resolution, and the only way
+                  # HDR reaches the TV from a 1080p library at all. The two formats
+                  # are declared conflicting in the guide's conflicts.json, so this
+                  # has to be an exclude+select swap, not just a select.
+                  custom_format_groups.add = [
+                    {
+                      trash_id = "f8bf8eab4617f12dfdbd16303d8da245"; # [Optional] Golden Rule HD
+                      exclude = [ "dc98083864ea246d05a42df0d05f81cc" ]; # x265 (HD)
+                      select = [ "839bea857ed2c0a8e084f3cbdbd65ecb" ]; # x265 (no HDR/DV)
+                    }
+                    { trash_id = "a3ac6af01d78e4f21fcb75f601ac96df"; } # [Unwanted] Unwanted Formats
+                    # The TV is HDR but not confirmed Dolby Vision. A DV release
+                    # with no HDR10 fallback renders grey and washed out on a
+                    # non-DV display, so block that specific case.
+                    { trash_id = "7fc2751eef7e6bdc70b74136e5e35c76"; } # [HDR Formats] DV (w/o HDR fallback)
+                  ];
+                };
+              };
             };
           };
         };
       };
     };
-  };
 }

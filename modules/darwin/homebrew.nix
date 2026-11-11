@@ -1,68 +1,71 @@
 {
-  lib,
-  config,
-  pkgs,
-  ...
-}:
+  flake.modules.darwin.base =
+    {
+      lib,
+      config,
+      pkgs,
+      ...
+    }:
 
-{
-  options.darwin.homebrew = {
-    enable = lib.mkEnableOption "Enable Homebrew package manager";
-  };
-
-  config = lib.mkIf config.darwin.homebrew.enable {
-    homebrew = {
-      enable = true;
-
-      # Auto-update homebrew on activation
-      onActivation = {
-        autoUpdate = true;
-        upgrade = true;
-        cleanup = "zap"; # Uninstall packages not listed in config
-        # Homebrew 5.1+ requires --force/--force-cleanup/$HOMEBREW_ASK for
-        # `brew bundle --cleanup`; nix-darwin doesn't add it, so pass it here.
-        extraFlags = [ "--force" ];
+    {
+      options.darwin.homebrew = {
+        enable = lib.mkEnableOption "Enable Homebrew package manager";
       };
 
-      # Global homebrew settings
-      global = {
-        autoUpdate = true;
-      };
+      config = lib.mkIf config.darwin.homebrew.enable {
+        homebrew = {
+          enable = true;
 
-      # Taps (additional repositories)
-      taps = [
-        "PeonPing/tap"
-      ];
+          # Auto-update homebrew on activation
+          onActivation = {
+            autoUpdate = true;
+            upgrade = true;
+            cleanup = "zap"; # Uninstall packages not listed in config
+            # Homebrew 5.1+ requires --force/--force-cleanup/$HOMEBREW_ASK for
+            # `brew bundle --cleanup`; nix-darwin doesn't add it, so pass it here.
+            extraFlags = [ "--force" ];
+          };
 
-      # Formulae (CLI tools)
-      brews = [
-        "cmatrix"
-        "docker"
-        "docker-compose"
-        "openssh" # FIDO2-capable OpenSSH (Apple's bundled version lacks FIDO2 support)
-        "terminal-notifier"
-      ];
+          # Global homebrew settings
+          global = {
+            autoUpdate = true;
+          };
 
-      # Casks (GUI applications)
-      casks = [
-        "1password"
-        "amethyst"
-        "anki"
-        "betterdisplay"
-        "bitwarden"
-        "ghostty"
-        "orbstack"
-        "qmk-toolbox"
-        "raycast"
-        "zed"
-        "gcloud-cli"
-      ];
+          # Taps (additional repositories)
+          taps = [
+            "PeonPing/tap"
+          ];
 
-      # Mac App Store apps (requires mas CLI tool)
-      masApps = {
-        # Format: "App Name" = appId;
-        # "Xcode" = 497799835;
+          # Formulae (CLI tools)
+          brews = [
+            "cmatrix"
+            "docker"
+            "docker-compose"
+            "openssh" # FIDO2-capable OpenSSH (Apple's bundled version lacks FIDO2 support)
+            "terminal-notifier"
+          ];
+
+          # Casks (GUI applications)
+          casks = [
+            "1password"
+            "amethyst"
+            "anki"
+            "betterdisplay"
+            "bitwarden"
+            "ghostty"
+            "orbstack"
+            "qmk-toolbox"
+            "raycast"
+            "zed"
+            "gcloud-cli"
+          ];
+
+          # Mac App Store apps (requires mas CLI tool)
+          masApps = {
+            # Format: "App Name" = appId;
+            # "Xcode" = 497799835;
+          };
+        };
       };
     };
-  };
 }

@@ -1,43 +1,46 @@
 {
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
+  flake.modules.nixos.homelab =
+    {
+      pkgs,
+      lib,
+      options,
+      config,
+      ...
+    }:
 
-let
-  storage = config.homelab.storage;
-  user = config.user;
-  uid = toString config.user.uid;
-in
+    let
+      storage = config.homelab.storage;
+      user = config.user;
+      uid = toString config.user.uid;
+    in
 
-{
-  options.homelab.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
+    {
+      options.homelab.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
 
-  config = lib.mkIf config.homelab.uptime-kuma.enable {
-    homelab.records.uptime-kuma = {
-      subdomain = "status";
-      port = 3001;
-      openFirewall = true;
-      tile = {
-        title = "Uptime Kuma";
-        icon = "sh:uptime-kuma";
-        group = "infrastructure";
+      config = lib.mkIf config.homelab.uptime-kuma.enable {
+        homelab.records.uptime-kuma = {
+          subdomain = "status";
+          port = 3001;
+          openFirewall = true;
+          tile = {
+            title = "Uptime Kuma";
+            icon = "sh:uptime-kuma";
+            group = "infrastructure";
+          };
+        };
+
+        systemd.tmpfiles.rules = [
+          "d /home/${user.userName}/uptime-kuma 775 ${user.userName} ${user.group}"
+        ];
+
+        virtualisation.oci-containers.containers.uptime-kuma = {
+          image = "louislam/uptime-kuma:latest";
+          ports = [ "${toString config.homelab.records.uptime-kuma.port}:3001" ];
+          volumes = [
+            "/home/${user.userName}/uptime-kuma:/app/data/"
+          ];
+          autoStart = true;
+        };
       };
     };
-
-    systemd.tmpfiles.rules = [
-      "d /home/${user.userName}/uptime-kuma 775 ${user.userName} ${user.group}"
-    ];
-
-    virtualisation.oci-containers.containers.uptime-kuma = {
-      image = "louislam/uptime-kuma:latest";
-      ports = [ "${toString config.homelab.records.uptime-kuma.port}:3001" ];
-      volumes = [
-        "/home/${user.userName}/uptime-kuma:/app/data/"
-      ];
-      autoStart = true;
-    };
-  };
 }

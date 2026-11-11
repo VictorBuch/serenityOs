@@ -6,7 +6,7 @@
   ...
 }:
 let
-  inherit (inputs) nixpkgs nix-darwin import-tree;
+  inherit (inputs) nixpkgs nix-darwin;
   customLib = import ../../lib { inherit (nixpkgs) lib; };
 
   mkHost =
@@ -21,7 +21,6 @@ let
     let
       darwin = class == "darwin";
       builder = if darwin then nix-darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
-      platformTree = nixpkgs.lib.optional darwin (import-tree ../darwin);
       inherit (config.flake) modules;
       feature =
         n:
@@ -45,8 +44,7 @@ let
           inherit (customLib) expiring;
         };
         modules = [
-          (import-tree ../common)
-          ../common/_defaults.nix
+          modules.${class}.base
           { imports = nixpkgs.lib.concatMap feature features; }
           hostConfig
           (
@@ -57,7 +55,6 @@ let
           )
           (if darwin then inputs.sops-nix.darwinModules.sops else inputs.sops-nix.nixosModules.sops)
         ]
-        ++ platformTree
         ++ extraModules;
       }
     );
@@ -155,10 +152,10 @@ let
         "starship"
         "tmux"
         "user"
+        "homelab"
+        "homelab-facts"
       ];
       extraModules = [
-        (import-tree ../homelab)
-        ../homelab/_config.nix
         inputs.wannashare.nixosModules.default
         inputs.sparkyfitness.nixosModules.sparkyfitness
         inputs.tv-learn.nixosModules.tv-learn
@@ -172,9 +169,9 @@ let
         "nushell"
         "starship"
         "user"
+        "homelab-facts"
       ];
       extraModules = [
-        ../homelab/_config.nix
         inputs.disko.nixosModules.disko
       ];
     }

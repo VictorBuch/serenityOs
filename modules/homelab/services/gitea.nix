@@ -1,242 +1,244 @@
 {
-  config,
-  pkgs,
-  lib,
-  options,
-  ...
-}:
+  flake.modules.nixos.homelab =
+    {
+      config,
+      pkgs,
+      lib,
+      options,
+      ...
+    }:
 
-let
-  gitea = config.homelab.records.gitea;
-  fqdn = "${gitea.subdomain}.${gitea.domain}";
-  user = config.user;
-  giteaDir = "/var/lib/gitea";
-  giteaUser = "gitea";
-  giteaGroup = "gitea";
-in
+    let
+      gitea = config.homelab.records.gitea;
+      fqdn = "${gitea.subdomain}.${gitea.domain}";
+      user = config.user;
+      giteaDir = "/var/lib/gitea";
+      giteaUser = "gitea";
+      giteaGroup = "gitea";
+    in
 
-{
-  options.homelab.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
+    {
+      options.homelab.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
-  config = lib.mkIf config.homelab.gitea.enable {
-    homelab.records.gitea = {
-      subdomain = "git";
-      port = 3004;
-      exposure = "public";
-      tile = {
-        title = "Gitea";
-        icon = "sh:gitea";
-        group = "infrastructure";
-      };
-    };
-    homelab.ports.gitea = [ 2222 ];
-
-
-    #catppuccin.gitea.enable = true;
-
-    # PostgreSQL database for Gitea
-    services.postgresql = {
-      enable = true;
-      package = pkgs.postgresql_17;
-      ensureDatabases = [ "gitea" ];
-      ensureUsers = [
-        {
-          name = giteaUser;
-          ensureDBOwnership = true;
-        }
-      ];
-    };
-
-    # Ensure PostgreSQL starts before Gitea
-    systemd.services.gitea.after = [ "postgresql.service" ];
-    systemd.services.gitea.requires = [ "postgresql.service" ];
-
-    # Gitea service configuration
-    services.gitea = {
-      enable = true;
-      package = pkgs.gitea;
-      appName = "Git Server";
-
-      database = {
-        type = "postgres";
-        host = "/run/postgresql";
-        name = "gitea";
-        user = giteaUser;
-        # Uses Unix socket authentication - no password needed
-      };
-
-      # Git LFS support for large files
-      lfs.enable = true;
-
-      settings = {
-        other = {
-          SHOW_FOOTER_POWERED_BY = false;
+      config = lib.mkIf config.homelab.gitea.enable {
+        homelab.records.gitea = {
+          subdomain = "git";
+          port = 3004;
+          exposure = "public";
+          tile = {
+            title = "Gitea";
+            icon = "sh:gitea";
+            group = "infrastructure";
+          };
         };
-        server = {
-          ROOT_URL = "${gitea.url}/";
-          HTTP_ADDR = "127.0.0.1";
-          HTTP_PORT = gitea.port;
+        homelab.ports.gitea = [ 2222 ];
 
-          # SSH configuration
-          DISABLE_SSH = false;
-          SSH_DOMAIN = fqdn;
-          SSH_PORT = 2222;
-          START_SSH_SERVER = true;
-          SSH_LISTEN_HOST = "0.0.0.0";
-          SSH_LISTEN_PORT = 2222;
-        };
+        #catppuccin.gitea.enable = true;
 
-        service = {
-          DISABLE_REGISTRATION = true; # Allow user registration (change to true after initial setup if desired)
-          REQUIRE_SIGNIN_VIEW = false; # Public repositories are viewable without login
-        };
-
-        # Enable Gitea Actions for CI/CD
-        actions = {
-          ENABLED = true;
-          DEFAULT_ACTIONS_URL = "github";
-        };
-        # Security settings
-        security = {
-          INSTALL_LOCK = true;
-        };
-
-        # Session configuration
-        session = {
-          COOKIE_SECURE = true;
-          COOKIE_NAME = "gitea_session";
-        };
-
-        # Git LFS configuration
-        lfs = {
-          PATH = "${giteaDir}/data/lfs";
-        };
-
-        # Repository settings
-        repository = {
-          ROOT = "${giteaDir}/repositories";
-          DEFAULT_BRANCH = "main";
-        };
-
-        # Log settings
-        log = {
-          MODE = "console, file";
-          LEVEL = "Info";
-        };
-      };
-    };
-
-    # Gitea Actions Runners for CI/CD
-    services.gitea-actions-runner = {
-      package = pkgs.gitea-actions-runner;
-
-      instances = {
-        # Docker runner for containerized builds
-        docker = {
+        # PostgreSQL database for Gitea
+        services.postgresql = {
           enable = true;
-          name = "docker-runner";
-          url = gitea.url;
-          # Token needs to be generated in Gitea UI after first setup
-          # Go to Site Administration -> Actions -> Runners -> Create new runner
-          tokenFile = config.sops.templates."gitea-runner-env".path;
-          labels = [
-            "node:docker://node:20-bookworm"
-            "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:full-latest"
+          package = pkgs.postgresql_17;
+          ensureDatabases = [ "gitea" ];
+          ensureUsers = [
+            {
+              name = giteaUser;
+              ensureDBOwnership = true;
+            }
           ];
+        };
+
+        # Ensure PostgreSQL starts before Gitea
+        systemd.services.gitea.after = [ "postgresql.service" ];
+        systemd.services.gitea.requires = [ "postgresql.service" ];
+
+        # Gitea service configuration
+        services.gitea = {
+          enable = true;
+          package = pkgs.gitea;
+          appName = "Git Server";
+
+          database = {
+            type = "postgres";
+            host = "/run/postgresql";
+            name = "gitea";
+            user = giteaUser;
+            # Uses Unix socket authentication - no password needed
+          };
+
+          # Git LFS support for large files
+          lfs.enable = true;
+
           settings = {
-            container = {
-              network = "bridge";
+            other = {
+              SHOW_FOOTER_POWERED_BY = false;
+            };
+            server = {
+              ROOT_URL = "${gitea.url}/";
+              HTTP_ADDR = "127.0.0.1";
+              HTTP_PORT = gitea.port;
+
+              # SSH configuration
+              DISABLE_SSH = false;
+              SSH_DOMAIN = fqdn;
+              SSH_PORT = 2222;
+              START_SSH_SERVER = true;
+              SSH_LISTEN_HOST = "0.0.0.0";
+              SSH_LISTEN_PORT = 2222;
+            };
+
+            service = {
+              DISABLE_REGISTRATION = true; # Allow user registration (change to true after initial setup if desired)
+              REQUIRE_SIGNIN_VIEW = false; # Public repositories are viewable without login
+            };
+
+            # Enable Gitea Actions for CI/CD
+            actions = {
+              ENABLED = true;
+              DEFAULT_ACTIONS_URL = "github";
+            };
+            # Security settings
+            security = {
+              INSTALL_LOCK = true;
+            };
+
+            # Session configuration
+            session = {
+              COOKIE_SECURE = true;
+              COOKIE_NAME = "gitea_session";
+            };
+
+            # Git LFS configuration
+            lfs = {
+              PATH = "${giteaDir}/data/lfs";
+            };
+
+            # Repository settings
+            repository = {
+              ROOT = "${giteaDir}/repositories";
+              DEFAULT_BRANCH = "main";
+            };
+
+            # Log settings
+            log = {
+              MODE = "console, file";
+              LEVEL = "Info";
             };
           };
         };
 
-        # Nix runner for Nix builds
-        nix = {
-          enable = true;
-          name = "nix-runner";
-          url = gitea.url;
-          tokenFile = config.sops.templates."gitea-runner-env".path;
-          labels = [
-            "nix:host"
-          ];
-          hostPackages = with pkgs; [
-            bash
-            coreutils
-            curl
-            git
-            nix
-            go
-            openssh
-            gzip
-            gnutar
-            nodejs
-            sudo
-            docker
-	    gawk
-	    gnused
-	    wget
+        # Gitea Actions Runners for CI/CD
+        services.gitea-actions-runner = {
+          package = pkgs.gitea-actions-runner;
+
+          instances = {
+            # Docker runner for containerized builds
+            docker = {
+              enable = true;
+              name = "docker-runner";
+              url = gitea.url;
+              # Token needs to be generated in Gitea UI after first setup
+              # Go to Site Administration -> Actions -> Runners -> Create new runner
+              tokenFile = config.sops.templates."gitea-runner-env".path;
+              labels = [
+                "node:docker://node:20-bookworm"
+                "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:full-latest"
+              ];
+              settings = {
+                container = {
+                  network = "bridge";
+                };
+              };
+            };
+
+            # Nix runner for Nix builds
+            nix = {
+              enable = true;
+              name = "nix-runner";
+              url = gitea.url;
+              tokenFile = config.sops.templates."gitea-runner-env".path;
+              labels = [
+                "nix:host"
+              ];
+              hostPackages = with pkgs; [
+                bash
+                coreutils
+                curl
+                git
+                nix
+                go
+                openssh
+                gzip
+                gnutar
+                nodejs
+                sudo
+                docker
+                gawk
+                gnused
+                wget
+              ];
+            };
+          };
+        };
+
+        # SOPS secrets configuration
+        sops.secrets."gitea/runner_token" = {
+          # Both runners take this through systemd EnvironmentFile, which PID 1
+          # reads as root before the unit drops privileges, so it never needs to be
+          # readable by the runner users themselves.
+          mode = "0400";
+          owner = "root";
+          group = "root";
+          restartUnits = [
+            "gitea-runner-docker.service"
+            "gitea-runner-nix.service"
           ];
         };
+
+        # Create environment file with TOKEN variable for runners
+        sops.templates."gitea-runner-env" = {
+          content = ''
+            TOKEN=${config.sops.placeholder."gitea/runner_token"}
+          '';
+          owner = "root";
+          group = "root";
+          mode = "0400";
+        };
+
+        # Open firewall port for Gitea SSH
+        networking.firewall.allowedTCPPorts = [ 2222 ];
+
+        # Add main user to gitea group for management access
+        users.users.${user.userName}.extraGroups = [ giteaGroup ];
+
+        # Ensure proper permissions on Gitea directories
+        systemd.tmpfiles.rules = [
+          "d ${giteaDir} 0750 ${giteaUser} ${giteaGroup}"
+          "d ${giteaDir}/repositories 0750 ${giteaUser} ${giteaGroup}"
+          "d ${giteaDir}/data 0750 ${giteaUser} ${giteaGroup}"
+          "d ${giteaDir}/data/lfs 0750 ${giteaUser} ${giteaGroup}"
+        ];
+
+        # Run nix runner as wanna-share-releaser for deployment access
+        systemd.services.gitea-runner-nix.serviceConfig = {
+          DynamicUser = lib.mkForce false;
+          User = lib.mkForce "wanna-share-releaser";
+          Group = lib.mkForce "wanna-share-releaser";
+          NoNewPrivileges = lib.mkForce false; # Required for sudo
+        };
+        # Ensure runners start after Gitea is ready
+        systemd.services.gitea-runner-nix.after = [ "gitea.service" ];
+        systemd.services.gitea-runner-nix.wants = [ "gitea.service" ];
+
+        systemd.services.gitea-runner-docker.serviceConfig = {
+          DynamicUser = lib.mkForce false;
+          User = lib.mkForce "wanna-share-releaser";
+          Group = lib.mkForce "wanna-share-releaser";
+          NoNewPrivileges = lib.mkForce false;
+        };
+        systemd.services.gitea-runner-docker.after = [ "gitea.service" ];
+        systemd.services.gitea-runner-docker.wants = [ "gitea.service" ];
+
       };
     };
-
-    # SOPS secrets configuration
-    sops.secrets."gitea/runner_token" = {
-      # Both runners take this through systemd EnvironmentFile, which PID 1
-      # reads as root before the unit drops privileges, so it never needs to be
-      # readable by the runner users themselves.
-      mode = "0400";
-      owner = "root";
-      group = "root";
-      restartUnits = [
-        "gitea-runner-docker.service"
-        "gitea-runner-nix.service"
-      ];
-    };
-
-    # Create environment file with TOKEN variable for runners
-    sops.templates."gitea-runner-env" = {
-      content = ''
-        TOKEN=${config.sops.placeholder."gitea/runner_token"}
-      '';
-      owner = "root";
-      group = "root";
-      mode = "0400";
-    };
-
-    # Open firewall port for Gitea SSH
-    networking.firewall.allowedTCPPorts = [ 2222 ];
-
-    # Add main user to gitea group for management access
-    users.users.${user.userName}.extraGroups = [ giteaGroup ];
-
-    # Ensure proper permissions on Gitea directories
-    systemd.tmpfiles.rules = [
-      "d ${giteaDir} 0750 ${giteaUser} ${giteaGroup}"
-      "d ${giteaDir}/repositories 0750 ${giteaUser} ${giteaGroup}"
-      "d ${giteaDir}/data 0750 ${giteaUser} ${giteaGroup}"
-      "d ${giteaDir}/data/lfs 0750 ${giteaUser} ${giteaGroup}"
-    ];
-
-    # Run nix runner as wanna-share-releaser for deployment access
-    systemd.services.gitea-runner-nix.serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      User = lib.mkForce "wanna-share-releaser";
-      Group = lib.mkForce "wanna-share-releaser";
-      NoNewPrivileges = lib.mkForce false; # Required for sudo
-    };
-    # Ensure runners start after Gitea is ready
-    systemd.services.gitea-runner-nix.after = [ "gitea.service" ];
-    systemd.services.gitea-runner-nix.wants = [ "gitea.service" ];
-
-    systemd.services.gitea-runner-docker.serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      User = lib.mkForce "wanna-share-releaser";
-      Group = lib.mkForce "wanna-share-releaser";
-      NoNewPrivileges = lib.mkForce false;
-    };
-    systemd.services.gitea-runner-docker.after = [ "gitea.service" ];
-    systemd.services.gitea-runner-docker.wants = [ "gitea.service" ];
-
-  };
 }

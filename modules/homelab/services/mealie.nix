@@ -1,80 +1,83 @@
 {
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
-let
-  user = config.user;
-  uid = toString config.user.uid; # serenity user UID
-  gid = "mealie";
-in
-{
-  options.homelab.mealie.enable = lib.mkEnableOption "Enables mealie service";
+  flake.modules.nixos.homelab =
+    {
+      pkgs,
+      lib,
+      options,
+      config,
+      ...
+    }:
+    let
+      user = config.user;
+      uid = toString config.user.uid; # serenity user UID
+      gid = "mealie";
+    in
+    {
+      options.homelab.mealie.enable = lib.mkEnableOption "Enables mealie service";
 
-  config = lib.mkIf config.homelab.mealie.enable {
+      config = lib.mkIf config.homelab.mealie.enable {
 
-    # Create dedicated mealie group
-    users.groups.mealie = {
-      name = "mealie";
-      gid = 998;
-    };
+        # Create dedicated mealie group
+        users.groups.mealie = {
+          name = "mealie";
+          gid = 998;
+        };
 
-    # Create mealie system user
-    users.users.mealie = {
-      isSystemUser = true;
-      uid = 998;
-      group = "mealie";
-      extraGroups = [ "users" ];
-      home = "/var/lib/mealie";
-      shell = pkgs.bash;
-    };
+        # Create mealie system user
+        users.users.mealie = {
+          isSystemUser = true;
+          uid = 998;
+          group = "mealie";
+          extraGroups = [ "users" ];
+          home = "/var/lib/mealie";
+          shell = pkgs.bash;
+        };
 
-    # Add serenity user to mealie group for management access
-    users.users.${user.userName}.extraGroups = [ "mealie" ];
+        # Add serenity user to mealie group for management access
+        users.users.${user.userName}.extraGroups = [ "mealie" ];
 
-    systemd.tmpfiles.rules = [
-      "d /home/${user.userName}/mealie 0770 mealie mealie"
-    ];
+        systemd.tmpfiles.rules = [
+          "d /home/${user.userName}/mealie 0770 mealie mealie"
+        ];
 
-    homelab.records.mealie = {
-      subdomain = "cooking";
-      port = 9000;
-      exposure = "public";
-      openFirewall = true;
-      tile = {
-        title = "Mealie";
-        icon = "sh:mealie";
-        group = "productivity";
+        homelab.records.mealie = {
+          subdomain = "cooking";
+          port = 9000;
+          exposure = "public";
+          openFirewall = true;
+          tile = {
+            title = "Mealie";
+            icon = "sh:mealie";
+            group = "productivity";
+          };
+        };
+
+        sops.templates."mealie" = {
+          content = ''
+            DB_ENGINE=postgres
+            POSTGRES_USER=mealie
+            POSTGRES_PASSWORD=${config.sops.placeholder."mealie/db_password"}
+            POSTGRES_DB=mealie
+
+          '';
+          owner = "mealie";
+          group = "mealie";
+          mode = "0600";
+        };
+
+        services.mealie = {
+          enable = true;
+          package = pkgs.mealie;
+          inherit (config.homelab.records.mealie) port;
+          listenAddress = "0.0.0.0";
+          settings = {
+            PUID = 998;
+            GUID = 998;
+            TOKEN_TIME = 9600;
+          };
+          credentialsFile = config.sops.templates."mealie".path;
+          database.createLocally = true;
+        };
       };
     };
-
-    sops.templates."mealie" = {
-      content = ''
-        DB_ENGINE=postgres
-        POSTGRES_USER=mealie
-        POSTGRES_PASSWORD=${config.sops.placeholder."mealie/db_password"}
-        POSTGRES_DB=mealie
-
-      '';
-      owner = "mealie";
-      group = "mealie";
-      mode = "0600";
-    };
-
-    services.mealie = {
-      enable = true;
-      package = pkgs.mealie;
-      inherit (config.homelab.records.mealie) port;
-      listenAddress = "0.0.0.0";
-      settings = {
-        PUID = 998;
-        GUID = 998;
-        TOKEN_TIME = 9600;
-      };
-      credentialsFile = config.sops.templates."mealie".path;
-      database.createLocally = true;
-    };
-  };
 }

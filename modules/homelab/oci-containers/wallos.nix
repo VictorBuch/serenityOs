@@ -1,50 +1,53 @@
 {
-  pkgs,
-  lib,
-  options,
-  config,
-  ...
-}:
+  flake.modules.nixos.homelab =
+    {
+      pkgs,
+      lib,
+      options,
+      config,
+      ...
+    }:
 
-let
-  user = config.user;
-  uid = toString config.user.uid;
-in
+    let
+      user = config.user;
+      uid = toString config.user.uid;
+    in
 
-{
-  options.homelab.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
+    {
+      options.homelab.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
 
-  config = lib.mkIf config.homelab.wallos.enable {
-    homelab.records.wallos = {
-      subdomain = "subscriptions";
-      port = 8282;
-      openFirewall = true;
-      tile = {
-        title = "Wallos";
-        icon = "sh:wallos";
-        group = "productivity";
+      config = lib.mkIf config.homelab.wallos.enable {
+        homelab.records.wallos = {
+          subdomain = "subscriptions";
+          port = 8282;
+          openFirewall = true;
+          tile = {
+            title = "Wallos";
+            icon = "sh:wallos";
+            group = "productivity";
+          };
+        };
+
+        systemd.tmpfiles.rules = [
+          "d /home/${user.userName}/wallos 775 ${uid} ${user.group}"
+          "d /home/${user.userName}/wallos/db 775 ${uid} ${user.group}"
+          "d /home/${user.userName}/wallos/logos 775 ${uid} ${user.group}"
+        ];
+
+        virtualisation.oci-containers.containers.wallos = {
+          image = "bellamy/wallos:latest";
+          ports = [ "${toString config.homelab.records.wallos.port}:80" ];
+          volumes = [
+            "/home/${user.userName}/wallos/db:/var/www/html/db"
+            "/home/${user.userName}/wallos/logos:/var/www/html/images/uploads/logos"
+          ];
+          environment = {
+            TZ = "Europe/Prague";
+          };
+          # Let the container run as root (default) - it needs this for initial setup
+          # The container will drop privileges internally after setup if needed
+          autoStart = true;
+        };
       };
     };
-
-    systemd.tmpfiles.rules = [
-      "d /home/${user.userName}/wallos 775 ${uid} ${user.group}"
-      "d /home/${user.userName}/wallos/db 775 ${uid} ${user.group}"
-      "d /home/${user.userName}/wallos/logos 775 ${uid} ${user.group}"
-    ];
-
-    virtualisation.oci-containers.containers.wallos = {
-      image = "bellamy/wallos:latest";
-      ports = [ "${toString config.homelab.records.wallos.port}:80" ];
-      volumes = [
-        "/home/${user.userName}/wallos/db:/var/www/html/db"
-        "/home/${user.userName}/wallos/logos:/var/www/html/images/uploads/logos"
-      ];
-      environment = {
-        TZ = "Europe/Prague";
-      };
-      # Let the container run as root (default) - it needs this for initial setup
-      # The container will drop privileges internally after setup if needed
-      autoStart = true;
-    };
-  };
 }

@@ -1,16 +1,5 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "opencode";
-  category = "cli";
-  description = "opencode ai cli";
-  homeConfig =
+{
+  flake.modules.homeManager.opencode =
     {
       config,
       pkgs,
@@ -233,4 +222,4 @@ mkModule {
         };
       };
     };
-} args
+}

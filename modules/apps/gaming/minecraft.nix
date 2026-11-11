@@ -1,11 +1,14 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "minecraft";
-  category = "gaming";
-  packages = { pkgs, ... }: [
-    pkgs.zulu17
-    pkgs.prismlauncher
-  ];
-  description = "Minecraft with PrismLauncher";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.zulu17
+        pkgs.prismlauncher
+      ];
+    };
+in
+{
+  flake.modules.nixos.minecraft = module;
+  flake.modules.darwin.minecraft = module;
+}

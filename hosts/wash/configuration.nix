@@ -524,12 +524,5 @@ in
     wireguard-tools
   ];
 
-  apps.cli = {
-    fzf.enable = true;
-    git.enable = true;
-    nushell.enable = true;
-    starship.enable = true;
-  };
-
   system.stateVersion = "25.11";
 }

@@ -1,27 +1,22 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "system-tools";
-  category = "utilities";
-  packages =
+let
+  module =
     { pkgs, ... }:
-    [
-      pkgs.gcc
-      pkgs.chromium
-      pkgs.lm_sensors
-      pkgs.pciutils
-      pkgs.gparted
-      pkgs.sops
-      pkgs.jq
-    ];
-  description = "System utility tools";
-  homeConfig =
+    {
+      environment.systemPackages = [
+        pkgs.gcc
+        pkgs.chromium
+        pkgs.lm_sensors
+        pkgs.pciutils
+        pkgs.gparted
+        pkgs.sops
+        pkgs.jq
+      ];
+    };
+in
+{
+  flake.modules.nixos.system-tools = module;
+  flake.modules.darwin.system-tools = module;
+  flake.modules.homeManager.system-tools =
     { ... }:
     {
       programs.btop = {
@@ -29,4 +24,4 @@ mkModule {
         settings.color_theme = "noctalia";
       };
     };
-} args
+}

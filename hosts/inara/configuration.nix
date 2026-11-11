@@ -51,53 +51,6 @@ in
   ];
 
   maintenance.enable = true;
-  apps = {
-    cli = {
-      fzf.enable = true;
-      git.enable = true;
-      herdr.enable = true;
-      jujutsu.enable = true;
-      notes.enable = true;
-      nushell.enable = true;
-      opencode.enable = true;
-      sesh.enable = true;
-      starship.enable = true;
-    };
-
-    communication = {
-      discord.enable = true;
-      signal.enable = true;
-      slack.enable = true;
-      zoom.enable = true;
-    };
-
-    # zed comes from the homebrew cask instead, to avoid compiling it.
-    development = {
-      agent-browser.enable = true;
-      android-studio.enable = true;
-      claude.enable = true;
-      common.enable = true;
-      devenv-init.enable = true;
-      docker.enable = true;
-      neovim.enable = true;
-      tmux.enable = true;
-      vscode.enable = true;
-    };
-
-    media.ffmpeg.enable = true;
-
-    neovim.lazyvim.enable = true;
-
-    productivity = {
-      logseq.enable = true;
-      obsidian.enable = true;
-    };
-
-    utilities = {
-      cli-tools.enable = true;
-      localsend.enable = true;
-    };
-  };
 
   # Register nushell as a permissible login shell (configured via Home Manager)
   environment.shells = [ pkgs.nushell ];

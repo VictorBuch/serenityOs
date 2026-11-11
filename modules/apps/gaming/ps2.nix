@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "ps2";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.pcsx2 ];
-  description = "RPSX2 ps2 emulator";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.pcsx2 ];
+    };
+in
+{
+  flake.modules.nixos.ps2 = module;
+  flake.modules.darwin.ps2 = module;
+}

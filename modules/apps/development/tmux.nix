@@ -1,11 +1,14 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "tmux";
-  category = "development";
-  packages = { pkgs, ... }: [ pkgs.tmux ];
-  description = "Tmux terminal multiplexer";
-  homeConfig =
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.tmux ];
+    };
+in
+{
+  flake.modules.nixos.tmux = module;
+  flake.modules.darwin.tmux = module;
+  flake.modules.homeManager.tmux =
     {
       config,
       pkgs,
@@ -63,22 +66,22 @@ mkModule {
 
           			set -g status-right-length 70
           			set -g status-right "#(${pkgs.writeShellScript "cached-fortune" ''
-             			  CACHE_FILE="$HOME/.cache/tmux-fortune"
-             			  CACHE_DURATION=1800  # 30 minutes in seconds
+               			  CACHE_FILE="$HOME/.cache/tmux-fortune"
+               			  CACHE_DURATION=1800  # 30 minutes in seconds
 
-             			  mkdir -p "$HOME/.cache"
+               			  mkdir -p "$HOME/.cache"
 
-             			  if [ -f "$CACHE_FILE" ]; then
-             			    CACHE_AGE=$(($(date +%s) - $(date -r "$CACHE_FILE" +%s)))
-             			    if [ $CACHE_AGE -lt $CACHE_DURATION ]; then
-             			      cat "$CACHE_FILE"
-             			      exit 0
-             			    fi
-             			  fi
+               			  if [ -f "$CACHE_FILE" ]; then
+               			    CACHE_AGE=$(($(date +%s) - $(date -r "$CACHE_FILE" +%s)))
+               			    if [ $CACHE_AGE -lt $CACHE_DURATION ]; then
+               			      cat "$CACHE_FILE"
+               			      exit 0
+               			    fi
+               			  fi
 
-             			  ${pkgs.fortune}/bin/fortune -n 50 -s > "$CACHE_FILE"
-             			  cat "$CACHE_FILE"
-             			''})"
+               			  ${pkgs.fortune}/bin/fortune -n 50 -s > "$CACHE_FILE"
+               			  cat "$CACHE_FILE"
+               			''})"
 
 
           			# [0 - command]
@@ -98,4 +101,4 @@ mkModule {
           		'';
       };
     };
-} args
+}

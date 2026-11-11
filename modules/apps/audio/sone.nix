@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "sone";
-  category = "audio";
-  packages = { pkgs, ... }: [ pkgs.sone ];
-  description = "Tidal music streaming";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.sone ];
+    };
+in
+{
+  flake.modules.nixos.sone = module;
+  flake.modules.darwin.sone = module;
+}

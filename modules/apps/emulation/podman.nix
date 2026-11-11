@@ -1,21 +1,16 @@
-args@{ config, pkgs, lib, mkModule, ... }:
+{
+  flake.modules.nixos.podman =
+    { ... }:
+    {
+      virtualisation.containers.enable = true;
+      virtualisation.podman = {
+        enable = true;
 
-mkModule {
-  name = "podman";
-  platforms = [ "linux" ];
-  category = "emulation";
-  packages = { pkgs, ... }: [ ]; # Podman enabled via virtualisation.podman
-  description = "Podman container engine (Linux only)";
-  extraConfig = {
-    virtualisation.containers.enable = true;
-    virtualisation.podman = {
-      enable = true;
+        # Create a `docker` alias for podman, to use it as a drop-in replacement
+        dockerCompat = true;
 
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
-      dockerCompat = true;
-
-      # Required for containers under podman-compose to be able to talk to each other.
-      defaultNetwork.settings.dns_enabled = true;
+        # Required for containers under podman-compose to be able to talk to each other.
+        defaultNetwork.settings.dns_enabled = true;
+      };
     };
-  };
-} args
+}

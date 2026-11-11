@@ -1,14 +1,15 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "spotify";
-  category = "audio";
-  packages = { pkgs, ... }: [ pkgs.spotify ];
-  description = "Spotify music streaming";
-  # Spotify Connect discovery; the firewall option is NixOS-only.
-  extraConfig =
-    { lib, platform, ... }:
-    lib.optionalAttrs (platform == "linux") {
-      networking.firewall.allowedUDPPorts = [ 5353 ];
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.spotify ];
     };
-} args
+in
+{
+  flake.modules.nixos.spotify = {
+    imports = [ module ];
+    # Spotify Connect discovery.
+    networking.firewall.allowedUDPPorts = [ 5353 ];
+  };
+  flake.modules.darwin.spotify = module;
+}

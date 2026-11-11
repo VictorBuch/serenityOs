@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "audacity";
-  category = "audio";
-  packages = { pkgs, ... }: [ pkgs.audacity ];
-  description = "Audacity audio editor";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.audacity ];
+    };
+in
+{
+  flake.modules.nixos.audacity = module;
+  flake.modules.darwin.audacity = module;
+}

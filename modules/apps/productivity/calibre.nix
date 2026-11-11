@@ -1,12 +1,11 @@
-args@{
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "calibre";
-  category = "productivity";
-  packages =
-    { pkgs, ... }: [ pkgs.calibre ];
-  description = "calibre";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.calibre ];
+    };
+in
+{
+  flake.modules.nixos.calibre = module;
+  flake.modules.darwin.calibre = module;
+}

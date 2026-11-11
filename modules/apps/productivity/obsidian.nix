@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "obsidian";
-  category = "productivity";
-  description = "Obsidian note-taking app";
-  packages = { pkgs, ... }: [ pkgs.obsidian ];
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.obsidian ];
+    };
+in
+{
+  flake.modules.nixos.obsidian = module;
+  flake.modules.darwin.obsidian = module;
+}

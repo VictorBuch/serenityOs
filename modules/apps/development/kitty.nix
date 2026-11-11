@@ -1,11 +1,14 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "kitty";
-  category = "development";
-  packages = { pkgs, ... }: [ pkgs.kitty ];
-  description = "Kitty terminal emulator";
-  homeConfig =
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.kitty ];
+    };
+in
+{
+  flake.modules.nixos.kitty = module;
+  flake.modules.darwin.kitty = module;
+  flake.modules.homeManager.kitty =
     {
       config,
       pkgs,
@@ -33,4 +36,4 @@ mkModule {
         '';
       };
     };
-} args
+}

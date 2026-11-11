@@ -1,11 +1,3 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
 let
   # `monoFamily` comes from osConfig.fonts.mono.familyMono, so it follows the
   # `fonts.mono.preset` switch in modules/common/fonts.nix. The Mono variant is
@@ -38,21 +30,14 @@ let
     mouse-scroll-multiplier = 1;
   };
 in
-
-mkModule {
-  name = "ghostty";
-  category = "development";
-  packages =
+{
+  flake.modules.nixos.ghostty =
+    { pkgs, ... }:
     {
-      pkgs,
-      lib,
-      platform,
-      ...
-    }:
-    lib.optionals (platform == "linux") [ pkgs.ghostty ];
-  casks = [ "ghostty" ];
-  description = "Ghostty terminal emulator";
-  homeConfig =
+      environment.systemPackages = [ pkgs.ghostty ];
+    };
+  flake.modules.darwin.ghostty.homebrew.casks = [ "ghostty" ];
+  flake.modules.homeManager.ghostty =
     {
       config,
       pkgs,
@@ -90,4 +75,4 @@ mkModule {
         text = lib.generators.toKeyValue { } settings;
       };
     };
-} args
+}

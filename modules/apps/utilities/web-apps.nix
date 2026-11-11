@@ -1,168 +1,164 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "web-apps";
-  platforms = [ "linux" ];
-  category = "utilities";
-  packages = { pkgs, ... }: [ pkgs.chromium ];
-  description = "Web desktop apps (PWAs, Linux only)";
-  extraConfig = {
-    home-manager.users.${config.user.userName} =
-      let
-        browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";
-      in
-      {
-        xdg.desktopEntries = {
-          "IK Product manager" = {
-            name = "IK Product Manager";
-            genericName = "IK product manager";
-            exec = "audio-wine /home/jayne/.wine-audio/drive_c/Program Files/IK Multimedia/IK Product Manager/IK Product Manager.exe
+{
+  flake.modules.nixos.web-apps =
+    { config, pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.chromium ];
+      home-manager.users.${config.user.userName} =
+        let
+          browser = "${pkgs.chromium}/bin/chromium --enable-features=UseOzonePlatform --ozone-platform=wayland";
+        in
+        {
+          xdg.desktopEntries = {
+            "IK Product manager" = {
+              name = "IK Product Manager";
+              genericName = "IK product manager";
+              exec = "audio-wine /home/jayne/.wine-audio/drive_c/Program Files/IK Multimedia/IK Product Manager/IK Product Manager.exe
 ";
-            icon = "ik";
-            categories = [
-              "AudioVideo"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "ik";
+              icon = "ik";
+              categories = [
+                "AudioVideo"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "ik";
+              };
             };
-          };
-          youtube = {
-            name = "YouTube";
-            genericName = "Video Platform";
-            exec = "${browser} --app=https://youtube.com --no-first-run --disable-default-apps";
-            icon = "youtube";
-            categories = [
-              "Network"
-              "AudioVideo"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "youtube.com";
+            youtube = {
+              name = "YouTube";
+              genericName = "Video Platform";
+              exec = "${browser} --app=https://youtube.com --no-first-run --disable-default-apps";
+              icon = "youtube";
+              categories = [
+                "Network"
+                "AudioVideo"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "youtube.com";
+              };
             };
-          };
 
-          mynixos = {
-            name = "MyNixOS";
-            genericName = "NixOS Configuration Search";
-            exec = "${browser} --app=https://mynixos.com --no-first-run --disable-default-apps";
-            icon = "nix-snowflake";
-            categories = [
-              "Development"
-              "Documentation"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "mynixos.com";
+            mynixos = {
+              name = "MyNixOS";
+              genericName = "NixOS Configuration Search";
+              exec = "${browser} --app=https://mynixos.com --no-first-run --disable-default-apps";
+              icon = "nix-snowflake";
+              categories = [
+                "Development"
+                "Documentation"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "mynixos.com";
+              };
             };
-          };
 
-          protonmail = {
-            name = "Proton Mail";
-            genericName = "Email Client";
-            exec = "${browser} --app=https://mail.proton.me --no-first-run --disable-default-apps";
-            icon = "mail";
-            categories = [
-              "Network"
-              "Email"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "mail.proton.me";
+            protonmail = {
+              name = "Proton Mail";
+              genericName = "Email Client";
+              exec = "${browser} --app=https://mail.proton.me --no-first-run --disable-default-apps";
+              icon = "mail";
+              categories = [
+                "Network"
+                "Email"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "mail.proton.me";
+              };
             };
-          };
 
-          claude = {
-            name = "Claude";
-            genericName = "AI Assistant";
-            exec = "${browser} --app=https://claude.ai --no-first-run --disable-default-apps";
-            icon = "applications-science";
-            categories = [
-              "Network"
-              "Utility"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "claude.ai";
+            claude = {
+              name = "Claude";
+              genericName = "AI Assistant";
+              exec = "${browser} --app=https://claude.ai --no-first-run --disable-default-apps";
+              icon = "applications-science";
+              categories = [
+                "Network"
+                "Utility"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "claude.ai";
+              };
             };
-          };
 
-          github = {
-            name = "GitHub";
-            genericName = "Code Hosting Platform";
-            exec = "${browser} --app=https://github.com --no-first-run --disable-default-apps";
-            icon = "github";
-            categories = [
-              "Development"
-              "Network"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "github.com";
+            github = {
+              name = "GitHub";
+              genericName = "Code Hosting Platform";
+              exec = "${browser} --app=https://github.com --no-first-run --disable-default-apps";
+              icon = "github";
+              categories = [
+                "Development"
+                "Network"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "github.com";
+              };
             };
-          };
 
-          linear = {
-            name = "Linear";
-            genericName = "Issue Tracker";
-            exec = "${browser} --app=https://linear.app --no-first-run --disable-default-apps";
-            icon = "linear";
-            categories = [
-              "Development"
-              "Office"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "linear.app";
+            linear = {
+              name = "Linear";
+              genericName = "Issue Tracker";
+              exec = "${browser} --app=https://linear.app --no-first-run --disable-default-apps";
+              icon = "linear";
+              categories = [
+                "Development"
+                "Office"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "linear.app";
+              };
             };
-          };
 
-          nixpkgs = {
-            name = "NixOS Packages";
-            genericName = "Package Search";
-            exec = "${browser} --app=https://search.nixos.org/packages --no-first-run --disable-default-apps";
-            icon = "nix-snowflake";
-            categories = [
-              "Development"
-              "Documentation"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "search.nixos.org";
+            nixpkgs = {
+              name = "NixOS Packages";
+              genericName = "Package Search";
+              exec = "${browser} --app=https://search.nixos.org/packages --no-first-run --disable-default-apps";
+              icon = "nix-snowflake";
+              categories = [
+                "Development"
+                "Documentation"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "search.nixos.org";
+              };
             };
-          };
 
-          nixoptions = {
-            name = "NixOS Options";
-            genericName = "NixOS Options Search";
-            exec = "${browser} --app=https://search.nixos.org/options --no-first-run --disable-default-apps";
-            icon = "nix-snowflake";
-            categories = [
-              "Development"
-              "Documentation"
-            ];
-            terminal = false;
-            settings = {
-              StartupWMClass = "search.nixos.org";
+            nixoptions = {
+              name = "NixOS Options";
+              genericName = "NixOS Options Search";
+              exec = "${browser} --app=https://search.nixos.org/options --no-first-run --disable-default-apps";
+              icon = "nix-snowflake";
+              categories = [
+                "Development"
+                "Documentation"
+              ];
+              terminal = false;
+              settings = {
+                StartupWMClass = "search.nixos.org";
+              };
             };
-          };
 
-          # tidal = {
-          #   name = "Tidal";
-          #   genericName = "Music Streaming";
-          #   exec = "${browser} --app=https://listen.tidal.com --no-first-run --disable-default-apps";
-          #   icon = "tidal";
-          #   categories = [
-          #     "AudioVideo"
-          #     "Audio"
-          #     "Music"
-          #   ];
-          #   terminal = false;
-          #   settings = {
-          #     StartupWMClass = "listen.tidal.com";
-          #   };
-          # };
+            # tidal = {
+            #   name = "Tidal";
+            #   genericName = "Music Streaming";
+            #   exec = "${browser} --app=https://listen.tidal.com --no-first-run --disable-default-apps";
+            #   icon = "tidal";
+            #   categories = [
+            #     "AudioVideo"
+            #     "Audio"
+            #     "Music"
+            #   ];
+            #   terminal = false;
+            #   settings = {
+            #     StartupWMClass = "listen.tidal.com";
+            #   };
+            # };
+          };
         };
-      };
-  };
-} args
+    };
+}

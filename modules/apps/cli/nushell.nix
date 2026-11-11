@@ -1,5 +1,3 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
 let
   aliases = {
     v = "sudo nvim ";
@@ -20,12 +18,8 @@ let
     dvc = "davinci-convert";
   };
 in
-
-mkModule {
-  name = "nushell";
-  category = "cli";
-  description = "Nushell modern shell";
-  homeConfig =
+{
+  flake.modules.homeManager.nushell =
     {
       config,
       pkgs,
@@ -117,4 +111,4 @@ mkModule {
         };
       };
     };
-} args
+}

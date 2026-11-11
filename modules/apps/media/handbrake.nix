@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "handbrake";
-  category = "media";
-  packages = { pkgs, ... }: [ pkgs.handbrake ];
-  description = "HandBrake video transcoder";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.handbrake ];
+    };
+in
+{
+  flake.modules.nixos.handbrake = module;
+  flake.modules.darwin.handbrake = module;
+}

@@ -1,10 +1,5 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "starship";
-  category = "cli";
-  description = "Starship prompt";
-  homeConfig =
+{
+  flake.modules.homeManager.starship =
     {
       config,
       pkgs,
@@ -248,4 +243,4 @@ mkModule {
         };
       };
     };
-} args
+}

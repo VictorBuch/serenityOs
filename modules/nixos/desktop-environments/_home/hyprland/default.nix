@@ -1,6 +1,5 @@
 {
   lib,
-  osConfig ? { },
   ...
 }:
 {
@@ -16,7 +15,6 @@
     compositor.hyprland.enable = lib.mkDefault true;
     shell.noctalia.enable = lib.mkDefault true;
     common = {
-      davinci-convert.enable = lib.mkDefault (osConfig.apps.media.davinci-resolve.enable or false);
       rofi.enable = lib.mkDefault true;
     };
   };

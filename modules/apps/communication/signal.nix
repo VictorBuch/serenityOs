@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "signal";
-  category = "communication";
-  packages = { pkgs, ... }: [ pkgs.signal-desktop ];
-  description = "Private and secure messaging app";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.signal-desktop ];
+    };
+in
+{
+  flake.modules.nixos.signal = module;
+  flake.modules.darwin.signal = module;
+}

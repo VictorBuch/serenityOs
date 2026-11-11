@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "ps3";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.rpcs3 ];
-  description = "RPCS3 PS3 emulator";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.rpcs3 ];
+    };
+in
+{
+  flake.modules.nixos.ps3 = module;
+  flake.modules.darwin.ps3 = module;
+}

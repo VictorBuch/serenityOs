@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "blender";
-  category = "media";
-  packages = { pkgs, ... }: [ pkgs.blender ];
-  description = "Blender 3D modeling";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.blender ];
+    };
+in
+{
+  flake.modules.nixos.blender = module;
+  flake.modules.darwin.blender = module;
+}

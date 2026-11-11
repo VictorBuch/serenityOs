@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "mangohud";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.mangohud ];
-  description = "MangoHud performance overlay";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.mangohud ];
+    };
+in
+{
+  flake.modules.nixos.mangohud = module;
+  flake.modules.darwin.mangohud = module;
+}

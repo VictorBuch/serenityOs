@@ -1,4 +1,4 @@
-{ lib, osConfig ? { }, ... }:
+{ lib, ... }:
 
 {
   imports = [
@@ -11,6 +11,5 @@
   home.desktop = {
     compositor.niri.enable = lib.mkDefault true;
     shell.noctalia.enable = lib.mkDefault true;
-    common.davinci-convert.enable = lib.mkDefault (osConfig.apps.media.davinci-resolve.enable or false);
   };
 }

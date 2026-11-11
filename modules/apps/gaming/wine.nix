@@ -1,16 +1,17 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "wine";
-  category = "gaming";
-  # Use pkgs-stable for Wine gaming to avoid breaking changes
-  packages =
+let
+  module =
     { pkgs, pkgs-stable, ... }:
-    [
-      pkgs-stable.wineWowPackages.stable
-      pkgs-stable.wineWowPackages.waylandFull
-      pkgs-stable.winetricks
-      pkgs.protontricks # protontricks can stay on unstable
-    ];
-  description = "Wine Windows compatibility layer";
-} args
+    {
+      # Use pkgs-stable for Wine gaming to avoid breaking changes
+      environment.systemPackages = [
+        pkgs-stable.wineWowPackages.stable
+        pkgs-stable.wineWowPackages.waylandFull
+        pkgs-stable.winetricks
+        pkgs.protontricks # protontricks can stay on unstable
+      ];
+    };
+in
+{
+  flake.modules.nixos.wine = module;
+  flake.modules.darwin.wine = module;
+}

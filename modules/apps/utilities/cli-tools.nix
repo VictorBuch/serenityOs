@@ -1,11 +1,14 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "cli-tools";
-  category = "utilities";
-  packages = { pkgs, ... }: [
-    pkgs.pam-cli
-    pkgs.yt-dlp
-  ];
-  description = "Command-line development and management tools";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.pam-cli
+        pkgs.yt-dlp
+      ];
+    };
+in
+{
+  flake.modules.nixos.cli-tools = module;
+  flake.modules.darwin.cli-tools = module;
+}

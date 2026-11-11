@@ -1,42 +1,38 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "common";
-  category = "development";
-  packages =
+let
+  module =
     { pkgs, ... }:
-    [
-      pkgs.fastfetch
-      pkgs.starship
-      pkgs.zoxide
-      pkgs.fzf
-      pkgs.lazygit
-      pkgs.lazysql
-      pkgs.ripgrep
-      pkgs.fd
-      pkgs.nodejs_22
-      pkgs.llm-agents.claude-code
-      pkgs.gitea-mcp-server
-      pkgs.yazi
-      pkgs.devenv
-      pkgs.jujutsu
-      pkgs.jjui
-      pkgs.lazyjj
-      pkgs.go
-      pkgs.opencode
-      pkgs.bun
-      pkgs.pnpm
-      pkgs.gh
-      pkgs.tea
-      pkgs.bat
-    ];
-  homeConfig = {
+    {
+      environment.systemPackages = [
+        pkgs.fastfetch
+        pkgs.starship
+        pkgs.zoxide
+        pkgs.fzf
+        pkgs.lazygit
+        pkgs.lazysql
+        pkgs.ripgrep
+        pkgs.fd
+        pkgs.nodejs_22
+        pkgs.llm-agents.claude-code
+        pkgs.gitea-mcp-server
+        pkgs.yazi
+        pkgs.devenv
+        pkgs.jujutsu
+        pkgs.jjui
+        pkgs.lazyjj
+        pkgs.go
+        pkgs.opencode
+        pkgs.bun
+        pkgs.pnpm
+        pkgs.gh
+        pkgs.tea
+        pkgs.bat
+      ];
+    };
+in
+{
+  flake.modules.nixos.common = module;
+  flake.modules.darwin.common = module;
+  flake.modules.homeManager.common = {
     programs.superfile = {
       enable = true;
       settings = {
@@ -46,5 +42,4 @@ mkModule {
       };
     };
   };
-  description = "Common development tools";
-} args
+}

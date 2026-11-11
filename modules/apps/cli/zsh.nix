@@ -1,5 +1,3 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
 let
   aliases = {
     v = "sudo nvim ";
@@ -11,12 +9,8 @@ let
     ".." = "(cd ..) && (ls)";
   };
 in
-
-mkModule {
-  name = "zsh";
-  category = "cli";
-  description = "Z shell";
-  homeConfig =
+{
+  flake.modules.homeManager.zsh =
     {
       config,
       pkgs,
@@ -38,4 +32,4 @@ mkModule {
         '';
       };
     };
-} args
+}

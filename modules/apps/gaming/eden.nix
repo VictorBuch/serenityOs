@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "eden";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.eden ];
-  description = "Nintendo switch emulation";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.eden ];
+    };
+in
+{
+  flake.modules.nixos.eden = module;
+  flake.modules.darwin.eden = module;
+}

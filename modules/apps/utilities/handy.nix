@@ -1,11 +1,14 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "handy";
-  category = "utilities";
-  packages = { pkgs, ... }: [
-    pkgs.handy
-    pkgs.wtype
-  ];
-  description = "Voice to text";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.handy
+        pkgs.wtype
+      ];
+    };
+in
+{
+  flake.modules.nixos.handy = module;
+  flake.modules.darwin.handy = module;
+}

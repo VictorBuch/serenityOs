@@ -1,10 +1,13 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "bottles";
-  category = "emulation";
-  packages = { pkgs, ... }: [
-    pkgs.bottles
-  ];
-  description = "Windows emulation";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.bottles
+      ];
+    };
+in
+{
+  flake.modules.nixos.bottles = module;
+  flake.modules.darwin.bottles = module;
+}

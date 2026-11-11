@@ -1,20 +1,17 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  inputs,
-  ...
-}:
-
-mkModule {
-  name = "zen";
-  category = "browsers";
-  packages = { pkgs, ... }: [
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
-  description = "Zen browser";
-  homeConfig =
+{ inputs, ... }:
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      ];
+    };
+in
+{
+  flake.modules.nixos.zen = module;
+  flake.modules.darwin.zen = module;
+  flake.modules.homeManager.zen =
     {
       config,
       lib,
@@ -43,4 +40,4 @@ mkModule {
           };
       };
     };
-} args
+}

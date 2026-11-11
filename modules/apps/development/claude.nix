@@ -1,16 +1,5 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "claude";
-  category = "development";
-  description = "Claude Code skills and user CLAUDE.md";
-  homeConfig =
+{
+  flake.modules.homeManager.claude =
     { lib, ... }:
     let
       # One dir per account: default, claudew, claudep (see nushell.nix).
@@ -28,8 +17,10 @@ mkModule {
       // lib.listToAttrs (
         lib.concatMap (
           dir:
-          map (skill: lib.nameValuePair "${dir}/skills/${skill}" { source = ./claude/skills/${skill}; }) skills
+          map (
+            skill: lib.nameValuePair "${dir}/skills/${skill}" { source = ./claude/skills/${skill}; }
+          ) skills
         ) configDirs
       );
     };
-} args
+}

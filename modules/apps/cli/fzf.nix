@@ -1,10 +1,5 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "fzf";
-  category = "cli";
-  description = "Fuzzy finder";
-  homeConfig =
+{
+  flake.modules.homeManager.fzf =
     {
       config,
       pkgs,
@@ -19,4 +14,4 @@ mkModule {
         tmux.enableShellIntegration = true;
       };
     };
-} args
+}

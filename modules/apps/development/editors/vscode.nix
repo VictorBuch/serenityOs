@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "vscode";
-  category = "development";
-  packages = { pkgs, ... }: [ pkgs.vscode ];
-  description = "Visual Studio Code editor";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.vscode ];
+    };
+in
+{
+  flake.modules.nixos.vscode = module;
+  flake.modules.darwin.vscode = module;
+}

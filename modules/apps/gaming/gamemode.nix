@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "gamemode";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.gamemode ];
-  description = "GameMode performance optimization";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.gamemode ];
+    };
+in
+{
+  flake.modules.nixos.gamemode = module;
+  flake.modules.darwin.gamemode = module;
+}

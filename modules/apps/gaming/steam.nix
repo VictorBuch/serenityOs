@@ -1,20 +1,15 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "steam";
-  platforms = [ "linux" ];
-  category = "gaming";
-  packages = { pkgs, ... }: [ ]; # Steam is enabled via programs.steam
-  description = "Steam gaming platform (Linux only)";
-  extraConfig = {
-    programs.steam = {
-      enable = true;
-      remotePlay.openFirewall = true; # Open ports for Steam Remote Play
-      dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server
-      localNetworkGameTransfers.openFirewall = true; # Open ports for Steam Local Network Game Transfers
-      extraCompatPackages = [
-        pkgs.proton-ge-bin
-      ];
+{
+  flake.modules.nixos.steam =
+    { pkgs, ... }:
+    {
+      programs.steam = {
+        enable = true;
+        remotePlay.openFirewall = true; # Open ports for Steam Remote Play
+        dedicatedServer.openFirewall = true; # Open ports for Source Dedicated Server
+        localNetworkGameTransfers.openFirewall = true; # Open ports for Steam Local Network Game Transfers
+        extraCompatPackages = [
+          pkgs.proton-ge-bin
+        ];
+      };
     };
-  };
-} args
+}

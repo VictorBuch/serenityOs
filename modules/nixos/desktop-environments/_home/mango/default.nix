@@ -1,14 +1,8 @@
 {
   lib,
   inputs,
-  osConfig ? { },
   ...
 }:
-
-let
-  # Check if DaVinci Resolve is enabled at the system level
-  davinciEnabled = (osConfig.apps.media.davinci-resolve.enable or false);
-in
 
 {
   imports = [
@@ -30,7 +24,6 @@ in
     };
     shell.noctalia.enable = lib.mkDefault true;
     common = {
-      davinci-convert.enable = lib.mkDefault davinciEnabled;
       rofi.enable = lib.mkDefault true;
     };
   };

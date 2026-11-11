@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "retroarch";
-  category = "gaming";
-  packages = { pkgs, ... }: [ pkgs.retroarch-full ];
-  description = "Emulator";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.retroarch-full ];
+    };
+in
+{
+  flake.modules.nixos.retroarch = module;
+  flake.modules.darwin.retroarch = module;
+}

@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "vlc";
-  category = "audio";
-  packages = { pkgs, ... }: [ pkgs.vlc ];
-  description = "VLC media player";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.vlc ];
+    };
+in
+{
+  flake.modules.nixos.vlc = module;
+  flake.modules.darwin.vlc = module;
+}

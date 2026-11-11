@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "slack";
-  category = "communication";
-  packages = { pkgs, ... }: [ pkgs.slack ];
-  description = "Slack team communication";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.slack ];
+    };
+in
+{
+  flake.modules.nixos.slack = module;
+  flake.modules.darwin.slack = module;
+}

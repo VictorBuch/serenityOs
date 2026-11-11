@@ -1,10 +1,5 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "git";
-  category = "cli";
-  description = "Git version control";
-  homeConfig =
+{
+  flake.modules.homeManager.git =
     {
       config,
       pkgs,
@@ -158,4 +153,4 @@ mkModule {
         };
       };
     };
-} args
+}

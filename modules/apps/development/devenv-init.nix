@@ -1,30 +1,25 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
 let
-  devenv-init = pkgs.writeShellApplication {
-    name = "devenv-init";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.gnugrep
-    ];
-    text = builtins.readFile ./devenv-init.sh;
-  };
-in
-mkModule {
-  name = "devenv-init";
-  category = "development";
-  description = "Scaffold a project devenv that imports serenityOs's shared devenv modules";
-  packages =
+  module =
     { pkgs, ... }:
-    [
-      pkgs.devenv
-      pkgs.direnv
-      devenv-init
-    ];
-} args
+    let
+      devenv-init = pkgs.writeShellApplication {
+        name = "devenv-init";
+        runtimeInputs = [
+          pkgs.coreutils
+          pkgs.gnugrep
+        ];
+        text = builtins.readFile ./devenv-init.sh;
+      };
+    in
+    {
+      environment.systemPackages = [
+        pkgs.devenv
+        pkgs.direnv
+        devenv-init
+      ];
+    };
+in
+{
+  flake.modules.nixos.devenv-init = module;
+  flake.modules.darwin.devenv-init = module;
+}

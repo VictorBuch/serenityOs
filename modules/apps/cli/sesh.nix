@@ -1,10 +1,5 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "sesh";
-  category = "cli";
-  description = "Session manager for tmux";
-  homeConfig =
+{
+  flake.modules.homeManager.sesh =
     {
       config,
       pkgs,
@@ -63,4 +58,4 @@ mkModule {
         };
       };
     };
-} args
+}

@@ -1,14 +1,11 @@
-args@{
-  config,
-  pkgs,
-  lib,
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "ffmpeg";
-  category = "media";
-  packages = { pkgs, ... }: [ pkgs.ffmpeg ];
-  description = "FFmpeg for video editing";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.ffmpeg ];
+    };
+in
+{
+  flake.modules.nixos.ffmpeg = module;
+  flake.modules.darwin.ffmpeg = module;
+}

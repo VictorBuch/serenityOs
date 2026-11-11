@@ -1,15 +1,13 @@
-args@{
-  mkModule,
-  ...
-}:
-
-mkModule {
-  name = "language-learning";
-  category = "productivity";
-  packages =
+let
+  module =
     { pkgs, ... }:
-    [
-      pkgs.anki
-    ];
-  description = "Language learning apps (Anki)";
-} args
+    {
+      environment.systemPackages = [
+        pkgs.anki
+      ];
+    };
+in
+{
+  flake.modules.nixos.language-learning = module;
+  flake.modules.darwin.language-learning = module;
+}

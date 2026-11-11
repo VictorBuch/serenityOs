@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "firefox";
-  category = "browsers";
-  packages = { pkgs, ... }: [ pkgs.firefox ];
-  description = "Mozilla Firefox web browser";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.firefox ];
+    };
+in
+{
+  flake.modules.nixos.firefox = module;
+  flake.modules.darwin.firefox = module;
+}

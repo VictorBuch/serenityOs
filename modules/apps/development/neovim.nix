@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "neovim";
-  category = "development";
-  packages = { pkgs, ... }: [ pkgs.neovim ];
-  description = "Neovim text editor";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.neovim ];
+    };
+in
+{
+  flake.modules.nixos.neovim = module;
+  flake.modules.darwin.neovim = module;
+}

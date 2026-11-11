@@ -1,12 +1,15 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "qemu";
-  category = "emulation";
-  packages = { pkgs, ... }: [
-    pkgs.qemu
-    pkgs.quickemu
-    pkgs.quickgui
-  ];
-  description = "QEMU virtualization with quickemu and quickgui";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [
+        pkgs.qemu
+        pkgs.quickemu
+        pkgs.quickgui
+      ];
+    };
+in
+{
+  flake.modules.nixos.qemu = module;
+  flake.modules.darwin.qemu = module;
+}

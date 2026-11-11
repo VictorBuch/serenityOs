@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "mass";
-  category = "audio";
-  packages = { pkgs, ... }: [ pkgs.music-assistant-desktop ];
-  description = "Music assistant desktop app";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.music-assistant-desktop ];
+    };
+in
+{
+  flake.modules.nixos.mass = module;
+  flake.modules.darwin.mass = module;
+}

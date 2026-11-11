@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   self,
   withSystem,
@@ -15,6 +16,7 @@ let
       system ? if class == "darwin" then "aarch64-darwin" else "x86_64-linux",
       hostConfig ? ../../hosts/${name}/configuration.nix,
       platformModules ? true,
+      features ? [ ],
       extraModules ? [ ],
     }:
     let
@@ -25,6 +27,14 @@ let
           [ (import-tree ../darwin) ]
         else
           nixpkgs.lib.optional platformModules (import-tree ../nixos);
+      inherit (config.flake) modules;
+      feature =
+        n:
+        assert modules.${class} ? ${n} || modules.homeManager ? ${n} || throw "${name}: no feature ${n}";
+        nixpkgs.lib.optional (modules.${class} ? ${n}) modules.${class}.${n}
+        ++ nixpkgs.lib.optional (modules.homeManager ? ${n}) {
+          home-manager.sharedModules = [ modules.homeManager.${n} ];
+        };
     in
     withSystem system (
       { pkgs, pkgs-stable, ... }:
@@ -32,12 +42,12 @@ let
         inherit system pkgs;
         specialArgs = {
           inherit inputs system pkgs pkgs-stable;
-          inherit (customLib) mkModule expiring;
+          inherit (customLib) expiring;
         };
         modules = [
           (import-tree ../common)
           ../common/_defaults.nix
-          (import-tree ../apps)
+          { imports = nixpkgs.lib.concatMap feature features; }
           hostConfig
           (if darwin then inputs.home-manager.darwinModules.default else inputs.home-manager.nixosModules.default)
           (if darwin then inputs.sops-nix.darwinModules.sops else inputs.sops-nix.nixosModules.sops)
@@ -48,9 +58,85 @@ let
     );
 
   hosts = [
-    { name = "jayne"; }
+    {
+      name = "jayne";
+      features = [
+        "audacity"
+        "decent-sampler"
+        "easyeffects"
+        "feedback"
+        "mass"
+        "reaper"
+        "sone"
+        "spotify"
+        "vlc"
+        "yabridge"
+        "zen"
+        "fzf"
+        "git"
+        "herdr"
+        "jujutsu"
+        "notes"
+        "nushell"
+        "opencode"
+        "sesh"
+        "starship"
+        "zsh"
+        "discord"
+        "slack"
+        "agent-browser"
+        "claude"
+        "common"
+        "devenv-init"
+        "docker"
+        "android-studio"
+        "vscode"
+        "zed"
+        "ghostty"
+        "kitty"
+        "neovim"
+        "tmux"
+        "bottles"
+        "qemu"
+        "eden"
+        "gamemode"
+        "heroic"
+        "minecraft"
+        "ps2"
+        "ps3"
+        "retroarch"
+        "steam"
+        "sunshine"
+        "wine"
+        "logitech"
+        "blender"
+        "craft-apps"
+        "davinci-resolve"
+        "ffmpeg"
+        "fladder"
+        "handbrake"
+        "lazyvim"
+        "calibre"
+        "figma"
+        "obsidian"
+        "stylix"
+        "cli-tools"
+        "handy"
+        "localsend"
+        "syncthing"
+        "system-tools"
+      ];
+    }
     {
       name = "mal";
+      features = [
+        "fzf"
+        "git"
+        "nushell"
+        "sesh"
+        "starship"
+        "tmux"
+      ];
       platformModules = false;
       extraModules = [
         (import-tree ../homelab)
@@ -63,6 +149,12 @@ let
     }
     {
       name = "wash";
+      features = [
+        "fzf"
+        "git"
+        "nushell"
+        "starship"
+      ];
       platformModules = false;
       extraModules = [
         ../homelab/_config.nix
@@ -72,6 +164,33 @@ let
     }
     {
       name = "inara";
+      features = [
+        "fzf"
+        "git"
+        "jujutsu"
+        "notes"
+        "nushell"
+        "opencode"
+        "sesh"
+        "starship"
+        "discord"
+        "signal"
+        "slack"
+        "zoom"
+        "claude"
+        "common"
+        "devenv-init"
+        "android-studio"
+        "vscode"
+        "neovim"
+        "tmux"
+        "ffmpeg"
+        "lazyvim"
+        "logseq"
+        "obsidian"
+        "cli-tools"
+        "localsend"
+      ];
       class = "darwin";
     }
   ];

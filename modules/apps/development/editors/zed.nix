@@ -1,8 +1,11 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "zed";
-  category = "development";
-  packages = { pkgs, ... }: [ pkgs.zed-editor ];
-  description = "zed-editor";
-} args
+let
+  module =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.zed-editor ];
+    };
+in
+{
+  flake.modules.nixos.zed = module;
+  flake.modules.darwin.zed = module;
+}

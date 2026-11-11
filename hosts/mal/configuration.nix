@@ -317,17 +317,6 @@ in
     nvidia-vaapi-driver
   ];
 
-  # Server: enable tmux
-  apps.development.tmux.enable = true;
-
-  apps.cli = {
-    fzf.enable = true;
-    git.enable = true;
-    nushell.enable = true;
-    sesh.enable = true;
-    starship.enable = true;
-  };
-
   homelab = {
 
     # Networking and Auth

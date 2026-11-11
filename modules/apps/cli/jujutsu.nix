@@ -1,10 +1,5 @@
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "jujutsu";
-  category = "cli";
-  description = "Jujutsu git";
-  homeConfig =
+{
+  flake.modules.homeManager.jujutsu =
     {
       config,
       pkgs,
@@ -124,4 +119,4 @@ mkModule {
         };
       };
     };
-} args
+}

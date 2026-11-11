@@ -18,55 +18,49 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 **macOS Hosts:**
 - **inara**: macOS system using nix-darwin with Home Manager integration (aarch64-darwin)
 
-### Module Auto-Discovery with import-tree
+### Flake layout: flake-parts + aspects
 
-Modules are auto-discovered using `import-tree` (from `github:vic/import-tree`). This replaces manual import lists — just drop a `.nix` file in the right directory and it's automatically imported.
+`flake.nix` holds the inputs; its outputs are one `flake-parts.lib.mkFlake` call
+over `import-tree ./modules`.
+Every `.nix` file under `modules/` is a **flake-parts module**; paths containing
+`/_` (e.g. `_session.nix`, `_home/`, `_wine-tracks.nix`) are skipped and imported
+by path from a sibling.
 
-**Key convention:** Files prefixed with `_` (e.g., `_defaults.nix`, `_config.nix`) are **excluded** from import-tree auto-discovery. They are imported explicitly in `flake.nix` when needed.
+A file contributes **aspects**: `flake.modules.<class>.<name>`, class being
+`nixos`, `darwin` or `homeManager`. Several files may define the same aspect; the
+definitions merge (every `modules/common/*.nix` adds to `base`). Inside, write a
+plain module — `inputs` comes from the file's flake-parts arguments, not module args.
 
-### Module Structure
+- `modules/flake/hosts.nix` - `mkHost` and the `hosts` list
+- `modules/flake/systems.nix` - systems, `pkgs`/`pkgs-stable`, overlay, packages
+- `modules/common/` - aspect `base` (nixos + darwin), every host gets it
+- `modules/darwin/` - more of darwin `base` (homebrew)
+- `modules/apps/<category>/<name>.nix` - one aspect per app, named `<name>`
+- `modules/nixos/` - desktop and system aspects, one per file (`mango`, `amd-gpu`, `user`, ...)
+- `modules/homelab/` - aspect `homelab` (mal); `facts.nix` is `homelab-facts` (mal, wash)
+- `home/` - Home Manager entry point, imported by `modules/common/home-manager.nix`
+- `hosts/<name>/` - plain NixOS/darwin module per host plus hardware files
+- `overlays/`, `packages/`, `lib/expiring.nix` (used by the overlay)
 
-- `modules/common/` - Base cross-platform modules (auto-discovered via import-tree)
-- `modules/common/_defaults.nix` - Default enable values for common modules (imported explicitly)
-- `modules/nixos/` - NixOS-specific modules (desktop environments, system configs)
-- `modules/darwin/` - macOS-specific modules (homebrew config)
-- `modules/apps/` - Cross-platform application modules organized by category (auto-discovered)
-- `modules/homelab/` - Mal host services (auto-discovered, plus `_config.nix` imported explicitly)
-- `home/` - Minimal Home Manager entry point (default.nix, home.nix, wallpapers)
-- `hosts/` - Host-specific configurations and hardware profiles
-- `hosts/profiles/disko-btrfs.nix` - Shared btrfs disk layout (used by wash)
-- `lib/` - Custom helpers (only `mkModule`)
-- `overlays/` - Nixpkgs overlays (llm-agents, pam-cli, lute-v3, wine921)
-- `packages/` - Custom Nix packages (pam-cli, lute-v3)
+### How hosts are built
 
-### How Modules Are Composed in flake.nix
+`mkHost` builds every host. An entry in `hosts` has `name`, `features` (aspect
+names), optional `class = "darwin"`, `system` and `extraModules` (external flake
+modules). Each host gets, in order: `base`, the `features`,
+`hosts/<name>/configuration.nix`, the Home Manager and sops-nix modules, and
+`extraModules`. A feature pulls in `modules.<class>.<name>` and/or
+`modules.homeManager.<name>` (the latter via `home-manager.sharedModules`);
+naming one that has neither fails evaluation.
 
-One builder, `mkHost` in `flake.nix`, assembles every host — NixOS and macOS
-alike. A host is one entry in the `hosts` list: `name`, plus `class = "darwin"`
-for macOS, `system` for non-x86_64, `platformModules = false` to skip the
-platform tree, and `extraModules` for anything else.
+There are no `specialArgs`. Host files receive `inputs` and `pkgs-stable` as
+module args, so they work in values but not in `imports`. Home Manager modules
+still get `username`, `inputs` and `pkgs-stable` through `extraSpecialArgs`,
+set in `modules/common/home-manager.nix` from `user.userName`; a host sets
+`user.userName` and nothing else.
 
-Each host gets these module layers:
-1. `modules/common/` (auto-discovered) + `_defaults.nix` (explicit)
-2. `modules/apps/` (auto-discovered)
-3. Host-specific config from `hosts/<name>/configuration.nix`
-4. Home Manager + SOPS-nix integration modules (the platform's own variant)
-5. Platform modules: `modules/nixos/` for NixOS or `modules/darwin/` for macOS
-6. `extraModules` from the host entry
-
-Mal and wash set `platformModules = false` — no desktop tree. Mal takes
-`modules/homelab/` instead; wash takes only `_config.nix` for the domains.
-
-**Home Manager wiring is not written per host.** `modules/common/home-manager.nix`
-derives it from `user.userName`: the HM user, `extraSpecialArgs` (`username`,
-`inputs`, `pkgs-stable`) and `backupFileExtension`. A host sets
-`user.userName` and nothing else; an unset one fails an assertion.
-
-### Enabling Apps
-
-Every app is off until a host turns it on by name:
-`apps.<category>.<name>.enable = true;`. There is no category-wide switch, so
-adding a file to `modules/apps/<category>/` never puts it on a host by itself.
+Options with real logic stay options: `desktop.*`, `homelab.*`,
+`apps.audio.reaper.wineTrack`, `maintenance.enable` and friends. Hosts set those
+in their configuration file.
 
 ### Key Dependencies
 
@@ -75,7 +69,8 @@ adding a file to `modules/apps/<category>/` never puts it on a host by itself.
 - **home-manager**: User environment management
 - **nix-darwin**: macOS system configuration
 - **nix-homebrew**: Homebrew integration for macOS
-- **import-tree**: Auto-import module directories
+- **flake-parts**: Flake output framework; `flake.modules` holds the aspects
+- **import-tree** (`denful/import-tree`): Auto-import module directories
 - **disko**: Declarative disk partitioning (used with nixos-anywhere for onboarding)
 - **stylix**: System-wide theming
 - **nvf**: Neovim flake
@@ -224,110 +219,37 @@ Uses SOPS-nix for secret management:
 
 ## Configuration Guidelines
 
-### The mkModule Helper
+### Adding an app
 
-All application and service modules use the single `mkModule` helper (`lib/mkModule.nix`). It replaces the older `mkApp`, `mkHomeModule`, and `mkCategory` helpers.
-
-**CRITICAL: The `args` Pattern**
-
-All modules using `mkModule` **MUST** use the `args@{...}: ... } args` pattern:
+Create `modules/apps/<category>/<name>.nix`, then add `"<name>"` to the
+`features` of each host in `modules/flake/hosts.nix`. Shapes:
 
 ```nix
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  # configuration
-} args
-```
-
-**Without this pattern, you will get the error: "module does not look like a module"**
-
-**Basic app module** (system packages only):
-```nix
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "firefox";
-  category = "browsers";
-  packages = { pkgs, ... }: [ pkgs.firefox ];
-  description = "Mozilla Firefox web browser";
-} args
-```
-
-This creates the option `apps.browsers.firefox.enable`.
-
-**With Home Manager config** (e.g., CLI tools):
-```nix
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  name = "fzf";
-  category = "cli";
-  description = "Fuzzy finder";
-  homeConfig = { config, pkgs, lib, ... }: {
-    programs.fzf = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-  };
-} args
-```
-
-**Platform-specific packages:**
-
-Which platforms a module is for is stated, not inferred:
-
-```nix
-mkModule {
-  name = "steam";
-  category = "gaming";
-  platforms = [ "linux" ];
-  packages = { pkgs, ... }: [ pkgs.steam ];
+# system package, both platforms
+let
+  module = { pkgs, ... }: { environment.systemPackages = [ pkgs.firefox ]; };
+in
+{
+  flake.modules.nixos.firefox = module;
+  flake.modules.darwin.firefox = module;
 }
 ```
 
-A module that exists on both platforms but differs between them branches on
-`platform`, which is `"linux"` or `"darwin"`:
-
 ```nix
-mkModule {
-  name = "ghostty";
-  category = "development";
-  packages =
-    { pkgs, lib, platform, ... }:
-    lib.optionals (platform == "linux") [ pkgs.ghostty ];
-  casks = [ "ghostty" ];   # Darwin only, applied via nix-homebrew
+# Home Manager only, or a platform split: define only the classes that apply
+{
+  flake.modules.nixos.ghostty = { pkgs, ... }: { environment.systemPackages = [ pkgs.ghostty ]; };
+  flake.modules.darwin.ghostty.homebrew.casks = [ "ghostty" ];
+  flake.modules.homeManager.ghostty = { ... }: { programs.ghostty.enable = true; };
 }
 ```
 
-**Mixing stable and unstable packages:**
-```nix
-mkModule {
-  name = "myapp";
-  category = "media";
-  packages = { pkgs, pkgs-stable, ... }: [
-    pkgs.something         # from unstable
-    pkgs-stable.something  # from stable (25.11)
-  ];
-}
-```
-
-**mkModule parameters:**
-- `name` (required) - Module name, used in option path
-- `category` (optional) - Subdirectory category, creates `apps.<category>.<name>.enable`
-- `platforms` (default: both) - `[ "linux" ]`, `[ "darwin" ]`, or both. On a platform not listed, the module defines nothing at all
-- `packages` - System packages. A list, or a function receiving `{ pkgs, pkgs-stable, lib, platform }`
-- `extraConfig` - Additional NixOS/Darwin config. An attrset, or a function receiving the same arguments
-- `homeConfig` - Home Manager config (injected via `home-manager.sharedModules`)
-- `brews` / `casks` - Homebrew shortcuts, applied on Darwin only
-
-### Adding a New Package
-
-1. Create `modules/apps/<category>/<name>.nix` using `mkModule`
-2. The file is auto-discovered by import-tree — no need to edit any imports
-3. Enable it on each host that wants it: `apps.<category>.<name>.enable = true;`
-4. `git add` the new file (flakes only see Git-tracked files)
-5. Rebuild: `sudo nixos-rebuild switch --flake .` or `darwin-rebuild switch --flake .`
+Use `pkgs-stable` as a module argument for the stable (25.11) channel. A
+Linux-only app defines no `darwin` aspect, so it goes only in Linux hosts'
+`features`. An option that decides module *structure* (`options`, `imports`)
+must not read `pkgs`; branch on the class instead (see
+`modules/common/yubikey.nix`). New files must be tracked (`jj st`) before
+evaluation sees them.
 
 ### Enabling Homelab Services
 
@@ -352,19 +274,6 @@ Secrets are automatically decrypted at runtime and made available to services vi
 
 ## Common Errors and Troubleshooting
 
-### "module does not look like a module"
-
-**Cause:** Missing the `args@{...}: ... } args` pattern when using `mkModule`.
-
-**Solution:** Always use this pattern:
-```nix
-args@{ config, pkgs, lib, mkModule, ... }:
-
-mkModule {
-  # configuration
-} args
-```
-
 ### "path does not exist" (in flake evaluation)
 
 **Cause:** File not tracked by Git. Flakes only include Git-tracked files.
@@ -378,7 +287,7 @@ git add path/to/file.nix
 
 **Cause:** Qt applications don't automatically detect GTK icon themes without proper environment variables.
 
-**Solution:** Add to your module's `extraConfig` or `homeConfig`:
+**Solution:** Add to the app's `homeManager` aspect:
 ```nix
 home.sessionVariables = {
   QT_QPA_PLATFORMTHEME = "gtk3";
@@ -413,9 +322,8 @@ nix flake show github:owner/repo
 - `allowBroken = true` set to enable some Linux packages with broken dependencies on macOS
 
 ### Cross-Platform Configuration
-- Platform detection handled inside `mkModule` via `pkgs.stdenv.isLinux`
-- Application modules in `modules/apps/` handle platform differences internally
-- `mkModule` available in all modules via `specialArgs` in flake.nix
+- Platform differences are expressed by which classes an aspect defines
+  (`nixos`, `darwin`, `homeManager`), not by runtime checks
 
 ## Maintenance
 

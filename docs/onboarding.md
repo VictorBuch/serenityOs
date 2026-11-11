@@ -65,20 +65,21 @@ NVMe disk.
    - SD card (Raspberry Pi etc.): `/dev/mmcblk0`
    - Virtio (QEMU/KVM): `/dev/vda`
 
-4. Register the host in `flake.nix` by adding an entry to `hosts`:
+4. Register the host in `modules/flake/hosts.nix` by adding an entry to `hosts`:
 
    ```nix
    {
      name = "mal";
+     features = [ "user" "fzf" "git" ];
      extraModules = [ inputs.disko.nixosModules.disko ];
    }
    ```
 
-   For ARM hosts also set `system = "aarch64-linux";`. macOS hosts set
-   `class = "darwin";`. A server that should not take the desktop module
-   tree sets `platformModules = false;`.
+   `features` names the aspects the host takes (any `flake.modules.nixos.<name>`
+   or `flake.modules.homeManager.<name>`). For ARM hosts also set
+   `system = "aarch64-linux";`. macOS hosts set `class = "darwin";`.
 
-5. `git add hosts/mal flake.nix` (flakes only see Git-tracked files).
+5. `git add hosts/mal` (flakes only see Git-tracked files).
 
 ## Seed the sops age key (hosts that use sops-nix only)
 

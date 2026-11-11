@@ -33,7 +33,7 @@ in
   # modules/nixos/system/audio-performance.nix via musnix.rtirq.
   #
   # musnix ships this package through its own `nixpkgs.overlays` declaration, which this
-  # flake never applies -- flake.nix passes `pkgs` explicitly via specialArgs, so
+  # flake never applies -- modules/flake/hosts.nix passes `pkgs` to the system builder, so
   # module-level overlays are ignored (nix says so at every eval). It is not in nixpkgs
   # under any name, so without this line musnix.rtirq.enable fails with
   # "attribute 'rtirq' missing". Only the package is pulled across; the rest of musnix's

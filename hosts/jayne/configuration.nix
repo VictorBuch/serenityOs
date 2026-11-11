@@ -16,7 +16,17 @@ in
     ./hardware-configuration.nix
   ];
 
-  networking.hostName = "jayne";
+  networking = {
+    hostName = "jayne";
+    networkmanager.enable = true;
+    resolvconf.extraOptions = [
+      "timeout:1"
+      "attempts:2"
+    ];
+    networkmanager.plugins = with pkgs; [
+      networkmanager-openvpn
+    ];
+  };
 
   user.userName = username;
 
@@ -33,10 +43,26 @@ in
     LC_TELEPHONE = "da_DK.UTF-8";
     LC_TIME = "da_DK.UTF-8";
   };
+
   console.keyMap = "dk-latin1";
 
-  # Force Electron apps to use Wayland
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment = {
+
+    # Force Electron apps to use Wayland
+    sessionVariables.NIXOS_OZONE_WL = "1";
+
+    systemPackages = with pkgs; [
+      networkmanager-openvpn
+      openvpn
+      inputs.edit360.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ];
+
+    # U2F key mappings -- deployed to /etc/u2f-mappings
+    # Generated with: pamu2fcfg -o pam://serenityOs -i pam://serenityOs
+    etc."u2f-mappings".text = ''
+      jayne:nOoddQutVofHylA4WNRaidjr+w1mzhNglmLqCOFxh/y0G4KU4691+8AWOmofdOcrdY2a62vljX5aj3Gdn9HmAg==,4neONWeZ0hThNvKlidWWEle3+cUHglUOSlcn5VTcXeO0lPQLXtsyOpq31L4ZLGeRiJVAoQji+/p/RJKumPWzFg==,es256,+presence
+    '';
+  };
 
   hardware.bluetooth = {
     enable = true;
@@ -46,30 +72,37 @@ in
   zramSwap.enable = true;
 
   security.rtkit.enable = true;
-  services.pulseaudio.enable = false;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
+
+  services = {
+    pulseaudio.enable = false;
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+    };
+
+    printing.enable = true;
+    power-profiles-daemon.enable = true;
+    upower.enable = true;
+
+    # VPN: Tailscale (mesh) + NetworkManager OpenVPN plugin (for PIA .ovpn imports)
+    tailscale = {
+      enable = false;
+      useRoutingFeatures = "client";
+      extraUpFlags = [ "--operator=${username}" ];
+    };
   };
-
-  services.printing.enable = true;
-  services.power-profiles-daemon.enable = true;
-  services.upower.enable = true;
-
-  networking.networkmanager.enable = true;
-  networking.resolvconf.extraOptions = [
-    "timeout:1"
-    "attempts:2"
-  ];
   systemd.services.nscd.environment.NSNCD_WORKER_COUNT = "64";
 
-  programs.zsh.enable = true;
+  programs = {
 
-  # Binary compatibility for unpackaged programs
-  programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [ libz ];
+    zsh.enable = true;
+
+    # Binary compatibility for unpackaged programs
+    nix-ld.enable = true;
+    nix-ld.libraries = with pkgs; [ libz ];
+  };
 
   maintenance.enable = true;
 
@@ -143,28 +176,13 @@ in
   # Note: this also switches the CPU governor to "performance" system-wide.
   audio-performance.enable = true;
 
-  # VPN: Tailscale (mesh) + NetworkManager OpenVPN plugin (for PIA .ovpn imports)
-  services.tailscale = {
-    enable = false;
-    useRoutingFeatures = "client";
-    extraUpFlags = [ "--operator=${username}" ];
-  };
-
-  networking.networkmanager.plugins = with pkgs; [
-    networkmanager-openvpn
-  ];
-
-  environment.systemPackages = with pkgs; [
-    networkmanager-openvpn
-    openvpn
-    inputs.edit360.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
-
   # Desktop environments
   desktop = {
-    compositor.mango.enable = false;
-    compositor.hyprland.enable = false;
-    compositor.niri.enable = true;
+    compositor = {
+      mango.enable = false;
+      hyprland.enable = false;
+      niri.enable = true;
+    };
     session = {
       makeDefault = false;
       outputs = [
@@ -195,12 +213,6 @@ in
 
   # YubiKey: PAM U2F sudo + screen lock on removal
   yubikey-security.enable = true;
-
-  # U2F key mappings -- deployed to /etc/u2f-mappings
-  # Generated with: pamu2fcfg -o pam://serenityOs -i pam://serenityOs
-  environment.etc."u2f-mappings".text = ''
-    jayne:nOoddQutVofHylA4WNRaidjr+w1mzhNglmLqCOFxh/y0G4KU4691+8AWOmofdOcrdY2a62vljX5aj3Gdn9HmAg==,4neONWeZ0hThNvKlidWWEle3+cUHglUOSlcn5VTcXeO0lPQLXtsyOpq31L4ZLGeRiJVAoQji+/p/RJKumPWzFg==,es256,+presence
-  '';
 
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml;

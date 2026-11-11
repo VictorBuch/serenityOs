@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SMART summary for every disk -> ntfy. DRY_RUN=1 prints instead of posting.
+# SMART + SnapRAID health -> ntfy, only when something is wrong. DRY_RUN=1 prints instead of posting.
 set -uo pipefail
 NTFY_URL="${NTFY_URL:-http://localhost:8033/mal-smart}"
 
@@ -34,19 +34,29 @@ while read -r dev; do
   fi
 done < <(smartctl --scan -j | jq -r '.devices[].name')
 
-if ((nbad)); then
+# SnapRAID's closing health lines (scrub age, % not scrubbed, errors), not its tables.
+status=$(snapraid status 2>&1)
+array=$(sed -n '/^The oldest block was scrubbed/,$p' <<<"$status")
+[[ -n $array ]] || array=$(tail -n 10 <<<"$status") # status failed early: show why
+grep -qx 'No error detected.' <<<"$array" && array_ok=1 || array_ok=""
+
+if ((nbad)) && [[ -z $array_ok ]]; then
+  title="$nbad of $total disks need attention, SnapRAID reports errors"
+elif ((nbad)); then
   title="$nbad of $total disks need attention"
-  prio=urgent
-  tags=warning
+elif [[ -z $array_ok ]]; then
+  title="SnapRAID reports errors"
 else
-  title="All $total disks healthy"
-  prio=low
-  tags=white_check_mark
+  title="All $total disks and SnapRAID healthy"
 fi
-body="$bad$good"
+body="$bad$good"$'\nSnapRAID:\n'"$array"
 
 if [[ -n ${DRY_RUN:-} ]]; then
-  printf '%s\n\n%s' "$title" "$body"
+  printf '%s\n\n%s\n' "$title" "$body"
   exit 0
 fi
+# Only problems are worth a push.
+((nbad)) || [[ -z $array_ok ]] || exit 0
+prio=urgent
+tags=warning
 curl -fsS -o /dev/null -H "Title: $title" -H "Priority: $prio" -H "Tags: $tags" -d "$body" "$NTFY_URL"

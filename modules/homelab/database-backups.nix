@@ -18,6 +18,8 @@
       # PostgreSQL backup service (for Immich)
       systemd.services.postgres-backup = {
         description = "Backup PostgreSQL databases to mergerFS pool";
+        onSuccess = [ "ntfy-job@%n.service" ];
+        onFailure = [ "ntfy-job@%n.service" ];
         path = with pkgs; [
           postgresql
           gzip

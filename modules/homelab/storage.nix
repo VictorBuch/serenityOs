@@ -7,7 +7,8 @@
       ...
     }:
     let
-      smartTopic = "http://localhost:${toString config.homelab.records.ntfy.port}/mal-smart";
+      ntfy = "http://localhost:${toString config.homelab.records.ntfy.port}";
+      smartTopic = "${ntfy}/mal-smart";
     in
     {
       # Install required packages
@@ -108,9 +109,10 @@
       };
 
       systemd.services.smart-summary = {
-        description = "Send a SMART summary of every disk to ntfy";
+        description = "Push SMART and SnapRAID problems to ntfy";
         path = with pkgs; [
           smartmontools
+          snapraid
           jq
           curl
         ];
@@ -127,8 +129,22 @@
         };
       };
 
+      # Hooked into storage jobs via onSuccess/onFailure; posts only failures and
+      # warnings to ntfy topic mal-jobs. The instance is the job's unit name.
+      systemd.services."ntfy-job@" = {
+        description = "Report %i problems to ntfy";
+        path = with pkgs; [
+          jq
+          curl
+        ];
+        environment.NTFY_URL = "${ntfy}/mal-jobs";
+        script = builtins.readFile ./ntfy-job.sh;
+        serviceConfig.Type = "oneshot";
+      };
+
       # Systemd service for cache mover
       systemd.services.mergerfs-cache-mover = {
+        onFailure = [ "ntfy-job@%n.service" ];
         description = "Move old files from SSD cache to backing storage";
         path = with pkgs; [
           bash
@@ -257,6 +273,12 @@
       # Ensure SnapRAID sync runs AFTER cache mover
       systemd.services.snapraid-sync = {
         after = [ "mergerfs-cache-mover.service" ];
+        onSuccess = [ "ntfy-job@%n.service" ];
+        onFailure = [ "ntfy-job@%n.service" ];
+      };
+      systemd.services.snapraid-scrub = {
+        onSuccess = [ "ntfy-job@%n.service" ];
+        onFailure = [ "ntfy-job@%n.service" ];
       };
 
       # Watchdog service to detect and recover from stale mergerfs mounts

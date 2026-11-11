@@ -54,6 +54,7 @@ let
     {
       name = "jayne";
       features = [
+        "yubikey"
         "audacity"
         "decent-sampler"
         "easyeffects"
@@ -124,8 +125,6 @@ let
         "niri"
         "hyprland"
         "kde"
-        "networking"
-        "nvidia-gpu"
         "user"
         "amd-gpu"
         "security"
@@ -136,6 +135,7 @@ let
     {
       name = "mal";
       features = [
+        "yubikey"
         "fzf"
         "git"
         "nushell"
@@ -169,6 +169,7 @@ let
     {
       name = "inara";
       features = [
+        "yubikey"
         "fzf"
         "git"
         "jujutsu"

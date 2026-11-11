@@ -4,7 +4,7 @@
 }:
 final: prev:
 let
-  expiring = import ../lib/expiring.nix { inherit (prev) lib; };
+  expiring = import ./expiring.nix { inherit (prev) lib; };
 in
 {
   # AI coding agents from numtide/llm-agents.nix

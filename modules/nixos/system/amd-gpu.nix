@@ -8,11 +8,7 @@
     }:
     {
 
-      options = {
-        amd-gpu.enable = lib.mkEnableOption "Enable AMD GPU driver support";
-      };
-
-      config = lib.mkIf config.amd-gpu.enable {
+      config = {
         boot.initrd.kernelModules = [ "amdgpu" ];
 
         # AMD GPU kernel parameters for performance

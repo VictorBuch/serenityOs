@@ -104,8 +104,6 @@ in
     nix-ld.libraries = with pkgs; [ libz ];
   };
 
-  maintenance.enable = true;
-
   # Flake HM modules that define options our modules use. noctalia is not
   # here: home-manager ships its own programs.noctalia module, and importing
   # the flake's as well makes the option collide.
@@ -159,7 +157,7 @@ in
     supportedFilesystems = [ "ntfs" ];
     # Kernel performance optimizations
     kernel.sysctl = {
-      # mkForce because musnix (audio-performance.enable) also defines this key -- with
+      # mkForce because musnix (audio-performance) also defines this key -- with
       # the same value, but boot.kernel.sysctl entries must be uniquely defined, so equal
       # values still collide.
       "vm.swappiness" = lib.mkForce 10;
@@ -168,13 +166,6 @@ in
       "vm.dirty_background_ratio" = 5;
     };
   };
-
-  # AMD GPU
-  amd-gpu.enable = true;
-
-  # Realtime audio tuning for REAPER (musnix on the stock kernel).
-  # Note: this also switches the CPU governor to "performance" system-wide.
-  audio-performance.enable = true;
 
   # Desktop environments
   desktop = {
@@ -210,9 +201,6 @@ in
   };
 
   apps.audio.reaper.wineTrack = "modern";
-
-  # YubiKey: PAM U2F sudo + screen lock on removal
-  yubikey-security.enable = true;
 
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml;

@@ -62,7 +62,6 @@ in
   };
 
   # GC, store optimization, boot cleanup
-  maintenance.enable = true;
 
   # Weekly auto-upgrade, matching mal. Both ends of the pangolin tunnel have to
   # move together: wash upgrading only on manual deploys is what let it jump
@@ -73,9 +72,6 @@ in
   i18n.defaultLocale = "en_DK.UTF-8";
 
   zramSwap.enable = true;
-
-  # No desktop, no yubikey tooling on the VPS
-  yubikey.enable = false;
 
   user.userName = username;
 

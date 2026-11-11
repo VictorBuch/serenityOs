@@ -33,14 +33,14 @@ plain module — `inputs` comes from the file's flake-parts arguments, not modul
 
 - `modules/flake/hosts.nix` - `mkHost` and the `hosts` list
 - `modules/flake/systems.nix` - systems, `pkgs`/`pkgs-stable`, overlay, packages
-- `modules/common/` - aspect `base` (nixos + darwin), every host gets it
+- `modules/common/` - aspect `base` (nixos + darwin), every host gets it; `yubikey.nix` is its own aspect
 - `modules/darwin/` - more of darwin `base` (homebrew)
 - `modules/apps/<category>/<name>.nix` - one aspect per app, named `<name>`
 - `modules/nixos/` - desktop and system aspects, one per file (`mango`, `amd-gpu`, `user`, ...)
 - `modules/homelab/` - aspect `homelab` (mal); `facts.nix` is `homelab-facts` (mal, wash)
 - `home/` - Home Manager entry point, imported by `modules/common/home-manager.nix`
 - `hosts/<name>/` - plain NixOS/darwin module per host plus hardware files
-- `overlays/`, `packages/`, `lib/expiring.nix` (used by the overlay)
+- `overlays/` (with `expiring.nix`, its warn-when-stale helpers), `packages/`
 
 ### How hosts are built
 
@@ -59,7 +59,7 @@ set in `modules/common/home-manager.nix` from `user.userName`; a host sets
 `user.userName` and nothing else.
 
 Options with real logic stay options: `desktop.*`, `homelab.*`,
-`apps.audio.reaper.wineTrack`, `maintenance.enable` and friends. Hosts set those
+`apps.audio.reaper.wineTrack`, `autoupgrade.enable`. Hosts set those
 in their configuration file.
 
 ### Key Dependencies

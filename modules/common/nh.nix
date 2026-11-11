@@ -15,11 +15,7 @@ let
     in
 
     {
-      options = {
-        nh.enable = lib.mkEnableOption "Enables nh";
-      };
-
-      config = lib.mkIf config.nh.enable {
+      config = {
 
         # environment.variables works on both NixOS and Darwin
         environment.variables = {

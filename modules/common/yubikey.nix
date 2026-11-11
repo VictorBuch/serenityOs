@@ -9,9 +9,7 @@ let
       ...
     }:
     {
-      options.yubikey.enable = lib.mkEnableOption "YubiKey support";
-
-      config = lib.mkIf config.yubikey.enable (
+      config = (
         lib.mkMerge (
           [
             {
@@ -47,6 +45,6 @@ let
     };
 in
 {
-  flake.modules.nixos.base = module true;
-  flake.modules.darwin.base = module false;
+  flake.modules.nixos.yubikey = module true;
+  flake.modules.darwin.yubikey = module false;
 }

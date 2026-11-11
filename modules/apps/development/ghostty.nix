@@ -47,7 +47,7 @@ in
     }:
     let
       # Fall back to the generic "monospace" fontconfig alias if fonts.nix is not
-      # in play (bare HM, or a host with fonts.enable = false) so this module
+      # in play (bare HM) so this module
       # still evaluates standalone.
       settings =
         ghosttySettings (lib.attrByPath [ "fonts" "mono" "familyMono" ] "monospace" osConfig)

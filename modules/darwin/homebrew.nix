@@ -8,11 +8,7 @@
     }:
 
     {
-      options.darwin.homebrew = {
-        enable = lib.mkEnableOption "Enable Homebrew package manager";
-      };
-
-      config = lib.mkIf config.darwin.homebrew.enable {
+      config = {
         homebrew = {
           enable = true;
 

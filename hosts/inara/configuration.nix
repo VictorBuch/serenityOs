@@ -50,8 +50,6 @@ in
     sops
   ];
 
-  maintenance.enable = true;
-
   # Register nushell as a permissible login shell (configured via Home Manager)
   environment.shells = [ pkgs.nushell ];
   environment.variables = {

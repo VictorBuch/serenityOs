@@ -26,8 +26,6 @@ let
     {
 
       options = {
-        fonts.enable = lib.mkEnableOption "Enable custom fonts";
-
         fonts.mono = {
           preset = lib.mkOption {
             type = lib.types.enum (builtins.attrNames monoPresets);
@@ -55,7 +53,7 @@ let
         };
       };
 
-      config = lib.mkIf config.fonts.enable {
+      config = {
         fonts.packages = [
           config.fonts.mono.package
         ];

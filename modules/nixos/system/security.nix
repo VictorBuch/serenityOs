@@ -8,9 +8,7 @@
       ...
     }:
     {
-      options.yubikey-security.enable = lib.mkEnableOption "YubiKey PAM U2F and screen lock";
-
-      config = lib.mkIf config.yubikey-security.enable {
+      config = {
         # PAM U2F -- touch YubiKey as a sufficient factor for sudo and login
         security.pam.u2f = {
           enable = true;

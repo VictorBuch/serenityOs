@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# SMART summary for every disk -> ntfy. DRY_RUN=1 prints instead of posting.
+set -uo pipefail
+NTFY_URL="${NTFY_URL:-http://localhost:8033/mal-smart}"
+
+lines=""
+bad=0
+while read -r dev; do
+  line=$(smartctl -j -a "$dev" | jq -r --arg dev "$dev" '
+    [ .ata_smart_attributes.table[]? | select(.id == 5 or .id == 197 or .id == 198) | .raw.value ] as $ata
+    | (.nvme_smart_health_information_log.media_errors // 0) as $merr
+    | ((.smart_status.passed // false) and ($ata | all(. == 0)) and $merr == 0) as $ok
+    | "\(if $ok then "OK " else "BAD" end) \($dev) \(.model_name // "?") | \(.temperature.current // "?")C | \(.power_on_time.hours // "?")h"
+      + (if ($ata | length) > 0 then " | realloc/pending/uncorr \($ata | join("/"))" else "" end)
+      + (if .nvme_smart_health_information_log then " | wear \(.nvme_smart_health_information_log.percentage_used)% media_err \($merr)" else "" end)
+      + " | last test: \(.ata_smart_self_test_log.standard.table[0].status.string // .nvme_self_test_log.table[0].self_test_result.string // "none")"
+  ')
+  [[ $line == BAD* ]] && bad=1
+  lines+="$line"$'\n'
+done < <(smartctl --scan -j | jq -r '.devices[].name')
+
+title="SMART: all disks OK"
+prio=low
+tags=floppy_disk
+if ((bad)); then
+  title="SMART: disk problem on mal"
+  prio=urgent
+  tags=rotating_light
+fi
+
+if [[ -n ${DRY_RUN:-} ]]; then
+  printf '%s\n\n%s' "$title" "$lines"
+  exit 0
+fi
+curl -fsS -H "Title: $title" -H "Priority: $prio" -H "Tags: $tags" -d "$lines" "$NTFY_URL"

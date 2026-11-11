@@ -53,7 +53,6 @@ in
 
   # Enable all maintenance features
   # (GC with 10-day retention, auto-upgrade with lockfile commits, store optimization, boot cleanup)
-  maintenance.enable = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Copenhagen";
@@ -387,7 +386,6 @@ in
     # Other
     crafty.enable = true;
     mealie.enable = true;
-    lab.enable = false;
     lute.enable = true;
     sparkyfitness.enable = true;
     tv-learn.enable = true;

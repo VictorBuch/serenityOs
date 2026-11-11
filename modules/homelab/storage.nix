@@ -6,6 +6,9 @@
       pkgs,
       ...
     }:
+    let
+      smartTopic = "http://localhost:${toString config.homelab.records.ntfy.port}/mal-smart";
+    in
     {
       # Install required packages
       environment.systemPackages = with pkgs; [
@@ -93,6 +96,36 @@
         "d /cache 0755 root root -"
         "d ${config.homelab.filesDir} 2770 root files -"
       ];
+
+      # Short self-test daily 03:00, long on the 1st at 04:00; sleeping disks are skipped.
+      services.smartd = {
+        enable = true;
+        notifications.wall.enable = false;
+        defaults.autodetected = "-a -o on -S on -n standby,q -s (S/../.././03|L/../01/./04) -W 4,45,55 -m <nomailer> -M exec ${pkgs.writeShellScript "smartd-ntfy" ''
+          ${pkgs.curl}/bin/curl -fsS -o /dev/null -H "Title: SMART alert: $SMARTD_DEVICE" \
+            -H "Priority: urgent" -H "Tags: rotating_light" -d "$SMARTD_MESSAGE" ${smartTopic}
+        ''}";
+      };
+
+      systemd.services.smart-summary = {
+        description = "Send a SMART summary of every disk to ntfy";
+        path = with pkgs; [
+          smartmontools
+          jq
+          curl
+        ];
+        environment.NTFY_URL = smartTopic;
+        script = builtins.readFile ./smart-ntfy.sh;
+        serviceConfig.Type = "oneshot";
+      };
+
+      systemd.timers.smart-summary = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "Mon 09:00";
+          Persistent = true;
+        };
+      };
 
       # Systemd service for cache mover
       systemd.services.mergerfs-cache-mover = {

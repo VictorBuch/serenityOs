@@ -109,6 +109,7 @@ in
     {
       environment.systemPackages = with scripts pkgs; [
         pkgs.herdr
+        pkgs.herdr-desktop
         pkgs.jujutsu
         pkgs.cargo
         pkgs.rustc

@@ -11,14 +11,13 @@
     in
 
     {
-      options.homelab.music-assistant.enable = lib.mkEnableOption "Enables the Music Assistant server";
 
       # Runs the upstream image rather than nixpkgs' services.music-assistant.
       # Upstream bakes shared API credentials (app_secrets.json) into its image at
       # build time; the nixpkgs build has none, and Tidal's device-flow login only
       # accepts Tidal-registered "Limited Input Device" clients, so there is no
       # self-supplied client_id that works there.
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.music-assistant = {
           subdomain = "ma";
           port = 8095;

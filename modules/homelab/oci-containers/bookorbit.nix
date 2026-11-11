@@ -16,9 +16,8 @@
       network = "bookorbit-net";
     in
     {
-      options.homelab.bookorbit.enable = lib.mkEnableOption "BookOrbit ebook library";
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.bookorbit = {
           subdomain = "books";
           port = 3060;

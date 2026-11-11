@@ -19,11 +19,8 @@
     in
 
     {
-      options.homelab.reactive-resume = {
-        enable = lib.mkEnableOption "Enables Reactive Resume - open-source resume builder";
-      };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.reactive-resume = {
           subdomain = "cv";
           port = 3200;

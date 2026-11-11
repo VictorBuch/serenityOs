@@ -14,9 +14,8 @@
     in
 
     {
-      options.homelab.wallos.enable = lib.mkEnableOption "Enables the wallos subscription tracker container";
 
-      config = lib.mkIf config.homelab.wallos.enable {
+      config = {
         homelab.records.wallos = {
           subdomain = "subscriptions";
           port = 8282;

@@ -15,9 +15,8 @@
     in
 
     {
-      options.homelab.uptime-kuma.enable = lib.mkEnableOption "Enables the monitoring service uptime kuma";
 
-      config = lib.mkIf config.homelab.uptime-kuma.enable {
+      config = {
         homelab.records.uptime-kuma = {
           subdomain = "status";
           port = 3001;

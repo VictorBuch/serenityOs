@@ -15,11 +15,7 @@
 
     {
 
-      options = {
-        homelab.fileflows.enable = lib.mkEnableOption "Enables FileFlows media processing with NVENC support";
-      };
-
-      config = lib.mkIf config.homelab.fileflows.enable {
+      config = {
         homelab.records.fileflows = {
           port = 19200;
           # OIDC handled by FileFlows itself

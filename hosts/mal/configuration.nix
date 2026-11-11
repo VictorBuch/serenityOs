@@ -291,8 +291,6 @@ in
   ];
 
   homelab = {
-
-    # Networking and Auth
     tailscale = {
       advertiseExitNode = true;
       useRoutingFeatures = "both"; # Act as both client and server
@@ -301,31 +299,14 @@ in
         "--advertise-routes=192.168.0.0/24" # Share your local network
       ];
     };
-    # Pangolin site connector (tunnel to wash)
 
-    # Smart home
-    music-assistant.enable = true;
-
-    # Monitor and Dashboards
-    uptime-kuma.enable = true;
-    wallos.enable = true;
-
-    # Media
-    fileflows.enable = true;
-    bookorbit.enable = true;
-    chaptarr.enable = true;
     qbittorrent-vpn = {
-      enable = true;
       qui.enable = true;
       mousehole.enable = true;
     };
 
-    # NAS: copyparty serves /mnt/pool/files at files.<domain> with its own
-    # accounts and share links; Syncthing keeps subfolders of it two-way
-    # synced with the desktops, which is the part copyparty cannot do.
-
-    # SMB on top of the same trees, for mounting the pool as a network drive
-    # in Dolphin/Finder. LAN and Tailscale only -- never through the tunnel.
+    # Syncthing keeps subfolders of copyparty's /mnt/pool/files two-way synced
+    # with the desktops, which is the part copyparty cannot do.
     filesync = {
       folders = [ "projects" ];
       devices = {
@@ -333,21 +314,7 @@ in
       };
     };
 
-    # Utils
-    # homelab.mam-dynamic-seedbox.enable = true;
-
-    # Other
-    crafty.enable = true;
     tv-learn.enable = true;
-    trek.enable = true;
-
-    # Development
-
-    # Document Management
-    reactive-resume.enable = true;
-    invoice-ninja.enable = true;
-
-    # Sharing
     wannashare = {
       enable = true;
       environmentFile = config.sops.templates."wannashare-env".path;

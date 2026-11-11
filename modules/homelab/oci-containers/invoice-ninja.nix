@@ -68,9 +68,8 @@
     in
 
     {
-      options.homelab.invoice-ninja.enable = lib.mkEnableOption "Enables the Invoice Ninja invoicing application";
 
-      config = lib.mkIf config.homelab.invoice-ninja.enable {
+      config = {
         homelab.records.invoice-ninja = {
           subdomain = "invoice";
           port = 8380;

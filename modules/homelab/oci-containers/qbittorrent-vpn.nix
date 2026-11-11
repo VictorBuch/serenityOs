@@ -15,7 +15,6 @@
 
     {
       options.homelab.qbittorrent-vpn = {
-        enable = lib.mkEnableOption "qBittorrent behind PIA WireGuard via pia-tun";
 
         qui.enable = lib.mkEnableOption "Enable qui modern web UI for qBittorrent";
 
@@ -30,7 +29,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable (
+      config = (
         lib.mkMerge [
           {
             # Host port 8081 is mapped to pia-tun's container:8080.

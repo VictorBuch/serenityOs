@@ -16,11 +16,7 @@
 
     {
 
-      options = {
-        homelab.crafty.enable = lib.mkEnableOption "Enables the crafty minecraft server controller";
-      };
-
-      config = lib.mkIf config.homelab.crafty.enable {
+      config = {
         homelab.records.crafty = {
           port = 8443;
           scheme = "https";

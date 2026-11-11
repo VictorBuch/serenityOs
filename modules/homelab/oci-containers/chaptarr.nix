@@ -14,9 +14,8 @@
       configDir = "/home/${user.userName}/chaptarr";
     in
     {
-      options.homelab.chaptarr.enable = lib.mkEnableOption "Chaptarr ebook and audiobook collection manager";
 
-      config = lib.mkIf cfg.enable {
+      config = {
         # Host networking on the image's default port; the container is not told it.
         homelab.records.chaptarr = {
           port = 8789;

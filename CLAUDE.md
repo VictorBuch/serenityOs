@@ -249,14 +249,14 @@ must not read `pkgs`; branch on the class instead (see
 `modules/common/yubikey.nix`). New files must be tracked (`jj st`) before
 evaluation sees them.
 
-### Enabling Homelab Services
+### Homelab Services
 
-Services are disabled by default. To enable:
-
-1. Edit `hosts/mal/configuration.nix`
-2. Set the service option to true (e.g., `immich.enable = true;`)
-3. Ensure secrets are configured in `secrets/secrets.yaml` if needed
-4. Rebuild: `sudo nixos-rebuild switch --flake .#mal`
+Every file in `modules/homelab/` is part of the `homelab` aspect, which only mal
+uses, so a service runs as soon as its file exists. There are no
+`homelab.<name>.enable` switches: to add a service, create the file; to remove
+one, delete it. Secrets go in `secrets/secrets.yaml`. Modules from other flakes
+(`tv-learn`, `wannashare`) keep their own `enable` options in
+`hosts/mal/configuration.nix`.
 
 ### Working with Secrets (SOPS)
 

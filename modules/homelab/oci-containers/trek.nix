@@ -15,11 +15,8 @@
     in
 
     {
-      options.homelab.trek = {
-        enable = lib.mkEnableOption "Enables TREK travel planner";
-      };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.trek = {
           subdomain = "travel";
           port = 3070;

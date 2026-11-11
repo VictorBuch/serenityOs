@@ -160,8 +160,6 @@ in
   security.pam.services.sudo_local.touchIdAuth = true;
 
   sops = {
-    defaultSopsFile = ../../secrets/secrets.yaml;
-    defaultSopsFormat = "yaml";
     age.keyFile = "/Users/${username}/.config/sops/age/age-yubikey-identity-907e6f67.txt";
     age.sshKeyPaths = [ ]; # Don't try SSH keys, use YubiKey identity only
   };
@@ -173,9 +171,6 @@ in
 
   # Time zone and locale
   time.timeZone = "Europe/Prague";
-
-  # Shells
-  programs.zsh.enable = true;
 
   # State version
   system.stateVersion = 5;

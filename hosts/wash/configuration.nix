@@ -68,9 +68,6 @@ in
   # 3.5 weeks of nixpkgs in one go on 2026-08-27 and break the tunnel.
   autoupgrade.enable = true;
 
-  time.timeZone = "Europe/Copenhagen";
-  i18n.defaultLocale = "en_DK.UTF-8";
-
   zramSwap.enable = true;
 
   user.userName = username;
@@ -107,8 +104,6 @@ in
   # Sops configuration — wash only gets secrets/vps.yaml, not the homelab vault
   sops = {
     defaultSopsFile = ../../secrets/vps.yaml;
-    defaultSopsFormat = "yaml";
-
     # Staged by nixos-anywhere --extra-files before first boot
     age.keyFile = "/var/lib/sops-nix/key.txt";
 

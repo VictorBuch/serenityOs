@@ -50,10 +50,17 @@ let
       }
     );
 
+  shell = [
+    "fzf"
+    "git"
+    "nushell"
+    "starship"
+  ];
+
   hosts = [
     {
       name = "jayne";
-      features = [
+      features = shell ++ [
         "yubikey"
         "audacity"
         "decent-sampler"
@@ -66,15 +73,11 @@ let
         "vlc"
         "yabridge"
         "zen"
-        "fzf"
-        "git"
         "herdr"
         "jujutsu"
         "notes"
-        "nushell"
         "opencode"
         "sesh"
-        "starship"
         "zsh"
         "discord"
         "slack"
@@ -134,13 +137,9 @@ let
     }
     {
       name = "mal";
-      features = [
+      features = shell ++ [
         "yubikey"
-        "fzf"
-        "git"
-        "nushell"
         "sesh"
-        "starship"
         "tmux"
         "user"
         "homelab"
@@ -154,11 +153,7 @@ let
     }
     {
       name = "wash";
-      features = [
-        "fzf"
-        "git"
-        "nushell"
-        "starship"
+      features = shell ++ [
         "user"
         "homelab-facts"
       ];
@@ -168,16 +163,12 @@ let
     }
     {
       name = "inara";
-      features = [
+      features = shell ++ [
         "yubikey"
-        "fzf"
-        "git"
         "jujutsu"
         "notes"
-        "nushell"
         "opencode"
         "sesh"
-        "starship"
         "discord"
         "signal"
         "slack"

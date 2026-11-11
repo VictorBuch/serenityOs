@@ -168,23 +168,13 @@ Total time: ~5 to 15 minutes on mid-spec hardware.
 ## After install
 
 1. Commit the auto-generated `hardware-configuration.nix`:
-   `git add hosts/mal/hardware-configuration.nix && git commit`.
+   `jj commit -m "add mal hardware config"`.
 2. SSH into the new machine as the target user.
 3. Set the user password: `sudo passwd mal`.
 4. Future rebuilds from the machine itself: `sudo nixos-rebuild switch --flake .#mal`.
 
-## Fallback: `install.sh`
-
-`install.sh` is kept for cases where nixos-anywhere isn't an option (no
-network access, no secondary machine, etc.). It expects you to have
-booted into NixOS, partitioned disks by hand, and cloned this repo onto
-the target. See the script itself for details.
-
 ## Notes
 
-- `hosts/profiles/shepherd.nix` is the reusable base profile. Edit it to
-  change defaults for all shepherd-derived hosts (locale, desktop env,
-  base apps).
 - `hosts/profiles/disko-btrfs.nix` defines the shared btrfs layout with
   `@` / `@home` / `@nix` / `@log` subvolumes. Per-host `disko.nix` only
   overrides the device path.

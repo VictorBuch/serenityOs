@@ -11,7 +11,7 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 ### Host Configurations
 
 **NixOS Hosts:**
-- **jayne**: Primary desktop system (KDE Plasma by default, mango also installed)
+- **jayne**: Primary desktop system (niri; mango, Hyprland, GNOME and KDE available but off)
 - **mal**: Homelab server with services and static IP (192.168.0.243)
 - **wash**: Public Netcup VPS running Pangolin (edge for *.victorbuch.com)
 
@@ -213,9 +213,7 @@ Uses SOPS-nix for secret management:
 
 ## Installation
 
-**Primary method:** nixos-anywhere + disko (one command, no manual partitioning). See `docs/onboarding.md` for the full walkthrough.
-
-**Fallback:** `install.sh` for cases where nixos-anywhere isn't an option.
+nixos-anywhere + disko (one command, no manual partitioning). See `docs/onboarding.md` for the full walkthrough.
 
 ## Configuration Guidelines
 
@@ -276,11 +274,11 @@ Secrets are automatically decrypted at runtime and made available to services vi
 
 ### "path does not exist" (in flake evaluation)
 
-**Cause:** File not tracked by Git. Flakes only include Git-tracked files.
+**Cause:** File not tracked. Flakes only include tracked files.
 
 **Solution:**
 ```bash
-git add path/to/file.nix
+jj st   # snapshots the working copy, tracking new files
 ```
 
 ### Missing app icons in Qt/QML applications

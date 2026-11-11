@@ -620,6 +620,32 @@ scratch files (`*.reapeaks`, `*.rpp-bak`, autosaves) are excluded via
 syncing. Sync agents and DAWs fight over open handles. Work locally, or let the
 project settle before switching machines.
 
+## Database Troubleshooting
+
+### PostgreSQL Database Recreation
+When manually dropping PostgreSQL databases/users, NixOS won't automatically recreate them because `postgresql-setup.service` is a oneshot that already ran. To force recreation:
+```bash
+# Force PostgreSQL to re-run setup scripts
+sudo systemctl restart postgresql-setup.service
+# Then restart the dependent service
+sudo systemctl start <service-name>
+```
+This is needed after manually running `DROP DATABASE` or `DROP USER` commands.
+
+### Paperless-ngx Troubleshooting
+If paperless services fail after database reset with "relation auth_user does not exist":
+```bash
+# Run migrations manually first
+sudo paperless-manage migrate
+# Then start the services
+sudo systemctl reset-failed paperless-scheduler
+sudo systemctl start paperless-scheduler
+```
+The `paperless-manage` command is available system-wide for Django management tasks:
+- `sudo paperless-manage migrate` - Run database migrations
+- `sudo paperless-manage createsuperuser` - Create admin user interactively
+- `sudo paperless-manage changepassword <username>` - Reset user password
+
 ## Configuration Files
 
 - **Host config**: `hosts/mal/configuration.nix`

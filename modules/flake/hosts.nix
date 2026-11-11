@@ -15,18 +15,13 @@ let
       class ? "nixos",
       system ? if class == "darwin" then "aarch64-darwin" else "x86_64-linux",
       hostConfig ? ../../hosts/${name}/configuration.nix,
-      platformModules ? true,
       features ? [ ],
       extraModules ? [ ],
     }:
     let
       darwin = class == "darwin";
       builder = if darwin then nix-darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
-      platformTree =
-        if darwin then
-          [ (import-tree ../darwin) ]
-        else
-          nixpkgs.lib.optional platformModules (import-tree ../nixos);
+      platformTree = nixpkgs.lib.optional darwin (import-tree ../darwin);
       inherit (config.flake) modules;
       feature =
         n:
@@ -41,7 +36,12 @@ let
       builder {
         inherit system pkgs;
         specialArgs = {
-          inherit inputs system pkgs pkgs-stable;
+          inherit
+            inputs
+            system
+            pkgs
+            pkgs-stable
+            ;
           inherit (customLib) expiring;
         };
         modules = [
@@ -49,7 +49,12 @@ let
           ../common/_defaults.nix
           { imports = nixpkgs.lib.concatMap feature features; }
           hostConfig
-          (if darwin then inputs.home-manager.darwinModules.default else inputs.home-manager.nixosModules.default)
+          (
+            if darwin then
+              inputs.home-manager.darwinModules.default
+            else
+              inputs.home-manager.nixosModules.default
+          )
           (if darwin then inputs.sops-nix.darwinModules.sops else inputs.sops-nix.nixosModules.sops)
         ]
         ++ platformTree
@@ -125,6 +130,19 @@ let
         "localsend"
         "syncthing"
         "system-tools"
+        "sddm"
+        "mango"
+        "gnome"
+        "niri"
+        "hyprland"
+        "kde"
+        "networking"
+        "nvidia-gpu"
+        "user"
+        "amd-gpu"
+        "security"
+        "envfs"
+        "audio-performance"
       ];
     }
     {
@@ -136,12 +154,11 @@ let
         "sesh"
         "starship"
         "tmux"
+        "user"
       ];
-      platformModules = false;
       extraModules = [
         (import-tree ../homelab)
         ../homelab/_config.nix
-        ../nixos/system/user.nix
         inputs.wannashare.nixosModules.default
         inputs.sparkyfitness.nixosModules.sparkyfitness
         inputs.tv-learn.nixosModules.tv-learn
@@ -154,11 +171,10 @@ let
         "git"
         "nushell"
         "starship"
+        "user"
       ];
-      platformModules = false;
       extraModules = [
         ../homelab/_config.nix
-        ../nixos/system/user.nix
         inputs.disko.nixosModules.disko
       ];
     }

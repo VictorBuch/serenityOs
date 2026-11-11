@@ -127,5 +127,12 @@
   };
 
   outputs =
-    inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree [ ./modules/flake ./modules/apps ]);
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      inputs.import-tree [
+        ./modules/flake
+        ./modules/apps
+        ./modules/nixos
+      ]
+    );
 }

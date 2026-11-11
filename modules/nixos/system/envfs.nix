@@ -1,4 +1,7 @@
-{ ... }:
 {
-  services.envfs.enable = true;
+  flake.modules.nixos.envfs =
+    { ... }:
+    {
+      services.envfs.enable = true;
+    };
 }

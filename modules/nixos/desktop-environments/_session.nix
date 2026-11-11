@@ -137,12 +137,6 @@ in
       default = "dolphin";
       description = "The app that owns inode/directory and answers org.freedesktop.FileManager1.";
     };
-
-    homeModules = lib.mkOption {
-      type = lib.types.listOf lib.types.path;
-      default = [ ];
-      description = "Home Manager modules carrying each enabled Compositor's own config.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -151,7 +145,7 @@ in
 
     services.displayManager.defaultSession = lib.mkIf cfg.makeDefault cfg.name;
 
-    home-manager.sharedModules = [ ./_home/common/session.nix ] ++ cfg.homeModules;
+    home-manager.sharedModules = [ ./_home/common/session.nix ];
 
     desktop.session.autostart = [
       [

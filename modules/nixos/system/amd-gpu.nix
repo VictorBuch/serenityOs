@@ -1,38 +1,41 @@
 {
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-{
+  flake.modules.nixos.amd-gpu =
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
+    {
 
-  options = {
-    amd-gpu.enable = lib.mkEnableOption "Enable AMD GPU driver support";
-  };
+      options = {
+        amd-gpu.enable = lib.mkEnableOption "Enable AMD GPU driver support";
+      };
 
-  config = lib.mkIf config.amd-gpu.enable {
-    boot.initrd.kernelModules = [ "amdgpu" ];
+      config = lib.mkIf config.amd-gpu.enable {
+        boot.initrd.kernelModules = [ "amdgpu" ];
 
-    # AMD GPU kernel parameters for performance
-    boot.kernelParams = [
-      "amdgpu.gpu_recovery=1" # Enable GPU recovery
-    ];
+        # AMD GPU kernel parameters for performance
+        boot.kernelParams = [
+          "amdgpu.gpu_recovery=1" # Enable GPU recovery
+        ];
 
-    # Enable openGL
-    hardware.graphics = {
-      enable = true;
-      enable32Bit = true;
-      extraPackages = with pkgs; [
-        rocmPackages.clr.icd
-        clinfo
-        libva-utils # vainfo for VAAPI verification
-      ];
+        # Enable openGL
+        hardware.graphics = {
+          enable = true;
+          enable32Bit = true;
+          extraPackages = with pkgs; [
+            rocmPackages.clr.icd
+            clinfo
+            libva-utils # vainfo for VAAPI verification
+          ];
+        };
+
+        services.xserver.enable = true;
+        services.xserver.videoDrivers = [ "amdgpu" ];
+
+        # CPU performance governor for AMD systems
+        powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
+      };
     };
-
-    services.xserver.enable = true;
-    services.xserver.videoDrivers = [ "amdgpu" ];
-
-    # CPU performance governor for AMD systems
-    powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
-  };
 }

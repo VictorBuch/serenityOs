@@ -15,16 +15,18 @@ ls -la /cache
 
 ## Cache Mover
 
-Moves files from SSD cache (`/cache`) to cold storage (`/mnt/cold`) when cache exceeds 80%.
+Moves every file not modified for 2 days from SSD cache (`/cache`) to cold
+storage (`/mnt/cold`), regardless of how full the cache is. SnapRAID does not
+cover `/cache`, so this is what gets new data under parity.
 
 ```bash
-# Run cache mover (only moves if >80% full)
+# Run cache mover
 sudo systemctl start mergerfs-cache-mover
 
 # Check logs
 journalctl -u mergerfs-cache-mover
 
-# Force move all cache files regardless of threshold
+# Force move all cache files regardless of age
 sudo rsync -av --remove-source-files /cache/ /mnt/cold/
 ```
 
@@ -95,6 +97,6 @@ sudo snapraid fix
 ## Data Flow
 
 1. New files write to `/mnt/pool` -> land on `/cache` (SSD)
-2. Cache mover moves files >7 days old to `/mnt/cold` when cache >80%
+2. Cache mover moves files not modified for 2 days to `/mnt/cold` (daily, 12:00)
 3. `/mnt/cold` is mergerfs union of `/mnt/disk1` + `/mnt/disk2`
 4. SnapRAID creates parity for disk1/disk2 on `/mnt/parity1`

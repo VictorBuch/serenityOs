@@ -136,71 +136,51 @@
           rsync
           findutils
           gawk
-        ]; # Added gawk for awk command
+        ];
         script = ''
           #!/usr/bin/env bash
           set -euo pipefail
 
           CACHE="/cache"
           BACKING="/mnt/cold"
-          THRESHOLD=80  # Percentage
-          TARGET=60     # Target after cleanup
-          AGE_DAYS=7
+          AGE_DAYS=2
 
+          # SnapRAID only covers the HDDs, so anything on the SSD is unprotected.
+          # Move by age, not by fullness: every file untouched for AGE_DAYS goes
+          # to the cold pool, and the 13:00 sync picks it up the same day.
           usage_pct() { df --output=pcent "''${CACHE}" | tail -1 | tr -dc '0-9'; }
-
-          USAGE=$(usage_pct)
-          if [ "''${USAGE}" -le "''${THRESHOLD}" ]; then
-            echo "Cache at ''${USAGE}%, no cleanup needed."
-            exit 0
-          fi
-
-          SIZE=$(df --output=size -B1 "''${CACHE}" | tail -1 | tr -dc '0-9')
-          USED=$(df --output=used -B1 "''${CACHE}" | tail -1 | tr -dc '0-9')
-          NEED=$(( USED - SIZE * TARGET / 100 ))
-          echo "Cache at ''${USAGE}%, need to free $(numfmt --to=iec "''${NEED}")"
 
           WORK=$(mktemp -d)
           trap 'rm -rf "''${WORK}"' EXIT
 
-          # inode <TAB> atime <TAB> size <TAB> path-relative-to-CACHE
-          find "''${CACHE}" -type f -printf '%i\t%A@\t%s\t%P\n' > "''${WORK}/all"
+          # mtime, not atime: a file that keeps being watched must still get
+          # parity. mtime lives on the inode, so every hardlink of a file (a
+          # torrent in downloads/ and its Sonarr import in tv/) is selected
+          # together -- and rsync only keeps hardlinks between files inside a
+          # *single* transfer, so they all go in the one invocation below.
+          # Anything still being written has a fresh mtime and stays put.
+          find "''${CACHE}" -type f -mmin +$(( AGE_DAYS * 1440 )) -printf '%P\0' \
+            > "''${WORK}/files-from"
 
-          # The unit of movement is the inode, not the path. rsync only preserves
-          # hardlinks between files inside a *single* transfer, so a Sonarr import
-          # (torrent in downloads/ hardlinked to the file in tv/) has to move as
-          # one batch. Moving paths one at a time -- as this did before -- silently
-          # forks every seeded file into two independent copies on the cold pool.
-          # An inode is eligible only when its most recently read link is cold, so
-          # something still being watched keeps all of its links on the SSD.
-          awk -F'\t' -v cutoff="$(date -d "''${AGE_DAYS} days ago" +%s)" '
-            { if (!($1 in newest) || $2 > newest[$1]) newest[$1] = $2; size[$1] = $3 }
-            END { for (i in newest) if (newest[i] < cutoff)
-                    printf "%d\t%d\t%d\n", newest[i], i, size[i] }
-          ' "''${WORK}/all" | sort -n > "''${WORK}/groups"
-
-          # Coldest inodes first, until the batch covers what we need to free.
-          awk -F'\t' -v need="''${NEED}" \
-            '{ total += $3; print $2; if (total >= need) exit }' \
-            "''${WORK}/groups" > "''${WORK}/inodes"
-
-          if [ ! -s "''${WORK}/inodes" ]; then
-            echo "Nothing older than ''${AGE_DAYS} days to move; cache still at ''${USAGE}%."
+          COUNT=$(tr -cd '\0' < "''${WORK}/files-from" | wc -c)
+          if [ "''${COUNT}" -eq 0 ]; then
+            echo "Nothing older than ''${AGE_DAYS} days on cache ($(usage_pct)% used)."
             exit 0
           fi
+          echo "Moving ''${COUNT} paths older than ''${AGE_DAYS} days ($(usage_pct)% used)"
 
-          # Expand the chosen inodes back out to every path that links to them.
-          awk -F'\t' 'NR==FNR { want[$1] = 1; next } ($1 in want) { print $4 }' \
-            "''${WORK}/inodes" "''${WORK}/all" > "''${WORK}/files-from"
+          # Exit 24 = a file vanished mid-transfer (deleted by an app); harmless,
+          # whatever was left behind moves on the next run.
+          rc=0
+          rsync -aH --remove-source-files --from0 --files-from="''${WORK}/files-from" \
+            "''${CACHE}/" "''${BACKING}/" || rc=$?
+          if [ "''${rc}" -ne 0 ] && [ "''${rc}" -ne 24 ]; then
+            echo "rsync failed with exit ''${rc}"
+            exit "''${rc}"
+          fi
 
-          echo "Moving $(wc -l < "''${WORK}/files-from") paths ($(wc -l < "''${WORK}/inodes") inodes)"
-
-          # -H is the whole point: one invocation, hardlinks intact on arrival.
-          rsync -aH --remove-source-files --files-from="''${WORK}/files-from" \
-            "''${CACHE}/" "''${BACKING}/"
-
-          # Clean up empty directories
-          find "''${CACHE}" -type d -empty -delete 2>/dev/null || true
+          # Clean up empty directories, keeping the top-level share dirs.
+          find "''${CACHE}" -mindepth 2 -type d -empty -delete 2>/dev/null || true
 
           echo "Cache cleanup complete. Usage now: $(usage_pct)%"
         '';

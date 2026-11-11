@@ -356,6 +356,15 @@ in
     };
   };
 
+  systemd.services.crowdsec-setup = {
+    startLimitIntervalSec = 120;
+    startLimitBurst = 5;
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+    };
+  };
+
   systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
 
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;

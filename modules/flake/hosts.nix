@@ -148,7 +148,6 @@ let
       extraModules = [
         inputs.wannashare.nixosModules.default
         inputs.sparkyfitness.nixosModules.sparkyfitness
-        inputs.tv-learn.nixosModules.tv-learn
       ];
     }
     {

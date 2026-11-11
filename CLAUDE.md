@@ -255,7 +255,7 @@ Every file in `modules/homelab/` is part of the `homelab` aspect, which only mal
 uses, so a service runs as soon as its file exists. There are no
 `homelab.<name>.enable` switches: to add a service, create the file; to remove
 one, delete it. Secrets go in `secrets/secrets.yaml`. Modules from other flakes
-(`tv-learn`, `wannashare`) keep their own `enable` options in
+(`wannashare`) keep its own `enable` options in
 `hosts/mal/configuration.nix`.
 
 ### Working with Secrets (SOPS)

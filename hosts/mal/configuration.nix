@@ -314,7 +314,6 @@ in
       };
     };
 
-    tv-learn.enable = true;
     wannashare = {
       enable = true;
       environmentFile = config.sops.templates."wannashare-env".path;
@@ -323,10 +322,6 @@ in
     # Service Records for services whose modules come from other flakes and
     # know nothing about records.nix.
     records = {
-      tv-learn = lib.mkIf config.homelab.tv-learn.enable {
-        subdomain = "learn";
-        inherit (config.homelab.tv-learn) port;
-      };
       wannashare-db = lib.mkIf config.homelab.wannashare.enable {
         subdomain = "db-wannashare";
         domain = config.homelab.smoothlessDomain;
@@ -337,11 +332,6 @@ in
       wannashare = lib.mkIf config.homelab.wannashare.enable {
         domain = config.homelab.smoothlessDomain;
         port = 3005;
-        exposure = "public";
-      };
-      suboptimal = {
-        domain = config.homelab.smoothlessDomain;
-        port = 3232;
         exposure = "public";
       };
     };

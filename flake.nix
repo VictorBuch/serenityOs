@@ -105,12 +105,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # tv-learn: immersion language-learning media app (learn.victorbuch.com)
-    tv-learn = {
-      url = "git+https://git.victorbuch.com/VictorBuch/tv-learn";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # edit360: Insta360 360° reframing editor (local checkout, no remote yet)
     edit360 = {
       url = "git+file:///home/jayne/Documents/github/edit-360?ref=main";
@@ -126,6 +120,5 @@
     import-tree.url = "github:denful/import-tree";
   };
 
-  outputs =
-    inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }

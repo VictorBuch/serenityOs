@@ -117,11 +117,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Auto-import module directories (replaces manual import lists)
-    import-tree = {
-      url = "github:vic/import-tree";
-      flake = false;
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+
+    # Auto-import module directories (replaces manual import lists)
+    import-tree.url = "github:denful/import-tree";
   };
 
   outputs =
@@ -130,6 +132,7 @@
       nixpkgs,
       nixpkgs-stable,
       nix-darwin,
+      flake-parts,
       ...
     }@inputs:
     let
@@ -137,7 +140,7 @@
       customLib = import ./lib { inherit (nixpkgs) lib; };
 
       # Auto-import module directories (replaces manual import lists)
-      import-tree = import inputs.import-tree;
+      inherit (inputs) import-tree;
 
       # Import the overlay with inputs
       overlayWithInputs = import ./overlays { inherit inputs; };
@@ -259,39 +262,33 @@
           }) (builtins.filter (host: (host.class or "nixos") == class) hosts)
         );
 
-      # Export custom packages for all systems
-      packages = builtins.listToAttrs (
-        map
-          (system: {
-            name = system;
-            value = import ./packages {
-              pkgs = pkgsFor system;
-            };
-          })
-          [
-            "x86_64-linux"
-            "aarch64-linux"
-            "x86_64-darwin"
-            "aarch64-darwin"
-          ]
-      );
-
     in
-    {
-      # Export packages
-      inherit packages;
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
 
-      # Export overlay
-      overlays.default = overlayWithInputs;
+      perSystem =
+        { system, ... }:
+        {
+          packages = import ./packages { pkgs = pkgsFor system; };
+        };
 
-      checks.x86_64-linux.inara = (pkgsFor "x86_64-linux").writeText "inara" (
-        builtins.unsafeDiscardStringContext self.darwinConfigurations.inara.system.drvPath
-      );
+      flake = {
+        overlays.default = overlayWithInputs;
 
-      checks.x86_64-linux.shell-actions =
-        self.nixosConfigurations.jayne.config.home-manager.users.jayne.home.desktop.shell.check;
+        checks.x86_64-linux.inara = (pkgsFor "x86_64-linux").writeText "inara" (
+          builtins.unsafeDiscardStringContext self.darwinConfigurations.inara.system.drvPath
+        );
 
-      nixosConfigurations = hostsOfClass "nixos";
-      darwinConfigurations = hostsOfClass "darwin";
+        checks.x86_64-linux.shell-actions =
+          self.nixosConfigurations.jayne.config.home-manager.users.jayne.home.desktop.shell.check;
+
+        nixosConfigurations = hostsOfClass "nixos";
+        darwinConfigurations = hostsOfClass "darwin";
+      };
     };
 }

@@ -24,7 +24,6 @@
     in
     {
       options.homelab.romm = {
-        enable = lib.mkEnableOption "RomM ROM manager on romm.<domain>";
 
         libraryDir = lib.mkOption {
           type = lib.types.str;
@@ -56,7 +55,7 @@
         igdb.enable = lib.mkEnableOption "IGDB metadata from the sops secrets romm/igdb_client_id and romm/igdb_client_secret";
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.romm = {
           port = 8093;
           exposure = "public";

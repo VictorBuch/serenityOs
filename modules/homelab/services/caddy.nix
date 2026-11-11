@@ -112,11 +112,8 @@
       };
     in
     {
-      options.homelab.caddy = {
-        enable = lib.mkEnableOption "Enables Caddy reverse proxy";
-      };
 
-      config = lib.mkIf cfg.enable {
+      config = {
 
         sops.secrets."cloudflare/api_token" = { };
         sops.templates."acme-cf.env" = {

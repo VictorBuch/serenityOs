@@ -70,7 +70,6 @@
       # created alongside the directory in storage.nix.
       ###########################################################################
       options.homelab.copyparty = {
-        enable = lib.mkEnableOption "copyparty file server on files.<domain>";
 
         package = lib.mkOption {
           type = lib.types.package;
@@ -112,7 +111,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         # Public on purpose: copyparty authenticates users itself, and its /share
         # links must be reachable by people who have no SSO account. A Pangolin
         # auth screen would stop the recipient before copyparty sees the request.

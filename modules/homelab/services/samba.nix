@@ -122,7 +122,6 @@
       # keeps it that way even if the firewall is ever opened wider.
       ###########################################################################
       options.homelab.samba = {
-        enable = lib.mkEnableOption "Samba file shares for the storage pool (LAN/Tailscale only)";
 
         user = lib.mkOption {
           type = lib.types.str;
@@ -227,7 +226,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         # smbd writes as `user`, so it needs the same group memberships the other
         # writers of these trees have. filesync.nix already adds `files` when it is
         # enabled; deriving the list from the shares keeps SMB working on its own.

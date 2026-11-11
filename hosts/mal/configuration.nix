@@ -294,7 +294,6 @@ in
 
     # Networking and Auth
     tailscale = {
-      enable = true;
       advertiseExitNode = true;
       useRoutingFeatures = "both"; # Act as both client and server
       enableSsh = true; # Allow SSH via Tailscale
@@ -303,33 +302,18 @@ in
       ];
     };
     # Pangolin site connector (tunnel to wash)
-    newt.enable = true;
-    caddy.enable = true;
-    adguard.enable = true;
-    pocket-id = {
-      enable = true;
-    };
 
     # Smart home
-    hyperhdr.enable = true;
     music-assistant.enable = true;
-    home-assistant.enable = true;
 
     # Monitor and Dashboards
-    dashboard = {
-      glance.enable = true;
-    };
     uptime-kuma.enable = true;
     wallos.enable = true;
 
     # Media
     fileflows.enable = true;
-    streaming.enable = true;
-    calibre-web.enable = true;
     bookorbit.enable = true;
     chaptarr.enable = true;
-    romm.enable = true;
-    immich.enable = true;
     qbittorrent-vpn = {
       enable = true;
       qui.enable = true;
@@ -339,13 +323,10 @@ in
     # NAS: copyparty serves /mnt/pool/files at files.<domain> with its own
     # accounts and share links; Syncthing keeps subfolders of it two-way
     # synced with the desktops, which is the part copyparty cannot do.
-    copyparty.enable = true;
 
     # SMB on top of the same trees, for mounting the pool as a network drive
     # in Dolphin/Finder. LAN and Tailscale only -- never through the tunnel.
-    samba.enable = true;
     filesync = {
-      enable = true;
       folders = [ "projects" ];
       devices = {
         jayne = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";
@@ -354,22 +335,15 @@ in
 
     # Utils
     # homelab.mam-dynamic-seedbox.enable = true;
-    it-tools.enable = true;
-    ntfy-sh.enable = true;
 
     # Other
     crafty.enable = true;
-    mealie.enable = true;
-    lute.enable = true;
-    sparkyfitness.enable = true;
     tv-learn.enable = true;
     trek.enable = true;
 
     # Development
-    gitea.enable = true;
 
     # Document Management
-    paperless.enable = true;
     reactive-resume.enable = true;
     invoice-ninja.enable = true;
 

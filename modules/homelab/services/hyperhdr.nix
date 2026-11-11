@@ -15,11 +15,6 @@
     {
 
       options.homelab.hyperhdr = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Whether to enable the HyperHDR ambient lighting service.";
-        };
 
         user = mkOption {
           type = types.str;
@@ -34,7 +29,7 @@
         };
       };
 
-      config = mkIf cfg.enable {
+      config = {
 
         # Create system user and group for HyperHDR
         users.users = {

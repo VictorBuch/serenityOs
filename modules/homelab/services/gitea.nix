@@ -18,9 +18,8 @@
     in
 
     {
-      options.homelab.gitea.enable = lib.mkEnableOption "Enables Gitea git service with Actions runners";
 
-      config = lib.mkIf config.homelab.gitea.enable {
+      config = {
         homelab.records.gitea = {
           subdomain = "git";
           port = 3004;

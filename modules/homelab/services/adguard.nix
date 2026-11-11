@@ -11,9 +11,8 @@
       hl = config.homelab;
     in
     {
-      options.homelab.adguard.enable = lib.mkEnableOption "Enables AdGuard Home DNS filtering service with Unbound";
 
-      config = lib.mkIf config.homelab.adguard.enable {
+      config = {
         homelab.records.adguard = {
           subdomain = "ad";
           port = 3000;

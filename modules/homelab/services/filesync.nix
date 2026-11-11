@@ -27,7 +27,6 @@
       # anything dropped into copyparty's web UI syncs back down.
       ###########################################################################
       options.homelab.filesync = {
-        enable = mkEnableOption "two-way Syncthing sync of shared folders under homelab.filesDir";
 
         devices = mkOption {
           type = types.attrsOf types.str;
@@ -85,11 +84,11 @@
         };
       };
 
-      config = mkIf cfg.enable {
+      config = {
         assertions = [
           {
             assertion = cfg.folders != [ ];
-            message = "homelab.filesync.enable is true but homelab.filesync.folders is empty.";
+            message = "homelab.filesync.folders is empty.";
           }
         ];
 

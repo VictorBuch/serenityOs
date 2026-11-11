@@ -36,15 +36,8 @@
       '';
     in
     {
-      options.homelab.home-assistant = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Whether to enable the Home Assistant service.";
-        };
-      };
 
-      config = mkIf cfg.enable {
+      config = {
 
         # Ensure hass user can access USB serial devices (for Zigbee dongle)
         users.users.hass.extraGroups = [ "dialout" ];

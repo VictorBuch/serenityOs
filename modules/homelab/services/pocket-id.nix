@@ -15,7 +15,6 @@
 
     {
       options.homelab.pocket-id = {
-        enable = lib.mkEnableOption "Enables Pocket ID authentication service";
 
         trustProxy = lib.mkOption {
           type = lib.types.bool;
@@ -30,7 +29,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
 
         # The OIDC IdP itself: must never sit behind an auth screen or
         # Pangolin/qui/fileflows logins deadlock.

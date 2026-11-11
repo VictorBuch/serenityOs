@@ -467,485 +467,461 @@
       '';
     in
     {
-      options = {
-        homelab.dashboard = {
-          homarr.enable = lib.mkEnableOption "Enables the homarr dashboard";
-          glance.enable = lib.mkEnableOption "Enables the glance dashboard";
+      config = {
+        homelab.records.glance = {
+          subdomain = "dashboard";
+          port = 8080;
+          # Glance's Sonarr/Radarr widgets emit poster <img> tags that the
+          # *browser* loads, so they cannot point at the arrs' loopback ports.
+          # These same-origin paths proxy the covers and inject the API key
+          # server-side, which also keeps the keys out of the dashboard HTML.
+          # Paired with `cover-proxy` below; keys come from caddy.nix.
+          caddy.extraRoutes = ''
+            handle_path /covers/sonarr/* {
+              rewrite * /api/v3/mediacover{path}
+              reverse_proxy ${hl.records.sonarr.upstream} {
+                header_up X-Api-Key {env.SONARR_API_KEY}
+              }
+            }
+            handle_path /covers/radarr/* {
+              rewrite * /api/v3/mediacover{path}
+              reverse_proxy ${hl.records.radarr.upstream} {
+                header_up X-Api-Key {env.RADARR_API_KEY}
+              }
+            }
+          '';
         };
-      };
-
-      config = lib.mkMerge [
-        (lib.mkIf config.homelab.dashboard.homarr.enable {
-          systemd.tmpfiles.rules = [
-            "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
-            "d /home/${user.userName}/dashboard/homarr 0770 ${toString user.uid} ${user.group} -"
-          ];
-          virtualisation.oci-containers.containers.homarr = {
-            image = "ghcr.io/ajnart/homarr:latest";
-            autoStart = true;
-            volumes = [
-              "/home/${user.userName}/dashboard/homarr:/app/data/configs"
-              "homarr:/app/public/icons"
-            ];
-            ports = [ "7575:7575" ];
-          };
-        })
-        (lib.mkIf config.homelab.dashboard.glance.enable {
-          homelab.records.glance = {
-            subdomain = "dashboard";
-            port = 8080;
-            # Glance's Sonarr/Radarr widgets emit poster <img> tags that the
-            # *browser* loads, so they cannot point at the arrs' loopback ports.
-            # These same-origin paths proxy the covers and inject the API key
-            # server-side, which also keeps the keys out of the dashboard HTML.
-            # Paired with `cover-proxy` below; keys come from caddy.nix.
-            caddy.extraRoutes = ''
-              handle_path /covers/sonarr/* {
-                rewrite * /api/v3/mediacover{path}
-                reverse_proxy ${hl.records.sonarr.upstream} {
-                  header_up X-Api-Key {env.SONARR_API_KEY}
-                }
-              }
-              handle_path /covers/radarr/* {
-                rewrite * /api/v3/mediacover{path}
-                reverse_proxy ${hl.records.radarr.upstream} {
-                  header_up X-Api-Key {env.RADARR_API_KEY}
-                }
-              }
-            '';
-          };
-          systemd.tmpfiles.rules = [
-            "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
-            "d /home/${user.userName}/dashboard/glance 0770 ${toString user.uid} ${user.group} -"
-          ];
-          services.glance = {
-            enable = true;
-            package = pkgs.glance;
-            openFirewall = true;
-            settings = {
-              server = {
-                host = "127.0.0.1";
-                inherit (hl.records.glance) port;
-              };
-              theme = {
-                backgroundColor = [
-                  240
-                  21
-                  15
-                ];
-                contrastMultiplier = 1.2;
-                primaryColor = [
-                  217
-                  92
-                  83
-                ];
-                positiveColor = [
-                  115
-                  54
-                  76
-                ];
-                negativeColor = [
-                  347
-                  70
-                  65
-                ];
-              };
-              pages = [
-                {
-                  name = "Home";
-                  hideDesktopNavigation = true;
-                  columns = [
-                    {
-                      size = "small";
-                      widgets = [
-                        {
-                          type = "weather";
-                          location = "Brno, Czechia";
-                          units = "metric";
-                          hourFormat = "12h";
-                        }
-                        # Immich Stats Widget
-                        {
-                          type = "custom-api";
-                          title = "Immich Stats";
-                          title-url = hl.records.immich.url;
-                          cache = "5m";
-                          options = {
-                            api-base-url = hl.records.immich.upstream;
-                            key = {
-                              _secret = "/run/credentials/glance.service/immich-api_key";
-                            };
+        systemd.tmpfiles.rules = [
+          "d /home/${user.userName}/dashboard 0770 ${toString user.uid} ${user.group} -"
+          "d /home/${user.userName}/dashboard/glance 0770 ${toString user.uid} ${user.group} -"
+        ];
+        services.glance = {
+          enable = true;
+          package = pkgs.glance;
+          openFirewall = true;
+          settings = {
+            server = {
+              host = "127.0.0.1";
+              inherit (hl.records.glance) port;
+            };
+            theme = {
+              backgroundColor = [
+                240
+                21
+                15
+              ];
+              contrastMultiplier = 1.2;
+              primaryColor = [
+                217
+                92
+                83
+              ];
+              positiveColor = [
+                115
+                54
+                76
+              ];
+              negativeColor = [
+                347
+                70
+                65
+              ];
+            };
+            pages = [
+              {
+                name = "Home";
+                hideDesktopNavigation = true;
+                columns = [
+                  {
+                    size = "small";
+                    widgets = [
+                      {
+                        type = "weather";
+                        location = "Brno, Czechia";
+                        units = "metric";
+                        hourFormat = "12h";
+                      }
+                      # Immich Stats Widget
+                      {
+                        type = "custom-api";
+                        title = "Immich Stats";
+                        title-url = hl.records.immich.url;
+                        cache = "5m";
+                        options = {
+                          api-base-url = hl.records.immich.upstream;
+                          key = {
+                            _secret = "/run/credentials/glance.service/immich-api_key";
                           };
-                          template = ''
-                            {{ $apiKey := .Options.StringOr "key" "" }}
-                            {{ $baseUrl := .Options.StringOr "api-base-url" "" }}
+                        };
+                        template = ''
+                          {{ $apiKey := .Options.StringOr "key" "" }}
+                          {{ $baseUrl := .Options.StringOr "api-base-url" "" }}
 
-                            {{ if or (eq $apiKey "") (eq $baseUrl "") }}
-                              <div class="widget-error-header">
-                                <div class="color-negative size-h3">ERROR</div>
-                                <p>Missing API key or base URL</p>
+                          {{ if or (eq $apiKey "") (eq $baseUrl "") }}
+                            <div class="widget-error-header">
+                              <div class="color-negative size-h3">ERROR</div>
+                              <p>Missing API key or base URL</p>
+                            </div>
+                          {{ else }}
+                            {{ $statsUrl := printf "%s/api/server-info/statistics" $baseUrl }}
+                            {{ $stats := newRequest $statsUrl
+                              | withHeader "Accept" "application/json"
+                              | withHeader "x-api-key" $apiKey
+                              | getResponse }}
+
+                            <div class="flex flex-column gap-10">
+                              <div class="flex gap-10 items-center">
+                                <div class="color-primary">Photos & Videos</div>
                               </div>
-                            {{ else }}
-                              {{ $statsUrl := printf "%s/api/server-info/statistics" $baseUrl }}
-                              {{ $stats := newRequest $statsUrl
-                                | withHeader "Accept" "application/json"
-                                | withHeader "x-api-key" $apiKey
-                                | getResponse }}
 
-                              <div class="flex flex-column gap-10">
-                                <div class="flex gap-10 items-center">
-                                  <div class="color-primary">Photos & Videos</div>
+                              {{ $photos := $stats.JSON.Int "photos" }}
+                              {{ $videos := $stats.JSON.Int "videos" }}
+                              {{ $total := add $photos $videos }}
+
+                              <div class="flex flex-column gap-5">
+                                <div class="flex justify-between">
+                                  <span class="color-subdue">Photos:</span>
+                                  <span class="font-mono">{{ $photos | printf "%d" }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                  <span class="color-subdue">Videos:</span>
+                                  <span class="font-mono">{{ $videos | printf "%d" }}</span>
+                                </div>
+                                <div class="flex justify-between font-bold">
+                                  <span>Total:</span>
+                                  <span class="font-mono">{{ $total | printf "%d" }}</span>
+                                </div>
+                              </div>
+
+                              {{ $usage := $stats.JSON.Int "usage" }}
+                              {{ $usageByUser := $stats.JSON.Int "usageByUser" }}
+
+                              <div class="margin-top-10 padding-top-10 border-top">
+                                <div class="flex gap-10 items-center margin-bottom-10">
+                                  <div class="color-primary">Storage</div>
                                 </div>
 
-                                {{ $photos := $stats.JSON.Int "photos" }}
-                                {{ $videos := $stats.JSON.Int "videos" }}
-                                {{ $total := add $photos $videos }}
+                                {{ $gb := div $usage 1073741824.0 }}
+                                {{ $userGb := div $usageByUser 1073741824.0 }}
 
                                 <div class="flex flex-column gap-5">
                                   <div class="flex justify-between">
-                                    <span class="color-subdue">Photos:</span>
-                                    <span class="font-mono">{{ $photos | printf "%d" }}</span>
+                                    <span class="color-subdue">Total:</span>
+                                    <span class="font-mono">{{ $gb | printf "%.2f GB" }}</span>
                                   </div>
                                   <div class="flex justify-between">
-                                    <span class="color-subdue">Videos:</span>
-                                    <span class="font-mono">{{ $videos | printf "%d" }}</span>
-                                  </div>
-                                  <div class="flex justify-between font-bold">
-                                    <span>Total:</span>
-                                    <span class="font-mono">{{ $total | printf "%d" }}</span>
-                                  </div>
-                                </div>
-
-                                {{ $usage := $stats.JSON.Int "usage" }}
-                                {{ $usageByUser := $stats.JSON.Int "usageByUser" }}
-
-                                <div class="margin-top-10 padding-top-10 border-top">
-                                  <div class="flex gap-10 items-center margin-bottom-10">
-                                    <div class="color-primary">Storage</div>
-                                  </div>
-
-                                  {{ $gb := div $usage 1073741824.0 }}
-                                  {{ $userGb := div $usageByUser 1073741824.0 }}
-
-                                  <div class="flex flex-column gap-5">
-                                    <div class="flex justify-between">
-                                      <span class="color-subdue">Total:</span>
-                                      <span class="font-mono">{{ $gb | printf "%.2f GB" }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                      <span class="color-subdue">By Users:</span>
-                                      <span class="font-mono">{{ $userGb | printf "%.2f GB" }}</span>
-                                    </div>
+                                    <span class="color-subdue">By Users:</span>
+                                    <span class="font-mono">{{ $userGb | printf "%.2f GB" }}</span>
                                   </div>
                                 </div>
                               </div>
-                            {{ end }}
-                          '';
-                        }
-                        # TV Shows Widget
-                        {
-                          type = "custom-api";
-                          title = "TV Shows";
-                          title-url = hl.records.sonarr.url;
-                          cache = "30m";
-                          options = {
-                            service = "sonarr";
-                            type = "upcoming";
-                            size = "medium";
-                            collapse-after = 3;
-                            show-grabbed = false;
-                            timezone = "-04";
-                            interval = 20;
-                            api-base-url = hl.records.sonarr.upstream;
-                            # Posters are fetched by the browser, not by glance, so
-                            # they go through Caddy's same-origin cover proxy
-                            # instead of api-base-url (see the glance record above).
-                            cover-proxy = "/covers/sonarr";
-                            key = {
-                              _secret = "/run/credentials/glance.service/sonarr-api_key";
-                            };
-                            url = hl.records.sonarr.url;
+                            </div>
+                          {{ end }}
+                        '';
+                      }
+                      # TV Shows Widget
+                      {
+                        type = "custom-api";
+                        title = "TV Shows";
+                        title-url = hl.records.sonarr.url;
+                        cache = "30m";
+                        options = {
+                          service = "sonarr";
+                          type = "upcoming";
+                          size = "medium";
+                          collapse-after = 3;
+                          show-grabbed = false;
+                          timezone = "-04";
+                          interval = 20;
+                          api-base-url = hl.records.sonarr.upstream;
+                          # Posters are fetched by the browser, not by glance, so
+                          # they go through Caddy's same-origin cover proxy
+                          # instead of api-base-url (see the glance record above).
+                          cover-proxy = "/covers/sonarr";
+                          key = {
+                            _secret = "/run/credentials/glance.service/sonarr-api_key";
                           };
-                          template = servarrTemplate;
-                        }
-                        # Movies Widget
-                        {
-                          type = "custom-api";
-                          title = "Movies";
-                          title-url = hl.records.radarr.url;
-                          cache = "30m";
-                          options = {
-                            service = "radarr";
-                            type = "upcoming";
-                            size = "medium";
-                            collapse-after = 3;
-                            show-grabbed = false;
-                            timezone = "-04";
-                            interval = 20;
-                            api-base-url = hl.records.radarr.upstream;
-                            # Same as the Sonarr widget above — browser-loaded
-                            # posters go through the same-origin cover proxy.
-                            cover-proxy = "/covers/radarr";
-                            key = {
-                              _secret = "/run/credentials/glance.service/radarr-api_key";
-                            };
-                            url = hl.records.radarr.url;
+                          url = hl.records.sonarr.url;
+                        };
+                        template = servarrTemplate;
+                      }
+                      # Movies Widget
+                      {
+                        type = "custom-api";
+                        title = "Movies";
+                        title-url = hl.records.radarr.url;
+                        cache = "30m";
+                        options = {
+                          service = "radarr";
+                          type = "upcoming";
+                          size = "medium";
+                          collapse-after = 3;
+                          show-grabbed = false;
+                          timezone = "-04";
+                          interval = 20;
+                          api-base-url = hl.records.radarr.upstream;
+                          # Same as the Sonarr widget above — browser-loaded
+                          # posters go through the same-origin cover proxy.
+                          cover-proxy = "/covers/radarr";
+                          key = {
+                            _secret = "/run/credentials/glance.service/radarr-api_key";
                           };
-                          template = servarrTemplate;
-                        }
-                      ];
-                    }
-                    {
-                      size = "full";
-                      widgets = [
-                        {
-                          type = "search";
-                          searchEngine = "duckduckgo";
-                          bangs = [
-                            {
-                              title = "YouTube";
-                              shortcut = "!yt";
-                              url = "https://www.youtube.com/results?search_query={QUERY}";
-                            }
-                          ];
-                        }
-                        # Media Stack Monitor Group
-                        {
-                          type = "monitor";
-                          cache = "1m";
-                          title = "Media Stack";
-                          sites = monitorSites "media";
-                        }
-                        # Infrastructure Monitor Group
-                        {
-                          type = "monitor";
-                          cache = "1m";
-                          title = "Infrastructure";
-                          sites = monitorSites "infrastructure";
-                        }
-                        # Productivity & Tools Monitor Group
-                        {
-                          type = "monitor";
-                          cache = "1m";
-                          title = "Productivity & Tools";
-                          sites = monitorSites "productivity";
-                        }
-                        # Bookmarks
-                        {
-                          type = "bookmarks";
-                          groups = [
-                            {
-                              title = "General";
-                              links = [
-                                {
-                                  title = "Proton Mail";
-                                  url = "https://mail.proton.me/";
-                                }
-                                {
-                                  title = "Amazon";
-                                  url = "https://www.amazon.de/";
-                                }
-                                {
-                                  title = "Github";
-                                  url = "https://github.com/";
-                                }
-                              ];
-                            }
-                            {
-                              title = "Entertainment";
-                              links = [
-                                {
-                                  title = "YouTube";
-                                  url = "https://www.youtube.com/";
-                                }
-                              ];
-                            }
-                          ];
-                        }
-                      ];
-                    }
-                    {
-                      size = "small";
-                      widgets = [
-                        {
-                          type = "server-stats";
-                          servers = [
-                            {
-                              type = "local";
-                              name = "Mal";
-                            }
-                          ];
-                        }
-                        {
-                          type = "releases";
-                          cache = "1d";
-                          repositories = [
-                            "glanceapp/glance"
-                            "immich-app/immich"
-                            "mealie-recipes/mealie"
-                            "steveiliop56/tinyauth"
-                            "pocket-id/pocket-id"
-                            "LazyVim/LazyVim"
-                          ];
-                        }
-                        {
-                          type = "custom-api";
-                          title = "Next Race";
-                          cache = "1d";
-                          url = "https://f1api.dev/api/current/next?timezone=Europe/London";
-                          template = ''
-                            <div class="flex flex-column gap-10">
-                                {{ $session := index (.JSON.Array "race") 0 }}
-                                <p class="size-h5">
-                                  Round {{ .JSON.String "round" }}
+                          url = hl.records.radarr.url;
+                        };
+                        template = servarrTemplate;
+                      }
+                    ];
+                  }
+                  {
+                    size = "full";
+                    widgets = [
+                      {
+                        type = "search";
+                        searchEngine = "duckduckgo";
+                        bangs = [
+                          {
+                            title = "YouTube";
+                            shortcut = "!yt";
+                            url = "https://www.youtube.com/results?search_query={QUERY}";
+                          }
+                        ];
+                      }
+                      # Media Stack Monitor Group
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Media Stack";
+                        sites = monitorSites "media";
+                      }
+                      # Infrastructure Monitor Group
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Infrastructure";
+                        sites = monitorSites "infrastructure";
+                      }
+                      # Productivity & Tools Monitor Group
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Productivity & Tools";
+                        sites = monitorSites "productivity";
+                      }
+                      # Bookmarks
+                      {
+                        type = "bookmarks";
+                        groups = [
+                          {
+                            title = "General";
+                            links = [
+                              {
+                                title = "Proton Mail";
+                                url = "https://mail.proton.me/";
+                              }
+                              {
+                                title = "Amazon";
+                                url = "https://www.amazon.de/";
+                              }
+                              {
+                                title = "Github";
+                                url = "https://github.com/";
+                              }
+                            ];
+                          }
+                          {
+                            title = "Entertainment";
+                            links = [
+                              {
+                                title = "YouTube";
+                                url = "https://www.youtube.com/";
+                              }
+                            ];
+                          }
+                        ];
+                      }
+                    ];
+                  }
+                  {
+                    size = "small";
+                    widgets = [
+                      {
+                        type = "server-stats";
+                        servers = [
+                          {
+                            type = "local";
+                            name = "Mal";
+                          }
+                        ];
+                      }
+                      {
+                        type = "releases";
+                        cache = "1d";
+                        repositories = [
+                          "glanceapp/glance"
+                          "immich-app/immich"
+                          "mealie-recipes/mealie"
+                          "steveiliop56/tinyauth"
+                          "pocket-id/pocket-id"
+                          "LazyVim/LazyVim"
+                        ];
+                      }
+                      {
+                        type = "custom-api";
+                        title = "Next Race";
+                        cache = "1d";
+                        url = "https://f1api.dev/api/current/next?timezone=Europe/London";
+                        template = ''
+                          <div class="flex flex-column gap-10">
+                              {{ $session := index (.JSON.Array "race") 0 }}
+                              <p class="size-h5">
+                                Round {{ .JSON.String "round" }}
+                              </p>
+
+                              <div class="margin-block-4">
+                                <p class="color-highlight">{{ $session.String "raceName" }}</p>
+
+                                <div class="margin-block-10"></div>
+
+                                <!-- Race -->
+                                <p class="color-primary">
+                                  <span>Race</span>
+                                  {{ $raceDate := $session.String "schedule.race.date" }}
+                                  {{ $raceTime := $session.String "schedule.race.time" }}
+                                  {{ $raceDateTime := concat $raceDate "T" $raceTime }}
+                                  {{ $parsedRaceTime := parseLocalTime "2006-01-02T15:04:05" $raceDateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedRaceTime.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedRaceTime | toRelativeTime }}></span>
+                                  {{ end }}
                                 </p>
+                                <p class="size-h5">{{ $raceDate }} at {{ $raceTime }}</p>
 
-                                <div class="margin-block-4">
-                                  <p class="color-highlight">{{ $session.String "raceName" }}</p>
-
-                                  <div class="margin-block-10"></div>
-
-                                  <!-- Race -->
-                                  <p class="color-primary">
-                                    <span>Race</span>
-                                    {{ $raceDate := $session.String "schedule.race.date" }}
-                                    {{ $raceTime := $session.String "schedule.race.time" }}
-                                    {{ $raceDateTime := concat $raceDate "T" $raceTime }}
-                                    {{ $parsedRaceTime := parseLocalTime "2006-01-02T15:04:05" $raceDateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedRaceTime.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedRaceTime | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $raceDate }} at {{ $raceTime }}</p>
-
-                                  <!-- Qualifying -->
-                                  <p class="color-primary">
-                                    <span>Qualifying</span>
-                                    {{ $qualyDate := $session.String "schedule.qualy.date" }}
-                                    {{ $qualyTime := $session.String "schedule.qualy.time" }}
-                                    {{ $qualyDateTime := concat $qualyDate "T" $qualyTime }}
-                                    {{ $parsedQualyTime := parseLocalTime "2006-01-02T15:04:05" $qualyDateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedQualyTime.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedQualyTime | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $qualyDate }} at {{ $qualyTime }}</p>
-
-                                  <!-- Free Practice 1 -->
-                                  <p class="color-primary">
-                                    <span>Free Practice 1</span>
-                                    {{ $fp1Date := $session.String "schedule.fp1.date" }}
-                                    {{ $fp1Time := $session.String "schedule.fp1.time" }}
-                                    {{ $fp1DateTime := concat $fp1Date "T" $fp1Time }}
-                                    {{ $parsedFP1Time := parseLocalTime "2006-01-02T15:04:05" $fp1DateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedFP1Time.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedFP1Time | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $fp1Date }} at {{ $fp1Time }}</p>
-
-                                  <!-- Free Practice 2 -->
-                                  <p class="color-primary">
-                                    <span>Free Practice 2</span>
-                                    {{ $fp2Date := $session.String "schedule.fp2.date" }}
-                                    {{ $fp2Time := $session.String "schedule.fp2.time" }}
-                                    {{ $fp2DateTime := concat $fp2Date "T" $fp2Time }}
-                                    {{ $parsedFP2Time := parseLocalTime "2006-01-02T15:04:05" $fp2DateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedFP2Time.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedFP2Time | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $fp2Date }} at {{ $fp2Time }}</p>
-
-                                  <!-- Free Practice 3 -->
-                                  <p class="color-primary">
-                                    <span>Free Practice 3</span>
-                                    {{ $fp3Date := $session.String "schedule.fp3.date" }}
-                                    {{ $fp3Time := $session.String "schedule.fp3.time" }}
-                                    {{ $fp3DateTime := concat $fp3Date "T" $fp3Time }}
-                                    {{ $parsedFP3Time := parseLocalTime "2006-01-02T15:04:05" $fp3DateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedFP3Time.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedFP3Time | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $fp3Date }} at {{ $fp3Time }}</p>
-
-                                  <!-- Sprint Qualifying - only if date is not null -->
-                                  {{ if and (ne ($session.String "schedule.sprintQualy.date") "null") (ne ($session.String "schedule.sprintQualy.date") "") }}
-                                  <p class="color-primary">
-                                    <span>Sprint Qualifying</span>
-                                    {{ $sprintQualyDate := $session.String "schedule.sprintQualy.date" }}
-                                    {{ $sprintQualyTime := $session.String "schedule.sprintQualy.time" }}
-                                    {{ $sprintQualyDateTime := concat $sprintQualyDate "T" $sprintQualyTime }}
-                                    {{ $parsedSprintQualyTime := parseLocalTime "2006-01-02T15:04:05" $sprintQualyDateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedSprintQualyTime.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedSprintQualyTime | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $sprintQualyDate }} at {{ $sprintQualyTime }}</p>
+                                <!-- Qualifying -->
+                                <p class="color-primary">
+                                  <span>Qualifying</span>
+                                  {{ $qualyDate := $session.String "schedule.qualy.date" }}
+                                  {{ $qualyTime := $session.String "schedule.qualy.time" }}
+                                  {{ $qualyDateTime := concat $qualyDate "T" $qualyTime }}
+                                  {{ $parsedQualyTime := parseLocalTime "2006-01-02T15:04:05" $qualyDateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedQualyTime.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedQualyTime | toRelativeTime }}></span>
                                   {{ end }}
+                                </p>
+                                <p class="size-h5">{{ $qualyDate }} at {{ $qualyTime }}</p>
 
-                                  <!-- Sprint Race - only if date is not null -->
-                                  {{ if and (ne ($session.String "schedule.sprintRace.date") "null") (ne ($session.String "schedule.sprintRace.date") "") }}
-                                  <p class="color-primary">
-                                    <span>Sprint Race</span>
-                                    {{ $sprintRaceDate := $session.String "schedule.sprintRace.date" }}
-                                    {{ $sprintRaceTime := $session.String "schedule.sprintRace.time" }}
-                                    {{ $sprintRaceDateTime := concat $sprintRaceDate "T" $sprintRaceTime }}
-                                    {{ $parsedSprintRaceTime := parseLocalTime "2006-01-02T15:04:05" $sprintRaceDateTime }}
-                                    {{ $now := now }}
-                                    {{ if $parsedSprintRaceTime.Before $now }}
-                                      <span class="color-highlight">Completed</span>
-                                    {{ else }}
-                                      <span class="color-highlight" {{ $parsedSprintRaceTime | toRelativeTime }}></span>
-                                    {{ end }}
-                                  </p>
-                                  <p class="size-h5">{{ $sprintRaceDate }} at {{ $sprintRaceTime }}</p>
+                                <!-- Free Practice 1 -->
+                                <p class="color-primary">
+                                  <span>Free Practice 1</span>
+                                  {{ $fp1Date := $session.String "schedule.fp1.date" }}
+                                  {{ $fp1Time := $session.String "schedule.fp1.time" }}
+                                  {{ $fp1DateTime := concat $fp1Date "T" $fp1Time }}
+                                  {{ $parsedFP1Time := parseLocalTime "2006-01-02T15:04:05" $fp1DateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedFP1Time.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedFP1Time | toRelativeTime }}></span>
                                   {{ end }}
-                                </div>
+                                </p>
+                                <p class="size-h5">{{ $fp1Date }} at {{ $fp1Time }}</p>
 
-                                <ul class="size-h5 attachments">
-                                  <li>{{ $session.String "circuit.country" }}</li>
-                                  <li>{{ $session.String "circuit.city" }}</li>
-                                  <li>{{ $session.String "laps" }} Laps</li>
-                                  <li>{{ $session.String "circuit.circuitName" }}</li>
-                                </ul>
+                                <!-- Free Practice 2 -->
+                                <p class="color-primary">
+                                  <span>Free Practice 2</span>
+                                  {{ $fp2Date := $session.String "schedule.fp2.date" }}
+                                  {{ $fp2Time := $session.String "schedule.fp2.time" }}
+                                  {{ $fp2DateTime := concat $fp2Date "T" $fp2Time }}
+                                  {{ $parsedFP2Time := parseLocalTime "2006-01-02T15:04:05" $fp2DateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedFP2Time.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedFP2Time | toRelativeTime }}></span>
+                                  {{ end }}
+                                </p>
+                                <p class="size-h5">{{ $fp2Date }} at {{ $fp2Time }}</p>
+
+                                <!-- Free Practice 3 -->
+                                <p class="color-primary">
+                                  <span>Free Practice 3</span>
+                                  {{ $fp3Date := $session.String "schedule.fp3.date" }}
+                                  {{ $fp3Time := $session.String "schedule.fp3.time" }}
+                                  {{ $fp3DateTime := concat $fp3Date "T" $fp3Time }}
+                                  {{ $parsedFP3Time := parseLocalTime "2006-01-02T15:04:05" $fp3DateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedFP3Time.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedFP3Time | toRelativeTime }}></span>
+                                  {{ end }}
+                                </p>
+                                <p class="size-h5">{{ $fp3Date }} at {{ $fp3Time }}</p>
+
+                                <!-- Sprint Qualifying - only if date is not null -->
+                                {{ if and (ne ($session.String "schedule.sprintQualy.date") "null") (ne ($session.String "schedule.sprintQualy.date") "") }}
+                                <p class="color-primary">
+                                  <span>Sprint Qualifying</span>
+                                  {{ $sprintQualyDate := $session.String "schedule.sprintQualy.date" }}
+                                  {{ $sprintQualyTime := $session.String "schedule.sprintQualy.time" }}
+                                  {{ $sprintQualyDateTime := concat $sprintQualyDate "T" $sprintQualyTime }}
+                                  {{ $parsedSprintQualyTime := parseLocalTime "2006-01-02T15:04:05" $sprintQualyDateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedSprintQualyTime.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedSprintQualyTime | toRelativeTime }}></span>
+                                  {{ end }}
+                                </p>
+                                <p class="size-h5">{{ $sprintQualyDate }} at {{ $sprintQualyTime }}</p>
+                                {{ end }}
+
+                                <!-- Sprint Race - only if date is not null -->
+                                {{ if and (ne ($session.String "schedule.sprintRace.date") "null") (ne ($session.String "schedule.sprintRace.date") "") }}
+                                <p class="color-primary">
+                                  <span>Sprint Race</span>
+                                  {{ $sprintRaceDate := $session.String "schedule.sprintRace.date" }}
+                                  {{ $sprintRaceTime := $session.String "schedule.sprintRace.time" }}
+                                  {{ $sprintRaceDateTime := concat $sprintRaceDate "T" $sprintRaceTime }}
+                                  {{ $parsedSprintRaceTime := parseLocalTime "2006-01-02T15:04:05" $sprintRaceDateTime }}
+                                  {{ $now := now }}
+                                  {{ if $parsedSprintRaceTime.Before $now }}
+                                    <span class="color-highlight">Completed</span>
+                                  {{ else }}
+                                    <span class="color-highlight" {{ $parsedSprintRaceTime | toRelativeTime }}></span>
+                                  {{ end }}
+                                </p>
+                                <p class="size-h5">{{ $sprintRaceDate }} at {{ $sprintRaceTime }}</p>
+                                {{ end }}
                               </div>
-                          '';
-                        }
-                      ];
-                    }
-                  ];
-                }
-              ];
-            };
-          };
 
-          # Configure glance service credentials
-          systemd.services.glance.serviceConfig.LoadCredential = [
-            "sonarr-api_key:${config.sops.secrets."sonarr_api_key".path}"
-            "radarr-api_key:${config.sops.secrets."radarr_api_key".path}"
-            "immich-api_key:${config.sops.secrets."immich_api_key".path}"
-          ];
-        })
-      ];
+                              <ul class="size-h5 attachments">
+                                <li>{{ $session.String "circuit.country" }}</li>
+                                <li>{{ $session.String "circuit.city" }}</li>
+                                <li>{{ $session.String "laps" }} Laps</li>
+                                <li>{{ $session.String "circuit.circuitName" }}</li>
+                              </ul>
+                            </div>
+                        '';
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
+        };
+
+        # Configure glance service credentials
+        systemd.services.glance.serviceConfig.LoadCredential = [
+          "sonarr-api_key:${config.sops.secrets."sonarr_api_key".path}"
+          "radarr-api_key:${config.sops.secrets."radarr_api_key".path}"
+          "immich-api_key:${config.sops.secrets."immich_api_key".path}"
+        ];
+      };
     };
 }

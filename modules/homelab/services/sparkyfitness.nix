@@ -13,11 +13,8 @@
       record = config.homelab.records.sparkyfitness;
     in
     {
-      options.homelab.sparkyfitness = {
-        enable = lib.mkEnableOption "SparkyFitness nutrition/fitness tracker";
-      };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.sparkyfitness = {
           subdomain = "fitness";
           kind = "static";

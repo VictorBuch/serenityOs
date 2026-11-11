@@ -62,7 +62,6 @@
     in
     {
       options.homelab.calibre-web = {
-        enable = lib.mkEnableOption "Calibre-Web ebook library with OPDS for KOReader";
 
         libraryDir = lib.mkOption {
           type = lib.types.str;
@@ -77,7 +76,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         homelab.records.calibre-web = {
           subdomain = "ebooks";
           port = 8083;

@@ -63,7 +63,6 @@
     in
     {
       options.homelab.newt = {
-        enable = lib.mkEnableOption "Newt tunnel client (Pangolin site connector on wash)";
 
         endpoint = lib.mkOption {
           type = lib.types.str;
@@ -72,7 +71,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
         sops.secrets = {
           "pangolin/newt_id" = { };
           "pangolin/newt_secret" = { };

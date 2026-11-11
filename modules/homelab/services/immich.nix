@@ -14,9 +14,8 @@
       gid = "immich"; # immich group
     in
     {
-      options.homelab.immich.enable = lib.mkEnableOption "Enables Immich photo backup service";
 
-      config = lib.mkIf config.homelab.immich.enable {
+      config = {
         # Mobile app talks to the API directly; Immich has its own auth.
         homelab.records.immich = {
           subdomain = "photos";

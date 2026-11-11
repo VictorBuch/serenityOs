@@ -14,9 +14,8 @@
       user = config.user;
     in
     {
-      options.homelab.paperless.enable = lib.mkEnableOption "Enables Paperless-ngx document management service";
 
-      config = lib.mkIf config.homelab.paperless.enable {
+      config = {
 
         users.users.${user.userName}.extraGroups = [ "paperless" ];
 

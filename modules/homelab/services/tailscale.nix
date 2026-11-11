@@ -13,7 +13,6 @@
     in
     {
       options.homelab.tailscale = {
-        enable = lib.mkEnableOption "Enables Tailscale VPN service";
 
         advertiseExitNode = lib.mkOption {
           type = lib.types.bool;
@@ -91,7 +90,7 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = {
 
         # Enable the Tailscale service
         services.tailscale = {

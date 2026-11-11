@@ -17,11 +17,7 @@
 
     {
 
-      options = {
-        homelab.streaming.enable = lib.mkEnableOption "Enables streaming services";
-      };
-
-      config = lib.mkIf config.homelab.streaming.enable {
+      config = {
         users = {
           groups.multimedia = {
             name = "multimedia";

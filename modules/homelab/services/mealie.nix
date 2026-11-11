@@ -13,9 +13,8 @@
       gid = "mealie";
     in
     {
-      options.homelab.mealie.enable = lib.mkEnableOption "Enables mealie service";
 
-      config = lib.mkIf config.homelab.mealie.enable {
+      config = {
 
         # Create dedicated mealie group
         users.groups.mealie = {

@@ -11,11 +11,13 @@ This is a personal NixOS/nix-darwin configuration repository using Nix flakes. T
 ### Host Configurations
 
 **NixOS Hosts:**
+
 - **jayne**: Primary desktop system (niri; mango, Hyprland, GNOME and KDE available but off)
 - **mal**: Homelab server with services and static IP (192.168.0.243)
-- **wash**: Public Netcup VPS running Pangolin (edge for *.victorbuch.com)
+- **wash**: Public Netcup VPS running Pangolin (edge for \*.victorbuch.com)
 
 **macOS Hosts:**
+
 - **inara**: macOS system using nix-darwin with Home Manager integration (aarch64-darwin)
 
 ### Flake layout: flake-parts + aspects
@@ -85,6 +87,7 @@ in their configuration file.
 ### Building and Switching
 
 **NixOS (Linux hosts):**
+
 ```bash
 # Build and switch to new configuration (tell user to run - requires sudo, DON'T run yourself)
 sudo nixos-rebuild switch --flake .
@@ -98,6 +101,7 @@ sudo nixos-rebuild switch --flake .#mal
 ```
 
 **nix-darwin (macOS hosts):**
+
 ```bash
 # Build and switch to new configuration (tell user to run - requires sudo, DON'T run yourself)
 darwin-rebuild switch --flake .
@@ -110,6 +114,7 @@ darwin-rebuild switch --flake .#inara
 ```
 
 **Common commands (all platforms):**
+
 ```bash
 # Check flake before building
 nix flake check
@@ -127,6 +132,7 @@ darwin-rebuild build --flake .        # macOS
 Project-specific development environments are available in `devenvs/` using [devenv.sh](https://devenv.sh). Each template provides isolated, reproducible environments with automatic activation via direnv.
 
 **Available Templates:**
+
 - `vue-nuxt` - Vue 3 + Nuxt 3 with Node.js 20, pnpm, Vue language server
 - `nodejs` - Node.js 22 with npm/pnpm/yarn/bun (for Next.js, React, Vite, etc.)
 - `flutter` - Flutter + Android SDK + Dart formatter
@@ -135,6 +141,7 @@ Project-specific development environments are available in `devenvs/` using [dev
 - `go` - Go toolchain + gopls + delve + golangci-lint + sqlc
 
 **Quick usage:**
+
 ```bash
 # Copy template to your project directory
 cp -r ~/serenityOs/devenvs/nodejs/* /path/to/your-project/
@@ -152,18 +159,21 @@ See `devenvs/README.md` for detailed documentation.
 The mal host runs as a homelab server with the following characteristics:
 
 **Important Service Management:**
+
 - Docker services run as systemd services with naming: `docker-<serviceName>`
 - **DO NOT** use `docker` or `podman` commands directly - they won't work
 - Use systemd commands: `systemctl status docker-<service>`, `systemctl restart docker-<service>`
 - Services are declared in `modules/homelab/oci-containers/` and `modules/homelab/services/`
 
 **Network Configuration:**
+
 - Static IP: 192.168.0.243
 - Reverse proxy: Caddy (configured in `modules/homelab/services/caddy.nix`)
 - Cloudflare tunnels for external access
 - Authentication: Tinyauth and pocket-id
 
 **Storage Architecture:**
+
 - `/cache` (SSD): Hot storage for new writes
 - `/mnt/disk1`, `/mnt/disk2`: Cold storage HDDs
 - `/mnt/parity1`: SnapRAID parity disk
@@ -173,6 +183,7 @@ The mal host runs as a homelab server with the following characteristics:
 - See `modules/homelab/STORAGE.md` for commands reference
 
 **Maintenance:**
+
 - Automatic updates: weekly (Sunday 02:00) rebuild of `github:VictorBuch/serenityOs` main. Inputs only move when an updated flake.lock is pushed; a manual deploy of unpushed work is reverted on the next run
 - Automatic garbage collection runs weekly
 - SOPS for secret management (secrets in `secrets/secrets.yaml`)
@@ -244,7 +255,7 @@ in
 
 Use `pkgs-stable` as a module argument for the stable (25.11) channel. A
 Linux-only app defines no `darwin` aspect, so it goes only in Linux hosts'
-`features`. An option that decides module *structure* (`options`, `imports`)
+`features`. An option that decides module _structure_ (`options`, `imports`)
 must not read `pkgs`; branch on the class instead (see
 `modules/common/yubikey.nix`). New files must be tracked (`jj st`) before
 evaluation sees them.
@@ -277,6 +288,7 @@ Secrets are automatically decrypted at runtime and made available to services vi
 **Cause:** File not tracked. Flakes only include tracked files.
 
 **Solution:**
+
 ```bash
 jj st   # snapshots the working copy, tracking new files
 ```
@@ -286,6 +298,7 @@ jj st   # snapshots the working copy, tracking new files
 **Cause:** Qt applications don't automatically detect GTK icon themes without proper environment variables.
 
 **Solution:** Add to the app's `homeManager` aspect:
+
 ```nix
 home.sessionVariables = {
   QT_QPA_PLATFORMTHEME = "gtk3";
@@ -301,6 +314,7 @@ Different flakes use different naming conventions for their Home Manager modules
 - Some flakes: `inputs.flake.homeModules.default` (e.g., noctalia)
 
 **Solution:** Check the flake's outputs first:
+
 ```bash
 nix flake show github:owner/repo
 ```
@@ -308,18 +322,21 @@ nix flake show github:owner/repo
 ## Platform-Specific Notes
 
 ### NixOS (jayne, mal, wash)
+
 - All configurations use `nixos-unstable` channel
 - Home Manager integrated via `inputs.home-manager.nixosModules.default`
 - Mal host does NOT use desktop modules (homelab modules instead)
 - SOPS-nix enabled on all hosts for secret management
 
 ### macOS (inara)
+
 - Uses nix-darwin for system configuration
 - Home Manager integrated via `inputs.home-manager.darwinModules.default`
 - Homebrew managed via nix-homebrew (configured in `modules/darwin/`)
 - `allowBroken = true` set to enable some Linux packages with broken dependencies on macOS
 
 ### Cross-Platform Configuration
+
 - Platform differences are expressed by which classes an aspect defines
   (`nixos`, `darwin`, `homeManager`), not by runtime checks
 
@@ -337,6 +354,7 @@ tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
 The skill has specialized workflows that produce better results than ad-hoc answers.
 
 Key routing rules:
+
 - Product ideas, "is this worth building", brainstorming → invoke office-hours
 - Bugs, errors, "why is this broken", 500 errors → invoke investigate
 - Ship, deploy, push, create PR → invoke ship

@@ -154,6 +154,16 @@
             mushroom
             mini-graph-card # graphs like the reference image
             bubble-card
+            # used by the "Glow" and "Control Room" dashboards (card_mod styling comes from uix)
+            button-card
+            layout-card
+            auto-entities
+            apexcharts-card
+            mini-media-player
+            vacuum-card
+            clock-weather-card
+            navbar-card
+            kiosk-mode # Glow hides the HA header (escape hatch: ?disable_km)
           ];
 
           config = {
@@ -188,6 +198,79 @@
                 "sensor.smart_plug_terra_voltage"
                 "switch.server_adaptive_lighting_smart_lamps_adaptive_lighting_smart_lamps"
               ];
+            };
+
+            # Themes used per-view by the YAML dashboards below.
+            frontend.themes = {
+              glow = {
+                # warm night: charcoal glass, amber accent; light colours carry the rest
+                primary-color = "#f5a524";
+                accent-color = "#f5a524";
+                primary-background-color = "#121014";
+                secondary-background-color = "#1b181f";
+                lovelace-background = "radial-gradient(1200px 600px at 10% -10%, #3a2a1a 0%, transparent 60%), radial-gradient(900px 600px at 110% 10%, #1d2340 0%, transparent 55%), #121014";
+                card-background-color = "rgba(30, 27, 34, 0.72)";
+                ha-card-background = "rgba(30, 27, 34, 0.72)";
+                ha-card-border-radius = "24px";
+                ha-card-border-width = "0px";
+                ha-card-box-shadow = "0 8px 30px rgba(0,0,0,0.35)";
+                primary-text-color = "#f4efe9";
+                secondary-text-color = "#a39b93";
+                disabled-text-color = "#5f5a55";
+                divider-color = "rgba(255,255,255,0.06)";
+                state-icon-color = "#a39b93";
+                app-header-background-color = "transparent";
+                app-header-text-color = "#f4efe9";
+                bubble-main-background-color = "rgba(44, 40, 50, 0.85)";
+                bubble-secondary-background-color = "rgba(60, 55, 68, 0.9)";
+                bubble-pop-up-background-color = "rgba(22, 20, 26, 0.92)";
+                bubble-accent-color = "#f5a524";
+                bubble-border-radius = "22px";
+                bubble-button-border-radius = "18px";
+                bubble-icon-background-color = "rgba(255,255,255,0.06)";
+                mush-chip-background = "rgba(44, 40, 50, 0.85)";
+                mush-chip-border-width = "0px";
+              };
+              control-room = {
+                # blueprint: deep navy, cyan grid lines, neon state colours
+                primary-color = "#38d6ff";
+                accent-color = "#38d6ff";
+                primary-background-color = "#070d1a";
+                secondary-background-color = "#0d1729";
+                lovelace-background = "linear-gradient(rgba(56,214,255,0.045) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, rgba(56,214,255,0.045) 1px, transparent 1px) 0 0 / 32px 32px, radial-gradient(1400px 800px at 50% -20%, #12305a 0%, #070d1a 65%)";
+                card-background-color = "rgba(12, 22, 40, 0.82)";
+                ha-card-background = "rgba(12, 22, 40, 0.82)";
+                ha-card-border-radius = "14px";
+                ha-card-border-width = "1px";
+                ha-card-border-color = "rgba(56, 214, 255, 0.14)";
+                ha-card-box-shadow = "none";
+                primary-text-color = "#e3f2ff";
+                secondary-text-color = "#7f98b8";
+                disabled-text-color = "#3d5170";
+                divider-color = "rgba(56,214,255,0.10)";
+                state-icon-color = "#7f98b8";
+                app-header-background-color = "#070d1a";
+                app-header-text-color = "#e3f2ff";
+              };
+            };
+
+            # YAML dashboards; the files live in /var/lib/hass/dashboards/ and are
+            # edited in place (refresh the browser to pick up changes, no restart).
+            lovelace.dashboards = {
+              dashboard-glow = {
+                mode = "yaml";
+                filename = "dashboards/glow.yaml";
+                title = "Glow";
+                icon = "mdi:lightbulb-night";
+                show_in_sidebar = true;
+              };
+              dashboard-control = {
+                mode = "yaml";
+                filename = "dashboards/control-room.yaml";
+                title = "Control Room";
+                icon = "mdi:floor-plan";
+                show_in_sidebar = true;
+              };
             };
 
             # UI-managed automations, scenes, and scripts

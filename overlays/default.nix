@@ -22,6 +22,9 @@ in
   # fee[dB]ack - guitar practice app, wrapped from the upstream AppImage
   feedback-desktop = final.callPackage ../packages/feedback-desktop { };
 
+  # ES-DE, removed from nixpkgs (freeimage); wrapped from the upstream AppImage
+  es-de = final.callPackage ../packages/es-de { };
+
   # storytold Craft apps (PhotoCraft, FilmCraft, ...) from release tarballs; bump with
   # packages/craft-apps/update.sh
   craft-apps = final.callPackage ../packages/craft-apps { };

@@ -102,6 +102,7 @@ let
         "ps2"
         "ps3"
         "retroarch"
+        "es-de"
         "steam"
         "sunshine"
         "wine"

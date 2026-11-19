@@ -274,6 +274,7 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     docker-compose
+    herdr-core
     neovim
     fzf
     lazygit

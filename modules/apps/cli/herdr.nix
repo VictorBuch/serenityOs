@@ -1,106 +1,8 @@
 let
   scripts = pkgs: rec {
-    # herdr-sesh: a sesh-style space picker for herdr (see ./herdr-sesh.sh).
-    herdr-sesh = pkgs.writeShellApplication {
-      name = "herdr-sesh";
-      runtimeInputs = [
-        pkgs.herdr
-        pkgs.jq
-        pkgs.fzf
-        pkgs.figlet
-        pkgs.bash
-        pkgs.zoxide
-        pkgs.coreutils
-        pkgs.gnugrep
-        pkgs.util-linux
-      ];
-      text = builtins.readFile ./herdr-sesh.sh;
-    };
-
-    # jjws: create a jj workspace and register it as a native herdr workspace, so
-    # it shows up in the sidebar instead of being invisible (see ./jjws.sh).
-    jjws = pkgs.writeShellApplication {
-      name = "jjws";
-      runtimeInputs = [
-        pkgs.jujutsu
-        pkgs.git
-        pkgs.herdr
-        pkgs.coreutils
-      ];
-      text = builtins.readFile ./jjws.sh;
-    };
-
-    # adopt-jj-workspaces: sweep orphan jj workspaces (e.g. created by agents via
-    # raw `jj workspace add`) into herdr. Bound to prefix+shift+j below.
-    adopt-jj-workspaces = pkgs.writeShellApplication {
-      name = "adopt-jj-workspaces";
-      runtimeInputs = [
-        pkgs.herdr
-        pkgs.coreutils
-      ];
-      text = builtins.readFile ./adopt-jj-workspaces.sh;
-    };
-
-    # Predefined spaces. Each becomes a fzf entry; selecting it focuses the
-    # existing workspace or builds a fresh one with named tabs, split panes, and
-    # startup commands already running. Mirrors modules/apps/cli/sesh.nix.
-    spaces = [
-      {
-        name = "serenityOs";
-        path = "~/serenityOs";
-        preview = "figlet serenityOs";
-        tabs = [
-          {
-            name = "edit";
-            panes = [ { command = "nvim"; } ];
-          }
-          {
-            name = "jj";
-            panes = [ { command = "jj pull; jjui"; } ];
-          }
-        ];
-      }
-      {
-        name = "web-builder";
-        path = "~/Documents/work/web-builder";
-        preview = "figlet web-builder";
-        tabs = [
-          {
-            name = "edit";
-            panes = [
-              { command = "nvim"; }
-              {
-                command = "ccw";
-                direction = "right";
-                ratio = 0.5;
-              }
-            ];
-          }
-          {
-            name = "jj";
-            panes = [ { command = "jj pull; jjui"; } ];
-          }
-          {
-            name = "dev";
-            panes = [ { command = "pnpm run dev"; } ];
-          }
-        ];
-      }
-      {
-        name = "server mal";
-        path = "~";
-        preview = "figlet ssh mal";
-        command = "ssh serenity@mal";
-      }
-    ];
-
     fortune = pkgs.writeShellScript "herdr-fortune" ''
       ${pkgs.fortune}/bin/fortune -n 50 -s | tr -s '\n\t' ' '
     '';
-
-    seshConfig = (pkgs.formats.json { }).generate "herdr-sesh-spaces.json" {
-      inherit spaces;
-    };
   };
 in
 {
@@ -114,9 +16,6 @@ in
         pkgs.cargo
         pkgs.rustc
         pkgs.jq
-        herdr-sesh
-        jjws
-        adopt-jj-workspaces
       ];
     };
   flake.modules.homeManager.herdr =
@@ -136,33 +35,6 @@ in
       xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
 
       xdg.configFile."herdr-app/keys.json".source = ./herdr-app-keys.json;
-
-      # Run a pane's start command (see herdr-sesh.sh) once, at the first prompt,
-      # as if typed. HERDR_SESH_DONE keeps nested shells from running it again.
-      programs.nushell.extraConfig = ''
-        $env.config.hooks.pre_prompt = ($env.config.hooks.pre_prompt? | default [] | append {||
-          if ($env.HERDR_PANE_ID? | is-empty) or ($env.HERDR_SESH_DONE? | is-not-empty) { return }
-          $env.HERDR_SESH_DONE = 1
-          let f = ($env.XDG_STATE_HOME? | default ($env.HOME | path join .local/state) | path join herdr-sesh cmds $env.HERDR_PANE_ID)
-          let c = ($env.HERDR_SESH_CMD? | default (if ($f | path exists) { open --raw $f } else { "" }))
-          if ($c | is-not-empty) { commandline edit --replace --accept $c }
-        })
-      '';
-      programs.zsh.initContent = lib.mkOrder 1500 ''
-        _herdr_sesh_run() {
-          add-zle-hook-widget -d line-init _herdr_sesh_run
-          [[ -n $HERDR_PANE_ID && -z $HERDR_SESH_DONE ]] || return 0
-          export HERDR_SESH_DONE=1
-          local f=''${XDG_STATE_HOME:-$HOME/.local/state}/herdr-sesh/cmds/$HERDR_PANE_ID
-          local c=''${HERDR_SESH_CMD:-$(cat $f 2>/dev/null)}
-          [[ -n $c ]] || return 0
-          BUFFER=$c
-          zle accept-line
-        }
-        autoload -Uz add-zle-hook-widget
-        zle -N _herdr_sesh_run
-        add-zle-hook-widget line-init _herdr_sesh_run
-      '';
 
       xdg.configFile."herdr/config.toml".source = (pkgs.formats.toml { }).generate "herdr-config.toml" {
         theme = {
@@ -194,15 +66,6 @@ in
           detach = "prefix+d";
           close_workspace = "prefix+ctrl+d";
           command = [
-            # prefix+s: sesh-style space picker (fzf popup).
-            {
-              key = "prefix+s";
-              type = "popup";
-              command = "${herdr-sesh}/bin/herdr-sesh";
-              description = "pick a space (herdr-sesh)";
-              width = "60%";
-              height = "60%";
-            }
             {
               key = "prefix+a";
               type = "plugin_action";
@@ -215,28 +78,11 @@ in
               command = "nathanflurry.jj-workspace.new";
               description = "new jj workspace";
             }
-            # prefix+shift+l: previous workspace (tmux switch-client -l / prefix+L).
-            {
-              key = "prefix+shift+l";
-              type = "shell";
-              command = "${herdr-sesh}/bin/herdr-sesh last";
-              description = "previous workspace";
-            }
             {
               key = "prefix+shift+d";
               type = "plugin_action";
               command = "nathanflurry.jj-workspace.remove";
               description = "remove jj workspace";
-            }
-            # prefix+shift+j: adopt orphan jj workspaces (raw `jj workspace add`,
-            # e.g. from agents) into herdr's sidebar (fzf-less popup).
-            {
-              key = "prefix+shift+j";
-              type = "popup";
-              command = "${adopt-jj-workspaces}/bin/adopt-jj-workspaces";
-              description = "adopt orphan jj workspaces into herdr";
-              width = "60%";
-              height = "40%";
             }
             # vim-herdr-navigation: vim-tmux-navigator equivalent (ctrl+hjkl).
             {

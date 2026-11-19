@@ -11,7 +11,7 @@
 
     window-rule {
         match app-id=r#"^zen"#
-        match app-id=r#"^com\.mitchellh\.ghostty$"#
+        match app-id=r#"^herdr-app$"#
         open-on-workspace "main"
     }
 

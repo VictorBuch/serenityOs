@@ -4,7 +4,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-apps=(photocraft filmcraft lightcraft pdfcraft figcraft vectorcraft effectcraft)
+apps=(photocraft filmcraft lightcraft pdfcraft figcraft vectorcraft effectcraft soundcraft)
 
 out='{}'
 for app in "${apps[@]}"; do

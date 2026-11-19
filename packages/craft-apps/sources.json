@@ -33,5 +33,10 @@
     "version": "0.24.1",
     "assetId": 737404345,
     "hash": "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns="
+  },
+  "soundcraft": {
+    "version": "0.20.1",
+    "assetId": 737505161,
+    "hash": "sha256-yu/PhcTxE4cX1ZLTHOW+B/L8phbsNtY/rGdgze++KKk="
   }
 }

@@ -1,15 +1,8 @@
-let
-  scripts = pkgs: rec {
-    fortune = pkgs.writeShellScript "herdr-fortune" ''
-      ${pkgs.fortune}/bin/fortune -n 50 -s | tr -s '\n\t' ' '
-    '';
-  };
-in
 {
   flake.modules.nixos.herdr =
     { pkgs, ... }:
     {
-      environment.systemPackages = with scripts pkgs; [
+      environment.systemPackages = with pkgs; [
         pkgs.herdr
         pkgs.herdr-desktop
         pkgs.jujutsu
@@ -20,21 +13,23 @@ in
     };
   flake.modules.homeManager.herdr =
     { pkgs, lib, ... }:
-    let
-      inherit (scripts pkgs)
-        seshConfig
-        spaces
-        herdr-sesh
-        adopt-jj-workspaces
-        fortune
-        jjws
-        ;
-    in
     {
-      # Space definitions consumed by herdr-sesh at runtime.
-      xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
-
       xdg.configFile."herdr-app/keys.json".source = ./herdr-app-keys.json;
+      xdg.configFile."herdr-app/layouts/clean.json".source = ./_herdr-app/layouts/clean.json;
+      xdg.configFile."herdr-app/mods" = {
+        source = ./_herdr-app/mods;
+        recursive = true;
+      };
+
+      programs.ssh = {
+        enable = true;
+        enableDefaultConfig = false;
+        matchBlocks."192.168.0.243" = {
+          controlMaster = "auto";
+          controlPath = "~/.ssh/cm-%C";
+          controlPersist = "yes";
+        };
+      };
 
       xdg.configFile."herdr/config.toml".source = (pkgs.formats.toml { }).generate "herdr-config.toml" {
         theme = {
@@ -49,7 +44,7 @@ in
           tab_bar_right = [
             {
               type = "command";
-              command = "${fortune}";
+              command = "${pkgs.writeShellScript "herdr-fortune" "${pkgs.fortune}/bin/fortune -n 50 -s | tr -s '\\n\\t' ' '"}";
               interval_seconds = 1800;
             }
           ];

@@ -16,7 +16,7 @@ binds {
     // Focuses the app's window if it exists, launches it otherwise.
     // -c is a case-insensitive regex on app-id; add -m to pull the window to the current workspace.
     Mod+1                               hotkey-overlay-title="Zen" { spawn "nirirun" "-c" "^zen" "--" "zen-beta"; }
-    Mod+2                               hotkey-overlay-title="Ghostty" { spawn "nirirun" "-c" "ghostty" "--" "ghostty"; }
+    Mod+2                               hotkey-overlay-title="Herdr" { spawn "nirirun" "-c" "herdr" "--" "herdr"; }
     Mod+3                               hotkey-overlay-title="Obsidian" { spawn "nirirun" "-c" "obsidian" "--" "obsidian"; }
     Mod+4                               hotkey-overlay-title="Android Studio" { spawn "nirirun" "-c" "jetbrains-studio" "--" "android-studio"; }
     Mod+5                               hotkey-overlay-title="REAPER" { spawn "nirirun" "-c" "reaper" "--" "reaper"; }

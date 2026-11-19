@@ -135,6 +135,8 @@ in
       # Space definitions consumed by herdr-sesh at runtime.
       xdg.configFile."herdr/sesh-spaces.json".source = seshConfig;
 
+      xdg.configFile."herdr-app/keys.json".source = ./herdr-app-keys.json;
+
       # Run a pane's start command (see herdr-sesh.sh) once, at the first prompt,
       # as if typed. HERDR_SESH_DONE keeps nested shells from running it again.
       programs.nushell.extraConfig = ''

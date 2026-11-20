@@ -63,6 +63,7 @@
     "ctrl-space h": "pane.split:down",
     "ctrl-space space": "tab.prev",
     "ctrl-space ,": "app.settings",
+    "ctrl-space j": "mod.open:jjui-float",
     "ctrl-space d": "window.close",
     "ctrl-space ctrl-d": "space.close"
   },

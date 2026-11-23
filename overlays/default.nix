@@ -84,31 +84,9 @@ in
   yabridge-wine10 = final.callPackage ../packages/yabridge-wine10 { };
   yabridgectl-wine10 = final.yabridge-wine10.yabridgectl;
 
-  # gcc 16 defaults to C++20. Both REAPER extensions only declare a minimum standard
-  # (cxx_std_17 / cxx_std_11), so they now compile as C++20 and break: reapack on
-  # -Werror=deprecated implicit `this` capture, SWS on ContextAction no longer being
-  # an aggregate (deleted copy ctor). Pin both back to C++17.
-  reaper-reapack-extension =
-    expiring.onBump prev.reaper-reapack-extension "1.2.5"
-      "retest the build without the C++17 pin, then delete this override"
-      (
-        prev.reaper-reapack-extension.overrideAttrs (old: {
-          cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_CXX_STANDARD=17" ];
-        })
-      );
-  # patchelf 0.19.2 grows 7.83's .dynstr into a LOAD segment that overlaps the text
-  # segment, and glibc's loader segfaults in dl_main. 0.15.2 (stable) patches it clean.
-  reaper =
-    expiring.when (prev.patchelf.version != "0.19.2" || prev.reaper.version != "7.83")
-      "reaper ${prev.reaper.version} / patchelf ${prev.patchelf.version}: retest reaper with the default patchelf, then delete this override"
-      (
-        prev.reaper.overrideAttrs (old: {
-          nativeBuildInputs = [
-            inputs.nixpkgs-stable.legacyPackages.${final.stdenv.hostPlatform.system}.patchelf
-          ]
-          ++ old.nativeBuildInputs;
-        })
-      );
+  # gcc 16 defaults to C++20. SWS only declares a minimum standard (cxx_std_11), so
+  # it compiles as C++20 and breaks on ContextAction no longer being an aggregate
+  # (deleted copy ctor). Pin it back to C++17.
   reaper-sws-extension =
     expiring.onBump prev.reaper-sws-extension "2.14.0.7"
       "retest the build without the C++17 pin, then delete this override"

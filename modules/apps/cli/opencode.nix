@@ -10,6 +10,8 @@
       programs.opencode = {
         enable = true;
         package = pkgs.opencode;
+        tui = lib.mkForce { };
+        cli.theme.name = "stylix";
 
         # Basic settings (these override/extend defaults)
         settings = {

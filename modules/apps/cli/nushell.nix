@@ -39,6 +39,7 @@ in
 
         nushell = {
           enable = true;
+          loadSessionVariables = false;
           shellAliases = aliases;
           environmentVariables = {
             EDITOR = "nvim";

@@ -24,10 +24,10 @@
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
-        matchBlocks."192.168.0.243" = {
-          controlMaster = "auto";
-          controlPath = "~/.ssh/cm-%C";
-          controlPersist = "yes";
+        settings."192.168.0.243" = {
+          ControlMaster = "auto";
+          ControlPath = "~/.ssh/cm-%C";
+          ControlPersist = "yes";
         };
       };
 

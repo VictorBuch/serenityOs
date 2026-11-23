@@ -12,6 +12,7 @@
         data = "/var/lib/figcraft-server";
         public_url = "wss://${record.subdomain}.${record.domain}/";
         trusted_proxy = "127.0.0.1";
+        max_file_mb = 512;
       };
     in
     {

@@ -73,4 +73,4 @@ let
       };
     };
 in
-lib.mapAttrs mkCraftApp (lib.importJSON ./sources.json)
+lib.mapAttrs mkCraftApp (removeAttrs (lib.importJSON ./sources.json) [ "figcraft-server" ])

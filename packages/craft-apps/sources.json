@@ -33,5 +33,10 @@
     "version": "0.24.1",
     "assetId": 737404345,
     "hash": "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns="
+  },
+  "figcraft-server": {
+    "version": "0.18.1",
+    "assetId": 737531552,
+    "hash": "sha256-IVth5bHdW0tNGTUJt75UAQ47kp3Rm5o6hfsTV1Oc3Ng="
   }
 }

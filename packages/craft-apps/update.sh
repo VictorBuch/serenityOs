@@ -4,11 +4,11 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-apps=(photocraft filmcraft lightcraft pdfcraft figcraft vectorcraft effectcraft)
+apps=(photocraft filmcraft lightcraft pdfcraft figcraft vectorcraft effectcraft figcraft-server)
 
 out='{}'
 for app in "${apps[@]}"; do
-  release=$(curl -fsSL "https://api.github.com/repos/storytold/$app/releases/latest")
+  release=$(curl -fsSL "https://api.github.com/repos/storytold/${app%-server}/releases/latest")
   version=$(jq -r '.tag_name | ltrimstr("v")' <<<"$release")
   asset=$(jq -e --arg n "$app-$version-linux-x86_64.tar.gz" '.assets[] | select(.name == $n)' <<<"$release")
   assetId=$(jq -r .id <<<"$asset")

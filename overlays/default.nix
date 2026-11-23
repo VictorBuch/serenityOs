@@ -28,6 +28,7 @@ in
   # storytold Craft apps (PhotoCraft, FilmCraft, ...) from release tarballs; bump with
   # packages/craft-apps/update.sh
   craft-apps = final.callPackage ../packages/craft-apps { };
+  figcraft-server = final.callPackage ../packages/craft-apps/figcraft-server.nix { };
 
   # Rocksmith .psarc -> fee[dB]ack .feedpak converter, installed alongside the app
   psarc2feedpak = final.callPackage ../packages/psarc2feedpak { };

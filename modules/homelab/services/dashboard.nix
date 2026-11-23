@@ -505,48 +505,35 @@
               inherit (hl.records.glance) port;
             };
             theme = {
-              backgroundColor = [
-                240
-                21
-                15
-              ];
-              contrastMultiplier = 1.2;
-              primaryColor = [
-                217
-                92
-                83
-              ];
-              positiveColor = [
-                115
-                54
-                76
-              ];
-              negativeColor = [
-                347
-                70
-                65
-              ];
+              background-color = "240 21 15";
+              contrast-multiplier = 1.2;
+              primary-color = "217 92 83";
+              positive-color = "115 54 76";
+              negative-color = "347 70 65";
             };
             pages = [
               {
                 name = "Home";
-                hideDesktopNavigation = true;
+                hide-desktop-navigation = true;
                 columns = [
                   {
                     size = "small";
                     widgets = [
                       {
+                        type = "calendar";
+                        first-day-of-week = "monday";
+                      }
+                      {
                         type = "weather";
                         location = "Brno, Czechia";
                         units = "metric";
-                        hourFormat = "12h";
+                        hour-format = "24h";
                       }
-                      # Immich Stats Widget
                       {
                         type = "custom-api";
-                        title = "Immich Stats";
+                        title = "Photos";
                         title-url = hl.records.immich.url;
-                        cache = "5m";
+                        cache = "30m";
                         options = {
                           api-base-url = hl.records.immich.upstream;
                           key = {
@@ -554,121 +541,104 @@
                           };
                         };
                         template = ''
-                          {{ $apiKey := .Options.StringOr "key" "" }}
-                          {{ $baseUrl := .Options.StringOr "api-base-url" "" }}
+                          {{ $base := .Options.StringOr "api-base-url" "" }}
+                          {{ $key := .Options.StringOr "key" "" }}
+                          {{ $stats := newRequest (concat $base "/api/server/statistics") | withHeader "x-api-key" $key | getResponse }}
+                          {{ $disk := newRequest (concat $base "/api/server/storage") | withHeader "x-api-key" $key | getResponse }}
 
-                          {{ if or (eq $apiKey "") (eq $baseUrl "") }}
-                            <div class="widget-error-header">
-                              <div class="color-negative size-h3">ERROR</div>
-                              <p>Missing API key or base URL</p>
-                            </div>
+                          {{ if ne $stats.Response.StatusCode 200 }}
+                            <p class="color-negative">Immich said: {{ $stats.Response.Status }}</p>
+                            <p class="color-subdue size-h6 margin-top-5">Needs an admin API key with server.statistics and server.storage.</p>
                           {{ else }}
-                            {{ $statsUrl := printf "%s/api/server-info/statistics" $baseUrl }}
-                            {{ $stats := newRequest $statsUrl
-                              | withHeader "Accept" "application/json"
-                              | withHeader "x-api-key" $apiKey
-                              | getResponse }}
-
-                            <div class="flex flex-column gap-10">
-                              <div class="flex gap-10 items-center">
-                                <div class="color-primary">Photos & Videos</div>
+                            <div class="flex justify-between text-center">
+                              <div>
+                                <div class="color-highlight size-h3">{{ $stats.JSON.Int "photos" }}</div>
+                                <div class="size-h6">PHOTOS</div>
                               </div>
-
-                              {{ $photos := $stats.JSON.Int "photos" }}
-                              {{ $videos := $stats.JSON.Int "videos" }}
-                              {{ $total := add $photos $videos }}
-
-                              <div class="flex flex-column gap-5">
-                                <div class="flex justify-between">
-                                  <span class="color-subdue">Photos:</span>
-                                  <span class="font-mono">{{ $photos | printf "%d" }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                  <span class="color-subdue">Videos:</span>
-                                  <span class="font-mono">{{ $videos | printf "%d" }}</span>
-                                </div>
-                                <div class="flex justify-between font-bold">
-                                  <span>Total:</span>
-                                  <span class="font-mono">{{ $total | printf "%d" }}</span>
-                                </div>
+                              <div>
+                                <div class="color-highlight size-h3">{{ $stats.JSON.Int "videos" }}</div>
+                                <div class="size-h6">VIDEOS</div>
                               </div>
-
-                              {{ $usage := $stats.JSON.Int "usage" }}
-                              {{ $usageByUser := $stats.JSON.Int "usageByUser" }}
-
-                              <div class="margin-top-10 padding-top-10 border-top">
-                                <div class="flex gap-10 items-center margin-bottom-10">
-                                  <div class="color-primary">Storage</div>
-                                </div>
-
-                                {{ $gb := div $usage 1073741824.0 }}
-                                {{ $userGb := div $usageByUser 1073741824.0 }}
-
-                                <div class="flex flex-column gap-5">
-                                  <div class="flex justify-between">
-                                    <span class="color-subdue">Total:</span>
-                                    <span class="font-mono">{{ $gb | printf "%.2f GB" }}</span>
-                                  </div>
-                                  <div class="flex justify-between">
-                                    <span class="color-subdue">By Users:</span>
-                                    <span class="font-mono">{{ $userGb | printf "%.2f GB" }}</span>
-                                  </div>
-                                </div>
+                              <div>
+                                <div class="color-highlight size-h3">{{ div ($stats.JSON.Int "usage" | toFloat) 1073741824.0 | printf "%.0f" }}</div>
+                                <div class="size-h6">GB</div>
                               </div>
                             </div>
+
+                            {{ if eq $disk.Response.StatusCode 200 }}
+                              <div class="margin-top-15">
+                                <div class="flex justify-between size-h6">
+                                  <span>Disk</span>
+                                  <span>{{ $disk.JSON.String "diskUse" }} / {{ $disk.JSON.String "diskSize" }}</span>
+                                </div>
+                                <div class="progress-bar margin-top-5">
+                                  <div class="progress-value{{ if ge ($disk.JSON.Float "diskUsagePercentage") 85.0 }} progress-value-notice{{ end }}" style="--percent: {{ $disk.JSON.Float "diskUsagePercentage" | printf "%.0f" }}"></div>
+                                </div>
+                              </div>
+                            {{ end }}
+
+                            <ul class="list list-gap-4 margin-top-15">
+                              {{ range $stats.JSON.Array "usageByUser" }}
+                                <li class="flex justify-between">
+                                  <span>{{ .String "userName" }}</span>
+                                  <span class="color-subdue">{{ .Int "photos" }} photos · {{ div (.Int "usage" | toFloat) 1073741824.0 | printf "%.1f" }} GB</span>
+                                </li>
+                              {{ end }}
+                            </ul>
                           {{ end }}
                         '';
                       }
-                      # TV Shows Widget
                       {
-                        type = "custom-api";
-                        title = "TV Shows";
-                        title-url = hl.records.sonarr.url;
-                        cache = "30m";
-                        options = {
-                          service = "sonarr";
-                          type = "upcoming";
-                          size = "medium";
-                          collapse-after = 3;
-                          show-grabbed = false;
-                          timezone = "-04";
-                          interval = 20;
-                          api-base-url = hl.records.sonarr.upstream;
-                          # Posters are fetched by the browser, not by glance, so
-                          # they go through Caddy's same-origin cover proxy
-                          # instead of api-base-url (see the glance record above).
-                          cover-proxy = "/covers/sonarr";
-                          key = {
-                            _secret = "/run/credentials/glance.service/sonarr-api_key";
-                          };
-                          url = hl.records.sonarr.url;
-                        };
-                        template = servarrTemplate;
-                      }
-                      # Movies Widget
-                      {
-                        type = "custom-api";
-                        title = "Movies";
-                        title-url = hl.records.radarr.url;
-                        cache = "30m";
-                        options = {
-                          service = "radarr";
-                          type = "upcoming";
-                          size = "medium";
-                          collapse-after = 3;
-                          show-grabbed = false;
-                          timezone = "-04";
-                          interval = 20;
-                          api-base-url = hl.records.radarr.upstream;
-                          # Same as the Sonarr widget above — browser-loaded
-                          # posters go through the same-origin cover proxy.
-                          cover-proxy = "/covers/radarr";
-                          key = {
-                            _secret = "/run/credentials/glance.service/radarr-api_key";
-                          };
-                          url = hl.records.radarr.url;
-                        };
-                        template = servarrTemplate;
+                        type = "group";
+                        widgets = [
+                          {
+                            type = "custom-api";
+                            title = "TV";
+                            title-url = hl.records.sonarr.url;
+                            cache = "30m";
+                            options = {
+                              service = "sonarr";
+                              type = "upcoming";
+                              size = "medium";
+                              collapse-after = 3;
+                              show-grabbed = false;
+                              timezone = "+01";
+                              interval = 14;
+                              api-base-url = hl.records.sonarr.upstream;
+                              # Posters are fetched by the browser, not by glance, so
+                              # they go through Caddy's same-origin cover proxy
+                              # instead of api-base-url (see the glance record above).
+                              cover-proxy = "/covers/sonarr";
+                              key = {
+                                _secret = "/run/credentials/glance.service/sonarr-api_key";
+                              };
+                              url = hl.records.sonarr.url;
+                            };
+                            template = servarrTemplate;
+                          }
+                          {
+                            type = "custom-api";
+                            title = "Movies";
+                            title-url = hl.records.radarr.url;
+                            cache = "30m";
+                            options = {
+                              service = "radarr";
+                              type = "upcoming";
+                              size = "medium";
+                              collapse-after = 3;
+                              show-grabbed = false;
+                              timezone = "+01";
+                              interval = 30;
+                              api-base-url = hl.records.radarr.upstream;
+                              cover-proxy = "/covers/radarr";
+                              key = {
+                                _secret = "/run/credentials/glance.service/radarr-api_key";
+                              };
+                              url = hl.records.radarr.url;
+                            };
+                            template = servarrTemplate;
+                          }
+                        ];
                       }
                     ];
                   }
@@ -677,67 +647,131 @@
                     widgets = [
                       {
                         type = "search";
-                        searchEngine = "duckduckgo";
+                        search-engine = "duckduckgo";
+                        autofocus = true;
+                        placeholder = "Search, or !yt !gh !np !no !hm";
                         bangs = [
                           {
                             title = "YouTube";
                             shortcut = "!yt";
                             url = "https://www.youtube.com/results?search_query={QUERY}";
                           }
+                          {
+                            title = "GitHub";
+                            shortcut = "!gh";
+                            url = "https://github.com/search?q={QUERY}&type=repositories";
+                          }
+                          {
+                            title = "Nix packages";
+                            shortcut = "!np";
+                            url = "https://search.nixos.org/packages?channel=unstable&query={QUERY}";
+                          }
+                          {
+                            title = "NixOS options";
+                            shortcut = "!no";
+                            url = "https://search.nixos.org/options?channel=unstable&query={QUERY}";
+                          }
+                          {
+                            title = "Home Manager options";
+                            shortcut = "!hm";
+                            url = "https://home-manager-options.extranix.com/?release=master&query={QUERY}";
+                          }
                         ];
                       }
-                      # Media Stack Monitor Group
-                      {
-                        type = "monitor";
-                        cache = "1m";
-                        title = "Media Stack";
-                        sites = monitorSites "media";
-                      }
-                      # Infrastructure Monitor Group
-                      {
-                        type = "monitor";
-                        cache = "1m";
-                        title = "Infrastructure";
-                        sites = monitorSites "infrastructure";
-                      }
-                      # Productivity & Tools Monitor Group
-                      {
-                        type = "monitor";
-                        cache = "1m";
-                        title = "Productivity & Tools";
-                        sites = monitorSites "productivity";
-                      }
-                      # Bookmarks
                       {
                         type = "bookmarks";
                         groups = [
                           {
-                            title = "General";
+                            title = "Everyday";
                             links = [
                               {
                                 title = "Proton Mail";
                                 url = "https://mail.proton.me/";
                               }
                               {
+                                title = "Proton Calendar";
+                                url = "https://calendar.proton.me/";
+                              }
+                              {
                                 title = "Amazon";
                                 url = "https://www.amazon.de/";
                               }
-                              {
-                                title = "Github";
-                                url = "https://github.com/";
-                              }
-                            ];
-                          }
-                          {
-                            title = "Entertainment";
-                            links = [
                               {
                                 title = "YouTube";
                                 url = "https://www.youtube.com/";
                               }
                             ];
                           }
+                          {
+                            title = "Code";
+                            links = [
+                              {
+                                title = "GitHub";
+                                url = "https://github.com/";
+                              }
+                              {
+                                title = "Gitea";
+                                url = hl.records.gitea.url;
+                              }
+                              {
+                                title = "WannaShare";
+                                url = "https://git.victorbuch.com/Smoothless/WannaShare";
+                              }
+                              {
+                                title = "serenityOs";
+                                url = "https://github.com/VictorBuch/serenityOs";
+                              }
+                            ];
+                          }
+                          {
+                            title = "Nix";
+                            links = [
+                              {
+                                title = "Packages & options";
+                                url = "https://search.nixos.org/";
+                              }
+                              {
+                                title = "Home Manager options";
+                                url = "https://home-manager-options.extranix.com/";
+                              }
+                              {
+                                title = "Noogle";
+                                url = "https://noogle.dev/";
+                              }
+                            ];
+                          }
+                          {
+                            title = "Guitar";
+                            links = [
+                              {
+                                title = "TrueFire";
+                                url = "https://truefire.com/";
+                              }
+                              {
+                                title = "FeedForge";
+                                url = "https://feedforge.org/";
+                              }
+                            ];
+                          }
                         ];
+                      }
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Media";
+                        sites = monitorSites "media";
+                      }
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Productivity & Tools";
+                        sites = monitorSites "productivity";
+                      }
+                      {
+                        type = "monitor";
+                        cache = "1m";
+                        title = "Infrastructure";
+                        sites = monitorSites "infrastructure";
                       }
                     ];
                   }
@@ -754,159 +788,81 @@
                         ];
                       }
                       {
+                        type = "dns-stats";
+                        title = "DNS";
+                        title-url = hl.records.adguard.url;
+                        service = "adguard";
+                        url = hl.records.adguard.upstream;
+                        hour-format = "24h";
+                      }
+                      {
+                        type = "custom-api";
+                        title = "Formula 1";
+                        cache = "1h";
+                        url = "https://api.jolpi.ca/ergast/f1/current/next.json";
+                        template =
+                          let
+                            # Jolpica nests each session under its own key; the
+                            # race itself is the top-level date/time.
+                            session = label: prefix: ''
+                              {{ if $race.Exists "${prefix}time" }}
+                                {{ $t := parseTime "rfc3339" (concat ($race.String "${prefix}date") "T" ($race.String "${prefix}time")) }}
+                                <li class="flex justify-between{{ if $t.Before now }} color-subdue{{ end }}">
+                                  <span>${label}</span>
+                                  <span>{{ $t.Local | formatTime "Mon 2 Jan 15:04" }}</span>
+                                </li>
+                              {{ end }}
+                            '';
+                          in
+                          ''
+                            {{ $races := .JSON.Array "MRData.RaceTable.Races" }}
+                            {{ if eq (len $races) 0 }}
+                              <p class="color-subdue">No more races this season.</p>
+                            {{ else }}
+                              {{ $race := index $races 0 }}
+                              {{ $start := parseTime "rfc3339" (concat ($race.String "date") "T" ($race.String "time")) }}
+                              <a class="size-h3 color-highlight block" href="{{ $race.String "url" }}" target="_blank" rel="noreferrer">{{ $race.String "raceName" }}</a>
+                              <p class="size-h6">
+                                Round {{ $race.String "round" }} · {{ $race.String "Circuit.Location.locality" }}, {{ $race.String "Circuit.Location.country" }}
+                              </p>
+                              <p class="color-primary margin-top-5">Lights out in <span {{ $start | toRelativeTime }}></span></p>
+                              <ul class="list list-gap-2 margin-top-10">
+                                ${session "Practice 1" "FirstPractice."}
+                                ${session "Practice 2" "SecondPractice."}
+                                ${session "Practice 3" "ThirdPractice."}
+                                ${session "Sprint quali" "SprintQualifying."}
+                                ${session "Sprint" "Sprint."}
+                                ${session "Qualifying" "Qualifying."}
+                                ${session "Race" ""}
+                              </ul>
+                            {{ end }}
+
+                            {{ $standings := newRequest "https://api.jolpi.ca/ergast/f1/current/driverStandings.json?limit=5" | getResponse }}
+                            {{ if eq $standings.Response.StatusCode 200 }}
+                              <p class="size-h6 margin-top-15">STANDINGS</p>
+                              <ul class="list list-gap-2 margin-top-5">
+                                {{ range $standings.JSON.Array "MRData.StandingsTable.StandingsLists.0.DriverStandings" }}
+                                  <li class="flex justify-between">
+                                    <span>{{ .String "position" }}. {{ .String "Driver.familyName" }}</span>
+                                    <span class="color-subdue">{{ .String "points" }} pts</span>
+                                  </li>
+                                {{ end }}
+                              </ul>
+                            {{ end }}
+                          '';
+                      }
+                      {
                         type = "releases";
                         cache = "1d";
+                        collapse-after = 4;
                         repositories = [
                           "glanceapp/glance"
                           "immich-app/immich"
                           "mealie-recipes/mealie"
-                          "steveiliop56/tinyauth"
                           "pocket-id/pocket-id"
-                          "LazyVim/LazyVim"
+                          "bookorbit/bookorbit"
+                          "CodeWithCJ/SparkyFitness"
                         ];
-                      }
-                      {
-                        type = "custom-api";
-                        title = "Next Race";
-                        cache = "1d";
-                        url = "https://f1api.dev/api/current/next?timezone=Europe/London";
-                        template = ''
-                          <div class="flex flex-column gap-10">
-                              {{ $session := index (.JSON.Array "race") 0 }}
-                              <p class="size-h5">
-                                Round {{ .JSON.String "round" }}
-                              </p>
-
-                              <div class="margin-block-4">
-                                <p class="color-highlight">{{ $session.String "raceName" }}</p>
-
-                                <div class="margin-block-10"></div>
-
-                                <!-- Race -->
-                                <p class="color-primary">
-                                  <span>Race</span>
-                                  {{ $raceDate := $session.String "schedule.race.date" }}
-                                  {{ $raceTime := $session.String "schedule.race.time" }}
-                                  {{ $raceDateTime := concat $raceDate "T" $raceTime }}
-                                  {{ $parsedRaceTime := parseLocalTime "2006-01-02T15:04:05" $raceDateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedRaceTime.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedRaceTime | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $raceDate }} at {{ $raceTime }}</p>
-
-                                <!-- Qualifying -->
-                                <p class="color-primary">
-                                  <span>Qualifying</span>
-                                  {{ $qualyDate := $session.String "schedule.qualy.date" }}
-                                  {{ $qualyTime := $session.String "schedule.qualy.time" }}
-                                  {{ $qualyDateTime := concat $qualyDate "T" $qualyTime }}
-                                  {{ $parsedQualyTime := parseLocalTime "2006-01-02T15:04:05" $qualyDateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedQualyTime.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedQualyTime | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $qualyDate }} at {{ $qualyTime }}</p>
-
-                                <!-- Free Practice 1 -->
-                                <p class="color-primary">
-                                  <span>Free Practice 1</span>
-                                  {{ $fp1Date := $session.String "schedule.fp1.date" }}
-                                  {{ $fp1Time := $session.String "schedule.fp1.time" }}
-                                  {{ $fp1DateTime := concat $fp1Date "T" $fp1Time }}
-                                  {{ $parsedFP1Time := parseLocalTime "2006-01-02T15:04:05" $fp1DateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedFP1Time.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedFP1Time | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $fp1Date }} at {{ $fp1Time }}</p>
-
-                                <!-- Free Practice 2 -->
-                                <p class="color-primary">
-                                  <span>Free Practice 2</span>
-                                  {{ $fp2Date := $session.String "schedule.fp2.date" }}
-                                  {{ $fp2Time := $session.String "schedule.fp2.time" }}
-                                  {{ $fp2DateTime := concat $fp2Date "T" $fp2Time }}
-                                  {{ $parsedFP2Time := parseLocalTime "2006-01-02T15:04:05" $fp2DateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedFP2Time.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedFP2Time | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $fp2Date }} at {{ $fp2Time }}</p>
-
-                                <!-- Free Practice 3 -->
-                                <p class="color-primary">
-                                  <span>Free Practice 3</span>
-                                  {{ $fp3Date := $session.String "schedule.fp3.date" }}
-                                  {{ $fp3Time := $session.String "schedule.fp3.time" }}
-                                  {{ $fp3DateTime := concat $fp3Date "T" $fp3Time }}
-                                  {{ $parsedFP3Time := parseLocalTime "2006-01-02T15:04:05" $fp3DateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedFP3Time.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedFP3Time | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $fp3Date }} at {{ $fp3Time }}</p>
-
-                                <!-- Sprint Qualifying - only if date is not null -->
-                                {{ if and (ne ($session.String "schedule.sprintQualy.date") "null") (ne ($session.String "schedule.sprintQualy.date") "") }}
-                                <p class="color-primary">
-                                  <span>Sprint Qualifying</span>
-                                  {{ $sprintQualyDate := $session.String "schedule.sprintQualy.date" }}
-                                  {{ $sprintQualyTime := $session.String "schedule.sprintQualy.time" }}
-                                  {{ $sprintQualyDateTime := concat $sprintQualyDate "T" $sprintQualyTime }}
-                                  {{ $parsedSprintQualyTime := parseLocalTime "2006-01-02T15:04:05" $sprintQualyDateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedSprintQualyTime.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedSprintQualyTime | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $sprintQualyDate }} at {{ $sprintQualyTime }}</p>
-                                {{ end }}
-
-                                <!-- Sprint Race - only if date is not null -->
-                                {{ if and (ne ($session.String "schedule.sprintRace.date") "null") (ne ($session.String "schedule.sprintRace.date") "") }}
-                                <p class="color-primary">
-                                  <span>Sprint Race</span>
-                                  {{ $sprintRaceDate := $session.String "schedule.sprintRace.date" }}
-                                  {{ $sprintRaceTime := $session.String "schedule.sprintRace.time" }}
-                                  {{ $sprintRaceDateTime := concat $sprintRaceDate "T" $sprintRaceTime }}
-                                  {{ $parsedSprintRaceTime := parseLocalTime "2006-01-02T15:04:05" $sprintRaceDateTime }}
-                                  {{ $now := now }}
-                                  {{ if $parsedSprintRaceTime.Before $now }}
-                                    <span class="color-highlight">Completed</span>
-                                  {{ else }}
-                                    <span class="color-highlight" {{ $parsedSprintRaceTime | toRelativeTime }}></span>
-                                  {{ end }}
-                                </p>
-                                <p class="size-h5">{{ $sprintRaceDate }} at {{ $sprintRaceTime }}</p>
-                                {{ end }}
-                              </div>
-
-                              <ul class="size-h5 attachments">
-                                <li>{{ $session.String "circuit.country" }}</li>
-                                <li>{{ $session.String "circuit.city" }}</li>
-                                <li>{{ $session.String "laps" }} Laps</li>
-                                <li>{{ $session.String "circuit.circuitName" }}</li>
-                              </ul>
-                            </div>
-                        '';
                       }
                     ];
                   }

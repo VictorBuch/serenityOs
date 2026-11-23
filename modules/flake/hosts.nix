@@ -121,6 +121,7 @@ let
         "localsend"
         "syncthing"
         "system-tools"
+        "activitywatch"
         "sddm"
         "mango"
         "gnome"

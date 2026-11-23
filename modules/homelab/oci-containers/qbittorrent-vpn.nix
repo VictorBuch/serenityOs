@@ -187,6 +187,7 @@
             virtualisation.oci-containers.containers.qui = {
               # No semver tags published yet, only `latest`. Pin to digest once stable.
               image = "ghcr.io/autobrr/qui:latest";
+              pull = "always";
               autoStart = true;
               dependsOn = [ "qbittorrent" ];
 
@@ -253,6 +254,7 @@
             # state persists in /var/lib/mousehole across restarts.
             virtualisation.oci-containers.containers.mousehole = {
               image = "tmmrtn/mousehole:latest";
+              pull = "always";
               autoStart = true;
               dependsOn = [ "pia-tun" ];
 

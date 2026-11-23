@@ -34,6 +34,7 @@
 
         virtualisation.oci-containers.containers.uptime-kuma = {
           image = "louislam/uptime-kuma:latest";
+          pull = "always";
           ports = [ "${toString config.homelab.records.uptime-kuma.port}:3001" ];
           volumes = [
             "/home/${user.userName}/uptime-kuma:/app/data/"

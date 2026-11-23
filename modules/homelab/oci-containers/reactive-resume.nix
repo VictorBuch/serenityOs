@@ -122,6 +122,7 @@
         # --- Browserless (Chromium) Container ---
         virtualisation.oci-containers.containers.rxresume-browserless = {
           image = "ghcr.io/browserless/chromium:latest";
+          pull = "always";
           autoStart = true;
 
           environment = {
@@ -143,6 +144,7 @@
         # --- SeaweedFS Container ---
         virtualisation.oci-containers.containers.rxresume-seaweedfs = {
           image = "chrislusf/seaweedfs:latest";
+          pull = "always";
           autoStart = true;
 
           cmd = [
@@ -213,6 +215,7 @@
         # --- Main Reactive Resume Container ---
         virtualisation.oci-containers.containers.reactive-resume = {
           image = "amruthpillai/reactive-resume:latest";
+          pull = "always";
           autoStart = true;
           dependsOn = [
             "rxresume-postgres"

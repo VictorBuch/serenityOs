@@ -33,6 +33,7 @@
 
         virtualisation.oci-containers.containers.chaptarr = {
           image = "chaptarr/chaptarr:latest";
+          pull = "always";
           autoStart = true;
           environment = {
             PUID = uid;

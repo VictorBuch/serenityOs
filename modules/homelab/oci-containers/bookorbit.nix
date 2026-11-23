@@ -91,6 +91,7 @@
 
         virtualisation.oci-containers.containers.bookorbit = {
           image = "ghcr.io/bookorbit/bookorbit:latest";
+          pull = "always";
           autoStart = true;
           dependsOn = [ "bookorbit-db" ];
           ports = [ "${toString hl.records.bookorbit.port}:3000" ];

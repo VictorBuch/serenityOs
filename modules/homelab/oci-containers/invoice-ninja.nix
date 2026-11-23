@@ -226,6 +226,7 @@
         # --- Invoice Ninja App (PHP-FPM) ---
         virtualisation.oci-containers.containers.invoiceninja = {
           image = "invoiceninja/invoiceninja-debian:latest";
+          pull = "always";
           volumes = [
             "${stateDir}/public:/var/www/html/public"
             "${stateDir}/storage:/var/www/html/storage"

@@ -48,6 +48,7 @@
         ];
         virtualisation.oci-containers.containers.crafty = {
           image = "registry.gitlab.com/crafty-controller/crafty-4:latest";
+          pull = "always";
           autoStart = true;
           environment = {
             TZ = "Europe/Copenhagen";

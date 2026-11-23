@@ -35,6 +35,7 @@
 
         virtualisation.oci-containers.containers.wallos = {
           image = "bellamy/wallos:latest";
+          pull = "always";
           ports = [ "${toString config.homelab.records.wallos.port}:80" ];
           volumes = [
             "/home/${user.userName}/wallos/db:/var/www/html/db"

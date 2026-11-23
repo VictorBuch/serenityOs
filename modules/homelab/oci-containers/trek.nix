@@ -62,6 +62,7 @@
 
         virtualisation.oci-containers.containers.trek = {
           image = "mauriceboe/trek:latest";
+          pull = "always";
           autoStart = true;
 
           ports = [ "${toString records.trek.port}:3000" ];

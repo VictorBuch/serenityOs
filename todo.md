@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] SMART tests on Mal - send summary to ntfy
+- [x] SMART tests on Mal - send summary to ntfy
 - [ ] Migrate auth to Authentik (single user store for friends)
       Pangolin is an OIDC _consumer_ only — its users just gate the proxy, they
       can't log into apps. Pocket ID is passkey-only, so it stays admin-only:

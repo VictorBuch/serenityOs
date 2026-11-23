@@ -48,7 +48,7 @@ let
         libxkbcommon
         libGL
         vulkan-loader
-        dbus
+        (lib.getLib dbus)
         fontconfig
         (lib.getLib libva)
         libx11

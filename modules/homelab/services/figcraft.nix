@@ -11,6 +11,7 @@
         listen = "0.0.0.0:${toString port}";
         data = "/var/lib/figcraft-server";
         public_url = "ws://${config.homelab.nixosIp}:${toString port}/";
+        team_files = "edit";
       };
 
       # Outside access: swap the record and settings above for these, then rebuild.

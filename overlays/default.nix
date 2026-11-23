@@ -13,9 +13,6 @@ in
   # Herdr: mouse-first terminal multiplexer (flake ships only a package)
   herdr = inputs.herdr.packages.${final.stdenv.hostPlatform.system}.default;
 
-  # Add the pam package (renamed to avoid conflict with linux-pam)
-  pam-cli = final.callPackage ../packages/pam { };
-
   # Lute v3 - language learning web application
   lute-v3 = final.callPackage ../packages/lute-v3 { };
 

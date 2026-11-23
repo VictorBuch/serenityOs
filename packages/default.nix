@@ -1,6 +1,5 @@
 { pkgs }:
 {
-  pam = pkgs.callPackage ./pam { };
   lute-v3 = pkgs.callPackage ./lute-v3 { };
 
   # Exposed so the AppImage wrap can be iterated on standalone:
@@ -8,7 +7,14 @@
   # It reaches NixOS configs through overlays/default.nix, not through here.
   feedback-desktop = pkgs.feedback-desktop;
   psarc2feedpak = pkgs.psarc2feedpak;
-  inherit (pkgs.craft-apps) photocraft filmcraft lightcraft pdfcraft figcraft vectorcraft;
+  inherit (pkgs.craft-apps)
+    photocraft
+    filmcraft
+    lightcraft
+    pdfcraft
+    figcraft
+    vectorcraft
+    ;
 
   # Exposed so the risky wine-11 yabridge can be iterated on standalone:
   #   nix build .#yabridge-wine10

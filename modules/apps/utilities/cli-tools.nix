@@ -3,7 +3,6 @@ let
     { pkgs, ... }:
     {
       environment.systemPackages = [
-        pkgs.pam-cli
         pkgs.yt-dlp
       ];
     };

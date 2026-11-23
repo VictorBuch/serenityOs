@@ -6,34 +6,18 @@
       ...
     }:
     let
-      port = config.homelab.records.figcraft.port;
+      record = config.homelab.records.figcraft;
       settings = (pkgs.formats.toml { }).generate "figcraft-server.toml" {
-        listen = "0.0.0.0:${toString port}";
+        listen = "127.0.0.1:${toString record.port}";
         data = "/var/lib/figcraft-server";
-        public_url = "ws://${config.homelab.nixosIp}:${toString port}/";
-        team_files = "edit";
+        public_url = "wss://${record.subdomain}.${record.domain}/";
+        trusted_proxy = "127.0.0.1";
       };
-
-      # Outside access: swap the record and settings above for these, then rebuild.
-      # Link tokens are the only auth and the app speaks raw WebSocket, so it must be
-      # "public"; Pangolin's SSO screen would block it.
-      #
-      # homelab.records.figcraft = {
-      #   port = 47900;
-      #   exposure = "public";
-      # };
-      #
-      # settings = (pkgs.formats.toml { }).generate "figcraft-server.toml" {
-      #   listen = "127.0.0.1:${toString port}";
-      #   data = "/var/lib/figcraft-server";
-      #   public_url = "wss://${config.homelab.records.figcraft.subdomain}.${config.homelab.domain}/";
-      #   trusted_proxy = "127.0.0.1";
-      # };
     in
     {
       homelab.records.figcraft = {
         port = 47900;
-        exposure = "lan";
+        exposure = "public";
       };
 
       systemd.services.figcraft-server = {
@@ -54,6 +38,8 @@
           UMask = "0077";
           MemoryHigh = "60%";
           MemoryMax = "75%";
+          IPAddressAllow = "localhost";
+          IPAddressDeny = "any";
 
           NoNewPrivileges = true;
           ProtectSystem = "strict";

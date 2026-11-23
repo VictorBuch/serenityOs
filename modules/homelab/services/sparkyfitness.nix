@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   flake.modules.nixos.homelab =
     {
@@ -66,14 +66,6 @@
           database.package = pkgs.postgresql_17;
           nginx.enable = false;
           extraEnvironment.SPARKY_FITNESS_DISABLE_SIGNUP = "true";
-          backendPackage = lib.mkForce (
-            inputs.sparkyfitness.packages.${pkgs.stdenv.hostPlatform.system}.sparkyfitness-server.overrideAttrs
-              (old: {
-                pnpmDeps = old.pnpmDeps.overrideAttrs {
-                  outputHash = "sha256-8rWfvkY7bH4U95K3x1gbBCI4zoDBJGbnGcFEXxoPBCQ=";
-                };
-              })
-          );
         };
 
         services.postgresql.package = lib.mkForce sf.database.package;

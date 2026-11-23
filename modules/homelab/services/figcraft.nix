@@ -20,6 +20,8 @@
         exposure = "public";
       };
 
+      environment.systemPackages = [ pkgs.figcraft-server ];
+
       systemd.services.figcraft-server = {
         description = "FigCraft collaboration server";
         wants = [ "network-online.target" ];

@@ -309,9 +309,14 @@ in
     # Syncthing keeps subfolders of copyparty's /mnt/pool/files two-way synced
     # with the desktops, which is the part copyparty cannot do.
     filesync = {
-      folders = [ "projects" ];
+      folders = [
+        "projects"
+        "retroarch-saves"
+        "retroarch-states"
+      ];
       devices = {
         jayne = "EH24C44-KUKHML6-JGORFNR-M332DXJ-MTFC4HL-PIMYZ5J-JU2Q6ZJ-RBMEOQN";
+        oppo = "U6B5MIK-II2HTOE-LQYEV22-CAO7RIG-LNVLP2I-QNIWALF-OV53PR7-TAGAMQH";
       };
     };
 

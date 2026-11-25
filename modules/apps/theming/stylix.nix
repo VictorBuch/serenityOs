@@ -84,7 +84,6 @@
                   # HM context, which conflicts with home-manager.useGlobalPkgs.
                   nixos-icons.enable = false;
                   gtksourceview.enable = false;
-                  wayprompt.enable = false;
                 };
             };
 

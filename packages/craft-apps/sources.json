@@ -30,9 +30,9 @@
     "hash": "sha256-oJBRQlL94UVJWsb8Zdb/ExHWmJmOV7pDTV0IlsPR+/o="
   },
   "effectcraft": {
-    "version": "0.24.1",
-    "assetId": 737404345,
-    "hash": "sha256-XOA5NpAUQif6kYboIwitY4pu9tn5dsmW5tA7W1G2Wns="
+    "version": "0.25.1",
+    "assetId": 784534806,
+    "hash": "sha256-byn/fgNZkJ/h2/b9PP2EMKA2I0m2EsXrLPyP7nueJ2A="
   },
   "figcraft-server": {
     "version": "0.18.1",

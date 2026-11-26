@@ -47,6 +47,9 @@
         {{ $now := ($nowUTC.In $timezone) | formatTime "rfc3339" }}
         {{ $posInterval := ((offsetNow (printf "+%dh" $intervalH)).In $timezone) | formatTime "rfc3339" }}
         {{ $negInterval := ((offsetNow (printf "-%dh" $intervalH)).In $timezone) | formatTime "rfc3339" }}
+        {{ $nowQ := $now | replaceAll "+" "%2B" }}
+        {{ $posIntervalQ := $posInterval | replaceAll "+" "%2B" }}
+        {{ $negIntervalQ := $negInterval | replaceAll "+" "%2B" }}
 
         {{ $apiBaseUrl := .Options.StringOr "api-base-url" "" }}
         {{ $key := .Options.StringOr "key" "" }}
@@ -75,29 +78,29 @@
 
           {{ if eq $service "sonarr" }}
             {{ if eq $type "recent" }}
-              {{ $requestUrl = printf "%s/api/v3/history/since?includeSeries=true&includeEpisode=true&eventType=grabbed&date=%s" $apiBaseUrl $negInterval }}
+              {{ $requestUrl = printf "%s/api/v3/history/since?includeSeries=true&includeEpisode=true&eventType=grabbed&date=%s" $apiBaseUrl $negIntervalQ }}
             {{ else if eq $type "missing" }}
               {{ $requestUrl = printf "%s/api/v3/wanted/missing?page=1&pageSize=50&includeSeries=true" $apiBaseUrl }}
             {{ else if eq $type "upcoming" }}
-              {{ $requestUrl = printf "%s/api/v3/calendar?includeSeries=true&start=%s&end=%s" $apiBaseUrl $now $posInterval }}
+              {{ $requestUrl = printf "%s/api/v3/calendar?includeSeries=true&start=%s&end=%s" $apiBaseUrl $nowQ $posIntervalQ }}
             {{ end }}
 
           {{ else if eq $service "radarr" }}
             {{ if eq $type "recent" }}
-              {{ $requestUrl = printf "%s/api/v3/history/since?includeMovie=true&eventType=grabbed&date=%s" $apiBaseUrl $negInterval }}
+              {{ $requestUrl = printf "%s/api/v3/history/since?includeMovie=true&eventType=grabbed&date=%s" $apiBaseUrl $negIntervalQ }}
             {{ else if eq $type "missing" }}
               {{ $requestUrl = printf "%s/api/v3/wanted/missing?page=1&pageSize=50" $apiBaseUrl }}
             {{ else if eq $type "upcoming" }}
-              {{ $requestUrl = printf "%s/api/v3/calendar?start=%s&end=%s" $apiBaseUrl $now $posInterval }}
+              {{ $requestUrl = printf "%s/api/v3/calendar?start=%s&end=%s" $apiBaseUrl $nowQ $posIntervalQ }}
             {{ end }}
 
           {{ else if eq $service "lidarr" }}
             {{ if eq $type "recent" }}
-              {{ $requestUrl = printf "%s/api/v1/history/since?includeArtist=true&includeAlbum=true&eventType=grabbed&date=%s" $apiBaseUrl $negInterval }}
+              {{ $requestUrl = printf "%s/api/v1/history/since?includeArtist=true&includeAlbum=true&eventType=grabbed&date=%s" $apiBaseUrl $negIntervalQ }}
             {{ else if eq $type "missing" }}
               {{ $requestUrl = printf "%s/api/v1/wanted/missing?page=1&pageSize=50&includeArtist=true" $apiBaseUrl }}
             {{ else if eq $type "upcoming" }}
-              {{ $requestUrl = printf "%s/api/v1/calendar?includeArtist=true&start=%s&end=%s" $apiBaseUrl $now $posInterval }}
+              {{ $requestUrl = printf "%s/api/v1/calendar?includeArtist=true&start=%s&end=%s" $apiBaseUrl $nowQ $posIntervalQ }}
             {{ end }}
           {{ end }}
 
